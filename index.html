@@ -1,716 +1,917 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LP プロンプトジェネレーター</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<style>
-  :root {
-    --accent: #29abe2;
-    --accent-light: #e8f6fd;
-    --accent-dark: #1a7fb5;
-    --bg: #f7fbfe;
-    --card: #ffffff;
-    --border: #d0eaf7;
-    --text-main: #1a2a3a;
-    --text-sub: #5a7a8a;
-    --text-muted: #8faabb;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow-card: 0 2px 12px rgba(41,171,226,0.10);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text-main);
-    min-height: 100vh;
-  }
-  .hero {
-    background: linear-gradient(135deg, #e8f6fd 0%, #ffffff 60%, #eaf7ff 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 56px 24px 40px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(41,171,226,0.12) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: -40px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(41,171,226,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero-icon {
-    width: 72px; height: 72px;
-    background: var(--accent);
-    border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px;
-    box-shadow: 0 8px 24px rgba(41,171,226,0.30);
-  }
-  .hero-icon i { color: #fff; font-size: 34px; }
-  .hero h1 {
-    font-size: 26px; font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 10px;
-  }
-  .hero p {
-    font-size: 14px; color: var(--text-sub);
-    line-height: 1.7; max-width: 520px; margin: 0 auto 20px;
-  }
-  .hero-badges {
-    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-  }
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(41,171,226,0.10);
-    border: 1px solid rgba(41,171,226,0.25);
-    color: var(--accent-dark);
-    font-size: 12px; font-weight: 500;
-    padding: 5px 12px; border-radius: 999px;
-  }
-  .main { max-width: 860px; margin: 0 auto; padding: 40px 20px 60px; }
-  .section-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--accent-light);
-  }
-  .section-header .icon-wrap {
-    width: 36px; height: 36px;
-    background: var(--accent-light);
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .section-header .icon-wrap i { color: var(--accent); font-size: 17px; }
-  .section-header h2 { font-size: 15px; font-weight: 600; color: var(--text-main); }
-  .section-header span { font-size: 12px; color: var(--text-muted); margin-left: auto; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-card);
-  }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 12px; font-weight: 500;
-    color: var(--text-sub);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .field label i { color: var(--accent); font-size: 13px; }
-  .field input, .field select, .field textarea {
-    width: 100%; padding: 10px 14px;
-    font-size: 13px; font-family: inherit;
-    color: var(--text-main); background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(41,171,226,0.12);
-    background: #fff;
-  }
-  .field textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
-  .field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2329abe2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px; cursor: pointer;
-  }
-  .color-field { display: flex; flex-direction: column; gap: 6px; }
-  .color-field label {
-    font-size: 12px; font-weight: 500; color: var(--text-sub);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .color-field label i { color: var(--accent); font-size: 13px; }
-  .color-row { display: flex; align-items: center; gap: 10px; }
-  .color-row input[type="color"] {
-    width: 44px; height: 38px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 2px 4px; cursor: pointer;
-    background: var(--bg); flex-shrink: 0;
-  }
-  .color-row input[type="text"] {
-    flex: 1; padding: 10px 14px;
-    font-size: 13px; font-family: monospace;
-    color: var(--text-main); background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm); outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .color-row input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(41,171,226,0.12);
-    background: #fff;
-  }
-  .theme-preview { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-  .theme-swatch {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    cursor: pointer;
-  }
-  .theme-swatch .swatch {
-    width: 32px; height: 32px; border-radius: 50%;
-    border: 2px solid transparent;
-    transition: transform 0.15s, border-color 0.15s;
-  }
-  .theme-swatch:hover .swatch { transform: scale(1.1); }
-  .theme-swatch.active .swatch { border-color: var(--text-main); }
-  .theme-swatch span { font-size: 10px; color: var(--text-muted); }
-  .image-section {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 16px; margin-bottom: 24px;
-  }
-  .image-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-  }
-  .image-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
-  .image-card-body { padding: 14px 16px; text-align: center; }
-  .image-card-body h3 {
-    font-size: 13px; font-weight: 600; color: var(--text-main);
-    margin-bottom: 4px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .image-card-body h3 i { color: var(--accent); font-size: 14px; }
-  .image-card-body p { font-size: 12px; color: var(--text-sub); line-height: 1.6; }
-  .steps {
-    display: flex; gap: 0;
-    position: relative;
-  }
-  .steps::before {
-    content: ''; position: absolute;
-    top: 18px; left: 18px; right: 18px;
-    height: 2px; background: var(--border);
-  }
-  .step {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; gap: 8px; position: relative; z-index: 1;
-  }
-  .step-num {
-    width: 36px; height: 36px;
-    background: var(--accent-light);
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700; color: var(--accent);
-  }
-  .step-label { font-size: 11px; color: var(--text-sub); text-align: center; line-height: 1.4; }
-  .gen-btn {
-    width: 100%; padding: 16px;
-    font-size: 15px; font-weight: 700; font-family: inherit;
-    background: linear-gradient(90deg, var(--accent) 0%, #45c5f0 100%);
-    color: #fff; border: none; border-radius: var(--radius);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 6px 20px rgba(41,171,226,0.30);
-    transition: transform 0.15s, box-shadow 0.15s;
-    margin-bottom: 8px;
-  }
-  .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(41,171,226,0.38); }
-  .gen-btn:active { transform: translateY(0); }
-  #output { display: none; }
-  .output-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .output-header h3 {
-    font-size: 14px; font-weight: 600; color: var(--text-main);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .output-header h3 i { color: var(--accent); }
-  .copy-btn {
-    display: flex; align-items: center; gap: 6px;
-    padding: 9px 18px; font-size: 13px; font-weight: 600; font-family: inherit;
-    background: var(--accent-light);
-    border: 1.5px solid var(--accent);
-    border-radius: var(--radius-sm); cursor: pointer; color: var(--accent-dark);
-    transition: background 0.15s, transform 0.1s;
-    user-select: none;
-  }
-  .copy-btn:hover { background: #d0edfa; }
-  .copy-btn:active { transform: scale(0.97); }
-  #promptBox {
-    background: #f4fbff; border: 1.5px solid var(--border);
-    border-radius: var(--radius); padding: 20px 22px;
-    font-size: 12.5px; line-height: 1.85;
-    white-space: pre-wrap; color: var(--text-main);
-    font-family: 'Courier New', monospace;
-    max-height: 480px; overflow-y: auto; margin-bottom: 14px;
-  }
-  .copy-msg {
-    display: none; font-size: 12px; color: #22a06b;
-    text-align: center; margin-top: 8px; font-weight: 500;
-  }
-  .tips {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 14px; margin-bottom: 28px;
-  }
-  .tip-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 18px 16px;
-    text-align: center; box-shadow: var(--shadow-card);
-  }
-  .tip-card .tip-icon {
-    width: 44px; height: 44px; background: var(--accent-light);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 10px;
-  }
-  .tip-card .tip-icon i { color: var(--accent); font-size: 20px; }
-  .tip-card h4 { font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
-  .tip-card p { font-size: 11px; color: var(--text-sub); line-height: 1.55; }
-  .divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 28px 0 24px;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-  .divider span { font-size: 12px; color: var(--text-muted); white-space: nowrap; font-weight: 500; }
-  footer {
-    text-align: center; padding: 24px;
-    font-size: 11px; color: var(--text-muted);
-    border-top: 1px solid var(--border);
-  }
-  @media (max-width: 640px) {
-    .grid-2, .grid-3, .image-section, .tips { grid-template-columns: 1fr; }
-    .steps { flex-direction: column; gap: 12px; }
-    .steps::before { display: none; }
-    .card { padding: 20px 16px; }
-    .hero h1 { font-size: 21px; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Japan AI研修 | 月額2,300円から始めるAIスクール</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:  #0984e3;
+      --accent2: #0652a3;
+      --bg:      #f0f6ff;
+      --white:   #ffffff;
+      --text:    #0a2140;
+      --muted:   #4a6080;
+      --danger:  #e17055;
+      --gold:    #f9ca24;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── UTILITIES ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+    .text-center { text-align: center; }
+    .section { padding: 72px 0; }
+    .section-alt { background: var(--white); }
+
+    .btn {
+      display: inline-block;
+      padding: 18px 44px;
+      border-radius: 50px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform .18s, box-shadow .18s, filter .18s;
+      line-height: 1.3;
+    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(9,132,227,.35); filter: brightness(1.08); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #74b9ff);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(9,132,227,.4);
+    }
+    .btn-large { font-size: 1.3rem; padding: 22px 56px; }
+    .btn-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 6px 20px rgba(9,132,227,.4); }
+      50%      { box-shadow: 0 6px 32px rgba(9,132,227,.75); }
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--white);
+      border-bottom: 3px solid var(--accent);
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(9,132,227,.12);
+    }
+    header .inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    header img { height: 54px; }
+    header .header-cta .btn { padding: 12px 28px; font-size: .95rem; }
+
+    /* ── FIRST VIEW ── */
+    #hero {
+      background: linear-gradient(160deg, #dceeff 0%, var(--bg) 60%);
+      padding: 64px 0 56px;
+      overflow: hidden;
+      position: relative;
+    }
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(9,132,227,.12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    .badge.gold { background: var(--gold); color: var(--text); }
+    .badge.soft { background: #fff; color: var(--accent); border: 2px solid var(--accent); }
+
+    .hero-main-copy {
+      font-size: clamp(1.7rem, 5vw, 2.6rem);
+      font-weight: 900;
+      line-height: 1.35;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .hero-main-copy .accent { color: var(--accent); }
+    .hero-main-copy .underline {
+      text-decoration: underline;
+      text-decoration-color: var(--accent);
+      text-underline-offset: 5px;
+    }
+    .hero-sub-copy {
+      font-size: clamp(.95rem, 2.5vw, 1.15rem);
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-img {
+      width: 100%;
+      max-width: 560px;
+      border-radius: 18px;
+      box-shadow: 0 12px 40px rgba(9,132,227,.18);
+      margin: 36px auto 0;
+      display: block;
+    }
+    .hero-price-note {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    /* ── PROBLEM ── */
+    .problem-list {
+      list-style: none;
+      max-width: 600px;
+      margin: 32px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .problem-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--white);
+      border-radius: 14px;
+      padding: 18px 22px;
+      box-shadow: 0 2px 10px rgba(9,132,227,.08);
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    .problem-list li .icon {
+      color: var(--accent);
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ── SOLUTION ── */
+    .reason-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .reason-card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 4px 18px rgba(9,132,227,.1);
+      border-top: 4px solid var(--accent);
+      transition: transform .2s;
+    }
+    .reason-card:hover { transform: translateY(-4px); }
+    .reason-card .icon-wrap {
+      width: 64px; height: 64px;
+      background: var(--bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 1.6rem;
+      color: var(--accent);
+    }
+    .reason-card h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 10px; }
+    .reason-card p { font-size: .9rem; color: var(--muted); }
+
+    /* ── BEFORE AFTER ── */
+    .ba-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .ba-card {
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(9,132,227,.1);
+    }
+    .ba-before {
+      background: #f8d7da;
+      padding: 20px 24px;
+    }
+    .ba-before .label { font-weight: 900; font-size: .85rem; color: #c0392b; margin-bottom: 8px; }
+    .ba-arrow {
+      background: var(--accent);
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      font-size: 1.3rem;
+    }
+    .ba-after {
+      background: #d4edda;
+      padding: 20px 24px;
+    }
+    .ba-after .label { font-weight: 900; font-size: .85rem; color: #155724; margin-bottom: 8px; }
+    .ba-card p { font-size: .95rem; line-height: 1.6; }
+
+    /* ── TESTIMONIALS ── */
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .testi-card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 18px rgba(9,132,227,.1);
+      text-align: left;
+      position: relative;
+    }
+    .testi-card::before {
+      content: '\201C';
+      position: absolute;
+      top: 10px; left: 18px;
+      font-size: 3.5rem;
+      color: var(--accent);
+      opacity: .25;
+      line-height: 1;
+    }
+    .testi-stars { color: var(--gold); font-size: 1rem; margin-bottom: 10px; }
+    .testi-card p { font-size: .92rem; line-height: 1.7; margin-bottom: 14px; }
+    .testi-author { display: flex; align-items: center; gap: 10px; }
+    .testi-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: var(--accent);
+    }
+    .testi-name { font-weight: 700; font-size: .88rem; }
+    .testi-role { font-size: .78rem; color: var(--muted); }
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 32px;
+      margin-top: 48px;
+    }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 2.2rem; font-weight: 900; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── STEPS ── */
+    .steps-wrap {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 580px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .step-item {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      position: relative;
+    }
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 64px;
+      bottom: -20px;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--accent), #74b9ff);
+    }
+    .step-num-wrap {
+      flex-shrink: 0;
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-weight: 900;
+      font-size: .72rem;
+      box-shadow: 0 4px 14px rgba(9,132,227,.4);
+    }
+    .step-num-wrap i { font-size: 1.3rem; margin-bottom: 2px; }
+    .step-body {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px 22px;
+      flex: 1;
+      box-shadow: 0 2px 10px rgba(9,132,227,.07);
+      margin-bottom: 28px;
+    }
+    .step-body h3 { font-size: 1rem; font-weight: 900; margin-bottom: 6px; color: var(--accent); }
+    .step-body p { font-size: .9rem; color: var(--muted); }
+
+    /* ── PRICING ── */
+    .price-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 40px 36px;
+      max-width: 480px;
+      margin: 48px auto 0;
+      box-shadow: 0 8px 32px rgba(9,132,227,.15);
+      border: 3px solid var(--accent);
+      position: relative;
+      text-align: center;
+    }
+    .price-card .popular-badge {
+      position: absolute;
+      top: -18px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 22px;
+      border-radius: 20px;
+      font-size: .85rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .price-main { font-size: 3.2rem; font-weight: 900; color: var(--accent); line-height: 1; }
+    .price-main span { font-size: 1.1rem; font-weight: 400; color: var(--muted); }
+    .price-tagline { font-size: .9rem; color: var(--muted); margin: 10px 0 24px; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+    .price-features li {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--bg);
+      font-size: .95rem;
+    }
+    .price-features li i { color: var(--accent); font-size: 1rem; margin-top: 3px; flex-shrink: 0; }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 640px; margin: 36px auto 0; display: flex; flex-direction: column; gap: 16px; }
+    .faq-item {
+      background: var(--white);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(9,132,227,.08);
+    }
+    .faq-q {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 18px 22px;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    .faq-q .q-icon { color: var(--accent); font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+    .faq-a {
+      padding: 0 22px 18px 46px;
+      font-size: .92rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── URGENCY ── */
+    #urgency {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      padding: 72px 0;
+      text-align: center;
+    }
+    #urgency h2 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900; margin-bottom: 12px; }
+    #urgency p { font-size: 1rem; opacity: .9; margin-bottom: 32px; max-width: 520px; margin-left: auto; margin-right: auto; }
+    #urgency .btn-white {
+      background: #fff;
+      color: var(--accent);
+      box-shadow: 0 6px 24px rgba(0,0,0,.2);
+      font-size: 1.3rem;
+      padding: 22px 56px;
+    }
+    #urgency .btn-white:hover { box-shadow: 0 10px 32px rgba(0,0,0,.3); }
+    .micro-copy { font-size: .8rem; opacity: .75; margin-top: 12px; }
+
+    /* ── FINAL CTA ── */
+    #final-cta {
+      background: var(--bg);
+      padding: 80px 0;
+      text-align: center;
+    }
+    #final-cta h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900; margin-bottom: 16px; }
+    .qr-wrap {
+      margin: 28px auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .qr-wrap img {
+      width: 200px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(9,132,227,.2);
+    }
+    .qr-note { font-size: .88rem; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--text);
+      color: rgba(255,255,255,.6);
+      text-align: center;
+      padding: 32px 20px;
+      font-size: .82rem;
+    }
+    footer a { color: rgba(255,255,255,.55); text-decoration: none; }
+    footer a:hover { color: #fff; }
+
+    /* ── SECTION TITLES ── */
+    .sec-title {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 900;
+      line-height: 1.35;
+      margin-bottom: 12px;
+    }
+    .sec-sub {
+      font-size: .95rem;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    .sec-label {
+      display: inline-block;
+      background: var(--bg);
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: .8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: .06em;
+    }
+    .divider {
+      width: 48px; height: 4px;
+      background: linear-gradient(to right, var(--accent), #74b9ff);
+      border-radius: 2px;
+      margin: 16px auto 0;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .btn-large { font-size: 1.05rem; padding: 18px 28px; }
+      .step-item:not(:last-child)::after { display: none; }
+      .price-card { padding: 32px 18px; }
+      header .header-cta { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="hero-icon"><i class="fa-solid fa-rocket"></i></div>
-  <h1><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);margin-right:8px;"></i>LP プロンプトジェネレーター</h1>
-  <p>情報を入力するだけで、コンバージョン率を最大化する<br>プロ品質のLPプロンプトを自動生成します。</p>
-  <div class="hero-badges">
-    <span class="badge"><i class="fa-solid fa-check-circle"></i> PASONA法則準拠</span>
-    <span class="badge"><i class="fa-solid fa-arrows-rotate"></i> CTA 3点配置</span>
-    <span class="badge"><i class="fa-solid fa-building"></i> BtoC/BtoB対応</span>
-    <span class="badge"><i class="fa-solid fa-palette"></i> カラー指定対応</span>
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="inner">
+    <img src="assets/1.png" alt="Japan AI研修 ロゴ" />
+    <div class="header-cta">
+      <a href="#final-cta" class="btn btn-primary">
+        <i class="fa-brands fa-line"></i> 無料プレゼントを受け取る
+      </a>
+    </div>
   </div>
-</div>
+</header>
 
-<div class="main">
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-list-ol"></i></div>
-    <h2>使い方</h2>
-  </div>
-  <div class="card" style="padding:24px 28px; margin-bottom:28px;">
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <span class="step-label">商品情報を<br>入力</span>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <span class="step-label">テーマカラーを<br>設定</span>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <span class="step-label">ボタンを<br>クリック</span>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <span class="step-label">プロンプトを<br>コピー・活用</span>
-      </div>
-    </div>
-  </div>
+<!-- ══════════════════════════════════════════
+     ① FIRST VIEW
+══════════════════════════════════════════ -->
+<section id="hero">
+  <div class="container text-center">
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-image"></i></div>
-    <h2>LP 構成の3ブロック</h2>
-  </div>
-  <div class="image-section">
-    <div class="image-card">
-      <svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;display:block;">
-        <defs>
-          <linearGradient id="g1a" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#e8f6fd"/><stop offset="100%" stop-color="#bde8f8"/>
-          </linearGradient>
-        </defs>
-        <rect width="420" height="160" fill="url(#g1a)"/>
-        <rect x="110" y="20" width="200" height="110" rx="8" fill="#fff" stroke="#29abe2" stroke-width="2.5"/>
-        <rect x="115" y="25" width="190" height="85" rx="5" fill="#f0faff"/>
-        <rect x="130" y="38" width="100" height="8" rx="4" fill="#29abe2" opacity=".7"/>
-        <rect x="130" y="52" width="75" height="5" rx="3" fill="#8fd4f0" opacity=".6"/>
-        <rect x="130" y="63" width="85" height="5" rx="3" fill="#8fd4f0" opacity=".5"/>
-        <rect x="148" y="78" width="70" height="20" rx="10" fill="#29abe2"/>
-        <text x="183" y="92" text-anchor="middle" font-size="9" fill="#fff" font-family="sans-serif">申し込む &#x25B6;</text>
-        <rect x="198" y="130" width="24" height="8" rx="3" fill="#b0d8ee"/>
-        <rect x="188" y="138" width="44" height="5" rx="3" fill="#b0d8ee"/>
-        <polygon points="265,68 265,90 270,85 274,96 278,94 274,83 280,83" fill="#ff6b6b" opacity=".85"/>
-        <rect x="270" y="22" width="56" height="18" rx="9" fill="#fff" stroke="#29abe2" stroke-width="1.5"/>
-        <text x="298" y="35" text-anchor="middle" font-size="8" fill="#1a7fb5" font-family="sans-serif">&#x2605; No.1</text>
-        <text x="130" y="110" font-size="10" fill="#f6c90e" font-family="sans-serif">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</text>
-      </svg>
-      <div class="image-card-body">
-        <h3><i class="fa-solid fa-eye"></i> &#x2460; ファーストビュー</h3>
-        <p>最初の3秒で離脱を防ぐ。キャッチコピー・メイン画像・権威性・CTAを配置。</p>
-      </div>
+    <!-- 権威性バッジ3種 -->
+    <div class="hero-badge-row">
+      <span class="badge gold"><i class="fa-solid fa-star"></i> 地方議員セミナー実績あり</span>
+      <span class="badge"><i class="fa-solid fa-yen-sign"></i> 業界最安値 月額2,300円</span>
+      <span class="badge soft"><i class="fa-solid fa-user-graduate"></i> 完全初心者OK</span>
     </div>
-    <div class="image-card">
-      <svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;display:block;">
-        <defs>
-          <linearGradient id="g2a" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#e0f7f0"/><stop offset="100%" stop-color="#b8eede"/>
-          </linearGradient>
-        </defs>
-        <rect width="420" height="160" fill="url(#g2a)"/>
-        <circle cx="110" cy="60" r="22" fill="#29abe2" opacity=".25"/>
-        <circle cx="110" cy="54" r="14" fill="#29abe2" opacity=".55"/>
-        <path d="M80,120 Q110,90 140,120" fill="#29abe2" opacity=".35"/>
-        <rect x="135" y="30" width="140" height="44" rx="12" fill="#fff" stroke="#29abe2" stroke-width="1.8"/>
-        <polygon points="135,52 118,60 140,60" fill="#fff"/>
-        <rect x="148" y="40" width="80" height="6" rx="3" fill="#8fd4f0"/>
-        <rect x="148" y="52" width="60" height="6" rx="3" fill="#8fd4f0" opacity=".6"/>
-        <rect x="135" y="90" width="80" height="38" rx="8" fill="#fff" stroke="#29abe2" stroke-width="1.5"/>
-        <text x="175" y="108" text-anchor="middle" font-size="16" font-family="sans-serif">&#x2705;</text>
-        <text x="175" y="122" text-anchor="middle" font-size="8" fill="#1a7fb5" font-family="sans-serif">解決策</text>
-        <rect x="225" y="90" width="80" height="38" rx="8" fill="#fff" stroke="#29abe2" stroke-width="1.5"/>
-        <text x="265" y="108" text-anchor="middle" font-size="16" font-family="sans-serif">&#x1F4AC;</text>
-        <text x="265" y="122" text-anchor="middle" font-size="8" fill="#1a7fb5" font-family="sans-serif">お客様の声</text>
-      </svg>
-      <div class="image-card-body">
-        <h3><i class="fa-solid fa-layer-group"></i> &#x2461; ボディ（中盤）</h3>
-        <p>共感・解決策・ベネフィット・社会的証明で信頼を積み上げるエリア。</p>
-      </div>
-    </div>
-    <div class="image-card">
-      <svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;display:block;">
-        <defs>
-          <linearGradient id="g3a" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#fef6e4"/><stop offset="100%" stop-color="#fde8c0"/>
-          </linearGradient>
-        </defs>
-        <rect width="420" height="160" fill="url(#g3a)"/>
-        <rect x="100" y="18" width="220" height="110" rx="10" fill="#fff" stroke="#f0a500" stroke-width="2"/>
-        <text x="210" y="40" text-anchor="middle" font-size="11" fill="#b07800" font-weight="bold" font-family="sans-serif">お申し込みフォーム</text>
-        <rect x="118" y="48" width="184" height="14" rx="5" fill="#fdf3d8" stroke="#f0c040" stroke-width="1"/>
-        <text x="126" y="59" font-size="8" fill="#b07800" font-family="sans-serif">お名前</text>
-        <rect x="118" y="68" width="184" height="14" rx="5" fill="#fdf3d8" stroke="#f0c040" stroke-width="1"/>
-        <text x="126" y="79" font-size="8" fill="#b07800" font-family="sans-serif">メールアドレス</text>
-        <rect x="138" y="92" width="144" height="22" rx="11" fill="#f0a500"/>
-        <text x="210" y="107" text-anchor="middle" font-size="10" fill="#fff" font-family="sans-serif">今すぐ申し込む &#x25B6;</text>
-        <rect x="330" y="30" width="62" height="22" rx="11" fill="#fff" stroke="#f0a500" stroke-width="1.5"/>
-        <text x="361" y="45" text-anchor="middle" font-size="9" fill="#b07800" font-family="sans-serif">FAQ &#x2753;</text>
-        <circle cx="355" cy="100" r="22" fill="#f0a500" opacity=".15"/>
-        <text x="355" y="108" text-anchor="middle" font-size="26" font-family="sans-serif">&#x2714;</text>
-      </svg>
-      <div class="image-card-body">
-        <h3><i class="fa-solid fa-flag-checkered"></i> &#x2462; クロージング</h3>
-        <p>最後の不安を解消し、今すぐ行動させる。FAQ・限定オファー・最終CTA。</p>
-      </div>
-    </div>
-    <div class="image-card">
-      <svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;display:block;">
-        <defs>
-          <linearGradient id="g4a" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#eaf7ff"/><stop offset="100%" stop-color="#c8ecfa"/>
-          </linearGradient>
-          <linearGradient id="bar1" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#29abe2"/><stop offset="100%" stop-color="#a8dff5"/>
-          </linearGradient>
-        </defs>
-        <rect width="420" height="160" fill="url(#g4a)"/>
-        <line x1="80" y1="20" x2="80" y2="128" stroke="#b0d8ee" stroke-width="1.5"/>
-        <line x1="80" y1="128" x2="360" y2="128" stroke="#b0d8ee" stroke-width="1.5"/>
-        <rect x="100" y="98" width="34" height="30" rx="4" fill="url(#bar1)" opacity=".5"/>
-        <rect x="155" y="82" width="34" height="46" rx="4" fill="url(#bar1)" opacity=".65"/>
-        <rect x="210" y="62" width="34" height="66" rx="4" fill="url(#bar1)" opacity=".8"/>
-        <rect x="265" y="38" width="34" height="90" rx="4" fill="url(#bar1)"/>
-        <polyline points="117,93 172,77 227,57 282,33" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="282" cy="33" r="5" fill="#ff6b6b"/>
-        <text x="117" y="142" text-anchor="middle" font-size="8" fill="#5a7a8a" font-family="sans-serif">1月</text>
-        <text x="172" y="142" text-anchor="middle" font-size="8" fill="#5a7a8a" font-family="sans-serif">2月</text>
-        <text x="227" y="142" text-anchor="middle" font-size="8" fill="#5a7a8a" font-family="sans-serif">3月</text>
-        <text x="282" y="142" text-anchor="middle" font-size="8" fill="#5a7a8a" font-family="sans-serif">4月</text>
-        <rect x="295" y="18" width="72" height="22" rx="11" fill="#29abe2"/>
-        <text x="331" y="33" text-anchor="middle" font-size="9" fill="#fff" font-family="sans-serif">CV率 UP &#x2191;</text>
-      </svg>
-      <div class="image-card-body">
-        <h3><i class="fa-solid fa-chart-line"></i> 成果のポイント</h3>
-        <p>CTA3点配置・BtoC/BtoB訴求切替・PASONA法則で高CVを実現。</p>
-      </div>
-    </div>
-  </div>
 
-  <div class="tips">
-    <div class="tip-card">
-      <div class="tip-icon"><i class="fa-solid fa-bullseye"></i></div>
-      <h4>ターゲット明確化</h4>
-      <p>「誰に向けたLPか」を明確にすると成約率が大幅に上がります。</p>
-    </div>
-    <div class="tip-card">
-      <div class="tip-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-      <h4>感情に刺さるコピー</h4>
-      <p>BtoCは感情・共感、BtoBは論理・ROIを前面に。</p>
-    </div>
-    <div class="tip-card">
-      <div class="tip-icon"><i class="fa-solid fa-clock"></i></div>
-      <h4>限定性で行動を促す</h4>
-      <p>「今だけ」「期間限定」など緊急性がコンバージョンを押し上げます。</p>
-    </div>
-  </div>
+    <!-- メインキャッチコピー（案A） -->
+    <h1 class="hero-main-copy">
+      AIって難しそう…<br>
+      <span class="accent">もう、その悩みは終わりです。</span><br>
+      <span class="underline">月額わずか2,300円</span>で<br>
+      今日からAIが使いこなせる
+    </h1>
 
-  <div class="divider"><span><i class="fa-solid fa-pen-to-square" style="margin-right:6px;color:var(--accent);"></i>情報を入力してプロンプトを生成</span></div>
+    <!-- サブキャッチコピー -->
+    <p class="hero-sub-copy">
+      専門知識ゼロ・パソコン苦手でも大丈夫。<br>
+      主婦・社会人・シニアが続々とAIを日常&amp;副業に活用中！
+    </p>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-box-open"></i></div>
-    <h2>商品・サービス情報</h2>
-    <span>必須項目を入力してください</span>
-  </div>
-  <div class="card">
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-store"></i> 商品・サービス名</label>
-        <input type="text" id="product" placeholder="例：オンライン英会話スクール" />
-      </div>
-      <div class="field">
-        <label><i class="fa-solid fa-users"></i> ターゲット</label>
-        <input type="text" id="target" placeholder="例：30代の忙しいビジネスマン" />
-      </div>
-    </div>
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-tag"></i> 価格帯・プラン</label>
-        <input type="text" id="price" placeholder="例：月額9,800円〜" />
-      </div>
-      <div class="field">
-        <label><i class="fa-solid fa-star"></i> 最大の強み（USP）</label>
-        <input type="text" id="usp" placeholder="例：業界最安値＋返金保証付き" />
-      </div>
-    </div>
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-building-user"></i> BtoC / BtoB</label>
-        <select id="biztype">
-          <option value="BtoC">BtoC（個人向け）</option>
-          <option value="BtoB">BtoB（法人向け）</option>
-        </select>
-      </div>
-      <div class="field">
-        <label><i class="fa-solid fa-crosshairs"></i> 目標CV（コンバージョン）</label>
-        <input type="text" id="cv" placeholder="例：無料体験申し込み" />
-      </div>
-    </div>
-    <div class="field" style="margin-bottom:16px;">
-      <label><i class="fa-solid fa-comment-dots"></i> ユーザーの主な悩み（箇条書きOK）</label>
-      <textarea id="pain" placeholder="例：英語が上達しない、忙しくて通えない、費用が高い"></textarea>
-    </div>
-    <div class="field">
-      <label><i class="fa-solid fa-medal"></i> 権威性・実績（任意）</label>
-      <input type="text" id="authority" placeholder="例：累計1万人受講・満足度98%・メディア掲載多数" />
-    </div>
-  </div>
+    <!-- ファーストCTA -->
+    <a href="#final-cta" class="btn btn-primary btn-large btn-pulse">
+      <i class="fa-solid fa-gift"></i>&nbsp; 今すぐ無料プロンプトをもらう
+    </a>
+    <p class="hero-price-note">✔ 登録無料 &nbsp;|&nbsp; ✔ クレジットカード不要 &nbsp;|&nbsp; ✔ いつでも退会OK</p>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-palette"></i></div>
-    <h2>テーマカラー設定</h2>
-    <span>LPのカラーをカスタマイズ</span>
+    <!-- ヒーロー画像（Unsplash推奨キーワード: "woman laptop ai technology bright" ） -->
+    <img
+      src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=900&auto=format&fit=crop&q=80"
+      alt="スマートフォンでAIを楽しく学ぶ女性"
+      class="hero-img"
+    />
   </div>
-  <div class="card">
-    <div class="grid-3" style="margin-bottom:20px;">
-      <div class="color-field">
-        <label><i class="fa-solid fa-fill-drip"></i> メインカラー（アクセント）</label>
-        <div class="color-row">
-          <input type="color" id="colorAccentPicker" value="#29abe2" oninput="syncColor('colorAccentPicker','colorAccentHex')" />
-          <input type="text" id="colorAccentHex" value="#29abe2" placeholder="#29abe2" oninput="syncHex('colorAccentHex','colorAccentPicker')" />
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     ② BODY — 共感セクション
+══════════════════════════════════════════ -->
+<section class="section section-alt" id="problems">
+  <div class="container text-center">
+    <span class="sec-label">PROBLEM</span>
+    <h2 class="sec-title">こんなお悩み、<br>ありませんか？</h2>
+    <div class="divider"></div>
+
+    <ul class="problem-list">
+      <li>
+        <i class="fa-solid fa-circle-question icon"></i>
+        <span>「AIって聞いたことあるけど、実際どう使えばいいの？」と毎回止まってしまう</span>
+      </li>
+      <li>
+        <i class="fa-solid fa-magnifying-glass icon"></i>
+        <span>ネットで調べても難しい言葉ばかりで、読む気が失せてしまう</span>
+      </li>
+      <li>
+        <i class="fa-solid fa-clock icon"></i>
+        <span>家事・育児・仕事で忙しくて、まとまった勉強時間がどうしても取れない</span>
+      </li>
+      <li>
+        <i class="fa-solid fa-piggy-bank icon"></i>
+        <span>「スクールは高そう」と思ってそもそも調べることすら諦めていた</span>
+      </li>
+      <li>
+        <i class="fa-solid fa-briefcase icon"></i>
+        <span>「AIで副業できたら…」とは思っているけど、何から始めればいいか全く見当がつかない</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     ② BODY — 解決策提示
+══════════════════════════════════════════ -->
+<section class="section" id="reasons">
+  <div class="container text-center">
+    <span class="sec-label">SOLUTION</span>
+    <h2 class="sec-title">Japan AI研修が<br>選ばれる5つの理由</h2>
+    <p class="sec-sub">初心者でも安心。忙しい毎日の中でも続けられる仕組みがここにあります。</p>
+    <div class="divider"></div>
+
+    <div class="reason-grid">
+      <div class="reason-card">
+        <div class="icon-wrap"><i class="fa-solid fa-yen-sign"></i></div>
+        <h3>業界最安値<br>月額2,300円</h3>
+        <p>カフェ2杯分の費用で、AIスキルが身につく。コスパ圧倒的No.1。</p>
+      </div>
+      <div class="reason-card">
+        <div class="icon-wrap"><i class="fa-solid fa-baby"></i></div>
+        <h3>完全初心者向け<br>やさしい解説</h3>
+        <p>専門用語なし。図解・動画・テキストで、どなたでもすぐ理解できます。</p>
+      </div>
+      <div class="reason-card">
+        <div class="icon-wrap"><i class="fa-solid fa-mobile-screen"></i></div>
+        <h3>スマホだけで<br>どこでも学習</h3>
+        <p>通勤中・家事のスキマ時間に。パソコン不要でOK！</p>
+      </div>
+      <div class="reason-card">
+        <div class="icon-wrap"><i class="fa-solid fa-landmark"></i></div>
+        <h3>地方議員も受講<br>確かな信頼と実績</h3>
+        <p>行政・企業向けセミナー実績あり。内容の質は折り紙付きです。</p>
+      </div>
+      <div class="reason-card">
+        <div class="icon-wrap"><i class="fa-brands fa-line"></i></div>
+        <h3>LINEでいつでも<br>質問OK</h3>
+        <p>わからないことはLINEでその場で解決。一人で悩まなくて大丈夫。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     ② BODY — Before→After
+══════════════════════════════════════════ -->
+<section class="section section-alt" id="benefits">
+  <div class="container text-center">
+    <span class="sec-label">BENEFIT</span>
+    <h2 class="sec-title">受講後、あなたの生活は<br>こう変わります</h2>
+    <div class="divider"></div>
+
+    <div class="ba-grid">
+      <div class="ba-card">
+        <div class="ba-before">
+          <div class="label">😓 BEFORE</div>
+          <p>ネットで検索しても答えが見つからず、何時間も悩んでいた</p>
+        </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="ba-after">
+          <div class="label">😊 AFTER</div>
+          <p>AIに頼めば数秒で回答が出てくる。調べる時間が激減してスッキリ！</p>
         </div>
       </div>
-      <div class="color-field">
-        <label><i class="fa-solid fa-brush"></i> 背景カラー</label>
-        <div class="color-row">
-          <input type="color" id="colorBgPicker" value="#f7fbfe" oninput="syncColor('colorBgPicker','colorBgHex')" />
-          <input type="text" id="colorBgHex" value="#f7fbfe" placeholder="#f7fbfe" oninput="syncHex('colorBgHex','colorBgPicker')" />
+      <div class="ba-card">
+        <div class="ba-before">
+          <div class="label">😓 BEFORE</div>
+          <p>副業を始めたいけど何のスキルもないと思い込んでいた</p>
+        </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="ba-after">
+          <div class="label">😊 AFTER</div>
+          <p>AIを使ったライティング・画像生成で副業案件を受注。月3万円の収入が！</p>
         </div>
       </div>
-      <div class="color-field">
-        <label><i class="fa-solid fa-font"></i> テキストカラー</label>
-        <div class="color-row">
-          <input type="color" id="colorTextPicker" value="#1a2a3a" oninput="syncColor('colorTextPicker','colorTextHex')" />
-          <input type="text" id="colorTextHex" value="#1a2a3a" placeholder="#1a2a3a" oninput="syncHex('colorTextHex','colorTextPicker')" />
+      <div class="ba-card">
+        <div class="ba-before">
+          <div class="label">😓 BEFORE</div>
+          <p>「AIは若い人やエンジニアのもの」と自分には関係ないと思っていた</p>
+        </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="ba-after">
+          <div class="label">😊 AFTER</div>
+          <p>40代主婦でも使いこなせた！料理レシピ提案・献立づくりにも大活躍</p>
         </div>
       </div>
     </div>
-    <div style="margin-bottom:16px;">
-      <p style="font-size:12px;color:var(--text-sub);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-swatchbook" style="color:var(--accent);"></i> プリセットテーマから選ぶ</p>
-      <div class="theme-preview" id="themePreview">
-        <div class="theme-swatch active" onclick="applyTheme('#29abe2','#f7fbfe','#1a2a3a',this)">
-          <div class="swatch" style="background:#29abe2;"></div>
-          <span>スカイ</span>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     ② BODY — 社会的証明 + 中間CTA
+══════════════════════════════════════════ -->
+<section class="section" id="testimonials">
+  <div class="container text-center">
+    <span class="sec-label">VOICE</span>
+    <h2 class="sec-title">受講者の声</h2>
+    <p class="sec-sub">全国から届いたリアルな感想をご紹介します</p>
+    <div class="divider"></div>
+
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p>「最初はAIって難しそうで不安でした。でも授業がとにかくわかりやすくて、1週間でChatGPTを使いこなせるように！家事の合間にスマホで学べるのが最高です。」</p>
+        <div class="testi-author">
+          <div class="testi-avatar"><i class="fa-solid fa-user"></i></div>
+          <div>
+            <div class="testi-name">Yさん・42歳</div>
+            <div class="testi-role">専業主婦 / 愛知県</div>
+          </div>
         </div>
-        <div class="theme-swatch" onclick="applyTheme('#00b894','#f0fdf8','#1a2e28',this)">
-          <div class="swatch" style="background:#00b894;"></div>
-          <span>ミント</span>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p>「月2,300円でこのクオリティは正直驚きました。他のスクールと比べると半額以下なのに内容は本格的。LINE質問もすぐ返してくれるから安心して続けられます。」</p>
+        <div class="testi-author">
+          <div class="testi-avatar"><i class="fa-solid fa-user"></i></div>
+          <div>
+            <div class="testi-name">Mさん・35歳</div>
+            <div class="testi-role">パート主婦 / 福岡県</div>
+          </div>
         </div>
-        <div class="theme-swatch" onclick="applyTheme('#6c5ce7','#f5f3ff','#1e1a3a',this)">
-          <div class="swatch" style="background:#6c5ce7;"></div>
-          <span>パープル</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#e17055','#fff5f2','#2d1a16',this)">
-          <div class="swatch" style="background:#e17055;"></div>
-          <span>コーラル</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#0984e3','#f0f6ff','#0a2140',this)">
-          <div class="swatch" style="background:#0984e3;"></div>
-          <span>ロイヤル</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#2d3436','#f8f8f8','#1a1a1a',this)">
-          <div class="swatch" style="background:#2d3436;"></div>
-          <span>モノ</span>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p>「AIを使って副業でブログ記事を書き始めました。最初の月から3万円以上稼げてびっくり。こんなに早く結果が出ると思っていなかったので感激しています！」</p>
+        <div class="testi-author">
+          <div class="testi-avatar"><i class="fa-solid fa-user"></i></div>
+          <div>
+            <div class="testi-name">Kさん・38歳</div>
+            <div class="testi-role">2児のママ / 大阪府</div>
+          </div>
         </div>
       </div>
     </div>
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;">
-      <p style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> 設定したカラーはプロンプト内のカラー指定セクションに自動で反映されます。</p>
+
+    <!-- 実績数字 -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num">500<span style="font-size:1.2rem">名+</span></div>
+        <div class="stat-label">累計受講者数</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">4.9</div>
+        <div class="stat-label">平均満足度（5点満点）</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">92<span style="font-size:1.2rem">%</span></div>
+        <div class="stat-label">「継続したい」回答率</div>
+      </div>
+    </div>
+
+    <!-- 中間CTA -->
+    <div style="margin-top: 48px;">
+      <a href="#final-cta" class="btn btn-primary btn-large">
+        <i class="fa-solid fa-envelope-open-text"></i>&nbsp; 無料プロンプトを今すぐ受け取る
+      </a>
+      <p class="hero-price-note" style="margin-top:10px;">登録はLINEを追加するだけ。1分で完了！</p>
     </div>
   </div>
+</section>
 
-  <button class="gen-btn" onclick="generate()">
-    <i class="fa-solid fa-wand-magic-sparkles"></i>
-    売れるプロンプトを生成する
-    <i class="fa-solid fa-arrow-right"></i>
-  </button>
 
-  <div id="output">
-    <div class="divider" style="margin-top:32px;"><span><i class="fa-solid fa-file-code" style="margin-right:6px;color:var(--accent);"></i>生成されたプロンプト</span></div>
-    <div class="card">
-      <div class="output-header">
-        <h3><i class="fa-solid fa-file-lines"></i> プロンプト</h3>
-        <button class="copy-btn" onclick="copyPrompt('copyMsg1')">
-          <i class="fa-regular fa-copy"></i> コピー
-        </button>
+<!-- ══════════════════════════════════════════
+     ③ CLOSING — 利用の流れ
+══════════════════════════════════════════ -->
+<section class="section section-alt" id="flow">
+  <div class="container text-center">
+    <span class="sec-label">HOW TO START</span>
+    <h2 class="sec-title">始め方はたった<br>4ステップ</h2>
+    <p class="sec-sub">難しい手続きは一切なし。スマホだけで今日中に始められます。</p>
+    <div class="divider"></div>
+
+    <div class="steps-wrap">
+      <div class="step-item">
+        <div class="step-num-wrap"><i class="fa-brands fa-line"></i><span>STEP1</span></div>
+        <div class="step-body">
+          <h3>LINEを友だち追加</h3>
+          <p>下のQRコードまたはボタンからLINEを追加。30秒でできます。</p>
+        </div>
       </div>
-      <div id="promptBox"></div>
-      <div id="copyMsg1" class="copy-msg"></div>
-      <div style="margin-top:16px;text-align:center;">
-        <button class="copy-btn" onclick="copyPrompt('copyMsg2')" style="margin:0 auto;font-size:14px;padding:12px 32px;border-radius:10px;display:inline-flex;">
-          <i class="fa-regular fa-copy" style="margin-right:8px;"></i> プロンプトをコピーする
-        </button>
-        <div id="copyMsg2" class="copy-msg"></div>
+      <div class="step-item">
+        <div class="step-num-wrap"><i class="fa-solid fa-gift"></i><span>STEP2</span></div>
+        <div class="step-body">
+          <h3>無料プロンプトをプレゼント</h3>
+          <p>追加後すぐに「今すぐ使えるAIプロンプト集」をお届け。すぐ試せます！</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num-wrap"><i class="fa-solid fa-book-open"></i><span>STEP3</span></div>
+        <div class="step-body">
+          <h3>コンテンツで学習スタート</h3>
+          <p>テキスト・動画でわかりやすく解説。スキマ時間に少しずつ進められます。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num-wrap"><i class="fa-solid fa-rocket"></i><span>STEP4</span></div>
+        <div class="step-body">
+          <h3>副業・日常でAI活用</h3>
+          <p>学んだAIスキルを副業や毎日の生活に活かして、時間とお金を手に入れましょう！</p>
+        </div>
       </div>
     </div>
   </div>
+</section>
 
-</div>
 
+<!-- ══════════════════════════════════════════
+     ③ CLOSING — 料金プラン
+══════════════════════════════════════════ -->
+<section class="section" id="pricing">
+  <div class="container text-center">
+    <span class="sec-label">PRICE</span>
+    <h2 class="sec-title">シンプルな<br>料金プラン</h2>
+    <div class="divider"></div>
+
+    <div class="price-card">
+      <div class="popular-badge"><i class="fa-solid fa-crown"></i>&nbsp;業界最安値</div>
+      <p style="font-size:.9rem; color:var(--muted); margin-bottom:8px; margin-top:8px;">スタンダードプラン</p>
+      <div class="price-main">¥2,300<span> / 月（税込）</span></div>
+      <p class="price-tagline">1日あたり約76円。コーヒー1杯以下でAIが学べます</p>
+      <ul class="price-features">
+        <li><i class="fa-solid fa-check"></i> 全コンテンツ（テキスト＋動画）見放題</li>
+        <li><i class="fa-solid fa-check"></i> AIプロンプト集プレゼント（無料）</li>
+        <li><i class="fa-solid fa-check"></i> LINEでの質問サポート</li>
+        <li><i class="fa-solid fa-check"></i> 副業活用ガイド付き</li>
+        <li><i class="fa-solid fa-check"></i> いつでも退会・解約OK（縛りなし）</li>
+      </ul>
+      <a href="#final-cta" class="btn btn-primary" style="width:100%; text-align:center; display:block;">
+        <i class="fa-solid fa-gift"></i>&nbsp; まず無料プロンプトを受け取る
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     ③ CLOSING — FAQ
+══════════════════════════════════════════ -->
+<section class="section section-alt" id="faq">
+  <div class="container text-center">
+    <span class="sec-label">FAQ</span>
+    <h2 class="sec-title">よくある質問</h2>
+    <div class="divider"></div>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-circle-question q-icon"></i>パソコンを持っていなくても受講できますか？</div>
+        <div class="faq-a">はい、スマートフォンだけで全コンテンツをご利用いただけます。アプリのインストールも不要です。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-circle-question q-icon"></i>AIやITの知識が全くないのですが大丈夫ですか？</div>
+        <div class="faq-a">もちろんです！本スクールは「AIって何？」というレベルの方を対象に設計しています。専門用語を使わず、図解でわかりやすく解説しています。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-circle-question q-icon"></i>月額2,300円以外に費用はかかりますか？</div>
+        <div class="faq-a">入会金・教材費・追加費用はすべて無料です。月額2,300円（税込）のみでご利用いただけます。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-circle-question q-icon"></i>退会・解約はいつでもできますか？</div>
+        <div class="faq-a">はい、1ヶ月単位でご利用いただけます。LINEから簡単にいつでも退会できます。縛りは一切ありません。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><i class="fa-solid fa-circle-question q-icon"></i>副業に使えるようになるまでどのくらいかかりますか？</div>
+        <div class="faq-a">個人差はありますが、多くの方が1〜2ヶ月でAIを使った副業（ライティング・画像生成など）を始めています。焦らず自分のペースで進められます。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     緊急性訴求
+══════════════════════════════════════════ -->
+<section id="urgency">
+  <div class="container">
+    <h2>⚡ 今だけ！先着50名様限定<br>AIプロンプト集を無料プレゼント</h2>
+    <p>
+      登録者全員に「すぐ使えるAIプロンプト30選」をプレゼント中。<br>
+      定員になり次第終了します。今すぐ登録して、ライバルに差をつけましょう！
+    </p>
+    <a href="#final-cta" class="btn btn-white btn-pulse">
+      <i class="fa-solid fa-bolt"></i>&nbsp; 今すぐ無料で受け取る（残りわずか）
+    </a>
+    <p class="micro-copy">✔ 完全無料 &nbsp;|&nbsp; ✔ LINEを追加するだけ &nbsp;|&nbsp; ✔ 勧誘・営業電話は一切なし</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     最終CTA
+══════════════════════════════════════════ -->
+<section id="final-cta">
+  <div class="container text-center">
+    <span class="sec-label">GET FREE GIFT</span>
+    <h2 class="sec-title">無料プロンプトを<br>今すぐ受け取る</h2>
+    <p class="sec-sub">
+      下のQRコードをスキャン、またはボタンをタップするだけ。<br>
+      LINEを追加した瞬間に「AIプロンプト30選」が届きます！
+    </p>
+    <div class="divider"></div>
+
+    <div class="qr-wrap">
+      <img src="assets/2.png" alt="公式LINE QRコード" />
+      <p class="qr-note"><i class="fa-brands fa-line" style="color:#06c755;"></i> カメラアプリでQRを読み取ってください</p>
+      <a href="https://lin.ee/" class="btn btn-primary btn-large btn-pulse" style="margin-top:4px;">
+        <i class="fa-brands fa-line"></i>&nbsp; LINEで受け取る（無料）
+      </a>
+      <p style="font-size:.82rem; color:var(--muted); margin-top:6px;">
+        ✔ 登録無料 &nbsp;|&nbsp; ✔ クレジットカード不要 &nbsp;|&nbsp; ✔ 勧誘なし
+      </p>
+    </div>
+
+    <p style="font-size:.8rem; color:var(--muted); margin-top:28px; max-width:420px; margin-left:auto; margin-right:auto;">
+      ご登録いただいた情報は、サービス提供・お問い合わせ対応のみに使用します。第三者への提供・迷惑連絡は一切ありません。
+    </p>
+  </div>
+</section>
+
+
+<!-- ══ FOOTER ══ -->
 <footer>
-  <i class="fa-solid fa-rocket" style="color:var(--accent);margin-right:6px;"></i>
-  LP プロンプトジェネレーター &nbsp;|&nbsp; コンバージョン率最大化のための専門ツール
+  <img src="assets/1.png" alt="Japan AI研修" style="height:36px; opacity:.65; margin-bottom:12px; display:block; margin-left:auto; margin-right:auto;" />
+  <p>© 2024 Japan AI研修 All Rights Reserved.</p>
+  <p style="margin-top:8px;"><a href="#">特定商取引法に基づく表示</a> &nbsp;|&nbsp; <a href="#">プライバシーポリシー</a></p>
 </footer>
 
-<script>
-function syncColor(pickerId, hexId) {
-  document.getElementById(hexId).value = document.getElementById(pickerId).value;
-}
-function syncHex(hexId, pickerId) {
-  var v = document.getElementById(hexId).value;
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById(pickerId).value = v;
-}
-function applyTheme(accent, bg, text, el) {
-  document.getElementById('colorAccentPicker').value = accent;
-  document.getElementById('colorAccentHex').value = accent;
-  document.getElementById('colorBgPicker').value = bg;
-  document.getElementById('colorBgHex').value = bg;
-  document.getElementById('colorTextPicker').value = text;
-  document.getElementById('colorTextHex').value = text;
-  document.querySelectorAll('.theme-swatch').forEach(function(s){ s.classList.remove('active'); });
-  el.classList.add('active');
-}
-function generate() {
-  var product   = document.getElementById('product').value.trim()   || '【商品・サービス名】';
-  var target    = document.getElementById('target').value.trim()    || '【ターゲット】';
-  var price     = document.getElementById('price').value.trim()     || '【価格帯】';
-  var usp       = document.getElementById('usp').value.trim()       || '【最大の強み】';
-  var biztype   = document.getElementById('biztype').value;
-  var cv        = document.getElementById('cv').value.trim()        || '【コンバージョン目標】';
-  var pain      = document.getElementById('pain').value.trim()      || '【ユーザーの悩み】';
-  var authority = document.getElementById('authority').value.trim() || '【権威性・実績】';
-  var colorAccent = document.getElementById('colorAccentHex').value || '#29abe2';
-  var colorBg     = document.getElementById('colorBgHex').value     || '#f7fbfe';
-  var colorText   = document.getElementById('colorTextHex').value   || '#1a2a3a';
-  var btocFocus = biztype === 'BtoC'
-    ? '感情的ベネフィット・口コミ・共感ストーリーを重視し、読者が「自分のことだ」と感じるコピーにしてください。'
-    : '論理的データ・ROI・費用対効果・導入事例を前面に出し、意思決定者が社内稟議を通しやすい根拠を盛り込んでください。';
-  var promptText = 'あなたはコンバージョン率最大化を専門とするトップクラスのLPコピーライター兼UXデザイナーです。\n以下の情報をもとに、成約率の高いランディングページ（LP）の完全な構成案と各セクションのコピーを作成してください。\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 商品・サービス情報\n━━━━━━━━━━━━━━━━━━━━━\n・商品名\t\t：' + product + '\n・ターゲット\t：' + target + '\n・価格帯\t\t：' + price + '\n・最大の強み（USP）：' + usp + '\n・権威性・実績\t：' + authority + '\n・ターゲットの悩み：' + pain + '\n・目標CV\t\t：' + cv + '\n・タイプ\t\t：' + biztype + '\n\n━━━━━━━━━━━━━━━━━━━━━\n■ カラー設定（デザイン指示）\n━━━━━━━━━━━━━━━━━━━━━\n・メインカラー（アクセント）：' + colorAccent + '\n・背景カラー\t：' + colorBg + '\n・テキストカラー：' + colorText + '\n※ 上記カラーをLP全体のデザイントークンとして使用してください。\n  CTAボタン・見出し・アイコン・バッジ類はメインカラーを基準に配色してください。\n  背景はホワイトベースで清涼感を意識し、テキストは読みやすいコントラストを確保してください。\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 出力形式（必ず守ること）\n━━━━━━━━━━━━━━━━━━━━━\n\n以下の3ブロック構成で、各セクションを\n【見出し】【コピー案】【設計意図】の3点セットで出力してください。\n文字は中央揃えを基本とし、枠・余白のバランスを均等に保つよう設計してください。\n\n【① ファーストビュー】\n- キャッチコピー（メイン・サブの2案）\n- メイン画像の推奨ビジュアル説明（Unsplash等で使えるキーワードも提示）\n- 権威性バッジ（3種類）※アイコン付きで提示\n- ファーストCTAボタンのテキスト（2案）\n\n【② ボディ（中盤）】\n- 共感セクション：「こんなお悩みありませんか？」の箇条書き5項目（各項目にアイコン提案）\n- 解決策提示：この商品が選ばれる理由（3〜5項目）\n- ベネフィット訴求：「使った後の変化」を具体的に3つ（Before→After形式）\n- 社会的証明：お客様の声テンプレート（3名分）＋実績数字の提示方法\n- 中間CTAボタンのテキスト\n\n【③ クロージング】\n- 料金プラン・利用の流れ（ステップ形式で3〜5段階）※各ステップにアイコン提案\n- FAQ（よくある質問）5問＋回答\n- 限定オファー・緊急性訴求のコピー（2案）\n- 最終CTAボタンのテキスト＋フォーム周りのマイクロコピー\n\n━━━━━━━━━━━━━━━━━━━━━\n■ デザイン・レイアウト指示\n━━━━━━━━━━━━━━━━━━━━━\n・適切な写真（Unsplash推奨キーワード）を各セクションに1〜2枚提案してください。\n・各セクションで使用すべきアイコン（Font Awesomeクラス名）を提示してください。\n・文字は中央揃えを基本とし、重要箇所は左揃えも適宜使用してください。\n・枠・カード・余白は均等でバランスの取れたレイアウトを意識してください。\n・文字ずれ・枠ずれが起きないよう、CSSのbox-sizing:border-boxとflexbox/gridを活用してください。\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 追加指示\n━━━━━━━━━━━━━━━━━━━━━\n・' + btocFocus + '\n・CTAボタンは「ファーストビュー直下」「ボディ中間」「クロージング最後」の最低3か所に設置する前提で設計してください。\n・各コピーはPASONAの法則（問題→親近感→解決策→提案→絞込→行動）に準拠してください。\n・専門用語を避け、中学生でも理解できる平易な言葉で書いてください。\n・最後に「このLPをさらに改善するための3つの施策提案」を追記してください。';
-  document.getElementById('promptBox').textContent = promptText;
-  document.getElementById('output').style.display = 'block';
-  document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-/* ── コピー共通処理 ── */
-function copyPrompt(msgId) {
-  var text = document.getElementById('promptBox').textContent;
-  var msg = document.getElementById(msgId);
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function() {
-      showCopyMsg(msg);
-    }).catch(function() {
-      fallbackCopy(text, msg);
-    });
-  } else {
-    fallbackCopy(text, msg);
-  }
-}
-function fallbackCopy(text, msg) {
-  var ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-  try {
-    var ok = document.execCommand('copy');
-    if (ok) {
-      showCopyMsg(msg);
-    } else {
-      msg.textContent = '⚠ 手動でCtrl+Aして右クリック→コピーしてください';
-      msg.style.display = 'block';
-    }
-  } catch(e) {
-    msg.textContent = '⚠ コピーに失敗しました。手動でテキストを選択してください。';
-    msg.style.display = 'block';
-  }
-  document.body.removeChild(ta);
-}
-function showCopyMsg(msg) {
-  msg.textContent = '✓ クリップボードにコピーしました';
-  msg.style.color = '#22a06b';
-  msg.style.display = 'block';
-  setTimeout(function(){ msg.style.display = 'none'; }, 2500);
-}
-</script>
 </body>
 </html>
