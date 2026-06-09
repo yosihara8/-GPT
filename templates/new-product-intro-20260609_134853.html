@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>新製品紹介動画 — 青×ホワイト 縦型15秒</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="./gsap.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1920px;
+    overflow: hidden; background: #f0f7ff;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  #bg { position: absolute; inset: 0; background: #f0f7ff; }
+  #bg-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 900px;
+    background: linear-gradient(160deg, #0057b8 0%, #1a8fff 55%, #42c2ff 100%);
+    border-radius: 0 0 80px 80px;
+  }
+  #wave { position: absolute; top: 820px; left: 0; right: 0; height: 120px; overflow: hidden; }
+  #wave svg { width: 100%; height: 100%; }
+  #shine {
+    position: absolute; top: 80px; right: 80px; width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+  }
+  #dots {
+    position: absolute; top: 40px; left: 40px; width: 200px; height: 200px;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.3) 1.5px, transparent 1.5px);
+    background-size: 28px 28px;
+  }
+  #brand { position: absolute; top: 100px; left: 0; right: 0; text-align: center; }
+  #brand-logo { display: inline-flex; align-items: center; gap: 12px; }
+  #brand-icon {
+    width: 52px; height: 52px; background: rgba(255,255,255,0.2);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px;
+  }
+  #brand-name { font-size: 30px; font-weight: 700; color: rgba(255,255,255,0.95); letter-spacing: 0.15em; text-transform: uppercase; }
+  #product-card {
+    position: absolute; top: 230px; left: 80px; right: 80px; height: 680px;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 48px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  #product-inner { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  #product-emoji { font-size: 220px; line-height: 1; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.15)); }
+  #product-badge {
+    display: inline-block; padding: 10px 32px;
+    background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 100px; font-size: 22px; font-weight: 700;
+    color: white; letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .sparkle { position: absolute; color: rgba(255,255,255,0.8); font-size: 28px; }
+  #new-label {
+    position: absolute; top: 220px; right: 60px;
+    width: 120px; height: 120px; background: #ff4500;
+    border-radius: 50%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-weight: 900; color: white; font-size: 34px; letter-spacing: 0.05em;
+    box-shadow: 0 8px 32px rgba(255,69,0,0.4);
+  }
+  #new-label span { font-size: 13px; font-weight: 500; letter-spacing: 0.1em; }
+  #copy-area { position: absolute; top: 960px; left: 60px; right: 60px; }
+  #tag-line { font-size: 24px; color: #1a8fff; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 18px; }
+  #main-copy { font-size: 80px; font-weight: 900; color: #0a1f44; line-height: 1.1; letter-spacing: -0.02em; }
+  #main-copy .blue { color: #1a8fff; }
+  #sub-copy { margin-top: 24px; font-size: 32px; color: #5a7a99; line-height: 1.6; font-weight: 400; }
+  #specs { position: absolute; top: 1320px; left: 60px; right: 60px; display: flex; gap: 24px; }
+  .spec-item {
+    flex: 1; padding: 28px 20px; background: white; border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(0,87,184,0.1); text-align: center;
+  }
+  .spec-icon { font-size: 44px; margin-bottom: 10px; }
+  .spec-value { font-size: 36px; font-weight: 900; color: #0057b8; line-height: 1; }
+  .spec-label { margin-top: 6px; font-size: 18px; color: #8aa0b8; }
+  #cta { position: absolute; bottom: 140px; left: 60px; right: 60px; }
+  #cta-btn {
+    display: block; padding: 52px 40px;
+    background: linear-gradient(90deg, #0057b8, #1a8fff);
+    border-radius: 28px; text-align: center;
+    font-size: 44px; font-weight: 900; color: white; letter-spacing: 0.05em;
+    box-shadow: 0 12px 40px rgba(0,87,184,0.35);
+  }
+  #cta-arrow { display: inline-block; margin-left: 16px; }
+  #bottom-bar { position: absolute; bottom: 56px; left: 0; right: 0; display: flex; justify-content: center; gap: 12px; }
+  .pip { width: 10px; height: 10px; border-radius: 50%; background: #c8dff5; }
+  .pip.active { width: 36px; border-radius: 5px; background: #1a8fff; }
+</style>
+</head>
+<body>
+
+<div id="stage"
+     data-composition-id="new-product-intro"
+     data-start="0"
+     data-duration="15"
+     data-width="1080"
+     data-height="1920">
+
+  <div id="bg" class="clip" data-start="0" data-duration="15">
+    <div id="bg-top"></div>
+    <div id="shine"></div>
+    <div id="dots"></div>
+    <div id="wave">
+      <svg viewBox="0 0 1080 120" preserveAspectRatio="none">
+        <path d="M0,60 C200,120 400,0 600,60 C800,120 1000,0 1080,60 L1080,120 L0,120 Z" fill="#f0f7ff"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="sparkle clip" id="sp1" style="top:310px;left:110px" data-start="0.5" data-duration="14">✦</div>
+  <div class="sparkle clip" id="sp2" style="top:450px;right:120px" data-start="0.7" data-duration="13">✦</div>
+  <div class="sparkle clip" id="sp3" style="top:720px;left:95px"   data-start="1"   data-duration="12">✧</div>
+
+  <div id="brand" class="clip" data-start="0.2" data-duration="14.8">
+    <div id="brand-logo">
+      <div id="brand-icon">⚡</div>
+      <div id="brand-name">BRAND</div>
+    </div>
+  </div>
+
+  <div id="product-card" class="clip" data-start="0.4" data-duration="14.6">
+    <div id="product-inner">
+      <div id="product-emoji">📱</div>
+      <div id="product-badge">NEW MODEL 2025</div>
+    </div>
+  </div>
+
+  <div id="new-label" class="clip" data-start="1" data-duration="13">NEW<span>ARRIVAL</span></div>
+
+  <div id="copy-area" class="clip" data-start="1.2" data-duration="13.8">
+    <div id="tag-line">Introducing</div>
+    <h1 id="main-copy">次世代を<br><span class="blue">切り拓く</span><br>一台</h1>
+    <p id="sub-copy">あなたの毎日を、<br>もっとスマートに。</p>
+  </div>
+
+  <div id="specs" class="clip" data-start="2" data-duration="13">
+    <div class="spec-item"><div class="spec-icon">⚡</div><div class="spec-value" id="sv1">0h</div><div class="spec-label">バッテリー</div></div>
+    <div class="spec-item"><div class="spec-icon">📷</div><div class="spec-value" id="sv2">0MP</div><div class="spec-label">カメラ</div></div>
+    <div class="spec-item"><div class="spec-icon">🚀</div><div class="spec-value" id="sv3">0x</div><div class="spec-label">処理速度</div></div>
+  </div>
+
+  <div id="cta" class="clip" data-start="3" data-duration="12">
+    <div id="cta-btn">今すぐ詳しく見る<span id="cta-arrow">→</span></div>
+  </div>
+
+  <div id="bottom-bar" class="clip" data-start="3.5" data-duration="11.5">
+    <div class="pip active"></div><div class="pip"></div><div class="pip"></div>
+  </div>
+
+</div>
+
+<script>
+const DURATION = 15;
+const tl = gsap.timeline({ paused: true });
+
+// 初期状態を全て GSAP で設定（CSS transform と競合しない）
+gsap.set("#bg-top",        { scaleY: 0, transformOrigin: "top" });
+gsap.set(["#shine","#dots"], { opacity: 0 });
+gsap.set("#brand",         { opacity: 0, y: -30 });
+gsap.set("#product-card",  { opacity: 0, scale: 0.85, y: 40 });
+gsap.set("#new-label",     { opacity: 0, scale: 0, rotation: -15 });
+gsap.set(["#sp1","#sp2","#sp3"], { opacity: 0 });
+gsap.set("#copy-area",     { opacity: 0 });
+gsap.set("#tag-line",      { opacity: 0, x: -20 });
+gsap.set("#main-copy",     { opacity: 0, y: 50 });
+gsap.set("#sub-copy",      { opacity: 0, y: 30 });
+gsap.set("#specs",         { opacity: 0 });
+gsap.set(".spec-item",     { opacity: 0, y: 40 });
+gsap.set("#cta",           { opacity: 0 });
+gsap.set("#cta-btn",       { scale: 0.85, opacity: 0 });
+gsap.set("#bottom-bar",    { opacity: 0 });
+
+// 0.0s: 青背景
+tl.to("#bg-top", { scaleY: 1, duration: 0.9, ease: "power3.out" }, 0);
+tl.to("#shine",  { opacity: 1, duration: 0.8 }, 0.3);
+tl.to("#dots",   { opacity: 1, duration: 0.8 }, 0.4);
+
+// 0.2s: ブランド
+tl.to("#brand", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.2);
+
+// 0.4s: 製品カード
+tl.to("#product-card", { opacity: 1, scale: 1, y: 0, duration: 0.9, ease: "back.out(1.4)" }, 0.4);
+
+// 製品浮遊（有限: 2.5s × 5 = 12.5s）
+tl.to("#product-emoji", { y: -20, duration: 2.5, repeat: 4, yoyo: true, ease: "sine.inOut" }, 2);
+
+// 1.0s: NEWラベル
+tl.to("#new-label", { opacity: 1, scale: 1, rotation: -10, duration: 0.6, ease: "back.out(2)" }, 1);
+tl.to("#new-label", { rotation: -14, duration: 0.8, repeat: 6, yoyo: true, ease: "sine.inOut" }, 2);
+
+// キラキラ点滅（有限: 1.2s × 10 = 12s）
+[["#sp1",0.5],["#sp2",0.7],["#sp3",1.0]].forEach(([id,s]) => {
+  tl.to(id, { opacity: 1, duration: 0.4 }, s);
+  tl.to(id, { opacity: 0, duration: 0.6, repeat: 9, yoyo: true, ease: "sine.inOut" }, s + 0.5);
+});
+
+// 1.2s: コピー
+tl.to("#copy-area", { opacity: 1, duration: 0.1 }, 1.2);
+tl.to("#tag-line",  { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 1.2);
+tl.to("#main-copy", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 1.5);
+tl.to("#sub-copy",  { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 2.0);
+
+// 2.0s: スペック
+tl.to("#specs",    { opacity: 1, duration: 0.1 }, 2.0);
+tl.to(".spec-item",{ opacity: 1, y: 0, stagger: 0.12, duration: 0.5, ease: "back.out(1.2)" }, 2.0);
+
+const countSpec = (id, target, suffix, start) => {
+  tl.to({}, { duration: 1.2, onUpdate: function() {
+    document.getElementById(id).textContent = Math.floor(this.progress() * target) + suffix;
+  }}, start);
+};
+countSpec("sv1", 48,  "h",  2.3);
+countSpec("sv2", 200, "MP", 2.4);
+countSpec("sv3", 5,   "x",  2.5);
+
+// 3.0s: CTA
+tl.to("#cta",    { opacity: 1, duration: 0.1 }, 3.0);
+tl.to("#cta-btn",{ scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.5)" }, 3.0);
+tl.to("#cta-btn",{ scale: 1.02, duration: 0.9, repeat: 5, yoyo: true, ease: "sine.inOut" }, 4.0);
+tl.to("#cta-arrow", { x: 8, duration: 0.6, repeat: 8, yoyo: true, ease: "sine.inOut" }, 4.0);
+
+// 3.5s: ボトム
+tl.to("#bottom-bar", { opacity: 1, duration: 0.5 }, 3.5);
+
+window.__timelines = window.__timelines || {};
+window.__timelines["new-product-intro"] = tl;
+</script>
+</body>
+</html>
