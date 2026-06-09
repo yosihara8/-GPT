@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>首振り・瞬き 横型15秒</title>
+<script src="./gsap.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  /* ──── 背景 ──── */
+  #bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #fdf8f3 0%, #fff0e6 60%, #fdf8f3 100%);
+  }
+
+  /* ──── キャラクターラッパー（首振りの対象） ──── */
+  /*
+   * 【まぶた位置の調整方法】
+   * 下記 CSS 変数を変えることで目の位置・サイズを調整できます
+   * 画像が表示されたらブラウザの DevTools で確認してください
+   */
+  #character-wrap {
+    position: absolute;
+    /* 画像を画面中央に配置 */
+    left: 555px;
+    top: 0px;
+    width: 810px;
+    height: 1080px;
+
+    /* 顎あたりを支点に首振り */
+    transform-origin: center 82%;
+
+    /* ──── まぶた位置の CSS 変数（調整ポイント） ──── */
+    --eye-l-left:   115px;   /* 左目 左端X (viewer視点の左目) */
+    --eye-l-top:    430px;   /* 左目 上端Y */
+    --eye-l-width:  160px;   /* 左目 幅 */
+    --eye-l-height: 148px;   /* 左目 高さ */
+
+    --eye-r-left:   405px;   /* 右目 左端X (viewer視点の右目=大きい方) */
+    --eye-r-top:    390px;   /* 右目 上端Y */
+    --eye-r-width:  200px;   /* 右目 幅 */
+    --eye-r-height: 180px;   /* 右目 高さ */
+
+    --skin-color: #F2BDA2;   /* 肌色（まぶたの色） */
+  }
+
+  #character-img {
+    width: 810px;
+    height: 1080px;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  /* ──── まぶたオーバーレイ ──── */
+  .eyelid-box {
+    position: absolute;
+    overflow: hidden;
+    pointer-events: none;
+    /* デバッグ時: outline: 2px solid red; */
+  }
+
+  #eyelid-left {
+    left:   var(--eye-l-left);
+    top:    var(--eye-l-top);
+    width:  var(--eye-l-width);
+    height: var(--eye-l-height);
+  }
+
+  #eyelid-right {
+    left:   var(--eye-r-left);
+    top:    var(--eye-r-top);
+    width:  var(--eye-r-width);
+    height: var(--eye-r-height);
+  }
+
+  /* まぶたの形（楕円形のスキンカラー） */
+  .eyelid {
+    position: absolute;
+    inset: 0;
+    background: var(--skin-color);
+    border-radius: 50%;
+    transform: scaleY(0);
+    transform-origin: top center;
+  }
+
+  /* まぶたのハイライト（上まぶたの影） */
+  .eyelid::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 10%;
+    width: 80%;
+    height: 20px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 50%;
+    filter: blur(4px);
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"
+     data-composition-id="head-shake-blink"
+     data-start="0"
+     data-duration="15"
+     data-width="1920"
+     data-height="1080">
+
+  <!-- 背景 -->
+  <div id="bg" class="clip" data-start="0" data-duration="15"></div>
+
+  <!-- キャラクター本体 -->
+  <div id="character-wrap" class="clip" data-start="0" data-duration="15">
+    <img id="character-img" src="./character.png" alt="character">
+
+    <!-- まぶたオーバーレイ（左目） -->
+    <div id="eyelid-left"  class="eyelid-box">
+      <div class="eyelid" id="el-l"></div>
+    </div>
+
+    <!-- まぶたオーバーレイ（右目） -->
+    <div id="eyelid-right" class="eyelid-box">
+      <div class="eyelid" id="el-r"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// GSAP アニメーション
+// ════════════════════════════════════════════════════════
+
+const tl = gsap.timeline({ paused: true });
+
+// 初期状態
+gsap.set("#character-wrap", { opacity: 0, y: 15 });
+gsap.set(["#el-l", "#el-r"], { scaleY: 0 });
+
+// ──── ヘルパー: 瞬き ────
+// t     : 開始時刻(秒)
+// speed : 速度倍率 (1=普通, 0.5=ゆっくり)
+function blink(t, speed) {
+  speed = speed || 1;
+  const closeTime = 0.07 / speed;
+  const holdTime  = 0.04 / speed;
+  const openTime  = 0.13 / speed;
+  tl.to(["#el-l", "#el-r"], {
+    scaleY: 1, duration: closeTime, ease: "power2.in"
+  }, t);
+  tl.to(["#el-l", "#el-r"], {
+    scaleY: 0, duration: openTime, ease: "power2.out"
+  }, t + closeTime + holdTime);
+}
+
+// ──── ヘルパー: 首振り (首を横に振る「いやいや」モーション) ────
+// t     : 開始時刻(秒)
+// swings: 往復回数 (偶数推奨)
+// amp   : 角度振れ幅 (deg)
+function headShake(t, swings, amp) {
+  swings = swings || 6;
+  amp    = amp    || 11;
+  const half = 0.18; // 片道の秒数
+
+  for (let i = 0; i < swings; i++) {
+    const dir = (i % 2 === 0) ? -1 : 1; // 左→右→左…
+    const rot = amp * dir;
+    // 首が傾くほど横にも少し動く（自然な動き）
+    const xShift = amp * dir * 1.8;
+    tl.to("#character-wrap", {
+      rotation: rot,
+      x: xShift,
+      duration: half,
+      ease: "power2.inOut"
+    }, t + i * half);
+  }
+
+  // 中央に戻る
+  tl.to("#character-wrap", {
+    rotation: 0,
+    x: 0,
+    duration: half * 1.2,
+    ease: "elastic.out(1, 0.8)"
+  }, t + swings * half);
+
+  return t + swings * half + half * 1.2;
+}
+
+// ──── ヘルパー: アイドルボブ（ゆっくり揺れる） ────
+function idleBob(t, duration) {
+  tl.to("#character-wrap", {
+    y: -10,
+    duration: duration / 2,
+    repeat: 1,
+    yoyo: true,
+    ease: "sine.inOut"
+  }, t);
+}
+
+// ════════════════════════════════════════
+// シーン 0.0s: フェードイン
+// ════════════════════════════════════════
+tl.to("#character-wrap", {
+  opacity: 1, y: 0,
+  duration: 0.7, ease: "power2.out"
+}, 0);
+
+// ════════════════════════════════════════
+// シーン 0.8s: 自然な瞬き（登場後すぐ）
+// ════════════════════════════════════════
+blink(0.8);
+
+// ════════════════════════════════════════
+// シーン 1.5s: 首振り第1弾（6往復）
+// ════════════════════════════════════════
+let nextT = headShake(1.5, 6, 11);
+// → 終わり ≈ 3.7s
+
+// ════════════════════════════════════════
+// シーン ~3.7s: 振り終わってすぐ瞬き
+// ════════════════════════════════════════
+blink(nextT + 0.1);
+
+// ════════════════════════════════════════
+// シーン ~4.0〜6.5s: アイドリング + 瞬き
+// ════════════════════════════════════════
+idleBob(4.0, 2.4);
+
+blink(5.2);
+
+idleBob(6.0, 1.6);
+
+// ════════════════════════════════════════
+// シーン 7.0s: 首振り第2弾（6往復、少し強め）
+// ════════════════════════════════════════
+nextT = headShake(7.0, 6, 13);
+// → 終わり ≈ 9.2s
+
+// ════════════════════════════════════════
+// シーン ~9.2s: 振り終わってすぐ瞬き（ゆっくり）
+// ════════════════════════════════════════
+blink(nextT + 0.1, 0.7); // 少しゆっくりな瞬き
+
+// ════════════════════════════════════════
+// シーン ~9.8〜12.5s: アイドリング + 瞬き
+// ════════════════════════════════════════
+idleBob(9.8, 2.0);
+blink(11.0);
+idleBob(11.5, 1.8);
+
+// ════════════════════════════════════════
+// シーン 13.0s: 首振り第3弾（4往復、小さめ）
+// ════════════════════════════════════════
+nextT = headShake(13.0, 4, 9);
+// → 終わり ≈ 14.3s
+
+// ════════════════════════════════════════
+// シーン 14.5s: 最後の瞬き
+// ════════════════════════════════════════
+blink(14.5);
+
+// ════ Hyperframes 登録 ════
+window.__timelines = window.__timelines || {};
+window.__timelines["head-shake-blink"] = tl;
+</script>
+</body>
+</html>
