@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>サッカーボール転がる 16:9 3秒</title>
+<script src="../gsap.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: #1a4a1a;
+  }
+
+  /* ──── フィールド ──── */
+  #field {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* 芝のストライプ（明暗の縞模様） */
+  #grass-stripes {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(0,0,0,0.08) 0px,
+      rgba(0,0,0,0.08) 96px,
+      transparent 96px,
+      transparent 192px
+    );
+  }
+
+  /* 空・スタジアム上部 */
+  #sky {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(180deg,
+      #87CEEB 0%,
+      #b0d8f0 60%,
+      rgba(176,216,240,0) 100%
+    );
+    opacity: 0.15;
+  }
+
+  /* 地平線 */
+  #horizon {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 650px;
+    background: linear-gradient(180deg,
+      #2d6e2d 0%,
+      #1e5c1e 30%,
+      #174f17 60%,
+      #0e3d0e 100%
+    );
+  }
+
+  /* パースペクティブグリッド（遠近感の芝目） */
+  #perspective-grid {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 650px;
+    overflow: hidden;
+  }
+
+  /* ライン（水平方向の芝目） */
+  .h-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* ゴールライン（白い実線） */
+  #goal-line {
+    position: absolute;
+    bottom: 200px;
+    left: 0; right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.5);
+  }
+
+  /* 太陽光 */
+  #sunlight {
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1200px;
+    height: 900px;
+    background: radial-gradient(ellipse at center top,
+      rgba(255,255,200,0.06) 0%,
+      transparent 70%
+    );
+  }
+
+  /* ──── ボールのシャドウ ──── */
+  #ball-shadow {
+    position: absolute;
+    width: 200px;
+    height: 40px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ──── ボールコンテナ ──── */
+  #ball-wrap {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+  }
+
+  /* ──── ボール本体 ──── */
+  #ball-svg {
+    width: 180px;
+    height: 180px;
+  }
+
+  /* ──── モーションブラー ──── */
+  #motion-blur {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: linear-gradient(90deg,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.04) 100%
+    );
+    opacity: 0;
+  }
+
+  /* ──── 芝の草のテクスチャ（前景） ──── */
+  #grass-fg {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 100px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .grass-blade {
+    position: absolute;
+    bottom: 0;
+    width: 3px;
+    border-radius: 2px 2px 0 0;
+    background: linear-gradient(180deg, #4a9a2a, #2d6e1a);
+    transform-origin: bottom center;
+  }
+
+  /* ──── ビネット ──── */
+  #vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center,
+      transparent 40%,
+      rgba(0,0,0,0.5) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ──── 光の粒子（芝の露） ──── */
+  .dew {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"
+     data-composition-id="soccer-ball-roll"
+     data-start="0"
+     data-duration="3"
+     data-width="1920"
+     data-height="1080">
+
+  <!-- フィールド背景 -->
+  <div id="field" class="clip" data-start="0" data-duration="3">
+    <div id="horizon"></div>
+    <div id="grass-stripes"></div>
+    <div id="sky"></div>
+    <div id="sunlight"></div>
+
+    <!-- 遠近法の芝目ライン -->
+    <div id="perspective-grid">
+      <div class="h-line" style="bottom:500px;opacity:0.3"></div>
+      <div class="h-line" style="bottom:420px;opacity:0.4"></div>
+      <div class="h-line" style="bottom:350px;opacity:0.5"></div>
+      <div class="h-line" style="bottom:280px;opacity:0.6"></div>
+      <div class="h-line" style="bottom:210px;opacity:0.7"></div>
+      <div class="h-line" style="bottom:150px;opacity:0.8"></div>
+      <div class="h-line" style="bottom:100px;opacity:0.9"></div>
+      <div class="h-line" style="bottom:60px;opacity:1"></div>
+      <div class="h-line" style="bottom:30px;opacity:1"></div>
+    </div>
+
+    <div id="goal-line"></div>
+  </div>
+
+  <!-- 露の粒（キラキラ） -->
+  <div class="dew" id="d1" style="left:400px;bottom:280px" data-start="0" data-duration="3"></div>
+  <div class="dew" id="d2" style="left:800px;bottom:220px" data-start="0" data-duration="3"></div>
+  <div class="dew" id="d3" style="left:1200px;bottom:260px" data-start="0" data-duration="3"></div>
+  <div class="dew" id="d4" style="left:1600px;bottom:240px" data-start="0" data-duration="3"></div>
+  <div class="dew" id="d5" style="left:600px;bottom:300px" data-start="0" data-duration="3"></div>
+
+  <!-- ボールの影 -->
+  <div id="ball-shadow" class="clip" data-start="0" data-duration="3"
+       style="bottom:200px;left:200px"></div>
+
+  <!-- ボール本体 -->
+  <div id="ball-wrap" class="clip" data-start="0" data-duration="3"
+       style="bottom:200px;left:110px">
+
+    <div id="motion-blur"></div>
+
+    <!-- サッカーボール SVG -->
+    <svg id="ball-svg" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- 球体グラデーション（光沢） -->
+        <radialGradient id="ballGrad" cx="35%" cy="28%" r="65%">
+          <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.9"/>
+          <stop offset="30%"  stop-color="#f0f0f0" stop-opacity="0.7"/>
+          <stop offset="60%"  stop-color="#d0d0d0" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#888888" stop-opacity="0.8"/>
+        </radialGradient>
+        <!-- 黒パネルのグラデーション -->
+        <radialGradient id="panelGrad" cx="40%" cy="35%" r="65%">
+          <stop offset="0%"   stop-color="#444444"/>
+          <stop offset="60%"  stop-color="#111111"/>
+          <stop offset="100%" stop-color="#000000"/>
+        </radialGradient>
+        <!-- ハイライト -->
+        <radialGradient id="highlight" cx="35%" cy="25%" r="40%">
+          <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+        </radialGradient>
+        <!-- 球体クリップ -->
+        <clipPath id="ballClip">
+          <circle cx="90" cy="90" r="86"/>
+        </clipPath>
+        <!-- ぼかしフィルタ -->
+        <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2"/>
+        </filter>
+      </defs>
+
+      <!-- ベース白 -->
+      <circle cx="90" cy="90" r="86" fill="url(#ballGrad)"/>
+
+      <!-- 黒い五角形パネル（サッカーボール模様） - クリップ内 -->
+      <g clip-path="url(#ballClip)">
+        <!-- 中央ペンタゴン -->
+        <polygon
+          points="90,34  110,50  104,74  76,74  70,50"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+
+        <!-- 上左 -->
+        <polygon
+          points="28,26  48,18  58,40  42,56  22,46"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+
+        <!-- 上右 -->
+        <polygon
+          points="152,26  132,18  122,40  138,56  158,46"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+
+        <!-- 左 -->
+        <polygon
+          points="14,78  30,64  54,72  54,96  32,104"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+
+        <!-- 右 -->
+        <polygon
+          points="166,78  150,64  126,72  126,96  148,104"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+
+        <!-- 下左 -->
+        <polygon
+          points="30,136  48,124  64,138  58,160  34,162"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+
+        <!-- 下右 -->
+        <polygon
+          points="150,136  132,124  116,138  122,160  146,162"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+
+        <!-- 真下 -->
+        <polygon
+          points="90,154  68,146  66,164  90,176  114,164  112,146"
+          fill="url(#panelGrad)" filter="url(#softShadow)"/>
+      </g>
+
+      <!-- 球体のエッジシャドウ（立体感） -->
+      <circle cx="90" cy="90" r="86"
+        fill="none"
+        stroke="rgba(0,0,0,0.3)"
+        stroke-width="4"/>
+
+      <!-- ハイライト -->
+      <ellipse cx="70" cy="58" rx="22" ry="16"
+        fill="url(#highlight)"
+        transform="rotate(-20, 70, 58)"/>
+
+      <!-- 小ハイライト -->
+      <ellipse cx="58" cy="46" rx="8" ry="5"
+        fill="rgba(255,255,255,0.5)"
+        transform="rotate(-15, 58, 46)"/>
+    </svg>
+  </div>
+
+  <!-- 前景の草 -->
+  <div id="grass-fg" class="clip" data-start="0" data-duration="3">
+    <!-- JSで生成 -->
+  </div>
+
+  <!-- ビネット -->
+  <div id="vignette" class="clip" data-start="0" data-duration="3"></div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// 前景の芝ブレード生成
+// ════════════════════════════════════════════════════════
+const grassFg = document.getElementById('grass-fg');
+for (let i = 0; i < 120; i++) {
+  const blade = document.createElement('div');
+  blade.className = 'grass-blade';
+  const x = Math.random() * 1920;
+  const h = 30 + Math.random() * 60;
+  const tilt = (Math.random() - 0.5) * 30;
+  const green = Math.floor(100 + Math.random() * 80);
+  blade.style.cssText = `
+    left: ${x}px;
+    height: ${h}px;
+    transform: rotate(${tilt}deg);
+    background: linear-gradient(180deg, rgb(40,${green},20), rgb(20,80,10));
+  `;
+  grassFg.appendChild(blade);
+}
+
+// ════════════════════════════════════════════════════════
+// GSAP アニメーション
+// ═══════════════════════════════════════════════════════
+
+// フィールド上の地面Y座標
+const GROUND_Y   = 200;  // bottom from body bottom
+const BALL_R     = 90;   // ボール半径(px)
+const START_X    = -200; // 画面左外からスタート
+const END_X      = 2100; // 画面右外へ退場
+const TRAVEL_PX  = END_X - START_X;
+
+// 転がり物理: 距離 = 角度 × 半径
+// 回転角 = 距離 / 半径 (ラジアン) = deg * (180/π)
+const ROTATION_DEG = (TRAVEL_PX / BALL_R) * (180 / Math.PI);
+
+const tl = gsap.timeline({ paused: true });
+
+// 初期位置設定
+gsap.set("#ball-wrap",   { x: START_X, y: 0 });
+gsap.set("#ball-shadow", { x: START_X, scaleX: 1.1 });
+gsap.set(".dew",         { opacity: 0 });
+
+// 0.0s: 露がキラリ
+tl.to(["#d1","#d2","#d3","#d4","#d5"], {
+  opacity: 1,
+  stagger: 0.15,
+  duration: 0.2,
+  yoyo: true,
+  repeat: 2,
+  ease: "sine.inOut"
+}, 0);
+
+// 0.0s〜3.0s: ボールが左から右へ等速で転がる
+tl.to("#ball-wrap", {
+  x: END_X,
+  duration: 3,
+  ease: "none"   // 等速
+}, 0);
+
+// ボールの回転（転がり物理）
+tl.to("#ball-svg", {
+  rotation: ROTATION_DEG,
+  duration: 3,
+  ease: "none",
+  transformOrigin: "center center"
+}, 0);
+
+// 影も一緒に動く
+tl.to("#ball-shadow", {
+  x: END_X + BALL_R,
+  duration: 3,
+  ease: "none"
+}, 0);
+
+// 地面に近いほど影が濃く・大きくなるパースペクティブ効果
+// （ここでは固定でOK、ボールは水平移動のみ）
+
+// ボールが草を掻き分けるときの微細な上下バウンス（芝の凸凹）
+tl.to("#ball-wrap", {
+  y: -4,
+  duration: 0.18,
+  repeat: 16,
+  yoyo: true,
+  ease: "sine.inOut"
+}, 0.1);
+
+// モーションブラーが動きに合わせて出現
+tl.to("#motion-blur", {
+  opacity: 1,
+  duration: 0.3
+}, 0);
+
+// 入場時にわずかに加速（最初だけ）
+// 上記で ease: "none" にしたので代わりに影のスケールで速度感を演出
+tl.to("#ball-shadow", {
+  scaleX: 1.4,
+  scaleY: 0.8,
+  duration: 0.3,
+  ease: "power2.out"
+}, 0);
+
+tl.to("#ball-shadow", {
+  scaleX: 1.1,
+  scaleY: 1,
+  duration: 2.7,
+  ease: "none"
+}, 0.3);
+
+// ════ Hyperframes 登録 ════
+window.__timelines = window.__timelines || {};
+window.__timelines["soccer-ball-roll"] = tl;
+</script>
+</body>
+</html>
