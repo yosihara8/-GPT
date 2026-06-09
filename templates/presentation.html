@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>プレゼンアニメーションテンプレート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: #0a0a1a;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: white;
+  }
+
+  /* 背景 */
+  #bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  }
+
+  /* 左サイドバー */
+  #sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(180deg, #6366f1, #8b5cf6, #ec4899);
+    opacity: 0;
+  }
+
+  /* ヘッダーエリア */
+  #header {
+    position: absolute;
+    top: 80px;
+    left: 100px;
+    opacity: 0;
+  }
+
+  #company-name {
+    font-size: 20px;
+    letter-spacing: 0.3em;
+    color: #6366f1;
+    text-transform: uppercase;
+  }
+
+  #slide-number {
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* メインタイトル */
+  #title-area {
+    position: absolute;
+    top: 180px;
+    left: 100px;
+    right: 900px;
+    opacity: 0;
+  }
+
+  #title-tag {
+    display: inline-block;
+    padding: 6px 20px;
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: 100px;
+    font-size: 18px;
+    color: #a5b4fc;
+    letter-spacing: 0.15em;
+    margin-bottom: 24px;
+  }
+
+  #main-title {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  #main-title .accent {
+    color: #818cf8;
+  }
+
+  #description {
+    margin-top: 28px;
+    font-size: 22px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  /* 統計数字エリア */
+  #stats {
+    position: absolute;
+    bottom: 120px;
+    left: 100px;
+    display: flex;
+    gap: 80px;
+    opacity: 0;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stat-number {
+    font-size: 56px;
+    font-weight: 900;
+    color: #818cf8;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 18px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.1em;
+  }
+
+  /* 右側ビジュアル */
+  #visual-panel {
+    position: absolute;
+    right: 100px;
+    top: 100px;
+    width: 720px;
+    height: 880px;
+    border-radius: 24px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(60px);
+  }
+
+  #visual-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+  }
+
+  #visual-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  #visual-circle {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    border: 3px solid rgba(99, 102, 241, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  #visual-circle::before {
+    content: '';
+    position: absolute;
+    inset: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(99, 102, 241, 0.3);
+  }
+
+  #visual-icon {
+    font-size: 100px;
+  }
+
+  .feature-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 40px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    width: 600px;
+  }
+
+  .feature-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #6366f1;
+    flex-shrink: 0;
+  }
+
+  .feature-text {
+    font-size: 20px;
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* 装飾ライン */
+  #deco-line {
+    position: absolute;
+    top: 150px;
+    left: 100px;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, transparent);
+    border-radius: 3px;
+  }
+
+  /* ロゴウォーターマーク */
+  #watermark {
+    position: absolute;
+    bottom: 40px;
+    right: 100px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.2em;
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"
+     data-composition-id="presentation"
+     data-start="0"
+     data-width="1920"
+     data-height="1080">
+
+  <!-- 背景 -->
+  <div id="bg" data-start="0" data-duration="30">
+    <div id="sidebar"></div>
+    <div id="deco-line"></div>
+  </div>
+
+  <!-- ヘッダー -->
+  <div id="header" data-start="0.2" data-duration="29.8">
+    <div id="company-name">Your Company</div>
+    <div id="slide-number">01 / 06</div>
+  </div>
+
+  <!-- タイトルエリア -->
+  <div id="title-area" data-start="0.4" data-duration="29.6">
+    <div id="title-tag">COMPANY OVERVIEW</div>
+    <h1 id="main-title">
+      私たちが<br>
+      <span class="accent">変革する</span><br>
+      未来
+    </h1>
+    <p id="description">
+      最先端のテクノロジーと人間中心の設計で、
+      ビジネスの新しい可能性を切り開きます。
+    </p>
+  </div>
+
+  <!-- 統計 -->
+  <div id="stats" data-start="1.5" data-duration="28">
+    <div class="stat-item">
+      <div class="stat-number" id="stat1">0</div>
+      <div class="stat-label">導入企業数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="stat2">0</div>
+      <div class="stat-label">満足度 (%)</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="stat3">0</div>
+      <div class="stat-label">業界実績 (年)</div>
+    </div>
+  </div>
+
+  <!-- 右パネル -->
+  <div id="visual-panel" data-start="0.6" data-duration="29.4">
+    <div id="visual-bg"></div>
+    <div id="visual-content">
+      <div id="visual-circle">
+        <div id="visual-icon">🚀</div>
+      </div>
+      <div class="feature-row" id="f1">
+        <div class="feature-dot"></div>
+        <div class="feature-text">AIによる業務自動化</div>
+      </div>
+      <div class="feature-row" id="f2">
+        <div class="feature-dot"></div>
+        <div class="feature-text">リアルタイムデータ分析</div>
+      </div>
+      <div class="feature-row" id="f3">
+        <div class="feature-dot"></div>
+        <div class="feature-text">クラウドネイティブ設計</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ウォーターマーク -->
+  <div id="watermark" data-start="1" data-duration="29">
+    CONFIDENTIAL 2025
+  </div>
+
+</div>
+
+<script>
+const tl = gsap.timeline({ paused: true });
+
+// サイドバーがスライドイン
+tl.to("#sidebar", {
+  opacity: 1,
+  duration: 0.1
+}, 0);
+
+tl.from("#sidebar", {
+  scaleY: 0,
+  transformOrigin: "top",
+  duration: 1,
+  ease: "power3.out"
+}, 0);
+
+// 装飾ラインが伸びる
+tl.to("#deco-line", {
+  width: 300,
+  duration: 0.8,
+  ease: "power3.out"
+}, 0.3);
+
+// ヘッダーがフェードイン
+tl.to("#header", {
+  opacity: 1,
+  y: 0,
+  duration: 0.5
+}, 0.2);
+
+tl.from("#header", {
+  y: -20,
+  duration: 0.5,
+  ease: "power2.out"
+}, 0.2);
+
+// タグからタイトルが展開
+tl.to("#title-area", { opacity: 1, duration: 0.1 }, 0.4);
+
+tl.from("#title-tag", {
+  opacity: 0,
+  x: -30,
+  duration: 0.5,
+  ease: "power3.out"
+}, 0.4);
+
+tl.from("#main-title", {
+  opacity: 0,
+  y: 50,
+  duration: 0.8,
+  ease: "power3.out"
+}, 0.7);
+
+tl.from("#description", {
+  opacity: 0,
+  y: 30,
+  duration: 0.6,
+  ease: "power2.out"
+}, 1.2);
+
+// 右パネルがスライドイン
+tl.to("#visual-panel", {
+  opacity: 1,
+  x: 0,
+  duration: 0.8,
+  ease: "power3.out"
+}, 0.6);
+
+// 円が回転
+tl.to("#visual-circle", {
+  rotation: 360,
+  duration: 20,
+  repeat: -1,
+  ease: "none"
+}, 1);
+
+// フィーチャー行が順番にフェードイン
+tl.from("#f1", { opacity: 0, x: 30, duration: 0.5, ease: "power2.out" }, 1);
+tl.from("#f2", { opacity: 0, x: 30, duration: 0.5, ease: "power2.out" }, 1.2);
+tl.from("#f3", { opacity: 0, x: 30, duration: 0.5, ease: "power2.out" }, 1.4);
+
+// 統計数字がカウントアップ
+tl.to("#stats", { opacity: 1, duration: 0.1 }, 1.5);
+tl.from("#stats", { y: 30, opacity: 0, duration: 0.6 }, 1.5);
+
+const countUp = (id, target, start, duration) => {
+  tl.to({}, {
+    duration: duration,
+    onUpdate: function() {
+      const progress = this.progress();
+      const current = Math.floor(progress * target);
+      document.getElementById(id).textContent = current.toLocaleString();
+    }
+  }, start);
+};
+
+countUp("stat1", 500, 2, 2);
+countUp("stat2", 98, 2.2, 1.5);
+countUp("stat3", 10, 2.4, 1.5);
+
+// ウォーターマーク
+tl.to("#watermark", { opacity: 1, duration: 0.5 }, 1);
+
+// 登録
+window.__timelines = window.__timelines || {};
+window.__timelines["presentation"] = tl;
+</script>
+</body>
+</html>

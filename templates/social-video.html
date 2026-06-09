@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>SNS縦型動画テンプレート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  /* 背景グラデーション */
+  #bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  }
+
+  /* 背景の光のエフェクト */
+  #light-orb {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* グリッドライン */
+  #grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+
+  /* パーティクル */
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+  }
+
+  /* ロゴ・ブランドエリア */
+  #brand {
+    position: absolute;
+    top: 140px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    opacity: 0;
+  }
+
+  #brand-tag {
+    display: inline-block;
+    padding: 8px 28px;
+    border: 1px solid rgba(99, 102, 241, 0.6);
+    border-radius: 100px;
+    color: #a5b4fc;
+    font-size: 28px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* メインビジュアルエリア */
+  #visual {
+    position: absolute;
+    top: 380px;
+    left: 60px;
+    right: 60px;
+    height: 900px;
+    border-radius: 30px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  #visual-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  #visual-icon {
+    font-size: 180px;
+    line-height: 1;
+  }
+
+  #visual-label {
+    font-size: 36px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.1em;
+  }
+
+  /* テキストコンテンツ */
+  #content {
+    position: absolute;
+    bottom: 300px;
+    left: 60px;
+    right: 60px;
+    opacity: 0;
+  }
+
+  #main-title {
+    font-size: 88px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  #main-title span {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  #sub-text {
+    margin-top: 30px;
+    font-size: 38px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+  }
+
+  /* CTAボタン */
+  #cta {
+    position: absolute;
+    bottom: 160px;
+    left: 60px;
+    right: 60px;
+    opacity: 0;
+  }
+
+  #cta-button {
+    display: block;
+    padding: 44px 60px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 20px;
+    text-align: center;
+    font-size: 44px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.05em;
+  }
+
+  /* 下部インジケーター */
+  #indicator {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+  }
+
+  .dot.active {
+    width: 40px;
+    border-radius: 6px;
+    background: #667eea;
+  }
+</style>
+</head>
+<body>
+
+<!-- Hyperframes コンポジション定義 -->
+<div id="stage"
+     data-composition-id="social-video"
+     data-start="0"
+     data-width="1080"
+     data-height="1920">
+
+  <!-- レイヤー1: 背景 -->
+  <div id="bg" data-start="0" data-duration="15">
+    <div id="light-orb"></div>
+    <div id="grid"></div>
+  </div>
+
+  <!-- パーティクル（複数） -->
+  <div class="particle" id="p1" style="top:20%;left:15%" data-start="0" data-duration="15"></div>
+  <div class="particle" id="p2" style="top:35%;left:80%" data-start="0" data-duration="15"></div>
+  <div class="particle" id="p3" style="top:60%;left:25%" data-start="0" data-duration="15"></div>
+  <div class="particle" id="p4" style="top:75%;left:70%" data-start="0" data-duration="15"></div>
+  <div class="particle" id="p5" style="top:10%;left:55%" data-start="0" data-duration="15"></div>
+
+  <!-- レイヤー2: ブランドタグ -->
+  <div id="brand" data-start="0.3" data-duration="14.7">
+    <span id="brand-tag">NEW RELEASE</span>
+  </div>
+
+  <!-- レイヤー3: メインビジュアル -->
+  <div id="visual" data-start="0.5" data-duration="14.5">
+    <div id="visual-inner">
+      <div id="visual-icon">✨</div>
+      <div id="visual-label">PRODUCT IMAGE</div>
+    </div>
+  </div>
+
+  <!-- レイヤー4: テキストコンテンツ -->
+  <div id="content" data-start="1.5" data-duration="12">
+    <h1 id="main-title">新製品<br><span>ついに</span><br>発売！</h1>
+    <p id="sub-text">待望の新シリーズが<br>いよいよ登場します</p>
+  </div>
+
+  <!-- レイヤー5: CTAボタン -->
+  <div id="cta" data-start="2.5" data-duration="11">
+    <div id="cta-button">今すぐチェック →</div>
+  </div>
+
+  <!-- レイヤー6: インジケーター -->
+  <div id="indicator" data-start="3" data-duration="11">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// GSAP アニメーション定義
+// Hyperframes は paused: true のタイムラインを seekして録画する
+// ─────────────────────────────────────────────────────────────
+
+const tl = gsap.timeline({ paused: true });
+
+// 背景の光が広がる
+tl.from("#light-orb", {
+  scale: 0,
+  opacity: 0,
+  duration: 2,
+  ease: "power2.out"
+}, 0);
+
+// パーティクルがランダムに浮遊
+["#p1","#p2","#p3","#p4","#p5"].forEach((id, i) => {
+  tl.from(id, {
+    opacity: 0,
+    y: 30,
+    duration: 1,
+    ease: "power2.out"
+  }, 0.2 * i);
+
+  tl.to(id, {
+    y: -40,
+    duration: 4 + i,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut"
+  }, 0.5);
+});
+
+// ブランドタグがフェードイン
+tl.to("#brand", {
+  opacity: 1,
+  y: 0,
+  duration: 0.6,
+  ease: "power3.out"
+}, 0.3);
+
+// ビジュアルがスケールアップ
+tl.to("#visual", {
+  opacity: 1,
+  scale: 1,
+  duration: 0.8,
+  ease: "back.out(1.2)"
+}, 0.5);
+
+// ビジュアルが微妙に浮遊
+tl.to("#visual", {
+  y: -15,
+  duration: 3,
+  repeat: -1,
+  yoyo: true,
+  ease: "sine.inOut"
+}, 2);
+
+// テキストが下からスライドイン
+tl.to("#content", {
+  opacity: 1,
+  duration: 0.5
+}, 1.5);
+
+tl.from("#main-title", {
+  y: 60,
+  opacity: 0,
+  duration: 0.7,
+  ease: "power3.out"
+}, 1.5);
+
+tl.from("#sub-text", {
+  y: 40,
+  opacity: 0,
+  duration: 0.6,
+  ease: "power3.out"
+}, 2);
+
+// CTAボタンがバウンスイン
+tl.to("#cta", {
+  opacity: 1,
+  duration: 0.1
+}, 2.5);
+
+tl.from("#cta-button", {
+  scale: 0.8,
+  opacity: 0,
+  duration: 0.6,
+  ease: "back.out(1.5)"
+}, 2.5);
+
+// CTAが軽くパルス
+tl.to("#cta-button", {
+  scale: 1.02,
+  duration: 0.8,
+  repeat: -1,
+  yoyo: true,
+  ease: "sine.inOut"
+}, 5);
+
+// インジケーターがフェードイン
+tl.to("#indicator", {
+  opacity: 1,
+  duration: 0.5,
+  ease: "power2.out"
+}, 3);
+
+// Hyperframes に登録
+window.__timelines = window.__timelines || {};
+window.__timelines["social-video"] = tl;
+</script>
+</body>
+</html>

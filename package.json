@@ -1,0 +1,17 @@
+{
+  "name": "auto-video-generator",
+  "version": "1.0.0",
+  "description": "Claude Code + Hyperframes + Lovart APIによる自動動画生成",
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "preview": "npx hyperframes preview",
+    "render": "npx hyperframes render",
+    "generate": "node scripts/lovart.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
