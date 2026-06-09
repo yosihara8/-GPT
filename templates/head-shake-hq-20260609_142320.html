@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>首振り瞬き 高品質版</title>
+<script src="./gsap.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: #0d0d0d;
+  }
+
+  /* ── ソフトな背景グラデーション ── */
+  #bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 120% 100% at 50% 110%,
+      #2a1a10 0%, #180d08 40%, #0d0a12 100%);
+  }
+
+  /* 左右の柔らかいハイライト */
+  #bg::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: -200px;
+    width: 800px; height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,200,150,0.06) 0%, transparent 70%);
+  }
+
+  #bg::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(150,150,255,0.04) 0%, transparent 70%);
+  }
+
+  /* キャラクター描画キャンバス */
+  #char-canvas {
+    position: absolute;
+    left: 555px;
+    top: 0;
+    width: 810px;
+    height: 1080px;
+    image-rendering: crisp-edges;
+  }
+
+  /* 非表示のソース画像（Hyperframesの画像読み込み待機用） */
+  #src-img {
+    display: none;
+    position: absolute;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"
+     data-composition-id="head-shake-hq"
+     data-start="0"
+     data-duration="15"
+     data-width="1920"
+     data-height="1080">
+
+  <div id="bg" class="clip" data-start="0" data-duration="15"></div>
+
+  <!-- Hyperframes が画像読み込みを追跡するために必要 -->
+  <img id="src-img" src="./character.png"
+       class="clip" data-start="0" data-duration="15"
+       alt="character">
+
+  <canvas id="char-canvas" width="810" height="1080"
+          class="clip" data-start="0" data-duration="15"></canvas>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  定数・パラメータ
+// ══════════════════════════════════════════════════════
+
+const DURATION = 15;
+const CW = 810, CH = 1080; // Canvas サイズ
+
+// ★ 目の位置パラメータ（実際の画像に合わせて調整）
+//   位置は810x1080に拡大した後の座標
+//   ブラウザのDevToolsで確認しながら微調整してください
+const EYES = {
+  left: {
+    cx: 219, cy: 505,       // 瞳の中心座標
+    rx: 80,  ry: 70,        // 楕円の半径
+    peakOffsetX: 10,        // まつ毛カーブのピーク位置（中心からの右オフセット）
+    lashW: 7,               // まつ毛の太さ
+  },
+  right: {
+    cx: 513, cy: 475,
+    rx: 103, ry: 88,
+    peakOffsetX: 15,
+    lashW: 9,
+  }
+};
+
+// ★ 肌色（画像から採取する色に合わせる）
+const SKIN_COLOR  = '#F2BDA0';
+const SKIN_DARK   = '#E8A882'; // まつ毛際の影色
+
+// ══════════════════════════════════════════════════════
+//  Canvas セットアップ
+// ══════════════════════════════════════════════════════
+
+const canvas = document.getElementById('char-canvas');
+const ctx    = canvas.getContext('2d');
+const img    = document.getElementById('src-img');
+
+// アニメーション状態（GSAPがこれを操作する）
+const S = {
+  headRot: 0,   // 首の傾き (deg) — 負=左, 正=右
+  headX:   0,   // 横方向の移動 (px)
+  headY:   0,   // 縦方向の移動 (px)
+  blinkL:  0,   // 左目まぶた閉度 0〜1
+  blinkR:  0,   // 右目まぶた閉度 0〜1
+  opacity: 0,   // 全体の不透明度
+};
+
+// ══════════════════════════════════════════════════════
+//  メインの描画関数（毎フレーム呼ばれる）
+// ══════════════════════════════════════════════════════
+
+function drawFrame() {
+  ctx.clearRect(0, 0, CW, CH);
+
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, Math.min(1, S.opacity));
+
+  // ── 首振り変換 ──
+  // 支点: 顎あたり（下88%）
+  const pivotX = CW * 0.5 + S.headX;
+  const pivotY = CH * 0.88 + S.headY;
+
+  ctx.translate(pivotX, pivotY);
+
+  // 3D感を出すためのパース変換
+  // 傾くほどX方向に軽くshearし、わずかに縮む
+  const rad    = S.headRot * (Math.PI / 180);
+  const shearX = S.headRot * 0.009;        // 横ずれ（遠近感）
+  const scaleX = 1.0 - Math.abs(S.headRot) * 0.0018; // 横縮み
+
+  ctx.transform(scaleX, 0, shearX, 1, 0, 0);
+  ctx.rotate(rad);
+  ctx.translate(-CW * 0.5, -CH * 0.88);
+
+  // ── キャラクター本体を描画 ──
+  if (img.complete && img.naturalWidth > 0) {
+    ctx.drawImage(img, 0, 0, CW, CH);
+  } else {
+    drawPlaceholder(ctx);
+  }
+
+  // ── まぶたを描画（画像の上にオーバーレイ） ──
+  drawEyelid(ctx, EYES.left,  S.blinkL);
+  drawEyelid(ctx, EYES.right, S.blinkR);
+
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════
+//  アニメ風まぶた描画
+// ══════════════════════════════════════════════════════
+
+function drawEyelid(ctx, eye, progress) {
+  if (progress <= 0.005) return;
+
+  const { cx, cy, rx, ry, peakOffsetX, lashW } = eye;
+  const eyeTop = cy - ry;
+  const eyeBot = cy + ry;
+
+  // まぶたが降りる先（0=全開=eyeTop, 1=全閉=eyeBot+少し）
+  const lidY = eyeTop + (eyeBot - eyeTop + ry * 0.15) * progress;
+
+  ctx.save();
+
+  // 目の楕円でクリップ（まぶたが目の外にはみ出ないよう）
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx + 3, ry + 3, 0, 0, Math.PI * 2);
+  ctx.clip();
+
+  // ── 上まぶたの肌色塗り ──
+  // 上端から lidY まで、底をわずかに曲線にして自然に見せる
+  const skinGrad = ctx.createLinearGradient(cx, eyeTop - 5, cx, lidY);
+  skinGrad.addColorStop(0.00, SKIN_COLOR);
+  skinGrad.addColorStop(0.75, SKIN_COLOR);
+  skinGrad.addColorStop(1.00, SKIN_DARK);
+
+  ctx.beginPath();
+  ctx.moveTo(cx - rx - 4, eyeTop - 4);
+  ctx.lineTo(cx + rx + 4, eyeTop - 4);
+  ctx.lineTo(cx + rx + 4, lidY + ry * 0.35);
+  // 底を自然なカーブに
+  ctx.quadraticCurveTo(cx, lidY + ry * 0.52, cx - rx - 4, lidY + ry * 0.35);
+  ctx.closePath();
+  ctx.fillStyle = skinGrad;
+  ctx.fill();
+
+  // ── アニメ風まつ毛ライン ──
+  // 内側から始まり、外側に向けてカーブして少し下がる
+  // まぶたが降りるにつれてラインも下に移動する
+  const lashTopY = lidY;
+  const pkX      = cx + peakOffsetX;     // カーブのピーク（外寄り）
+  const pkY      = lashTopY - ry * 0.08; // ピークは少し上
+
+  ctx.beginPath();
+  ctx.moveTo(cx - rx * 0.95, lashTopY + ry * 0.04);   // 内端
+  ctx.bezierCurveTo(
+    cx - rx * 0.3,  lashTopY - ry * 0.04,  // cp1: 内側上がり
+    pkX,            pkY,                    // cp2: ピーク
+    cx + rx * 0.95, lashTopY + ry * 0.10   // 外端: 少し下がる
+  );
+
+  // まつ毛の太さを閉度に応じて変える（閉じるほど太く見える）
+  const lw = lashW * (0.6 + 0.4 * progress);
+  ctx.strokeStyle = '#0d0d0d';
+  ctx.lineWidth   = lw;
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+
+  // まつ毛に少し立体感（軽いぼかし）
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+  ctx.lineWidth   = lw + 3;
+  ctx.filter      = 'blur(2px)';
+  ctx.stroke();
+  ctx.filter      = 'none';
+
+  // ── 下まぶた（わずかに動く、アニメの特徴） ──
+  const lowerProgress = progress * 0.18;
+  const lowerY = eyeBot - ry * 0.2 * lowerProgress;
+
+  if (lowerProgress > 0.02) {
+    ctx.beginPath();
+    ctx.moveTo(cx - rx * 0.9, lowerY);
+    ctx.bezierCurveTo(
+      cx - rx * 0.4, lowerY - ry * 0.05,
+      cx + rx * 0.2, lowerY - ry * 0.03,
+      cx + rx * 0.9, lowerY
+    );
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = lashW * 0.5;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════════════════
+//  プレースホルダー（character.png がない場合）
+// ══════════════════════════════════════════════════════
+
+function drawPlaceholder(ctx) {
+  // 背景（肌色）
+  ctx.fillStyle = '#f5f5f5';
+  ctx.fillRect(0, 0, CW, CH);
+
+  // 顔の輪郭
+  const faceGrad = ctx.createRadialGradient(CW/2, CH*0.47, 50, CW/2, CH*0.5, 240);
+  faceGrad.addColorStop(0, '#F8CBA8');
+  faceGrad.addColorStop(1, '#F0B88A');
+  ctx.beginPath();
+  ctx.ellipse(CW/2, CH*0.48, 240, 290, 0, 0, Math.PI*2);
+  ctx.fillStyle = faceGrad;
+  ctx.fill();
+
+  // 黒髪
+  ctx.beginPath();
+  ctx.ellipse(CW/2, CH*0.38, 295, 340, 0, 0, Math.PI*2);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fill();
+
+  // 前髪
+  ctx.beginPath();
+  ctx.ellipse(CW/2, CH*0.31, 280, 110, 0, 0, Math.PI);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fill();
+
+  // 左目
+  ctx.beginPath();
+  ctx.ellipse(EYES.left.cx, EYES.left.cy, EYES.left.rx, EYES.left.ry, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.ellipse(EYES.left.cx+5, EYES.left.cy+3, 48, 52, 0, 0, Math.PI*2);
+  ctx.fillStyle = '#8B6914';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.ellipse(EYES.left.cx+5, EYES.left.cy+3, 28, 30, 0, 0, Math.PI*2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.ellipse(EYES.left.cx-12, EYES.left.cy-14, 11, 9, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+
+  // 右目
+  ctx.beginPath();
+  ctx.ellipse(EYES.right.cx, EYES.right.cy, EYES.right.rx, EYES.right.ry, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.ellipse(EYES.right.cx+6, EYES.right.cy+4, 62, 66, 0, 0, Math.PI*2);
+  ctx.fillStyle = '#8B6914';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.ellipse(EYES.right.cx+6, EYES.right.cy+4, 36, 38, 0, 0, Math.PI*2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.ellipse(EYES.right.cx-15, EYES.right.cy-18, 14, 11, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+
+  // メガネ（左）
+  ctx.beginPath();
+  ctx.arc(EYES.left.cx, EYES.left.cy, 94, 0, Math.PI*2);
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 5;
+  ctx.fill();
+  ctx.stroke();
+
+  // メガネ（右）
+  ctx.beginPath();
+  ctx.arc(EYES.right.cx, EYES.right.cy, 115, 0, Math.PI*2);
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 5;
+  ctx.fill();
+  ctx.stroke();
+
+  // ノーズブリッジ
+  ctx.beginPath();
+  ctx.moveTo(EYES.left.cx + 94, EYES.left.cy - 5);
+  ctx.quadraticCurveTo(CW*0.5, EYES.left.cy - 20, EYES.right.cx - 115, EYES.right.cy - 8);
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // 鼻
+  ctx.beginPath();
+  ctx.ellipse(CW/2 + 5, CH*0.60, 13, 9, 0, 0, Math.PI*2);
+  ctx.fillStyle = '#e8a882';
+  ctx.fill();
+
+  // 口
+  ctx.beginPath();
+  ctx.moveTo(CW/2 - 55, CH*0.69);
+  ctx.quadraticCurveTo(CW/2, CH*0.715, CW/2 + 55, CH*0.69);
+  ctx.strokeStyle = '#c88060';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+}
+
+// ══════════════════════════════════════════════════════
+//  GSAP タイムライン
+// ══════════════════════════════════════════════════════
+
+const tl = gsap.timeline({ paused: true });
+
+// ★ キー: タイムラインが更新されるたびに drawFrame() を呼ぶ
+//    Hyperframes の seek にも対応
+tl.eventCallback("onUpdate", drawFrame);
+
+gsap.set(S, { opacity: 0 });
+
+// ── 瞬きヘルパー ──
+function blink(t, speed) {
+  speed = speed || 1;
+  const c = 0.065 / speed;
+  const h = 0.035 / speed;
+  const o = 0.13  / speed;
+  tl.to(S, { blinkL: 1, blinkR: 1, duration: c, ease: "power3.in"  }, t);
+  tl.to(S, { blinkL: 0, blinkR: 0, duration: o, ease: "power2.out" }, t + c + h);
+}
+
+// ── 首振りヘルパー（自然な減衰振動） ──
+function headShake(t, amp) {
+  amp = amp || 12;
+  // 減衰しながら左右に振れる
+  const swings = [
+    { d: -1, r: 1.00 },
+    { d: +1, r: 0.91 },
+    { d: -1, r: 0.81 },
+    { d: +1, r: 0.69 },
+    { d: -1, r: 0.54 },
+    { d: +1, r: 0.38 },
+  ];
+  const halfDur = 0.165;
+  let cur = t;
+
+  for (const { d, r } of swings) {
+    const rot  = d * amp * r;
+    const xOff = rot * 2.0;
+    tl.to(S, {
+      headRot: rot, headX: xOff,
+      duration: halfDur, ease: "power2.inOut"
+    }, cur);
+    cur += halfDur;
+  }
+
+  // バネで中央に戻る（elastic で自然なオーバーシュート）
+  tl.to(S, {
+    headRot: 0, headX: 0,
+    duration: 0.38, ease: "elastic.out(1.0, 0.55)"
+  }, cur);
+
+  return cur + 0.38;
+}
+
+// ── 微細なアイドルボブ ──
+function idleBob(t, dur) {
+  tl.to(S, {
+    headY: -7,
+    duration: dur / 2, repeat: 1, yoyo: true,
+    ease: "sine.inOut"
+  }, t);
+}
+
+// ════ シーン構成 ════
+
+// 0.0s: フェードイン
+tl.to(S, { opacity: 1, duration: 0.8, ease: "power2.out" }, 0);
+
+// 0.9s: 登場直後の自然な瞬き
+blink(0.9);
+
+// 1.6s: 首振り第1回
+let nxt = headShake(1.6, 12);
+
+// 振り終わり直後に瞬き
+blink(nxt + 0.08);
+
+// アイドル
+idleBob(nxt + 0.6, 2.2);
+blink(nxt + 1.8);
+idleBob(nxt + 2.8, 1.8);
+
+// 7.2s: 首振り第2回（少し強め）
+nxt = headShake(7.2, 13);
+
+// ゆっくり目の瞬き（眠そう）
+blink(nxt + 0.25, 0.65);
+
+idleBob(nxt + 1.0, 2.0);
+blink(nxt + 2.2);
+idleBob(nxt + 3.2, 1.6);
+
+// 13.1s: 首振り第3回（小さめ）
+nxt = headShake(13.1, 9);
+
+// 最後の瞬き
+blink(14.6);
+
+// ════ Hyperframes 登録 ════
+window.__timelines = window.__timelines || {};
+window.__timelines["head-shake-hq"] = tl;
+
+// 初期フレームを描画（読み込み完了時）
+if (img.complete) {
+  drawFrame();
+} else {
+  img.addEventListener('load', drawFrame);
+}
+</script>
+</body>
+</html>
