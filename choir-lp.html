@@ -758,11 +758,13 @@ footer a { color: var(--accent); }
       </div>
     </div>
 
-    <!-- Unsplash image placeholder -->
+    <!-- Flyer image -->
     <div class="fv-img-wrap">
-      <div class="fv-img-placeholder">
+      <img src="images/flyer.jpg" alt="男声合唱団 ジョイフル・スーベニール チラシ" style="width:100%;height:auto;display:block;"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+      <div class="fv-img-placeholder" style="display:none;">
         <i class="fa-solid fa-users"></i>
-        <p>推奨画像：男声合唱団が舞台で歌う様子<br><small>Unsplash キーワード：「male choir stage concert hall japan」</small></p>
+        <p>チラシ画像（images/flyer.jpg）を配置してください</p>
       </div>
     </div>
   </div>
@@ -1066,7 +1068,7 @@ footer a { color: var(--accent); }
         <div class="step-content">
           <div class="step-num-label">STEP 02</div>
           <div class="step-title">ご連絡・日程調整</div>
-          <p class="step-desc">担当者よりご連絡し、見学日を一緒に決めます。毎月8日が練習日（18:00〜20:00）です。</p>
+          <p class="step-desc">担当者よりご連絡し、見学日を一緒に決めます。練習は月2回（18:00〜20:00）。場所は福岡市博多区東光2-7-25　正興電機製作所本社ビル 別館8階ホールです。</p>
         </div>
       </div>
 
@@ -1129,7 +1131,7 @@ footer a { color: var(--accent); }
           <i class="fa-solid fa-chevron-down faq-toggle"></i>
         </div>
         <div class="faq-a">
-          <p>通常は月2回（第2・第4月曜日など）、18:00〜20:00の2時間です。福岡市内の公民館ホールが主な練習場所です。ご都合がつかない日はお休みいただいて構いません。</p>
+          <p>月2回、18:00〜20:00の2時間です。練習場所は福岡市博多区東光2-7-25　正興電機製作所本社ビル 別館8階ホールです。ご都合がつかない日はお休みいただいて構いません。</p>
         </div>
       </div>
 
@@ -1176,6 +1178,45 @@ footer a { color: var(--accent); }
     </a>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════
+     Practice Location
+══════════════════════════════════════ -->
+<section class="section section-alt" id="location">
+  <div class="container text-center">
+    <div class="sec-label">練習場所</div>
+    <h2 class="h-sub">アクセス</h2>
+    <div style="max-width:560px;margin:32px auto 0;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:32px 28px;box-shadow:var(--shadow-card);text-align:left;">
+      <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px;">
+        <div style="width:46px;height:46px;flex-shrink:0;background:var(--accent-light);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <i class="fa-solid fa-location-dot" style="color:var(--accent);font-size:22px;"></i>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">練習場所</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);line-height:1.6;">
+            正興電機製作所本社ビル<br>別館 8階ホール
+          </div>
+          <div style="font-size:14px;color:var(--text-sub);margin-top:4px;">
+            〒812-0053　福岡市博多区東光2-7-25
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px;">
+        <div style="width:46px;height:46px;flex-shrink:0;background:var(--accent-light);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+          <i class="fa-solid fa-clock" style="color:var(--accent);font-size:22px;"></i>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">練習日・時間</div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);">月2回 18:00 〜 20:00</div>
+        </div>
+      </div>
+      <a href="https://maps.google.com/maps?q=福岡市博多区東光2-7-25" target="_blank" rel="noopener"
+        style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:11px 22px;background:var(--accent-light);border:1.5px solid var(--accent);border-radius:999px;color:var(--accent-dark);font-size:13px;font-weight:700;text-decoration:none;">
+        <i class="fa-solid fa-map"></i> Google マップで見る
+      </a>
+    </div>
+  </div>
+</section>
 
 <!-- ══════════════════════════════════════
      Final CTA & Form
@@ -1236,12 +1277,18 @@ footer a { color: var(--accent); }
 
     <!-- Tel -->
     <div class="contact-line" style="margin-top:40px;">
-      <p style="margin-bottom:8px;">お電話でのお問い合わせ・見学申込</p>
-      <div class="tel-big">
+      <p style="margin-bottom:16px;">お電話でのお問い合わせ・見学申込</p>
+      <div class="tel-big" style="margin-bottom:10px;">
         <i class="fa-solid fa-phone"></i>
-        <a href="tel:0702771-0165">070-2771-0165</a>
+        <a href="tel:090-4588-0395">090-4588-0395</a>
       </div>
-      <p style="font-size:13px;color:var(--text-muted);margin-top:6px;">受付時間：月〜土 18:00〜21:00（担当：澤隈）</p>
+      <p style="font-size:14px;color:var(--text-sub);margin-bottom:16px;">（担当：近藤）</p>
+      <div class="tel-big" style="margin-bottom:10px;">
+        <i class="fa-solid fa-phone"></i>
+        <a href="tel:080-3187-0647">080-3187-0647</a>
+      </div>
+      <p style="font-size:14px;color:var(--text-sub);margin-bottom:16px;">（担当：小池）</p>
+      <p style="font-size:13px;color:var(--text-muted);">受付時間：月〜土 18:00〜21:00</p>
     </div>
   </div>
 </section>
@@ -1284,7 +1331,8 @@ footer a { color: var(--accent); }
     男声合唱団 ジョイフル・スーベニール
   </div>
   <p style="margin-bottom:8px;">福岡市博多区（小笠原正規ホール等） ｜ 創設1998年</p>
-  <p>お問い合わせ：<a href="tel:0702771-0165">070-2771-0165</a>（担当：澤隈） ／ 小笠原 090-3187-0617</p>
+  <p>お問い合わせ：近藤 <a href="tel:090-4588-0395">090-4588-0395</a> ／ 小池 <a href="tel:080-3187-0647">080-3187-0647</a></p>
+  <p style="margin-top:6px;">練習場所：福岡市博多区東光2-7-25　正興電機製作所本社ビル 別館8階ホール</p>
   <p style="margin-top:16px;font-size:11px;opacity:0.5;">© 2025 男声合唱団 ジョイフル・スーベニール. All Rights Reserved.</p>
 </footer>
 
