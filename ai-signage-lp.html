@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AIサイネージ動画広告 × クーポン × NFT | 広告を資産に変える新しい革命</title>
+<meta name="description" content="元NHKディレクター監修×AI活用で制作する魅力的な動画広告。クーポン×NFTで広告が永続的な資産に。売上20%以上アップ実績。毎月3社限定受付。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+/* =============================================
+   CSS VARIABLES & RESET
+   ============================================= */
+:root {
+  --primary: #00C9FF;
+  --primary-dark: #0099CC;
+  --secondary: #7C3AED;
+  --secondary-dark: #5B21B6;
+  --cta: #FF6B00;
+  --cta-hover: #E55A00;
+  --cta-light: #FFF3E8;
+  --gold: #FFB800;
+  --gold-dark: #E6A500;
+  --gradient-hero: linear-gradient(135deg, #0F0C29 0%, #0D1B4B 40%, #1A0A3D 70%, #0F0C29 100%);
+  --gradient-aurora: linear-gradient(135deg, #00C9FF 0%, #7C3AED 50%, #FF6B9D 100%);
+  --gradient-cta: linear-gradient(135deg, #FF6B00 0%, #FF9500 100%);
+  --gradient-gold: linear-gradient(135deg, #FFB800 0%, #FF6B00 100%);
+  --gradient-section: linear-gradient(180deg, #F0FAFF 0%, #FFFFFF 100%);
+  --bg: #FFFFFF;
+  --bg-light: #F0FAFF;
+  --bg-dark: #0F0C29;
+  --text: #0F172A;
+  --text-sub: #475569;
+  --text-muted: #94A3B8;
+  --text-white: #FFFFFF;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.10);
+  --shadow-lg: 0 20px 48px rgba(0,0,0,0.15);
+  --shadow-glow: 0 0 40px rgba(0,201,255,0.25);
+  --shadow-cta: 0 8px 28px rgba(255,107,0,0.35);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
+  --radius-xl: 40px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { text-decoration: none; color: inherit; }
+
+/* =============================================
+   UTILITY CLASSES
+   ============================================= */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.container-sm { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+.text-center { text-align: center; }
+.text-gradient {
+  background: var(--gradient-aurora);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.section { padding: 88px 0; }
+.section-light { background: var(--bg-light); }
+.section-white { background: var(--bg); }
+.section-dark { background: var(--bg-dark); }
+
+.section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,201,255,0.10);
+  border: 1px solid rgba(0,201,255,0.30);
+  color: var(--primary-dark);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  padding: 6px 16px; border-radius: 999px;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.section-title {
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 900; line-height: 1.25;
+  margin-bottom: 16px;
+}
+.section-subtitle {
+  font-size: 16px; color: var(--text-sub);
+  line-height: 1.8; max-width: 600px; margin: 0 auto 56px;
+}
+
+/* =============================================
+   STICKY HEADER
+   ============================================= */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(15,12,41,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,201,255,0.15);
+  padding: 14px 0;
+  transition: all 0.3s;
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-white); font-weight: 700; font-size: 15px;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--gradient-aurora);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-icon i { color: #fff; font-size: 16px; }
+.header-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gradient-cta);
+  color: #fff; font-size: 13px; font-weight: 700;
+  padding: 10px 20px; border-radius: 999px;
+  box-shadow: var(--shadow-cta);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.header-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(255,107,0,0.45); }
+
+/* =============================================
+   HERO / FIRST VIEW
+   ============================================= */
+.hero {
+  background: var(--gradient-hero);
+  min-height: 100vh;
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+  padding: 120px 0 80px;
+}
+.hero-aurora-1 {
+  position: absolute; top: -100px; left: -100px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,201,255,0.18) 0%, transparent 65%);
+  border-radius: 50%; animation: float1 8s ease-in-out infinite;
+}
+.hero-aurora-2 {
+  position: absolute; bottom: -80px; right: -80px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(124,58,237,0.20) 0%, transparent 65%);
+  border-radius: 50%; animation: float2 10s ease-in-out infinite;
+}
+.hero-aurora-3 {
+  position: absolute; top: 40%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px; height: 300px;
+  background: radial-gradient(ellipse, rgba(255,107,157,0.10) 0%, transparent 70%);
+  border-radius: 50%;
+}
+@keyframes float1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+@keyframes float2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(20px); } }
+
+.hero-inner { position: relative; z-index: 2; text-align: center; }
+
+.hero-badge-row {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  margin-bottom: 32px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.20);
+  color: rgba(255,255,255,0.90);
+  font-size: 12px; font-weight: 600;
+  padding: 7px 16px; border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+.hero-badge.gold {
+  background: rgba(255,184,0,0.15);
+  border-color: rgba(255,184,0,0.40);
+  color: #FFD966;
+}
+.hero-badge i { font-size: 11px; }
+
+.hero-title {
+  font-size: clamp(32px, 5.5vw, 64px);
+  font-weight: 900; line-height: 1.15;
+  color: #fff; margin-bottom: 24px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.30);
+}
+.hero-title .line-glow {
+  display: block;
+  background: var(--gradient-aurora);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(0,201,255,0.5));
+}
+
+.hero-subtitle {
+  font-size: clamp(14px, 2vw, 18px);
+  color: rgba(255,255,255,0.80);
+  max-width: 640px; margin: 0 auto 40px;
+  line-height: 1.8;
+}
+
+.hero-cta-group {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;
+  margin-bottom: 56px;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--gradient-cta);
+  color: #fff; font-size: 17px; font-weight: 700;
+  padding: 18px 40px; border-radius: 999px;
+  box-shadow: var(--shadow-cta);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none; cursor: pointer; font-family: inherit;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(255,107,0,0.50); }
+.btn-primary:active { transform: translateY(-1px); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.10);
+  border: 2px solid rgba(255,255,255,0.30);
+  color: #fff; font-size: 16px; font-weight: 600;
+  padding: 16px 36px; border-radius: 999px;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+  cursor: pointer; font-family: inherit;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.20); border-color: rgba(255,255,255,0.50); transform: translateY(-2px); }
+
+.hero-micro {
+  display: flex; align-items: center; gap: 6px;
+  justify-content: center;
+  color: rgba(255,255,255,0.55); font-size: 12px;
+}
+.hero-micro i { color: #4ADE80; }
+
+.hero-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 2px; max-width: 600px; margin: 56px auto 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--radius);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+.hero-stat {
+  padding: 28px 20px; text-align: center;
+  background: rgba(255,255,255,0.03);
+}
+.hero-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.10); }
+.hero-stat-num {
+  font-size: clamp(28px, 4vw, 40px); font-weight: 900;
+  background: var(--gradient-aurora);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 4px;
+}
+.hero-stat-label { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.4; }
+
+/* =============================================
+   TRUST BAR
+   ============================================= */
+.trust-bar {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+}
+.trust-bar-inner {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 32px;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-sub); font-size: 13px; font-weight: 600;
+}
+.trust-item i { color: var(--primary); font-size: 18px; }
+
+/* =============================================
+   PAIN SECTION
+   ============================================= */
+.pain-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px; margin-bottom: 48px;
+}
+.pain-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: flex; gap: 18px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.pain-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0,201,255,0.30);
+}
+.pain-icon {
+  width: 52px; height: 52px; flex-shrink: 0;
+  background: linear-gradient(135deg, #FFF3E8, #FFE4CC);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pain-icon i { font-size: 22px; color: var(--cta); }
+.pain-content h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.pain-content p { font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+
+.pain-bottom {
+  text-align: center;
+  background: linear-gradient(135deg, #FFF8F0, #FFF3E8);
+  border: 2px solid rgba(255,107,0,0.15);
+  border-radius: var(--radius-lg);
+  padding: 32px 40px;
+}
+.pain-bottom p {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  margin-bottom: 8px;
+}
+.pain-bottom span { font-size: 14px; color: var(--text-sub); }
+
+/* =============================================
+   SOLUTION SECTION
+   ============================================= */
+.solution-hero {
+  text-align: center; margin-bottom: 64px;
+}
+.solution-image-wrap {
+  position: relative;
+  max-width: 800px; margin: 0 auto 64px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.solution-image-placeholder {
+  width: 100%; height: 420px;
+  background: var(--gradient-hero);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+  color: rgba(255,255,255,0.7); font-size: 14px;
+}
+.solution-image-placeholder i { font-size: 64px; color: var(--primary); opacity: 0.8; }
+.solution-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(15,12,41,0.90) 0%, transparent 100%);
+  padding: 32px;
+}
+.solution-overlay-text {
+  color: #fff; font-size: 18px; font-weight: 700;
+  line-height: 1.5;
+}
+
+.reasons-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+.reason-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.reason-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: var(--gradient-aurora);
+}
+.reason-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
+.reason-icon {
+  width: 72px; height: 72px; margin: 0 auto 20px;
+  background: linear-gradient(135deg, #E0F7FF, #C5EFFF);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+.reason-icon i { font-size: 30px; color: var(--primary-dark); }
+.reason-num {
+  position: absolute; top: 16px; right: 20px;
+  font-size: 48px; font-weight: 900;
+  color: rgba(0,201,255,0.08);
+  line-height: 1;
+}
+.reason-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.reason-card p { font-size: 13px; color: var(--text-sub); line-height: 1.75; }
+
+/* =============================================
+   BEFORE/AFTER SECTION
+   ============================================= */
+.ba-grid { display: flex; flex-direction: column; gap: 32px; }
+.ba-row {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 24px; align-items: center;
+}
+.ba-before, .ba-after {
+  border-radius: var(--radius);
+  padding: 28px 32px;
+}
+.ba-before {
+  background: linear-gradient(135deg, #FFF5F5, #FFE8E8);
+  border: 1.5px solid rgba(239,68,68,0.20);
+}
+.ba-after {
+  background: linear-gradient(135deg, #F0FFF4, #E0FFE8);
+  border: 1.5px solid rgba(34,197,94,0.25);
+}
+.ba-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ba-before .ba-label { color: #EF4444; }
+.ba-after .ba-label { color: #16A34A; }
+.ba-text { font-size: 17px; font-weight: 700; line-height: 1.5; }
+.ba-before .ba-text { color: #991B1B; }
+.ba-after .ba-text { color: #15803D; }
+.ba-sub { font-size: 13px; color: var(--text-sub); margin-top: 8px; line-height: 1.6; }
+.ba-arrow {
+  width: 52px; height: 52px; flex-shrink: 0;
+  background: var(--gradient-aurora);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-glow);
+}
+.ba-arrow i { color: #fff; font-size: 20px; }
+
+/* =============================================
+   TESTIMONIALS
+   ============================================= */
+.testimonials-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px; margin-bottom: 48px;
+}
+.testimonial-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.testimonial-quote {
+  font-size: 56px; line-height: 1;
+  background: var(--gradient-aurora);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900; margin-bottom: -8px;
+}
+.testimonial-text {
+  font-size: 15px; line-height: 1.8;
+  color: var(--text); margin-bottom: 24px;
+  font-style: italic;
+}
+.testimonial-author {
+  display: flex; align-items: center; gap: 14px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.author-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--gradient-aurora);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.author-avatar i { color: #fff; font-size: 20px; }
+.author-name { font-size: 14px; font-weight: 700; }
+.author-role { font-size: 12px; color: var(--text-sub); }
+.stars { color: #FFB800; font-size: 14px; margin-bottom: 4px; }
+
+.results-bar {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2px;
+  background: var(--gradient-hero);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.result-item {
+  padding: 36px 28px; text-align: center;
+  background: rgba(255,255,255,0.04);
+}
+.result-num {
+  font-size: 44px; font-weight: 900;
+  background: var(--gradient-aurora);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 8px;
+}
+.result-label { font-size: 13px; color: rgba(255,255,255,0.65); }
+
+/* =============================================
+   MID CTA SECTION
+   ============================================= */
+.mid-cta {
+  background: var(--gradient-hero);
+  padding: 80px 0;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.mid-cta::before {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,201,255,0.10) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.mid-cta .container { position: relative; z-index: 1; }
+.mid-cta-title {
+  font-size: clamp(24px, 4vw, 38px); font-weight: 900;
+  color: #fff; margin-bottom: 12px;
+}
+.mid-cta-sub { font-size: 15px; color: rgba(255,255,255,0.70); margin-bottom: 32px; }
+.mid-cta-note {
+  margin-top: 16px; font-size: 12px;
+  color: rgba(255,255,255,0.50);
+  display: flex; align-items: center; gap: 6px; justify-content: center;
+}
+.mid-cta-note i { color: #4ADE80; }
+
+/* =============================================
+   HOW IT WORKS
+   ============================================= */
+.steps-track {
+  position: relative;
+  padding: 0 0 0 0;
+}
+.steps-track::before {
+  content: ''; position: absolute;
+  left: 50%; top: 32px;
+  width: 2px; height: calc(100% - 64px);
+  background: linear-gradient(to bottom, var(--primary), var(--secondary));
+  transform: translateX(-50%);
+}
+.step-row {
+  display: grid; grid-template-columns: 1fr 80px 1fr;
+  gap: 24px; align-items: flex-start;
+  margin-bottom: 40px;
+  position: relative;
+}
+.step-row:last-child { margin-bottom: 0; }
+.step-content-left { text-align: right; padding-top: 12px; }
+.step-content-right { padding-top: 12px; }
+.step-circle {
+  width: 64px; height: 64px;
+  background: var(--gradient-aurora);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-glow);
+  flex-shrink: 0; align-self: start;
+  position: relative; z-index: 1;
+  margin: 0 auto;
+}
+.step-circle i { color: #fff; font-size: 24px; }
+.step-num-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--primary-dark); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.step-desc { font-size: 13px; color: var(--text-sub); line-height: 1.75; }
+.step-empty { padding-top: 12px; }
+
+/* =============================================
+   PRICING
+   ============================================= */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px; align-items: start;
+}
+.pricing-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  position: relative; overflow: hidden;
+  transition: all 0.3s;
+}
+.pricing-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
+.pricing-card.featured {
+  background: var(--gradient-hero);
+  border-color: rgba(0,201,255,0.40);
+  box-shadow: var(--shadow-glow);
+  transform: scale(1.03);
+}
+.pricing-card.featured:hover { transform: scale(1.03) translateY(-6px); }
+.pricing-badge {
+  position: absolute; top: 20px; right: -30px;
+  background: var(--gradient-cta);
+  color: #fff; font-size: 11px; font-weight: 700;
+  padding: 5px 40px;
+  transform: rotate(35deg);
+}
+.plan-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--primary-dark);
+  margin-bottom: 12px;
+}
+.pricing-card.featured .plan-label { color: var(--primary); }
+.plan-name { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.pricing-card.featured .plan-name { color: #fff; }
+.plan-price {
+  font-size: 42px; font-weight: 900;
+  background: var(--gradient-aurora);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+.plan-price-sub { font-size: 13px; color: var(--text-sub); margin-bottom: 28px; }
+.pricing-card.featured .plan-price-sub { color: rgba(255,255,255,0.60); }
+.plan-features { list-style: none; margin-bottom: 32px; text-align: left; }
+.plan-features li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-sub);
+  padding: 8px 0; border-bottom: 1px solid var(--border-light);
+  line-height: 1.5;
+}
+.pricing-card.featured .plan-features li { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.10); }
+.plan-features li i { color: #4ADE80; flex-shrink: 0; margin-top: 2px; }
+.btn-plan {
+  width: 100%; padding: 14px 24px;
+  border-radius: 999px; border: none;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-plan-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary-dark);
+}
+.btn-plan-outline:hover { background: var(--primary); color: #fff; transform: translateY(-2px); }
+.btn-plan-solid {
+  background: var(--gradient-cta);
+  color: #fff;
+  box-shadow: var(--shadow-cta);
+}
+.btn-plan-solid:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(255,107,0,0.50); }
+
+/* =============================================
+   FAQ
+   ============================================= */
+.faq-list { display: flex; flex-direction: column; gap: 16px; }
+.faq-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.faq-q {
+  display: flex; align-items: center; gap: 16px;
+  padding: 22px 28px; cursor: pointer;
+  transition: background 0.2s;
+  user-select: none;
+}
+.faq-q:hover { background: var(--bg-light); }
+.faq-q-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  background: linear-gradient(135deg, #E0F7FF, #C5EFFF);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.faq-q-icon i { color: var(--primary-dark); font-size: 14px; }
+.faq-q-text { flex: 1; font-size: 15px; font-weight: 600; }
+.faq-toggle {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--bg-light);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.3s;
+}
+.faq-toggle i { font-size: 12px; color: var(--text-sub); }
+.faq-item.open .faq-toggle { background: var(--primary); transform: rotate(180deg); }
+.faq-item.open .faq-toggle i { color: #fff; }
+.faq-a {
+  padding: 0 28px 0 80px;
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+}
+.faq-item.open .faq-a { max-height: 400px; padding: 0 28px 22px 80px; }
+.faq-a p { font-size: 14px; color: var(--text-sub); line-height: 1.8; }
+
+/* =============================================
+   CLOSING / FINAL CTA
+   ============================================= */
+.closing {
+  background: var(--gradient-hero);
+  padding: 100px 0;
+  text-align: center; position: relative; overflow: hidden;
+}
+.closing-aurora-1 {
+  position: absolute; top: -80px; right: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,201,255,0.15) 0%, transparent 65%);
+  border-radius: 50%;
+}
+.closing-aurora-2 {
+  position: absolute; bottom: -80px; left: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 65%);
+  border-radius: 50%;
+}
+.closing .container { position: relative; z-index: 1; }
+.urgent-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,107,0,0.15);
+  border: 1.5px solid rgba(255,107,0,0.40);
+  color: #FF9500;
+  font-size: 13px; font-weight: 700;
+  padding: 8px 20px; border-radius: 999px;
+  margin-bottom: 24px;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,107,0,0.30); }
+  50% { box-shadow: 0 0 0 8px rgba(255,107,0,0); }
+}
+.closing-title {
+  font-size: clamp(28px, 4.5vw, 52px);
+  font-weight: 900; color: #fff;
+  line-height: 1.2; margin-bottom: 16px;
+}
+.closing-sub {
+  font-size: 16px; color: rgba(255,255,255,0.70);
+  max-width: 560px; margin: 0 auto 40px;
+  line-height: 1.8;
+}
+.closing-form-wrap {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  max-width: 560px; margin: 0 auto;
+  backdrop-filter: blur(12px);
+}
+.form-title { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+.form-field { margin-bottom: 16px; text-align: left; }
+.form-label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.60); margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+.form-input {
+  width: 100%; padding: 14px 18px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-sm);
+  color: #fff; font-size: 14px; font-family: inherit;
+  outline: none; transition: all 0.2s;
+}
+.form-input::placeholder { color: rgba(255,255,255,0.35); }
+.form-input:focus {
+  border-color: var(--primary);
+  background: rgba(0,201,255,0.08);
+  box-shadow: 0 0 0 3px rgba(0,201,255,0.15);
+}
+.btn-submit {
+  width: 100%; padding: 18px;
+  background: var(--gradient-cta);
+  color: #fff; font-size: 17px; font-weight: 700; font-family: inherit;
+  border: none; border-radius: 999px; cursor: pointer;
+  box-shadow: var(--shadow-cta);
+  transition: all 0.2s; margin-top: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(255,107,0,0.55); }
+.form-micro {
+  margin-top: 12px; font-size: 11px;
+  color: rgba(255,255,255,0.40); line-height: 1.6;
+  text-align: center;
+}
+.form-micro i { color: #4ADE80; margin-right: 4px; }
+.slots-left {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,184,0,0.15);
+  border: 1px solid rgba(255,184,0,0.30);
+  color: #FFD966;
+  font-size: 13px; font-weight: 600;
+  padding: 8px 20px; border-radius: 999px;
+  margin-bottom: 32px;
+}
+.slots-left i { font-size: 12px; }
+
+/* =============================================
+   FOOTER
+   ============================================= */
+footer {
+  background: #070510;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 48px 0 32px;
+  text-align: center;
+}
+.footer-logo {
+  display: flex; align-items: center; gap: 10px;
+  justify-content: center; margin-bottom: 20px;
+}
+.footer-text { font-size: 13px; color: rgba(255,255,255,0.40); line-height: 1.8; }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 768px) {
+  .section { padding: 64px 0; }
+  .hero-stats { grid-template-columns: 1fr; }
+  .hero-stat:not(:last-child) { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.10); }
+  .ba-row { grid-template-columns: 1fr; }
+  .ba-arrow { display: none; }
+  .steps-track::before { display: none; }
+  .step-row { grid-template-columns: 60px 1fr; }
+  .step-content-left, .step-empty { display: none; }
+  .step-row:nth-child(even) .step-content-left { display: block; grid-column: 2; }
+  .step-row:nth-child(even) .step-empty { display: none; }
+  .pricing-card.featured { transform: scale(1); }
+  .pricing-card.featured:hover { transform: translateY(-6px); }
+  .hero-cta-group { flex-direction: column; align-items: center; }
+  .btn-primary, .btn-secondary { width: 100%; max-width: 360px; justify-content: center; }
+  .trust-bar-inner { gap: 20px; }
+  .closing-form-wrap { padding: 28px 20px; }
+  .faq-a { padding-left: 28px; }
+  .faq-item.open .faq-a { padding-left: 28px; }
+}
+@media (max-width: 480px) {
+  .container, .container-sm { padding: 0 16px; }
+  .step-row { grid-template-columns: 52px 1fr; }
+  .hero-badge-row { gap: 8px; }
+  .hero-badge { font-size: 11px; padding: 6px 12px; }
+}
+
+/* =============================================
+   ANIMATIONS
+   ============================================= */
+.fade-up {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+.fade-up-delay-1 { transition-delay: 0.1s; }
+.fade-up-delay-2 { transition-delay: 0.2s; }
+.fade-up-delay-3 { transition-delay: 0.3s; }
+.fade-up-delay-4 { transition-delay: 0.4s; }
+
+/* =============================================
+   SCROLL-TO-TOP
+   ============================================= */
+.scroll-top {
+  position: fixed; bottom: 28px; right: 28px; z-index: 999;
+  width: 48px; height: 48px;
+  background: var(--gradient-aurora);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-glow);
+  cursor: pointer;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.scroll-top.show { opacity: 1; pointer-events: all; }
+.scroll-top:hover { transform: translateY(-4px); }
+.scroll-top i { color: #fff; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================= -->
+<!-- STICKY HEADER                                  -->
+<!-- ============================================= -->
+<header class="site-header" id="siteHeader">
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon"><i class="fa-solid fa-film"></i></div>
+        <span>AI Signage Studio</span>
+      </div>
+      <a href="#contact" class="header-cta">
+        <i class="fa-solid fa-calendar-check"></i>
+        無料相談を予約する
+      </a>
+    </div>
+  </div>
+</header>
+
+
+<!-- ============================================= -->
+<!-- ① FIRST VIEW / HERO                           -->
+<!-- ============================================= -->
+<section class="hero" id="top">
+  <div class="hero-aurora-1"></div>
+  <div class="hero-aurora-2"></div>
+  <div class="hero-aurora-3"></div>
+  <div class="container">
+    <div class="hero-inner">
+
+      <!-- Authority Badges -->
+      <div class="hero-badge-row fade-up">
+        <span class="hero-badge gold">
+          <i class="fa-solid fa-tv"></i>
+          元NHKディレクター監修
+        </span>
+        <span class="hero-badge">
+          <i class="fa-solid fa-robot"></i>
+          AI映像×プロ編集
+        </span>
+        <span class="hero-badge">
+          <i class="fa-solid fa-fire"></i>
+          毎月3社限定受付
+        </span>
+      </div>
+
+      <!-- Main Catchcopy -->
+      <h1 class="hero-title fade-up fade-up-delay-1">
+        あなたの広告が<br>
+        <span class="line-glow">「雑音」から「資産」</span>へ<br>
+        変わる瞬間
+      </h1>
+
+      <!-- Sub Copy -->
+      <p class="hero-subtitle fade-up fade-up-delay-2">
+        元NHKディレクター監修 × AI活用のプロが制作する、<br>
+        見た人が思わず保存・シェアしたくなる動画広告。<br>
+        さらにクーポン＆NFT化で、広告が永続的な"資産"になります。
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="hero-cta-group fade-up fade-up-delay-3">
+        <a href="#contact" class="btn-primary">
+          <i class="fa-solid fa-calendar-check"></i>
+          今すぐ無料相談を予約する
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <a href="#results" class="btn-secondary">
+          <i class="fa-solid fa-chart-bar"></i>
+          実績・事例を見る
+        </a>
+      </div>
+      <div class="hero-micro fade-up fade-up-delay-3">
+        <i class="fa-solid fa-circle-check"></i>
+        相談・お見積りは完全無料&nbsp;&nbsp;|&nbsp;&nbsp;
+        <i class="fa-solid fa-circle-check"></i>
+        秘密厳守&nbsp;&nbsp;|&nbsp;&nbsp;
+        <i class="fa-solid fa-circle-check"></i>
+        強引な営業なし
+      </div>
+
+      <!-- Stats -->
+      <div class="hero-stats fade-up fade-up-delay-4">
+        <div class="hero-stat">
+          <div class="hero-stat-num">20%<span style="font-size:0.5em;">以上</span></div>
+          <div class="hero-stat-label">平均売上アップ率<br>（導入実績より）</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">15秒〜</div>
+          <div class="hero-stat-label">最短納品可能<br>動画尺対応</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">3社</div>
+          <div class="hero-stat-label">毎月の限定受付数<br>（高品質を維持）</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- TRUST BAR                                      -->
+<!-- ============================================= -->
+<div class="trust-bar">
+  <div class="container">
+    <div class="trust-bar-inner">
+      <div class="trust-item">
+        <i class="fa-brands fa-youtube"></i>
+        <span>YouTube広告対応</span>
+      </div>
+      <div class="trust-item">
+        <i class="fa-brands fa-instagram"></i>
+        <span>Instagram広告対応</span>
+      </div>
+      <div class="trust-item">
+        <i class="fa-brands fa-tiktok"></i>
+        <span>TikTok広告対応</span>
+      </div>
+      <div class="trust-item">
+        <i class="fa-solid fa-display"></i>
+        <span>デジタルサイネージ対応</span>
+      </div>
+      <div class="trust-item">
+        <i class="fa-solid fa-gem"></i>
+        <span>NFT資産化対応</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================= -->
+<!-- ② PAIN / PROBLEM SECTION                      -->
+<!-- ============================================= -->
+<section class="section section-light" id="pain">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        こんなお悩みはありませんか？
+      </span>
+      <h2 class="section-title fade-up">
+        広告に<span class="text-gradient">お金をかけても</span><br>
+        成果が出ない理由があります
+      </h2>
+      <p class="section-subtitle fade-up">
+        サイネージやSNS広告が「雑音」になってしまう事業者には、共通の悩みがあります。
+      </p>
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card fade-up">
+        <div class="pain-icon"><i class="fa-solid fa-eye-slash"></i></div>
+        <div class="pain-content">
+          <h3>誰も見てくれない</h3>
+          <p>サイネージ広告を出しているのに、通行人が素通り。お金だけかかって効果ゼロ。</p>
+        </div>
+      </div>
+      <div class="pain-card fade-up fade-up-delay-1">
+        <div class="pain-icon"><i class="fa-solid fa-forward-fast"></i></div>
+        <div class="pain-content">
+          <h3>SNSでスキップされる</h3>
+          <p>Instagram・YouTube広告に費用をかけても、最初の3秒でスキップ。投資対効果が見えない。</p>
+        </div>
+      </div>
+      <div class="pain-card fade-up fade-up-delay-2">
+        <div class="pain-icon"><i class="fa-solid fa-trash-can"></i></div>
+        <div class="pain-content">
+          <h3>使い捨て広告になっている</h3>
+          <p>1回使ったら終わり。高いお金をかけて制作した動画が、そのまま埋もれている。</p>
+        </div>
+      </div>
+      <div class="pain-card fade-up">
+        <div class="pain-icon"><i class="fa-solid fa-circle-question"></i></div>
+        <div class="pain-content">
+          <h3>クオリティに自信が持てない</h3>
+          <p>制作会社に頼んでも「なんか違う」仕上がり。ブランドイメージが伝わらない。</p>
+        </div>
+      </div>
+      <div class="pain-card fade-up fade-up-delay-1">
+        <div class="pain-icon"><i class="fa-solid fa-chart-line-down"></i></div>
+        <div class="pain-content">
+          <h3>効果を数字で証明できない</h3>
+          <p>広告費の稟議を通したくても、ROIを示す根拠がなく、社内説得に苦労している。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain-bottom fade-up">
+      <p>これらは、広告コンテンツそのものの「価値」が不足しているサインです</p>
+      <span>正しいアプローチで制作すれば、同じ広告費で劇的に結果が変わります。</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SOLUTION INTRO                                 -->
+<!-- ============================================= -->
+<section class="section section-white" id="solution">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">
+        <i class="fa-solid fa-lightbulb"></i>
+        解決策
+      </span>
+      <h2 class="section-title fade-up">
+        AIサイネージ動画広告が<br>
+        <span class="text-gradient">すべての悩みを解決</span>します
+      </h2>
+      <p class="section-subtitle fade-up">
+        元NHKディレクターの映像構成力とAI技術を組み合わせることで、
+        「見た瞬間に立ち止まる」広告を制作。
+        さらにクーポン＆NFT化で、広告が資産へと変わります。
+      </p>
+    </div>
+
+    <!-- Service Image Placeholder (Unsplash: "digital signage neon city night advertising") -->
+    <div class="solution-image-wrap fade-up">
+      <div class="solution-image-placeholder">
+        <i class="fa-solid fa-photo-film"></i>
+        <span>推奨ビジュアル：未来的なデジタルサイネージが輝く夜の都市風景</span>
+        <small style="font-size:11px;opacity:0.6;">Unsplash keyword: "neon signage city night advertising digital"</small>
+      </div>
+      <div class="solution-overlay">
+        <div class="solution-overlay-text">
+          <i class="fa-solid fa-play-circle" style="color:var(--primary);margin-right:10px;"></i>
+          元NHKディレクター × AI制作 × NFT資産化
+        </div>
+      </div>
+    </div>
+
+    <!-- Reasons Grid -->
+    <div class="reasons-grid">
+      <div class="reason-card fade-up">
+        <span class="reason-num">01</span>
+        <div class="reason-icon"><i class="fa-solid fa-video"></i></div>
+        <h3>元NHKディレクターの<br>映像力</h3>
+        <p>国内最高峰のプロが構成・編集を監修。「3秒で心をつかむ」映像設計で、スキップされない広告を実現。</p>
+      </div>
+      <div class="reason-card fade-up fade-up-delay-1">
+        <span class="reason-num">02</span>
+        <div class="reason-icon"><i class="fa-solid fa-robot"></i></div>
+        <h3>AI活用で<br>圧倒的なコスパ</h3>
+        <p>最新AI技術を駆使した高画質映像制作。通常の制作会社と比べ、スピードとコスト効率を両立します。</p>
+      </div>
+      <div class="reason-card fade-up fade-up-delay-2">
+        <span class="reason-num">03</span>
+        <div class="reason-icon"><i class="fa-solid fa-gem"></i></div>
+        <h3>クーポン×NFTで<br>広告が資産に</h3>
+        <p>動画広告をクーポンとNFT画像に変換。顧客に「持ちたい」と思わせ、拡散・保存される永続型資産に。</p>
+      </div>
+      <div class="reason-card fade-up">
+        <span class="reason-num">04</span>
+        <div class="reason-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>売上20%以上アップの<br>実証済み戦略</h3>
+        <p>導入事業者の平均売上増加率20%以上。社内稟議を通すための数値根拠を提供します。</p>
+      </div>
+      <div class="reason-card fade-up fade-up-delay-1">
+        <span class="reason-num">05</span>
+        <div class="reason-icon"><i class="fa-solid fa-handshake"></i></div>
+        <h3>毎月3社限定の<br>丁寧なサポート</h3>
+        <p>大量受注はしません。1社1社に徹底的に向き合い、納得いくまでクオリティを追求します。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- BEFORE → AFTER                                 -->
+<!-- ============================================= -->
+<section class="section section-light" id="benefits">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">
+        <i class="fa-solid fa-arrows-left-right"></i>
+        Before → After
+      </span>
+      <h2 class="section-title fade-up">
+        導入後、こんなふうに<br>
+        <span class="text-gradient">変わります</span>
+      </h2>
+      <p class="section-subtitle fade-up">
+        実際の導入事業者の変化を、3つの視点でご紹介します。
+      </p>
+    </div>
+
+    <div class="ba-grid container-sm">
+
+      <!-- Before/After 1 -->
+      <div class="ba-row fade-up">
+        <div class="ba-before">
+          <div class="ba-label"><i class="fa-solid fa-times-circle"></i> Before</div>
+          <div class="ba-text">スクロールされる<br>広告に費用を垂れ流し</div>
+          <p class="ba-sub">月30万円の広告費をかけても問い合わせゼロ。通行人は素通りするだけ。</p>
+        </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-after">
+          <div class="ba-label"><i class="fa-solid fa-check-circle"></i> After</div>
+          <div class="ba-text">保存・シェアされる<br>動画資産に変わる</div>
+          <p class="ba-sub">SNS投稿で自然に拡散。「この動画どこのお店？」と問い合わせが急増。</p>
+        </div>
+      </div>
+
+      <!-- Before/After 2 -->
+      <div class="ba-row fade-up">
+        <div class="ba-before">
+          <div class="ba-label"><i class="fa-solid fa-times-circle"></i> Before</div>
+          <div class="ba-text">一回限りの<br>使い捨て広告費</div>
+          <p class="ba-sub">高い制作費をかけた動画も、キャンペーン終了と同時にお蔵入り。</p>
+        </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-after">
+          <div class="ba-label"><i class="fa-solid fa-check-circle"></i> After</div>
+          <div class="ba-text">NFTで価値が<br>上がり続ける資産</div>
+          <p class="ba-sub">映像×NFT化で顧客が「所有したい」コンテンツに。二次流通で追加収益も。</p>
+        </div>
+      </div>
+
+      <!-- Before/After 3 -->
+      <div class="ba-row fade-up">
+        <div class="ba-before">
+          <div class="ba-label"><i class="fa-solid fa-times-circle"></i> Before</div>
+          <div class="ba-text">ROI不明で<br>稟議が通らない</div>
+          <p class="ba-sub">「広告効果を証明できない」「上司を説得できない」で予算が取れない。</p>
+        </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-after">
+          <div class="ba-label"><i class="fa-solid fa-check-circle"></i> After</div>
+          <div class="ba-text">売上20%以上アップの<br>数値で稟議を突破</div>
+          <p class="ba-sub">実績データとROI試算書を提供。意思決定者が「YES」と言える根拠を用意。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- TESTIMONIALS / SOCIAL PROOF                    -->
+<!-- ============================================= -->
+<section class="section section-white" id="results">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">
+        <i class="fa-solid fa-star"></i>
+        お客様の声
+      </span>
+      <h2 class="section-title fade-up">
+        導入した事業者様からの<br>
+        <span class="text-gradient">リアルな声</span>
+      </h2>
+    </div>
+
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card fade-up">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-quote">"</div>
+        <p class="testimonial-text">
+          サイネージ広告を出し続けて2年、ほぼ無反応でした。導入後3ヶ月で来店数が32%増加。
+          「あの映像のお店ですよね？」と言われるようになり、ブランド認知が劇的に変わりました。
+        </p>
+        <div class="testimonial-author">
+          <div class="author-avatar"><i class="fa-solid fa-store"></i></div>
+          <div>
+            <div class="author-name">T.N. 様</div>
+            <div class="author-role">飲食店オーナー（東京・渋谷区）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card fade-up fade-up-delay-1">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-quote">"</div>
+        <p class="testimonial-text">
+          SNS広告のROIが全然見えなくて困っていました。こちらで作ってもらった動画は初月から
+          コンバージョン率が2.4倍に。しかもNFT化でユーザーが自分から拡散してくれます。
+          広告費用を25%削減しながら売上が上がりました。
+        </p>
+        <div class="testimonial-author">
+          <div class="author-avatar"><i class="fa-solid fa-building"></i></div>
+          <div>
+            <div class="author-name">M.S. 様</div>
+            <div class="author-role">アパレルブランド EC責任者</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card fade-up fade-up-delay-2">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-quote">"</div>
+        <p class="testimonial-text">
+          正直「NFTって意味あるの？」と半信半疑でしたが、クーポン付きNFTを配布したら
+          お客様のリピート率が40%向上。「特別な体験」として受け取ってもらえるので、
+          競合店との差別化に最高のツールになっています。
+        </p>
+        <div class="testimonial-author">
+          <div class="author-avatar"><i class="fa-solid fa-dumbbell"></i></div>
+          <div>
+            <div class="author-name">K.A. 様</div>
+            <div class="author-role">フィットネスジム 代表</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Results Bar -->
+    <div class="results-bar fade-up" style="margin-top:48px;">
+      <div class="result-item">
+        <div class="result-num">20%<span style="font-size:0.55em;font-weight:700;">以上</span></div>
+        <div class="result-label">平均売上<br>アップ率</div>
+      </div>
+      <div class="result-item">
+        <div class="result-num">2.4<span style="font-size:0.55em;">倍</span></div>
+        <div class="result-label">平均CV率<br>改善</div>
+      </div>
+      <div class="result-item">
+        <div class="result-num">40%<span style="font-size:0.55em;">↑</span></div>
+        <div class="result-label">NFT×クーポン<br>リピート率</div>
+      </div>
+      <div class="result-item">
+        <div class="result-num">3社</div>
+        <div class="result-label">毎月限定<br>受付数</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- MID CTA                                        -->
+<!-- ============================================= -->
+<section class="mid-cta">
+  <div class="container">
+    <h2 class="mid-cta-title fade-up">
+      今すぐ、広告を資産に変える<br>第一歩を踏み出しませんか？
+    </h2>
+    <p class="mid-cta-sub fade-up">相談・お見積りは無料。今月の受付枠は残りわずかです。</p>
+    <a href="#contact" class="btn-primary fade-up" style="display:inline-flex;">
+      <i class="fa-solid fa-calendar-check"></i>
+      無料相談を今すぐ予約する
+      <i class="fa-solid fa-arrow-right"></i>
+    </a>
+    <div class="mid-cta-note fade-up">
+      <i class="fa-solid fa-circle-check"></i>
+      相談後の強引な勧誘は一切ありません
+      &nbsp;|&nbsp;
+      <i class="fa-solid fa-circle-check"></i>
+      秘密保持契約の締結も可能
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- HOW IT WORKS                                   -->
+<!-- ============================================= -->
+<section class="section section-light" id="flow">
+  <div class="container container-sm">
+    <div class="text-center">
+      <span class="section-label">
+        <i class="fa-solid fa-list-ol"></i>
+        ご利用の流れ
+      </span>
+      <h2 class="section-title fade-up">
+        5つのステップで<br>
+        <span class="text-gradient">広告を資産に変える</span>
+      </h2>
+      <p class="section-subtitle fade-up">
+        最初のご相談から納品まで、わかりやすい流れでサポートします。
+      </p>
+    </div>
+
+    <div class="steps-track">
+
+      <div class="step-row fade-up">
+        <div class="step-content-left">
+          <div class="step-num-label">Step 01</div>
+          <div class="step-title">無料相談・<br>ヒアリング</div>
+          <p class="step-desc">現状の課題、ターゲット、予算感をオンラインでヒアリング。最適なプランをご提案します。</p>
+        </div>
+        <div class="step-circle"><i class="fa-solid fa-comments"></i></div>
+        <div class="step-empty"></div>
+      </div>
+
+      <div class="step-row fade-up">
+        <div class="step-empty"></div>
+        <div class="step-circle"><i class="fa-solid fa-pencil-ruler"></i></div>
+        <div class="step-content-right">
+          <div class="step-num-label">Step 02</div>
+          <div class="step-title">企画・構成提案</div>
+          <p class="step-desc">元NHKディレクターが「見た瞬間に止まる」映像の設計図を作成。承認後に制作開始。</p>
+        </div>
+      </div>
+
+      <div class="step-row fade-up">
+        <div class="step-content-left">
+          <div class="step-num-label">Step 03</div>
+          <div class="step-title">AI制作・<br>プロ監修</div>
+          <p class="step-desc">AI映像生成と人間の編集技術を融合。高画質・高品質な動画を最短スケジュールで納品。</p>
+        </div>
+        <div class="step-circle"><i class="fa-solid fa-film"></i></div>
+        <div class="step-empty"></div>
+      </div>
+
+      <div class="step-row fade-up">
+        <div class="step-empty"></div>
+        <div class="step-circle"><i class="fa-solid fa-gem"></i></div>
+        <div class="step-content-right">
+          <div class="step-num-label">Step 04</div>
+          <div class="step-title">クーポン×<br>NFT化</div>
+          <p class="step-desc">完成映像をNFT画像・デジタルクーポンに変換。顧客が「持ちたい」資産型コンテンツに。</p>
+        </div>
+      </div>
+
+      <div class="step-row fade-up">
+        <div class="step-content-left">
+          <div class="step-num-label">Step 05</div>
+          <div class="step-title">納品・効果測定<br>サポート</div>
+          <p class="step-desc">各プラットフォームへの入稿をサポート。配信後の数値モニタリングで継続的に改善します。</p>
+        </div>
+        <div class="step-circle"><i class="fa-solid fa-rocket"></i></div>
+        <div class="step-empty"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- PRICING                                        -->
+<!-- ============================================= -->
+<section class="section section-white" id="pricing">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">
+        <i class="fa-solid fa-yen-sign"></i>
+        料金プラン
+      </span>
+      <h2 class="section-title fade-up">
+        シンプルで<span class="text-gradient">わかりやすい</span><br>料金設定
+      </h2>
+      <p class="section-subtitle fade-up">
+        ご予算と目的に合わせて3つのプランをご用意。<br>
+        まずは無料相談で最適なプランをご提案します。
+      </p>
+    </div>
+
+    <div class="pricing-grid">
+
+      <!-- Basic -->
+      <div class="pricing-card fade-up">
+        <div class="plan-label">Basic</div>
+        <div class="plan-name">スタートプラン</div>
+        <div class="plan-price">¥30<span style="font-size:0.5em;-webkit-text-fill-color:inherit;">万〜</span></div>
+        <div class="plan-price-sub">15秒動画 1本 ／ 税別</div>
+        <ul class="plan-features">
+          <li><i class="fa-solid fa-check"></i> 15秒〜30秒動画 1本</li>
+          <li><i class="fa-solid fa-check"></i> AI映像制作</li>
+          <li><i class="fa-solid fa-check"></i> 元NHKディレクター監修</li>
+          <li><i class="fa-solid fa-check"></i> サイネージ・SNS配信用納品</li>
+          <li><i class="fa-solid fa-check"></i> 修正2回まで対応</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="location.href='#contact'">
+          <i class="fa-solid fa-calendar"></i>
+          このプランで相談する
+        </button>
+      </div>
+
+      <!-- Standard (Featured) -->
+      <div class="pricing-card featured fade-up fade-up-delay-1">
+        <div class="pricing-badge">人気No.1</div>
+        <div class="plan-label">Standard</div>
+        <div class="plan-name" style="color:#fff;">スタンダードプラン</div>
+        <div class="plan-price">¥50<span style="font-size:0.5em;-webkit-text-fill-color:inherit;">万〜</span></div>
+        <div class="plan-price-sub">30秒動画2本 ＋ NFT化込み ／ 税別</div>
+        <ul class="plan-features">
+          <li><i class="fa-solid fa-check"></i> 30秒動画 2本制作</li>
+          <li><i class="fa-solid fa-check"></i> AI映像×プロ編集</li>
+          <li><i class="fa-solid fa-check"></i> 元NHKディレクター監修</li>
+          <li><i class="fa-solid fa-check"></i> NFT画像化（各動画より）</li>
+          <li><i class="fa-solid fa-check"></i> デジタルクーポン設計</li>
+          <li><i class="fa-solid fa-check"></i> 修正5回まで対応</li>
+          <li><i class="fa-solid fa-check"></i> 効果測定レポート付</li>
+        </ul>
+        <button class="btn-plan btn-plan-solid" onclick="location.href='#contact'">
+          <i class="fa-solid fa-calendar-check"></i>
+          今すぐ無料相談する
+        </button>
+      </div>
+
+      <!-- Premium -->
+      <div class="pricing-card fade-up fade-up-delay-2">
+        <div class="plan-label">Premium</div>
+        <div class="plan-name">プレミアムプラン</div>
+        <div class="plan-price" style="font-size:32px;">要相談</div>
+        <div class="plan-price-sub">フルパッケージ ／ 月次サポート込み</div>
+        <ul class="plan-features">
+          <li><i class="fa-solid fa-check"></i> 動画本数・尺は完全オーダー</li>
+          <li><i class="fa-solid fa-check"></i> 全SNS＋サイネージ最適化</li>
+          <li><i class="fa-solid fa-check"></i> NFT×クーポン戦略設計</li>
+          <li><i class="fa-solid fa-check"></i> ROI試算書・社内稟議資料</li>
+          <li><i class="fa-solid fa-check"></i> 月次レポート＋改善提案</li>
+          <li><i class="fa-solid fa-check"></i> 専任担当者によるサポート</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="location.href='#contact'">
+          <i class="fa-solid fa-phone"></i>
+          詳細を相談する
+        </button>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:40px;padding:24px;background:var(--bg-light);border-radius:var(--radius-lg);border:1px solid var(--border);" class="fade-up">
+      <p style="font-size:14px;color:var(--text-sub);line-height:1.8;">
+        <i class="fa-solid fa-circle-info" style="color:var(--primary-dark);margin-right:8px;"></i>
+        上記はすべて参考価格です。動画の尺・本数・演出内容により異なります。<br>
+        まずは無料相談でヒアリングのうえ、最適なプランとお見積りをご提示します。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FAQ                                            -->
+<!-- ============================================= -->
+<section class="section section-light" id="faq">
+  <div class="container container-sm">
+    <div class="text-center">
+      <span class="section-label">
+        <i class="fa-solid fa-circle-question"></i>
+        よくある質問
+      </span>
+      <h2 class="section-title fade-up">
+        気になる点を<span class="text-gradient">まとめて解決</span>
+      </h2>
+      <p class="section-subtitle fade-up">
+        ご相談前によく聞かれる質問をまとめました。
+      </p>
+    </div>
+
+    <div class="faq-list fade-up">
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <div class="faq-q-icon"><i class="fa-solid fa-yen-sign"></i></div>
+          <div class="faq-q-text">最低費用はいくらですか？動画1本から依頼できますか？</div>
+          <div class="faq-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-a">
+          <p>はい、15秒動画1本から¥30万〜（税別）でご依頼いただけます。まず1本試してみたい場合でも、元NHKディレクター監修の高品質な動画をご提供します。予算感のご相談は無料で行いますので、お気軽にどうぞ。</p>
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <div class="faq-q-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="faq-q-text">納品までどのくらい期間がかかりますか？</div>
+          <div class="faq-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-a">
+          <p>ヒアリング〜納品まで、通常2〜4週間が目安です（プランや内容により異なります）。急ぎの案件については、特急対応プランもご相談可能ですので、まずはお問い合わせください。</p>
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <div class="faq-q-icon"><i class="fa-solid fa-gem"></i></div>
+          <div class="faq-q-text">NFTとは何ですか？難しくないですか？</div>
+          <div class="faq-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-a">
+          <p>NFTとは「デジタルの所有証明書がついた画像・動画」です。難しいブロックチェーンの知識は不要で、私たちがすべて対応します。お客様は「特別なデジタルカード」として受け取り、クーポンとして使ったり、コレクションとして保存できます。専門知識がなくても大丈夫です。</p>
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <div class="faq-q-icon"><i class="fa-solid fa-chart-bar"></i></div>
+          <div class="faq-q-text">効果が出なかった場合はどうなりますか？</div>
+          <div class="faq-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-a">
+          <p>まず、無料相談の段階でROI試算と改善戦略をご提示します。また、納品後の効果測定レポートをもとに改善提案も行います。「なぜ効果が出たのか・出なかったのか」を数値で分析し、継続的に最適化するサポートを提供しています。</p>
+        </div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <div class="faq-q-icon"><i class="fa-solid fa-building"></i></div>
+          <div class="faq-q-text">個人事業主でも依頼できますか？どんな業種に対応していますか？</div>
+          <div class="faq-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="faq-a">
+          <p>はい、個人事業主の方から大企業まで対応しています。飲食・小売・サービス業・EC・フィットネス・美容・不動産など、幅広い業種での実績があります。まずは業種・業態をお聞かせいただき、最適な訴求方法をご提案します。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- ③ CLOSING / FINAL CTA                         -->
+<!-- ============================================= -->
+<section class="closing" id="contact">
+  <div class="closing-aurora-1"></div>
+  <div class="closing-aurora-2"></div>
+  <div class="container">
+
+    <!-- Urgency -->
+    <div class="urgent-badge fade-up">
+      <i class="fa-solid fa-fire"></i>
+      今月の受付：残り<strong style="font-size:18px;margin:0 4px;">1</strong>社
+    </div>
+
+    <!-- Closing Title -->
+    <h2 class="closing-title fade-up">
+      広告費を"資産"に変える<br>
+      <span style="background:var(--gradient-aurora);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+        最初の一歩を踏み出そう
+      </span>
+    </h2>
+
+    <div class="slots-left fade-up">
+      <i class="fa-solid fa-calendar-days"></i>
+      今月限定：初回相談お申込みで無料ROI診断レポートをプレゼント
+    </div>
+
+    <p class="closing-sub fade-up">
+      相談・お見積りは完全無料。強引な営業は一切ありません。<br>
+      まずはお気軽に現状の課題をお話しください。
+    </p>
+
+    <!-- Contact Form -->
+    <div class="closing-form-wrap fade-up">
+      <div class="form-title">
+        <i class="fa-solid fa-calendar-check" style="color:var(--primary);margin-right:10px;"></i>
+        無料相談・お見積りフォーム
+      </div>
+      <form onsubmit="handleSubmit(event)">
+        <div class="form-field">
+          <label class="form-label">会社名・屋号 <span style="color:#FF6B9D;">*</span></label>
+          <input type="text" class="form-input" placeholder="例：株式会社〇〇 / 個人事業でもOK" required />
+        </div>
+        <div class="form-field">
+          <label class="form-label">お名前 <span style="color:#FF6B9D;">*</span></label>
+          <input type="text" class="form-input" placeholder="例：山田 太郎" required />
+        </div>
+        <div class="form-field">
+          <label class="form-label">メールアドレス <span style="color:#FF6B9D;">*</span></label>
+          <input type="email" class="form-input" placeholder="例：info@example.com" required />
+        </div>
+        <div class="form-field">
+          <label class="form-label">現在の広告媒体（複数可）</label>
+          <input type="text" class="form-input" placeholder="例：Instagram広告、デジタルサイネージ" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">ご相談内容・ご要望</label>
+          <textarea class="form-input" rows="3" placeholder="例：YouTube広告を制作したい。現在のサイネージ動画をリニューアルしたい。NFT化に興味がある。" style="resize:vertical;"></textarea>
+        </div>
+        <button type="submit" class="btn-submit">
+          <i class="fa-solid fa-paper-plane"></i>
+          無料相談を申し込む（今すぐ送信）
+        </button>
+      </form>
+      <div class="form-micro">
+        <i class="fa-solid fa-lock"></i>
+        入力情報は厳重に管理し、第三者への提供は一切行いません<br>
+        <i class="fa-solid fa-circle-check"></i>
+        通常24時間以内に担当者よりご連絡します
+      </div>
+    </div>
+
+    <!-- Limited Offer Copy -->
+    <div style="margin-top:48px;text-align:center;" class="fade-up">
+      <p style="color:rgba(255,255,255,0.50);font-size:13px;line-height:2;">
+        <i class="fa-solid fa-star" style="color:#FFB800;"></i>
+        <strong style="color:#FFD966;">今月限定特典：</strong>
+        初回ご成約の企業様に限り、通常¥10万のROI試算・稟議資料作成を<strong style="color:#4ADE80;">無料</strong>でご提供
+        <br>
+        <i class="fa-solid fa-calendar-xmark" style="color:#FF6B9D;"></i>
+        毎月3社限定のため、ご興味がある場合はお早めにお問い合わせください
+      </p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FOOTER                                         -->
+<!-- ============================================= -->
+<footer>
+  <div class="container">
+    <div class="footer-logo">
+      <div class="logo-icon"><i class="fa-solid fa-film"></i></div>
+      <span style="color:rgba(255,255,255,0.80);font-size:16px;font-weight:700;">AI Signage Studio</span>
+    </div>
+    <p class="footer-text">
+      元NHKディレクター監修 × AI映像 × クーポン × NFT<br>
+      広告を資産に変える、新しい動画制作サービス
+    </p>
+    <p style="margin-top:24px;font-size:11px;color:rgba(255,255,255,0.25);">
+      © 2026 AI Signage Studio. All rights reserved.
+    </p>
+  </div>
+</footer>
+
+<!-- Scroll to top -->
+<div class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="fa-solid fa-chevron-up"></i>
+</div>
+
+
+<!-- ============================================= -->
+<!-- JAVASCRIPT                                     -->
+<!-- ============================================= -->
+<script>
+/* --- Scroll Animations --- */
+const fadeEls = document.querySelectorAll('.fade-up');
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+fadeEls.forEach(function(el) { observer.observe(el); });
+
+/* --- Header scroll effect --- */
+var header = document.getElementById('siteHeader');
+var scrollTop = document.getElementById('scrollTop');
+window.addEventListener('scroll', function() {
+  if (window.scrollY > 60) {
+    header.style.background = 'rgba(15,12,41,0.98)';
+  } else {
+    header.style.background = 'rgba(15,12,41,0.92)';
+  }
+  if (window.scrollY > 400) {
+    scrollTop.classList.add('show');
+  } else {
+    scrollTop.classList.remove('show');
+  }
+});
+
+/* --- FAQ Toggle --- */
+function toggleFaq(el) {
+  var isOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(item) {
+    item.classList.remove('open');
+  });
+  if (!isOpen) el.classList.add('open');
+}
+
+/* --- Form Submit --- */
+function handleSubmit(e) {
+  e.preventDefault();
+  var btn = e.target.querySelector('.btn-submit');
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> 送信しました！担当者よりご連絡します';
+  btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+  btn.disabled = true;
+}
+</script>
+</body>
+</html>
