@@ -6,335 +6,552 @@
 <title>男声合唱団 ジョイフル・スーベニール｜団員募集</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700&family=Shippori+Mincho:wght@400;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
-/* ─── 男声合唱団カラー：深紺 × ゴールド ─── */
+/* ═══════════════════════════════════════
+   幻想的・虹色グラデーション テーマ
+═══════════════════════════════════════ */
 :root {
-  --accent:       #1b3d7b;   /* 深紺 */
-  --accent-dark:  #122b5a;
-  --accent-light: #e8eef8;
-  --gold:         #c8971f;   /* ゴールド */
-  --gold-light:   #fdf4e0;
-  --bg:           #f4f6fa;
-  --card:         #ffffff;
-  --border:       #d0d9ec;
-  --text:         #0f1e33;
-  --text-sub:     #3a4f6a;
-  --text-muted:   #7a8fa8;
-  --radius:       16px;
-  --radius-sm:    10px;
-  --shadow:       0 4px 24px rgba(27,61,123,0.13);
-  --shadow-card:  0 2px 16px rgba(15,30,51,0.08);
+  --bg:          #f8f6ff;
+  --card:        #ffffff;
+  --border:      #e2d9f3;
+  --text:        #18142a;        /* 深紫紺：読みやすく格調あり */
+  --text-sub:    #3d3460;
+  --text-muted:  #8a82aa;
+  --radius:      16px;
+  --radius-sm:   10px;
+  --shadow-card: 0 2px 20px rgba(100,80,180,0.10);
+  --shadow:      0 6px 32px rgba(100,80,180,0.18);
+  /* 虹グラデ（テキスト・アクセント用） */
+  --rainbow: linear-gradient(90deg,
+    #c9a0dc 0%, #a0c4f1 20%, #a0f1e0 38%,
+    #f1e4a0 55%, #f1a0b4 75%, #c9a0dc 100%);
+  /* ゴールド */
+  --gold: #b8963e;
+  --gold-light: #fdf6e3;
 }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
+body {
+  font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.85;
+  overflow-x: hidden;
+}
+/* 本文は明朝体で格式を出し、UIラベルはゴシック */
+.sans { font-family: 'Noto Sans JP', sans-serif; }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 
 .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
 .text-center { text-align: center; }
-.section { padding: 72px 0; }
+.section { padding: 80px 0; }
 .section-alt { background: #fff; }
 
-/* Badge */
+/* ─── Aurora 背景アニメーション ─── */
+@keyframes aurora {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.aurora-bg {
+  background: linear-gradient(135deg,
+    #f0e6ff 0%, #ddf0ff 14%, #d6fff4 28%,
+    #fffadf 42%, #ffe8f2 57%, #f2e8ff 71%,
+    #ddeeff 85%, #f0e6ff 100%);
+  background-size: 400% 400%;
+  animation: aurora 10s ease infinite;
+}
+
+/* ─── レインボーテキスト ─── */
+.rainbow-text {
+  background: var(--rainbow);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: aurora 8s ease infinite;
+}
+
+/* ─── Badge ─── */
 .badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: var(--gold-light); border: 1.5px solid var(--gold);
-  color: #8a6210; font-size: 12px; font-weight: 700;
-  padding: 5px 14px; border-radius: 999px; letter-spacing: 0.03em;
+  background: rgba(255,255,255,0.75);
+  border: 1.5px solid rgba(180,160,220,0.6);
+  color: var(--text-sub);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px; font-weight: 700;
+  padding: 5px 14px; border-radius: 999px;
+  backdrop-filter: blur(4px);
+  letter-spacing: 0.03em;
 }
 
-/* Section Label */
+/* ─── Section Label ─── */
 .sec-label {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13px; font-weight: 700; color: var(--gold);
-  letter-spacing: 0.1em; margin-bottom: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
 }
-.sec-label::before, .sec-label::after { content: ''; width: 28px; height: 2px; background: var(--gold); border-radius: 2px; }
+.sec-label::before, .sec-label::after {
+  content: ''; width: 24px; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+  border-radius: 2px;
+}
+.sec-label::after { background: linear-gradient(90deg, var(--gold), transparent); }
 
-.h-sub { font-size: clamp(18px, 3vw, 28px); font-weight: 700; line-height: 1.4; color: var(--text); }
-.lead { font-size: clamp(14px, 2vw, 17px); color: var(--text-sub); line-height: 1.85; }
+/* ─── 見出し ─── */
+.h-sub {
+  font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+.lead {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: clamp(14px, 2vw, 16px);
+  color: var(--text-sub);
+  line-height: 1.9;
+}
 
-/* CTA Button */
+/* ─── CTA Button ─── */
 .btn-cta {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  background: linear-gradient(135deg, var(--gold) 0%, #e8b840 100%);
-  color: #fff; font-size: 17px; font-weight: 700; font-family: inherit;
+  background: linear-gradient(135deg, #b06ad4 0%, #6a9fd4 35%, #6ad4bc 60%, #d4b06a 100%);
+  background-size: 300%;
+  animation: aurora 6s ease infinite;
+  color: #fff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 16px; font-weight: 700;
   padding: 18px 48px; border-radius: 999px; border: none; cursor: pointer;
-  box-shadow: 0 8px 32px rgba(200,151,31,0.40);
+  box-shadow: 0 8px 32px rgba(160,120,200,0.35);
   transition: transform 0.18s, box-shadow 0.18s;
-  letter-spacing: 0.04em; text-decoration: none;
+  letter-spacing: 0.06em; text-decoration: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.18);
 }
-.btn-cta:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(200,151,31,0.50); }
-.btn-cta:active { transform: translateY(-1px); }
+.btn-cta:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(160,120,200,0.50); }
 
-/* Nav */
+/* ─── Nav ─── */
 .nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(27,61,123,0.97); backdrop-filter: blur(12px);
-  border-bottom: 2px solid var(--gold); padding: 14px 0;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(200,180,240,0.40);
+  padding: 14px 0;
+  box-shadow: 0 2px 24px rgba(160,130,200,0.10);
 }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; max-width: 960px; margin: 0 auto; padding: 0 20px; }
-.nav-logo { font-family: 'Noto Serif JP', serif; font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
-.nav-logo .clef { color: var(--gold); font-size: 22px; font-family: serif; line-height: 1; }
-.nav-cta {
-  background: var(--gold); color: #fff; font-size: 13px; font-weight: 700; font-family: inherit;
-  padding: 10px 24px; border-radius: 999px; border: none; cursor: pointer;
-  transition: background 0.15s; text-decoration: none;
+.nav-logo {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 15px; font-weight: 700;
+  color: var(--text);
+  display: flex; align-items: center; gap: 8px;
 }
-.nav-cta:hover { background: #a87a14; }
+.nav-clef {
+  font-size: 24px; line-height: 1;
+  background: var(--rainbow); background-size: 300%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: aurora 8s ease infinite;
+}
+.nav-cta {
+  background: linear-gradient(135deg, #b06ad4, #6a9fd4);
+  color: #fff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 10px 24px; border-radius: 999px; border: none; cursor: pointer;
+  transition: opacity 0.15s; text-decoration: none;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.nav-cta:hover { opacity: 0.85; }
 
-/* ── First View ── */
+/* ═══════════════════════════════════
+   FIRST VIEW
+═══════════════════════════════════ */
 .fv {
   position: relative; overflow: hidden;
-  background: linear-gradient(160deg, #0d2147 0%, #1b3d7b 50%, #0d2147 100%);
-  padding: 100px 0 80px; text-align: center;
+  padding: 80px 0 80px; text-align: center;
 }
 .fv-deco { position: absolute; border-radius: 50%; pointer-events: none; }
-.fv-deco-1 { top: -100px; right: -100px; width: 440px; height: 440px; background: radial-gradient(circle, rgba(200,151,31,0.18) 0%, transparent 70%); }
-.fv-deco-2 { bottom: -80px; left: -80px; width: 320px; height: 320px; background: radial-gradient(circle, rgba(200,151,31,0.12) 0%, transparent 70%); }
+.fv-deco-1 { top: -120px; right: -80px; width: 420px; height: 420px; background: radial-gradient(circle, rgba(180,140,240,0.20) 0%, transparent 70%); }
+.fv-deco-2 { bottom: -80px; left: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(140,200,240,0.18) 0%, transparent 70%); }
+.fv-deco-3 { top: 40%; right: 8%; width: 180px; height: 180px; background: radial-gradient(circle, rgba(240,200,140,0.15) 0%, transparent 70%); }
 
-/* ト音記号 */
-.treble-clef {
-  font-size: 110px;
+/* ト音記号 — 文字とかぶらないよう独立ブロックで上に配置 */
+.treble-clef-wrap {
+  display: block;
+  margin: 0 auto 48px;   /* ← 下に余白をしっかり確保 */
   line-height: 1;
-  color: var(--gold);
-  display: inline-block;
-  font-family: 'Noto Serif JP', 'Times New Roman', serif;
-  margin-bottom: 16px;
-  animation: float 3.5s ease-in-out infinite;
-  text-shadow: 0 4px 24px rgba(200,151,31,0.45);
-  filter: drop-shadow(0 0 18px rgba(200,151,31,0.35));
 }
-@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.treble-clef {
+  display: inline-block;
+  font-size: 120px;
+  line-height: 1;
+  background: var(--rainbow);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: aurora 7s ease infinite, float 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 18px rgba(180,140,240,0.35));
+  font-family: 'Times New Roman', Georgia, serif;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
 
-.fv-badges { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 28px; }
+.fv-badges { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 32px; }
+
+/* キャッチコピー */
+.fv-catch { margin-bottom: 20px; }
 .fv-catch .main-catch {
-  font-family: 'Noto Serif JP', serif; font-size: clamp(30px, 6vw, 54px); font-weight: 700; line-height: 1.3; color: #fff;
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(32px, 6vw, 58px); font-weight: 800;
+  line-height: 1.4;
+  color: var(--text);
+  letter-spacing: 0.06em;
 }
 .fv-catch .main-catch .hl {
-  color: var(--gold); position: relative;
+  background: var(--rainbow); background-size: 300%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: aurora 7s ease infinite;
+  position: relative;
 }
-.fv-catch .main-catch .hl::after {
-  content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--gold), #e8d080); border-radius: 2px;
+.fv-sub {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: clamp(15px, 2.5vw, 19px);
+  color: var(--text-sub); margin: 0 0 36px; line-height: 1.8;
 }
-.fv-sub { font-size: clamp(15px, 2.5vw, 20px); color: rgba(255,255,255,0.82); margin: 14px 0 36px; line-height: 1.75; }
-.fv-img-wrap { max-width: 680px; margin: 40px auto 0; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.40); border: 2px solid rgba(200,151,31,0.35); }
-.fv-img-placeholder { width: 100%; height: 320px; background: linear-gradient(135deg, #0d2147 0%, #1b3d7b 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-.fv-img-placeholder .ph-clef { font-size: 72px; color: var(--gold); opacity: 0.5; line-height: 1; }
-.fv-img-placeholder p { font-size: 13px; color: rgba(255,255,255,0.55); text-align: center; line-height: 1.6; }
+
+/* チラシ画像 */
+.fv-img-wrap {
+  max-width: 680px; margin: 44px auto 0;
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(160,130,200,0.22);
+  border: 2px solid rgba(200,180,240,0.50);
+}
+.fv-img-placeholder {
+  width: 100%; height: 300px;
+  background: linear-gradient(135deg, #f0e6ff 0%, #ddf0ff 50%, #ffe8f2 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+}
+.fv-img-placeholder .ph-clef {
+  font-size: 64px; line-height: 1;
+  background: var(--rainbow); background-size: 300%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; animation: aurora 7s ease infinite;
+  opacity: 0.6;
+}
+.fv-img-placeholder p { font-family: 'Noto Sans JP', sans-serif; font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.6; }
 
 /* Authority Badges */
 .authority-row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 36px 0 0; }
-.auth-badge { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); border: 1.5px solid rgba(200,151,31,0.55); border-radius: var(--radius); padding: 12px 20px; }
-.auth-badge .ab-icon { width: 40px; height: 40px; background: rgba(200,151,31,0.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.auth-badge .ab-icon i { color: var(--gold); font-size: 19px; }
-.auth-badge .ab-text strong { display: block; font-size: 14px; font-weight: 700; color: #fff; }
-.auth-badge .ab-text span { font-size: 11px; color: rgba(255,255,255,0.65); }
+.auth-badge {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.80);
+  border: 1.5px solid rgba(200,180,240,0.50);
+  border-radius: var(--radius); padding: 14px 22px;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(4px);
+}
+.auth-badge .ab-icon { width: 40px; height: 40px; background: linear-gradient(135deg,#f0e6ff,#ddf0ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.auth-badge .ab-icon i { background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; font-size: 19px; }
+.auth-badge .ab-text strong { display: block; font-family: 'Shippori Mincho', serif; font-size: 14px; font-weight: 700; color: var(--text); }
+.auth-badge .ab-text span { font-family: 'Noto Sans JP', sans-serif; font-size: 11px; color: var(--text-muted); }
 
-/* ── Concert ── */
+/* ─── 区切り線 ─── */
+.divider-rainbow {
+  height: 3px;
+  background: var(--rainbow);
+  background-size: 300%;
+  animation: aurora 8s ease infinite;
+  border-radius: 2px;
+  margin: 0;
+  opacity: 0.6;
+}
+
+/* ─── Concert ─── */
 .concert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 44px; }
 .concert-card {
-  background: #fff; border: 2px solid var(--accent); border-radius: var(--radius);
-  padding: 32px 28px; text-align: center; box-shadow: var(--shadow);
-  position: relative; overflow: hidden; transition: transform 0.18s, box-shadow 0.18s;
+  background: #fff; border-radius: var(--radius);
+  padding: 36px 28px; text-align: center;
+  box-shadow: var(--shadow-card);
+  border: 1.5px solid rgba(200,180,240,0.40);
+  position: relative; overflow: hidden;
+  transition: transform 0.18s, box-shadow 0.18s;
 }
-.concert-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(27,61,123,0.18); }
 .concert-card::before {
-  content: '𝄞'; position: absolute; top: -8px; right: 12px;
-  font-size: 80px; color: var(--accent); opacity: 0.07; line-height: 1; font-family: serif;
+  content: '𝄞'; position: absolute; top: -10px; right: 10px;
+  font-size: 90px; line-height: 1;
+  background: var(--rainbow); background-size:300%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; animation: aurora 8s ease infinite;
+  opacity: 0.10; font-family: serif;
 }
-.concert-badge { display: inline-block; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; margin-bottom: 14px; }
+.concert-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+.concert-badge {
+  display: inline-block;
+  background: linear-gradient(135deg,#b06ad4,#6a9fd4);
+  color: #fff; font-family: 'Noto Sans JP',sans-serif;
+  font-size: 11px; font-weight: 700; padding: 4px 14px;
+  border-radius: 999px; margin-bottom: 16px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
 .concert-date {
-  font-family: 'Noto Serif JP', serif;
-  font-size: clamp(22px, 4vw, 34px); font-weight: 700; color: var(--text);
-  line-height: 1.35; margin-bottom: 14px;
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(24px, 4vw, 36px); font-weight: 700; color: var(--text);
+  line-height: 1.4; margin-bottom: 14px; letter-spacing: 0.04em;
 }
-.concert-venue { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-sub); }
+.concert-venue { display: inline-flex; align-items: center; gap: 6px; font-family: 'Noto Sans JP',sans-serif; font-size: 14px; color: var(--text-sub); }
 .concert-venue i { color: var(--gold); }
 
-/* ── Greeting ── */
-.greeting-wrap { max-width: 720px; margin: 40px auto 0; background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 40px 36px; box-shadow: var(--shadow-card); text-align: left; }
-.greeting-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
-.greeting-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-light), #c6d4ee); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid var(--accent); }
-.greeting-avatar i { color: var(--accent); font-size: 34px; }
-.greeting-name strong { display: block; font-size: 16px; font-weight: 700; color: var(--text); }
-.greeting-name span { font-size: 13px; color: var(--text-muted); }
-.greeting-body { font-size: 15px; color: var(--text-sub); line-height: 2.1; }
-.greeting-body p { margin-bottom: 14px; }
-.greeting-sig { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 20px; text-align: right; }
+/* ─── Greeting ─── */
+.greeting-wrap {
+  max-width: 720px; margin: 40px auto 0;
+  background: #fff; border-radius: var(--radius); padding: 44px 40px;
+  box-shadow: var(--shadow-card); text-align: left;
+  border: 1.5px solid rgba(200,180,240,0.35);
+  position: relative; overflow: hidden;
+}
+.greeting-wrap::before {
+  content: '𝄞'; position: absolute; bottom: -20px; right: 10px;
+  font-size: 160px; line-height: 1;
+  background: var(--rainbow); background-size:300%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; animation: aurora 8s ease infinite;
+  opacity: 0.05; font-family: serif; pointer-events: none;
+}
+.greeting-header { display: flex; align-items: center; gap: 20px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1.5px solid var(--border); }
+.greeting-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg,#f0e6ff,#ddf0ff); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid rgba(200,180,240,0.5); }
+.greeting-avatar i { font-size: 34px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.greeting-name strong { display: block; font-family: 'Shippori Mincho',serif; font-size: 17px; font-weight: 700; color: var(--text); }
+.greeting-name span { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; color: var(--text-muted); }
+.greeting-body { font-family: 'Shippori Mincho', serif; font-size: 15px; color: var(--text-sub); line-height: 2.2; }
+.greeting-body p { margin-bottom: 18px; }
+.greeting-sig { font-family: 'Shippori Mincho',serif; font-size: 15px; font-weight: 700; color: var(--text); margin-top: 24px; text-align: right; letter-spacing: 0.08em; }
 
-/* ── Staff ── */
-.staff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-top: 40px; }
-.staff-card { background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 32px 24px; text-align: center; box-shadow: var(--shadow-card); transition: transform 0.18s, box-shadow 0.18s; }
-.staff-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
-.staff-role { font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 10px; }
-.staff-icon { width: 74px; height: 74px; margin: 0 auto 14px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--accent); }
-.staff-icon i { color: var(--accent); font-size: 32px; }
-.staff-name { font-family: 'Noto Serif JP', serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+/* ─── Staff ─── */
+.staff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 28px; margin-top: 44px; }
+.staff-card {
+  background: #fff; border-radius: var(--radius); padding: 36px 26px; text-align: center;
+  box-shadow: var(--shadow-card); border: 1.5px solid rgba(200,180,240,0.35);
+  transition: transform 0.18s, box-shadow 0.18s;
+  position: relative; overflow: hidden;
+}
+.staff-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+.staff-role { font-family: 'Noto Sans JP',sans-serif; font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 14px; }
+.staff-icon {
+  width: 78px; height: 78px; margin: 0 auto 16px;
+  background: linear-gradient(135deg,#f0e6ff,#ddf0ff,#ffe8f2);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(200,180,240,0.5);
+}
+.staff-icon i { font-size: 34px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.staff-name { font-family: 'Shippori Mincho',serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: 0.05em; }
 .staff-name .sensei { font-size: 15px; color: var(--text-muted); }
-.staff-desc { font-size: 13px; color: var(--text-sub); line-height: 1.75; }
+.staff-desc { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; color: var(--text-sub); line-height: 1.8; }
 
-/* ── 募集要項 ── */
-.requirements-card { max-width: 760px; margin: 40px auto 0; background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
-.req-header { background: var(--accent); color: #fff; padding: 18px 28px; display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 700; }
+/* ─── 募集要項 ─── */
+.requirements-card { max-width: 780px; margin: 40px auto 0; background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); border: 1.5px solid rgba(200,180,240,0.35); }
+.req-header { background: linear-gradient(135deg, #3a2d6a, #2d4a8a); color: #fff; padding: 20px 30px; display: flex; align-items: center; gap: 12px; font-family: 'Shippori Mincho',serif; font-size: 18px; font-weight: 700; letter-spacing: 0.08em; }
 .req-body {}
 .req-row { display: flex; align-items: flex-start; border-bottom: 1px solid var(--border); }
 .req-row:last-child { border-bottom: none; }
-.req-label { background: var(--accent-light); padding: 18px 20px; min-width: 140px; font-size: 13px; font-weight: 700; color: var(--accent); border-right: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0; }
+.req-label { background: linear-gradient(135deg,#f6f2ff,#eef5ff); padding: 20px 22px; min-width: 148px; font-family: 'Noto Sans JP',sans-serif; font-size: 13px; font-weight: 700; color: var(--text-sub); border-right: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0; }
 .req-label i { margin-top: 2px; flex-shrink: 0; color: var(--gold); }
-.req-value { padding: 18px 22px; font-size: 14px; color: var(--text-sub); line-height: 1.85; }
-.req-value strong { color: var(--text); display: block; margin-bottom: 2px; }
+.req-value { padding: 20px 24px; font-family: 'Noto Sans JP',sans-serif; font-size: 14px; color: var(--text-sub); line-height: 1.9; }
+.req-value strong { color: var(--text); display: block; margin-bottom: 3px; font-family: 'Shippori Mincho',serif; font-size: 15px; }
 
-/* ── Location + QR ── */
-.location-grid { display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: center; max-width: 720px; margin: 36px auto 0; background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 32px 28px; box-shadow: var(--shadow-card); }
+/* ─── 写真ギャラリー ─── */
+.gallery-section { padding: 80px 0; }
+.gallery-intro { font-family: 'Noto Sans JP',sans-serif; font-size: 14px; color: var(--text-muted); margin: 10px 0 36px; }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 0;
+}
+/* メイン写真（横長・上段） */
+.gallery-main {
+  grid-column: 1 / -1;
+  border-radius: 18px; overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border: 2px solid rgba(200,180,240,0.40);
+  position: relative;
+}
+.gallery-main img { width: 100%; height: 360px; object-fit: cover; display: block; }
+.gallery-sub {
+  border-radius: 14px; overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border: 1.5px solid rgba(200,180,240,0.35);
+  position: relative;
+}
+.gallery-sub img { width: 100%; height: 220px; object-fit: cover; display: block; }
+/* 写真プレースホルダー */
+.photo-placeholder {
+  width: 100%;
+  background: linear-gradient(135deg, #f0e6ff 0%, #ddf0ff 50%, #ffe8f2 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  position: relative;
+}
+.gallery-main .photo-placeholder { height: 360px; }
+.gallery-sub .photo-placeholder { height: 220px; }
+.photo-placeholder .ph-icon {
+  font-size: 48px;
+  background: var(--rainbow); background-size:300%;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; animation: aurora 8s ease infinite;
+  opacity: 0.55;
+}
+.photo-placeholder p { font-family: 'Noto Sans JP',sans-serif; font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.6; }
+.photo-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(0deg, rgba(30,20,60,0.65) 0%, transparent 100%);
+  color: #fff; font-family: 'Noto Sans JP',sans-serif; font-size: 13px; font-weight: 700;
+  padding: 16px 16px 12px; letter-spacing: 0.04em;
+}
+
+/* ─── Location + QR ─── */
+.location-grid { display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: center; max-width: 720px; margin: 36px auto 0; background: #fff; border: 1.5px solid rgba(200,180,240,0.35); border-radius: var(--radius); padding: 32px 28px; box-shadow: var(--shadow-card); }
 .location-info .loc-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
 .location-info .loc-row:last-child { margin-bottom: 0; }
-.loc-icon { width: 42px; height: 42px; flex-shrink: 0; background: var(--accent-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-.loc-icon i { color: var(--accent); font-size: 20px; }
-.loc-text .loc-label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; margin-bottom: 3px; }
-.loc-text strong { display: block; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.5; }
-.loc-text span { font-size: 13px; color: var(--text-sub); }
+.loc-icon { width: 42px; height: 42px; flex-shrink: 0; background: linear-gradient(135deg,#f0e6ff,#ddf0ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.loc-icon i { font-size: 20px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.loc-text .loc-label { font-family: 'Noto Sans JP',sans-serif; font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; margin-bottom: 3px; }
+.loc-text strong { display: block; font-family: 'Shippori Mincho',serif; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.5; }
+.loc-text span { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; color: var(--text-sub); }
 .qr-wrap { text-align: center; flex-shrink: 0; }
-.qr-wrap img { width: 140px; height: 140px; border-radius: 10px; border: 2px solid var(--border); }
-.qr-wrap p { font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+.qr-wrap img { width: 140px; height: 140px; border-radius: 10px; border: 2px solid rgba(200,180,240,0.4); }
+.qr-wrap p { font-family: 'Noto Sans JP',sans-serif; font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
 
-/* ── Pain Points ── */
-.pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 40px; }
-.pain-card { background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 24px 22px; display: flex; align-items: flex-start; gap: 16px; box-shadow: var(--shadow-card); transition: transform 0.18s, box-shadow 0.18s; }
+/* ─── Pain Points ─── */
+.pain-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 16px; margin-top: 40px; }
+.pain-card { background: #fff; border: 1.5px solid rgba(200,180,240,0.35); border-radius: var(--radius); padding: 24px 22px; display: flex; align-items: flex-start; gap: 16px; box-shadow: var(--shadow-card); transition: transform 0.18s, box-shadow 0.18s; }
 .pain-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
-.pain-card .pc-icon { width: 46px; height: 46px; flex-shrink: 0; background: var(--accent-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-.pain-card .pc-icon i { color: var(--accent); font-size: 22px; }
-.pain-card .pc-text strong { display: block; font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
-.pain-card .pc-text p { font-size: 13px; color: var(--text-sub); line-height: 1.65; }
+.pain-card .pc-icon { width: 46px; height: 46px; flex-shrink: 0; background: linear-gradient(135deg,#f0e6ff,#ddf0ff); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.pain-card .pc-icon i { font-size: 22px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.pain-card .pc-text strong { display: block; font-family: 'Shippori Mincho',serif; font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.pain-card .pc-text p { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; color: var(--text-sub); line-height: 1.7; }
 
-/* ── Reasons ── */
-.reasons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 44px; }
-.reason-card { background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 32px 26px; text-align: center; box-shadow: var(--shadow-card); transition: transform 0.18s, box-shadow 0.18s; }
+/* ─── Reasons ─── */
+.reasons-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 24px; margin-top: 44px; }
+.reason-card { background: #fff; border: 1.5px solid rgba(200,180,240,0.35); border-radius: var(--radius); padding: 34px 26px; text-align: center; box-shadow: var(--shadow-card); transition: transform 0.18s, box-shadow 0.18s; }
 .reason-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
-.reason-num { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 12px; }
-.reason-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: var(--accent-light); border-radius: 18px; display: flex; align-items: center; justify-content: center; }
-.reason-icon i { color: var(--accent); font-size: 28px; }
-.reason-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
-.reason-desc { font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+.reason-num { font-family: 'Noto Sans JP',sans-serif; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.12em; margin-bottom: 14px; }
+.reason-icon { width: 66px; height: 66px; margin: 0 auto 16px; background: linear-gradient(135deg,#f0e6ff,#ddf0ff,#ffe8f2); border-radius: 18px; display: flex; align-items: center; justify-content: center; }
+.reason-icon i { font-size: 28px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.reason-title { font-family: 'Shippori Mincho',serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text); letter-spacing: 0.04em; }
+.reason-desc { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; color: var(--text-sub); line-height: 1.75; }
 
-/* ── Before/After ── */
+/* ─── Before/After ─── */
 .ba-list { display: flex; flex-direction: column; gap: 20px; margin-top: 40px; }
-.ba-item { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
-.ba-before { padding: 24px 26px; background: #f7f8fb; }
-.ba-before .ba-label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; margin-bottom: 6px; }
-.ba-before p { font-size: 14px; color: var(--text-sub); line-height: 1.65; }
-.ba-arrow { padding: 0 20px; font-size: 24px; color: var(--gold); }
-.ba-after { padding: 24px 26px; background: var(--accent-light); }
-.ba-after .ba-label { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 6px; }
-.ba-after p { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.65; }
+.ba-item { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background: #fff; border: 1.5px solid rgba(200,180,240,0.35); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
+.ba-before { padding: 24px 26px; background: #f9f8ff; }
+.ba-before .ba-label { font-family: 'Noto Sans JP',sans-serif; font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 6px; }
+.ba-before p { font-family: 'Noto Sans JP',sans-serif; font-size: 14px; color: var(--text-sub); line-height: 1.7; }
+.ba-arrow { padding: 0 18px; font-size: 22px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.ba-after { padding: 24px 26px; background: linear-gradient(135deg,#f6f0ff,#eef5ff); }
+.ba-after .ba-label { font-family: 'Noto Sans JP',sans-serif; font-size: 11px; font-weight: 700; color: #8060c0; letter-spacing: 0.1em; margin-bottom: 6px; }
+.ba-after p { font-family: 'Shippori Mincho',serif; font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.7; }
 
-/* ── Testimonials ── */
-.testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-top: 44px; }
-.testi-card { background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 28px 26px; box-shadow: var(--shadow-card); position: relative; }
-.testi-card::before { content: '\201C'; font-family: Georgia, serif; font-size: 72px; color: var(--accent); opacity: 0.13; position: absolute; top: 10px; left: 18px; line-height: 1; }
+/* ─── Testimonials ─── */
+.testi-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 24px; margin-top: 44px; }
+.testi-card { background: #fff; border: 1.5px solid rgba(200,180,240,0.35); border-radius: var(--radius); padding: 30px 26px; box-shadow: var(--shadow-card); position: relative; }
+.testi-card::before { content: '\201C'; font-family: Georgia,serif; font-size: 72px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; opacity: 0.22; position: absolute; top: 10px; left: 18px; line-height: 1; }
 .testi-stars { color: var(--gold); font-size: 14px; margin-bottom: 12px; }
-.testi-body { font-size: 14px; color: var(--text-sub); line-height: 1.8; margin-bottom: 18px; }
+.testi-body { font-family: 'Noto Sans JP',sans-serif; font-size: 14px; color: var(--text-sub); line-height: 1.85; margin-bottom: 18px; }
 .testi-meta { display: flex; align-items: center; gap: 12px; }
-.testi-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid var(--accent); }
-.testi-avatar i { color: var(--accent); font-size: 20px; }
-.testi-name { font-size: 13px; font-weight: 700; color: var(--text); }
-.testi-info { font-size: 11px; color: var(--text-muted); }
+.testi-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg,#f0e6ff,#ddf0ff); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid rgba(200,180,240,0.5); }
+.testi-avatar i { font-size: 20px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.testi-name { font-family: 'Shippori Mincho',serif; font-size: 14px; font-weight: 700; color: var(--text); }
+.testi-info { font-family: 'Noto Sans JP',sans-serif; font-size: 11px; color: var(--text-muted); }
 
 /* Stats */
-.stats-row { display: flex; flex-wrap: wrap; background: var(--accent); border-radius: var(--radius); overflow: hidden; margin: 48px 0 0; border: 2px solid var(--gold); }
-.stat-item { flex: 1; min-width: 160px; padding: 28px 20px; text-align: center; color: #fff; border-right: 1px solid rgba(255,255,255,0.15); }
+.stats-row { display: flex; flex-wrap: wrap; background: linear-gradient(135deg,#2a1f5a,#1a3a6a,#2a1f5a); border-radius: var(--radius); overflow: hidden; margin: 48px 0 0; border: 2px solid rgba(200,180,240,0.25); }
+.stat-item { flex: 1; min-width: 150px; padding: 28px 20px; text-align: center; color: #fff; border-right: 1px solid rgba(255,255,255,0.10); }
 .stat-item:last-child { border-right: none; }
-.stat-num { font-family: 'Noto Serif JP', serif; font-size: 40px; font-weight: 700; line-height: 1; margin-bottom: 6px; color: var(--gold); }
+.stat-num { font-family: 'Shippori Mincho',serif; font-size: 40px; font-weight: 700; line-height: 1; margin-bottom: 6px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
 .stat-unit { font-size: 18px; }
-.stat-label { font-size: 13px; opacity: 0.85; }
+.stat-label { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; opacity: 0.80; }
 
 /* Mid CTA */
-.mid-cta-wrap { margin-top: 56px; text-align: center; background: linear-gradient(135deg, var(--accent-light), #f4f6fa); border: 2px solid var(--accent); border-radius: 24px; padding: 48px 32px; }
-.mid-cta-wrap p { font-size: 15px; color: var(--text-sub); margin-bottom: 24px; }
+.mid-cta-wrap { margin-top: 56px; text-align: center; background: linear-gradient(135deg,#f6f0ff,#eef5ff,#f0fbff); border: 1.5px solid rgba(200,180,240,0.40); border-radius: 24px; padding: 48px 32px; }
+.mid-cta-wrap p { font-family: 'Noto Sans JP',sans-serif; font-size: 15px; color: var(--text-sub); margin-bottom: 24px; }
 
 /* Steps */
 .steps-wrap { position: relative; margin-top: 48px; }
-.steps-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--border); transform: translateX(-50%); }
+.steps-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg,#c9a0dc,#a0c4f1,#a0f1e0,#f1e4a0,#f1a0b4); transform: translateX(-50%); opacity: 0.5; }
 .step-item { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 36px; position: relative; }
 .step-item:nth-child(even) { flex-direction: row-reverse; }
-.step-icon-wrap { flex-shrink: 0; width: 64px; height: 64px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(27,61,123,0.30); z-index: 1; border: 3px solid var(--gold); }
-.step-icon-wrap i { color: var(--gold); font-size: 24px; }
-.step-content { flex: 1; background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 22px 26px; box-shadow: var(--shadow-card); }
-.step-num-label { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 4px; }
-.step-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.step-desc { font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+.step-icon-wrap { flex-shrink: 0; width: 64px; height: 64px; background: linear-gradient(135deg,#3a2d6a,#2d4a8a); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(100,80,180,0.28); z-index: 1; border: 2px solid rgba(200,180,240,0.40); }
+.step-icon-wrap i { font-size: 24px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.step-content { flex: 1; background: #fff; border: 1.5px solid rgba(200,180,240,0.35); border-radius: var(--radius); padding: 22px 26px; box-shadow: var(--shadow-card); }
+.step-num-label { font-family: 'Noto Sans JP',sans-serif; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.12em; margin-bottom: 4px; }
+.step-title { font-family: 'Shippori Mincho',serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: 0.04em; }
+.step-desc { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; color: var(--text-sub); line-height: 1.75; }
 
 /* FAQ */
 .faq-list { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
-.faq-item { background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
-.faq-q { display: flex; align-items: center; gap: 16px; padding: 20px 24px; cursor: pointer; font-size: 15px; font-weight: 700; color: var(--text); transition: background 0.15s; user-select: none; }
-.faq-q:hover { background: var(--accent-light); }
-.faq-q .faq-q-icon { width: 32px; height: 32px; flex-shrink: 0; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 14px; font-weight: 700; }
-.faq-q .faq-toggle { margin-left: auto; color: var(--accent); font-size: 18px; transition: transform 0.25s; }
+.faq-item { background: #fff; border: 1.5px solid rgba(200,180,240,0.35); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
+.faq-q { display: flex; align-items: center; gap: 16px; padding: 20px 24px; cursor: pointer; font-family: 'Shippori Mincho',serif; font-size: 15px; font-weight: 700; color: var(--text); transition: background 0.15s; user-select: none; letter-spacing: 0.03em; }
+.faq-q:hover { background: linear-gradient(135deg,#f6f0ff,#eef5ff); }
+.faq-q .faq-q-icon { width: 32px; height: 32px; flex-shrink: 0; background: linear-gradient(135deg,#3a2d6a,#2d4a8a); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #e8d0ff; font-family: 'Noto Sans JP',sans-serif; font-size: 14px; font-weight: 700; }
+.faq-q .faq-toggle { margin-left: auto; font-size: 18px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; transition: transform 0.25s; }
 .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.32s ease, padding 0.2s; padding: 0 24px; }
 .faq-a.open { max-height: 300px; padding: 0 24px 20px; }
-.faq-a p { font-size: 14px; color: var(--text-sub); line-height: 1.8; padding-top: 8px; border-top: 1px solid var(--border); }
+.faq-a p { font-family: 'Noto Sans JP',sans-serif; font-size: 14px; color: var(--text-sub); line-height: 1.85; padding-top: 12px; border-top: 1px solid var(--border); }
 .faq-item.open .faq-toggle { transform: rotate(180deg); }
 
 /* Urgency */
-.urgency-banner { background: linear-gradient(135deg, var(--accent) 0%, #122b5a 100%); border-radius: var(--radius); padding: 36px 32px; color: #fff; text-align: center; margin: 56px 0; box-shadow: 0 12px 40px rgba(27,61,123,0.35); border: 2px solid var(--gold); }
-.urgency-banner h3 { font-size: clamp(20px, 3.5vw, 30px); font-weight: 900; margin-bottom: 10px; }
-.urgency-banner p { font-size: 15px; opacity: 0.9; margin-bottom: 4px; }
-.urgency-tag { display: inline-block; background: rgba(200,151,31,0.25); border: 1.5px solid var(--gold); color: var(--gold); border-radius: 999px; font-size: 13px; font-weight: 700; padding: 6px 20px; margin-bottom: 20px; }
+.urgency-banner { background: linear-gradient(135deg,#2a1f5a 0%,#1a3a6a 50%,#2a1f5a 100%); border-radius: var(--radius); padding: 40px 32px; color: #fff; text-align: center; margin: 56px 0; box-shadow: 0 12px 40px rgba(60,40,120,0.30); position: relative; overflow: hidden; }
+.urgency-banner::before { content: ''; position: absolute; inset: 0; background: var(--rainbow); background-size: 300%; animation: aurora 8s ease infinite; opacity: 0.06; }
+.urgency-banner h3 { font-family: 'Shippori Mincho',serif; font-size: clamp(22px,3.5vw,32px); font-weight: 800; margin-bottom: 12px; letter-spacing: 0.06em; position: relative; }
+.urgency-banner p { font-family: 'Noto Sans JP',sans-serif; font-size: 15px; opacity: 0.90; margin-bottom: 4px; position: relative; }
+.urgency-tag { display: inline-block; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.35); border-radius: 999px; font-family: 'Noto Sans JP',sans-serif; font-size: 13px; font-weight: 700; padding: 6px 20px; margin-bottom: 20px; position: relative; }
 
 /* Pricing */
-.price-card { max-width: 480px; margin: 0 auto; background: #fff; border: 2px solid var(--accent); border-radius: 24px; padding: 40px 36px; text-align: center; box-shadow: var(--shadow); }
-.price-tag { font-family: 'Noto Serif JP', serif; font-size: 48px; font-weight: 700; color: var(--accent); line-height: 1; }
-.price-unit { font-size: 20px; }
-.price-note { font-size: 13px; color: var(--text-muted); margin-top: 8px; margin-bottom: 24px; }
+.price-card { max-width: 480px; margin: 0 auto; background: #fff; border: 2px solid rgba(180,160,220,0.50); border-radius: 24px; padding: 44px 36px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+.price-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,#f6f0ff,#fff,#eef5ff); z-index: 0; }
+.price-card > * { position: relative; z-index: 1; }
+.price-tag { font-family: 'Shippori Mincho',serif; font-size: 52px; font-weight: 700; background: linear-gradient(135deg,#3a2d6a,#2d4a8a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height: 1; }
+.price-unit { font-size: 22px; }
+.price-note { font-family: 'Noto Sans JP',sans-serif; font-size: 13px; color: var(--text-muted); margin-top: 8px; margin-bottom: 24px; }
 .price-includes { text-align: left; border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 28px; }
-.price-includes li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-sub); margin-bottom: 10px; }
-.price-includes li i { color: var(--gold); font-size: 16px; flex-shrink: 0; }
+.price-includes li { display: flex; align-items: center; gap: 10px; font-family: 'Noto Sans JP',sans-serif; font-size: 14px; color: var(--text-sub); margin-bottom: 11px; }
+.price-includes li i { font-size: 16px; flex-shrink: 0; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
 
 /* Final CTA / SMS */
-.final-cta { background: linear-gradient(160deg, var(--accent-light) 0%, #f4f6fa 60%, var(--accent-light) 100%); padding: 96px 0 80px; text-align: center; }
-
-/* SMS Contact Cards */
-.sms-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 600px; margin: 44px auto 0; }
-.sms-card {
-  background: #fff; border: 2px solid var(--accent); border-radius: var(--radius);
-  padding: 28px 24px; text-align: center; box-shadow: var(--shadow-card);
-  transition: transform 0.18s, box-shadow 0.18s;
-}
+.final-cta { padding: 96px 0 80px; text-align: center; }
+.sms-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 24px; max-width: 600px; margin: 44px auto 0; }
+.sms-card { background: #fff; border: 2px solid rgba(180,160,220,0.45); border-radius: var(--radius); padding: 32px 24px; text-align: center; box-shadow: var(--shadow-card); transition: transform 0.18s, box-shadow 0.18s; }
 .sms-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
-.sms-card .sms-role { font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 8px; }
-.sms-card .sms-icon { width: 56px; height: 56px; margin: 0 auto 12px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.sms-card .sms-icon i { color: var(--accent); font-size: 24px; }
-.sms-card .sms-name { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.sms-card .sms-tel { font-family: 'Noto Serif JP', serif; font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 16px; }
-.btn-sms {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  background: linear-gradient(135deg, var(--gold), #e8b840);
-  color: #fff; font-size: 15px; font-weight: 700; font-family: inherit;
-  padding: 14px 28px; border-radius: 999px; border: none; cursor: pointer;
-  box-shadow: 0 6px 20px rgba(200,151,31,0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
-  text-decoration: none; width: 100%;
-}
-.btn-sms:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(200,151,31,0.45); }
-.sms-note { font-size: 12px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; }
-
-.tel-big { font-family: 'Noto Serif JP', serif; font-size: 28px; font-weight: 700; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 10px; }
-.tel-big i { color: var(--gold); }
-.contact-line a { color: var(--accent); font-weight: 700; }
+.sms-card .sms-role { font-family: 'Noto Sans JP',sans-serif; font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 10px; }
+.sms-card .sms-icon { width: 58px; height: 58px; margin: 0 auto 12px; background: linear-gradient(135deg,#f0e6ff,#ddf0ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.sms-card .sms-icon i { font-size: 26px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+.sms-card .sms-name { font-family: 'Shippori Mincho',serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.sms-card .sms-tel { font-family: 'Noto Serif JP',serif; font-size: 20px; font-weight: 700; color: var(--text-sub); margin-bottom: 18px; }
+.btn-sms { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg,#b06ad4 0%,#6a9fd4 60%,#6ad4bc 100%); background-size: 300%; animation: aurora 6s ease infinite; color: #fff; font-family: 'Noto Sans JP',sans-serif; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 999px; border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(140,100,200,0.35); transition: transform 0.15s, box-shadow 0.15s; text-decoration: none; width: 100%; text-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.btn-sms:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(140,100,200,0.45); }
+.sms-note { font-family: 'Noto Sans JP',sans-serif; font-size: 12px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; }
 
 /* Footer */
-footer { background: var(--accent); color: rgba(255,255,255,0.7); text-align: center; padding: 40px 20px; font-size: 13px; border-top: 3px solid var(--gold); }
-footer .footer-logo { font-family: 'Noto Serif JP', serif; font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-footer .footer-clef { color: var(--gold); font-size: 24px; }
-footer a { color: var(--gold); }
+footer { background: linear-gradient(135deg,#2a1f5a,#1a3a6a); color: rgba(255,255,255,0.70); text-align: center; padding: 44px 20px; font-size: 13px; border-top: 2px solid rgba(200,180,240,0.30); }
+footer .footer-logo { font-family: 'Shippori Mincho',serif; font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.08em; }
+footer .footer-clef { font-size: 26px; background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; }
+footer a { color: #d0c0f0; }
+footer p { font-family: 'Noto Sans JP',sans-serif; }
 
-/* Responsive */
-@media (max-width: 640px) {
+/* ─── Responsive ─── */
+@media (max-width: 680px) {
+  .gallery-grid { grid-template-columns: 1fr; }
+  .gallery-main { grid-column: 1; }
   .ba-item { grid-template-columns: 1fr; }
   .ba-arrow { transform: rotate(90deg); text-align: center; padding: 8px 0; }
   .step-item, .step-item:nth-child(even) { flex-direction: column; }
@@ -344,10 +561,10 @@ footer a { color: var(--gold); }
   .urgency-banner { padding: 28px 20px; }
   .section { padding: 52px 0; }
   .location-grid { grid-template-columns: 1fr; justify-items: center; }
-  .req-label { min-width: 110px; }
-  .treble-clef { font-size: 80px; }
+  .treble-clef { font-size: 88px; }
+  .greeting-wrap { padding: 28px 20px; }
 }
-@media (max-width: 400px) {
+@media (max-width: 420px) {
   .auth-badge { flex-direction: column; text-align: center; }
   .req-row { flex-direction: column; }
   .req-label { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
@@ -360,23 +577,26 @@ footer a { color: var(--gold); }
 <nav class="nav">
   <div class="nav-inner">
     <div class="nav-logo">
-      <span class="clef">𝄞</span>
+      <span class="nav-clef">𝄞</span>
       男声合唱団 ジョイフル・スーベニール
     </div>
-    <a href="#contact" class="nav-cta">見学を申込む</a>
+    <a href="#contact" class="nav-cta sans">見学を申込む</a>
   </div>
 </nav>
 
 <!-- ══════════════════════
      FIRST VIEW
 ══════════════════════ -->
-<section class="fv">
+<section class="fv aurora-bg">
   <div class="fv-deco fv-deco-1"></div>
   <div class="fv-deco fv-deco-2"></div>
+  <div class="fv-deco fv-deco-3"></div>
   <div class="container">
 
-    <!-- ト音記号 -->
-    <div class="treble-clef">𝄞</div>
+    <!-- ト音記号（文字と独立したブロックとして上部に配置） -->
+    <div class="treble-clef-wrap">
+      <span class="treble-clef">𝄞</span>
+    </div>
 
     <div class="fv-badges">
       <span class="badge"><i class="fa-solid fa-shield-halved"></i> 創設26年の実績</span>
@@ -428,8 +648,10 @@ footer a { color: var(--gold); }
   </div>
 </section>
 
+<div class="divider-rainbow"></div>
+
 <!-- ══════════════════════
-     １．定期演奏会
+     定期演奏会
 ══════════════════════ -->
 <section class="section section-alt" id="concert">
   <div class="container text-center">
@@ -439,31 +661,19 @@ footer a { color: var(--gold); }
       年に一度、アクロス福岡シンフォニーホールで定期演奏会を開催しています。<br>
       今から入団すれば、あなたもこの舞台に立てます。
     </p>
-
     <div class="concert-grid">
       <div class="concert-card">
         <div class="concert-badge"><i class="fa-solid fa-star" style="margin-right:4px;"></i>次回公演</div>
-        <div class="concert-date">
-          2026年<br>9月27日（日）
-        </div>
-        <div class="concert-venue">
-          <i class="fa-solid fa-location-dot"></i>
-          アクロス福岡 シンフォニーホール
-        </div>
+        <div class="concert-date">2026年<br>9月27日（日）</div>
+        <div class="concert-venue"><i class="fa-solid fa-location-dot"></i>アクロス福岡 シンフォニーホール</div>
       </div>
       <div class="concert-card">
         <div class="concert-badge"><i class="fa-solid fa-calendar" style="margin-right:4px;"></i>次々回公演</div>
-        <div class="concert-date">
-          2027年<br>10月31日（日）
-        </div>
-        <div class="concert-venue">
-          <i class="fa-solid fa-location-dot"></i>
-          アクロス福岡 シンフォニーホール
-        </div>
+        <div class="concert-date">2027年<br>10月31日（日）</div>
+        <div class="concert-venue"><i class="fa-solid fa-location-dot"></i>アクロス福岡 シンフォニーホール</div>
       </div>
     </div>
-
-    <p style="margin-top:24px;font-size:14px;color:var(--text-muted);">
+    <p class="sans" style="margin-top:24px;font-size:14px;color:var(--text-muted);">
       <i class="fa-solid fa-circle-info" style="color:var(--gold);margin-right:6px;"></i>
       今から入団すれば、次の定期演奏会に出演できます。
     </p>
@@ -471,9 +681,99 @@ footer a { color: var(--gold); }
 </section>
 
 <!-- ══════════════════════
-     ２．団員募集　代表挨拶
+     写真ギャラリー
 ══════════════════════ -->
-<section class="section" id="greeting">
+<!--
+  ═══════════════════════════════════════════════════
+  📸 写真の追加方法（初心者向け 手順）
+
+  【準備するもの】
+    - このHTMLファイルと同じ場所に「images」フォルダを作る
+    - 写真ファイルをそのフォルダに入れる
+
+  【ファイル名の付け方（例）】
+    images/
+      ├── flyer.jpg         ← チラシ
+      ├── concert1.jpg      ← 演奏会の写真
+      ├── practice1.jpg     ← 練習風景
+      ├── members1.jpg      ← 集合写真
+      ├── members2.jpg      ← 打ち上げ写真
+      └── stage1.jpg        ← 舞台写真
+
+  【写真を差し替える方法】
+  以下の各 <img src="..."> の部分を
+  実際のファイル名に書き換えるだけです！
+
+  例）concert1.jpg を使いたい場合:
+      src="images/photo1.jpg"
+      ↓ 変更後
+      src="images/concert1.jpg"
+
+  【枚数を増やしたい場合】
+  .gallery-sub のブロックをコピー＆ペーストして
+  src の部分を新しいファイル名に変更してください。
+  ═══════════════════════════════════════════════════
+-->
+<section class="gallery-section aurora-bg" id="gallery">
+  <div class="container text-center">
+    <div class="sec-label">活動の様子</div>
+    <h2 class="h-sub">歌声と笑顔があふれる仲間たち</h2>
+    <p class="gallery-intro">定期演奏会や練習風景など、私たちの活動の様子をご覧ください。</p>
+
+    <div class="gallery-grid">
+
+      <!-- メイン写真（横長・大きく表示） -->
+      <div class="gallery-main">
+        <img src="images/concert1.jpg" alt="定期演奏会の様子"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="photo-placeholder" style="display:none;">
+          <span class="ph-icon"><i class="fa-solid fa-image"></i></span>
+          <p>images/concert1.jpg<br>（演奏会の写真を配置）</p>
+        </div>
+        <div class="photo-caption">アクロス福岡シンフォニーホール 定期演奏会</div>
+      </div>
+
+      <!-- サブ写真①（左） -->
+      <div class="gallery-sub">
+        <img src="images/practice1.jpg" alt="練習風景"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="photo-placeholder" style="display:none;">
+          <span class="ph-icon"><i class="fa-solid fa-image"></i></span>
+          <p>images/practice1.jpg<br>（練習風景）</p>
+        </div>
+        <div class="photo-caption">毎回の練習風景</div>
+      </div>
+
+      <!-- サブ写真②（中） -->
+      <div class="gallery-sub">
+        <img src="images/members1.jpg" alt="団員集合写真"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="photo-placeholder" style="display:none;">
+          <span class="ph-icon"><i class="fa-solid fa-image"></i></span>
+          <p>images/members1.jpg<br>（集合写真）</p>
+        </div>
+        <div class="photo-caption">仲間との一枚</div>
+      </div>
+
+      <!-- サブ写真③（右） -->
+      <div class="gallery-sub">
+        <img src="images/stage1.jpg" alt="舞台の様子"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="photo-placeholder" style="display:none;">
+          <span class="ph-icon"><i class="fa-solid fa-image"></i></span>
+          <p>images/stage1.jpg<br>（舞台の様子）</p>
+        </div>
+        <div class="photo-caption">舞台に立つ瞬間</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider-rainbow"></div>
+
+<!-- 代表挨拶 -->
+<section class="section section-alt" id="greeting">
   <div class="container text-center">
     <div class="sec-label">団員募集</div>
     <h2 class="h-sub">代表からのご挨拶</h2>
@@ -482,7 +782,7 @@ footer a { color: var(--gold); }
         <div class="greeting-avatar"><i class="fa-solid fa-person"></i></div>
         <div class="greeting-name">
           <strong>代表 ご挨拶</strong>
-          <span>男声合唱団 ジョイフル・スーベニール</span>
+          <span class="sans">男声合唱団 ジョイフル・スーベニール</span>
         </div>
       </div>
       <div class="greeting-body">
@@ -496,8 +796,8 @@ footer a { color: var(--gold); }
   </div>
 </section>
 
-<!-- ── 指導スタッフ ── -->
-<section class="section section-alt" id="staff">
+<!-- 指導スタッフ -->
+<section class="section" id="staff">
   <div class="container text-center">
     <div class="sec-label">指導スタッフ</div>
     <h2 class="h-sub">プロの先生が丁寧に指導します</h2>
@@ -518,93 +818,54 @@ footer a { color: var(--gold); }
   </div>
 </section>
 
-<!-- ── 募集要項 ── -->
-<section class="section" id="requirements">
+<!-- 募集要項 -->
+<section class="section section-alt" id="requirements">
   <div class="container text-center">
     <div class="sec-label">募集要項</div>
     <h2 class="h-sub">入団にあたって</h2>
     <div class="requirements-card">
-      <div class="req-header">
-        <i class="fa-solid fa-clipboard-list"></i> 募集要項
-      </div>
+      <div class="req-header"><i class="fa-solid fa-clipboard-list"></i> 募集要項</div>
       <div class="req-body">
-        <div class="req-row">
-          <div class="req-label"><i class="fa-solid fa-user-check"></i>入団資格</div>
-          <div class="req-value">コーラスの経験を問いません。<strong>男声合唱が好きな方であれば年齢・経験不問</strong>で大歓迎です。</div>
-        </div>
-        <div class="req-row">
-          <div class="req-label"><i class="fa-solid fa-calendar-check"></i>練習日程</div>
-          <div class="req-value"><strong>毎月第2・第4 月曜日（月2回）</strong>18:00 〜 20:00（練習後に交流会あり）</div>
-        </div>
-        <div class="req-row">
-          <div class="req-label"><i class="fa-solid fa-location-dot"></i>練習場所</div>
-          <div class="req-value"><strong>正興電機製作所 本社ビル 別館8階ホール</strong>〒812-0053　福岡市博多区東光2-7-25</div>
-        </div>
-        <div class="req-row">
-          <div class="req-label"><i class="fa-solid fa-yen-sign"></i>会費</div>
-          <div class="req-value"><strong>月額 4,000円</strong>（定期演奏会経費積立 1,500円 含む）<br><span style="color:var(--gold);font-weight:700;">入会金 無料</span></div>
-        </div>
-        <div class="req-row">
-          <div class="req-label"><i class="fa-solid fa-star"></i>定期演奏会</div>
-          <div class="req-value">年1回・アクロス福岡シンフォニーホールにて開催<br><strong>2026年9月27日（日）／ 2027年10月31日（日）</strong></div>
-        </div>
-        <div class="req-row">
-          <div class="req-label"><i class="fa-solid fa-comment-sms"></i>お問い合わせ</div>
-          <div class="req-value">
-            近藤 <a href="sms:090-4588-0395?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。" style="color:var(--accent);font-weight:700;">090-4588-0395</a>（SMS可）<br>
-            小池 <a href="sms:080-3187-0647?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。" style="color:var(--accent);font-weight:700;">080-3187-0647</a>（SMS可）
-          </div>
-        </div>
+        <div class="req-row"><div class="req-label"><i class="fa-solid fa-user-check"></i>入団資格</div><div class="req-value">コーラスの経験を問いません。<strong>男声合唱が好きな方であれば年齢・経験不問</strong>で大歓迎です。</div></div>
+        <div class="req-row"><div class="req-label"><i class="fa-solid fa-calendar-check"></i>練習日程</div><div class="req-value"><strong>毎月第2・第4 月曜日（月2回）</strong>18:00 〜 20:00（練習後に交流会あり）</div></div>
+        <div class="req-row"><div class="req-label"><i class="fa-solid fa-location-dot"></i>練習場所</div><div class="req-value"><strong>正興電機製作所 本社ビル 別館8階ホール</strong>〒812-0053　福岡市博多区東光2-7-25</div></div>
+        <div class="req-row"><div class="req-label"><i class="fa-solid fa-yen-sign"></i>会費</div><div class="req-value"><strong>月額 4,000円</strong>（定期演奏会経費積立 1,500円 含む）<br><span style="color:var(--gold);font-weight:700;font-family:'Noto Sans JP',sans-serif;">入会金 無料</span></div></div>
+        <div class="req-row"><div class="req-label"><i class="fa-solid fa-star"></i>定期演奏会</div><div class="req-value">年1回・アクロス福岡シンフォニーホール<br><strong>2026年9月27日（日）／ 2027年10月31日（日）</strong></div></div>
+        <div class="req-row"><div class="req-label"><i class="fa-solid fa-comment-sms"></i>お問い合わせ</div><div class="req-value" style="font-family:'Noto Sans JP',sans-serif;">
+          近藤 <a href="sms:090-4588-0395?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。" style="color:#6060c0;font-weight:700;">090-4588-0395</a>（SMS可）<br>
+          小池 <a href="sms:080-3187-0647?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。" style="color:#6060c0;font-weight:700;">080-3187-0647</a>（SMS可）
+        </div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── 練習場所 + QR ── -->
-<section class="section section-alt" id="location">
+<!-- 練習場所 + QR -->
+<section class="section" id="location">
   <div class="container text-center">
     <div class="sec-label">練習場所・アクセス</div>
     <h2 class="h-sub">練習場所</h2>
     <div class="location-grid">
       <div class="location-info">
-        <div class="loc-row">
-          <div class="loc-icon"><i class="fa-solid fa-building"></i></div>
-          <div class="loc-text">
-            <div class="loc-label">建物名</div>
-            <strong>正興電機製作所 本社ビル 別館8階ホール</strong>
-            <span>〒812-0053　福岡市博多区東光2-7-25</span>
-          </div>
-        </div>
-        <div class="loc-row">
-          <div class="loc-icon"><i class="fa-solid fa-clock"></i></div>
-          <div class="loc-text">
-            <div class="loc-label">練習日・時間</div>
-            <strong>毎月第2・第4 月曜日　18:00〜20:00</strong>
-          </div>
-        </div>
-        <div class="loc-row">
-          <div class="loc-icon"><i class="fa-solid fa-map"></i></div>
-          <div class="loc-text">
-            <div class="loc-label">地図</div>
-            <a href="https://maps.google.com/maps?q=福岡市博多区東光2-7-25" target="_blank" rel="noopener"
-              style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:9px 18px;background:var(--accent-light);border:1.5px solid var(--accent);border-radius:999px;color:var(--accent);font-size:13px;font-weight:700;">
-              <i class="fa-solid fa-map-location-dot"></i> Google マップで見る
-            </a>
-          </div>
-        </div>
+        <div class="loc-row"><div class="loc-icon"><i class="fa-solid fa-building"></i></div><div class="loc-text"><div class="loc-label">建物名</div><strong>正興電機製作所 本社ビル 別館8階ホール</strong><span>〒812-0053　福岡市博多区東光2-7-25</span></div></div>
+        <div class="loc-row"><div class="loc-icon"><i class="fa-solid fa-clock"></i></div><div class="loc-text"><div class="loc-label">練習日・時間</div><strong>毎月第2・第4 月曜日　18:00〜20:00</strong></div></div>
+        <div class="loc-row"><div class="loc-icon"><i class="fa-solid fa-map"></i></div><div class="loc-text"><div class="loc-label">地図</div>
+          <a href="https://maps.google.com/maps?q=福岡市博多区東光2-7-25" target="_blank" rel="noopener"
+            style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:9px 18px;background:linear-gradient(135deg,#f6f0ff,#eef5ff);border:1.5px solid rgba(180,160,220,0.5);border-radius:999px;color:var(--text-sub);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;">
+            <i class="fa-solid fa-map-location-dot"></i> Google マップで見る
+          </a>
+        </div></div>
       </div>
       <div class="qr-wrap">
-        <img
-          src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&color=1b3d7b&data=https%3A%2F%2Fmaps.google.com%2Fmaps%3Fq%3D%E7%A6%8F%E5%B2%A1%E5%B8%82%E5%8D%9A%E5%A4%9A%E5%8C%BA%E6%9D%B1%E5%85%892-7-25"
-          alt="練習場所 QRコード（Googleマップ）" width="140" height="140" />
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&color=3a2d6a&data=https%3A%2F%2Fmaps.google.com%2Fmaps%3Fq%3D%E7%A6%8F%E5%B2%A1%E5%B8%82%E5%8D%9A%E5%A4%9A%E5%8C%BA%E6%9D%B1%E5%85%892-7-25" alt="練習場所QRコード" width="140" height="140" />
         <p>QRコードを読み取ると<br>地図が開きます</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── お悩み ── -->
-<section class="section" id="pain">
+<!-- お悩み -->
+<section class="section section-alt" id="pain">
   <div class="container text-center">
     <div class="sec-label">こんなお悩みありませんか？</div>
     <h2 class="h-sub">あなたの「もっと歌いたい」という<br>気持ち、ずっと眠ったままですか？</h2>
@@ -615,12 +876,12 @@ footer a { color: var(--gold); }
       <div class="pain-card"><div class="pc-icon"><i class="fa-solid fa-question-circle"></i></div><div class="pc-text"><strong>「高齢でも続けられる？」</strong><p>年を取ったら迷惑をかけないか。若い人ばかりだったら浮きそう…</p></div></div>
       <div class="pain-card"><div class="pc-icon"><i class="fa-solid fa-heart-crack"></i></div><div class="pc-text"><strong>「毎日が刺激のない日常」</strong><p>定年後、何か夢中になれるものを探している。生活に張り合いが欲しい。</p></div></div>
     </div>
-    <p style="margin-top:40px;font-size:18px;font-weight:700;color:var(--gold);">✋ その悩み、ジョイフル・スーベニールが全部解決します。</p>
+    <p class="sans" style="margin-top:40px;font-size:18px;font-weight:700;color:var(--gold);">✋ その悩み、ジョイフル・スーベニールが全部解決します。</p>
   </div>
 </section>
 
-<!-- ── 選ばれる理由 ── -->
-<section class="section section-alt" id="reasons">
+<!-- 選ばれる理由 -->
+<section class="section" id="reasons">
   <div class="container text-center">
     <div class="sec-label">選ばれる理由</div>
     <h2 class="h-sub">なぜ26年間、愛され続けているのか</h2>
@@ -634,33 +895,21 @@ footer a { color: var(--gold); }
   </div>
 </section>
 
-<!-- ── Before/After ── -->
-<section class="section" id="benefit">
+<!-- Before/After -->
+<section class="section section-alt" id="benefit">
   <div class="container text-center">
     <div class="sec-label">入団後の変化</div>
     <h2 class="h-sub">入団3か月で、こんなに変わる</h2>
     <div class="ba-list">
-      <div class="ba-item">
-        <div class="ba-before"><div class="ba-label">BEFORE</div><p>退職してから毎日が同じ繰り返し。何か楽しみがほしいけど何もない、と思っていた。</p></div>
-        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-        <div class="ba-after"><div class="ba-label">AFTER</div><p>週1回の練習が待ち遠しい！練習後の飲み会が楽しくて、毎週顔を合わせる友人ができた。</p></div>
-      </div>
-      <div class="ba-item">
-        <div class="ba-before"><div class="ba-label">BEFORE</div><p>音楽は学校の授業以来。楽譜も読めないし、自分には無理だと最初からあきらめていた。</p></div>
-        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-        <div class="ba-after"><div class="ba-label">AFTER</div><p>3か月でシンフォニーホールの舞台に立てた。「自分ってできるんだ」と自信がついた。</p></div>
-      </div>
-      <div class="ba-item">
-        <div class="ba-before"><div class="ba-label">BEFORE</div><p>家に引きこもりがちで健康が心配。外に出る理由と、体を使う趣味が欲しかった。</p></div>
-        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-        <div class="ba-after"><div class="ba-label">AFTER</div><p>腹式呼吸で体が温まり、声を出すことで気持ちもスッキリ。家族にも「明るくなった」と言われた。</p></div>
-      </div>
+      <div class="ba-item"><div class="ba-before"><div class="ba-label">BEFORE</div><p>退職してから毎日が同じ繰り返し。何か楽しみがほしいけど何もない、と思っていた。</p></div><div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div><div class="ba-after"><div class="ba-label">AFTER</div><p>週1回の練習が待ち遠しい！練習後の飲み会が楽しくて、毎週顔を合わせる友人ができた。</p></div></div>
+      <div class="ba-item"><div class="ba-before"><div class="ba-label">BEFORE</div><p>音楽は学校の授業以来。楽譜も読めないし、自分には無理だと最初からあきらめていた。</p></div><div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div><div class="ba-after"><div class="ba-label">AFTER</div><p>3か月でシンフォニーホールの舞台に立てた。「自分ってできるんだ」と自信がついた。</p></div></div>
+      <div class="ba-item"><div class="ba-before"><div class="ba-label">BEFORE</div><p>家に引きこもりがちで健康が心配。外に出る理由と、体を使う趣味が欲しかった。</p></div><div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div><div class="ba-after"><div class="ba-label">AFTER</div><p>腹式呼吸で体が温まり、声を出すことで気持ちもスッキリ。家族にも「明るくなった」と言われた。</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- ── 団員の声 ── -->
-<section class="section section-alt" id="voice">
+<!-- 団員の声 -->
+<section class="section" id="voice">
   <div class="container text-center">
     <div class="sec-label">団員の声</div>
     <h2 class="h-sub">実際に入団した方の声を聞いてください</h2>
@@ -676,26 +925,22 @@ footer a { color: var(--gold); }
       <div class="stat-item"><div class="stat-num">100<span class="stat-unit">%</span></div><div class="stat-label">未経験者入団OK</div></div>
     </div>
     <div class="mid-cta-wrap">
-      <p class="lead">あなたも「歌う仲間」の一人になりませんか？<br>まずは一度、無料で見学してみてください。</p>
-      <a href="#contact" class="btn-cta">
-        <i class="fa-solid fa-comment-sms"></i>ショートメッセージで申込む
-      </a>
-      <p style="margin-top:14px;font-size:12px;color:var(--text-muted);">
-        <i class="fa-solid fa-lock"></i> 無料見学後の入団強要は一切ありません
-      </p>
+      <p>あなたも「歌う仲間」の一人になりませんか？<br>まずは一度、無料で見学してみてください。</p>
+      <a href="#contact" class="btn-cta"><i class="fa-solid fa-comment-sms"></i>ショートメッセージで申込む</a>
+      <p style="margin-top:14px;font-size:12px;color:var(--text-muted);font-family:'Noto Sans JP',sans-serif;"><i class="fa-solid fa-lock"></i> 無料見学後の入団強要は一切ありません</p>
     </div>
   </div>
 </section>
 
-<!-- ── 料金 ── -->
-<section class="section" id="price">
+<!-- 料金 -->
+<section class="section section-alt" id="price">
   <div class="container text-center">
     <div class="sec-label">料金プラン</div>
     <h2 class="h-sub">シンプルでわかりやすい料金体系</h2>
     <div class="price-card" style="margin-top:40px;">
-      <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:8px;">月額</div>
+      <div class="sans" style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:8px;">月額</div>
       <div class="price-tag">¥4,000<span class="price-unit">/月</span></div>
-      <p class="price-note">定期演奏会経費積立 ¥1,500 を含む<br><strong style="color:var(--gold);">入会金 ¥0</strong></p>
+      <p class="price-note sans">定期演奏会経費積立 ¥1,500 を含む<br><strong style="color:var(--gold);">入会金 ¥0</strong></p>
       <ul class="price-includes">
         <li><i class="fa-solid fa-check-circle"></i> 毎回の練習参加費込み</li>
         <li><i class="fa-solid fa-check-circle"></i> 定期演奏会への出演権（年1回）</li>
@@ -703,42 +948,28 @@ footer a { color: var(--gold); }
         <li><i class="fa-solid fa-check-circle"></i> 練習後の交流会への参加</li>
         <li><i class="fa-solid fa-check-circle"></i> 中野恭子先生・権藤寛子先生による本格指導</li>
       </ul>
-      <a href="#contact" class="btn-cta" style="width:100%;">
-        <i class="fa-solid fa-comment-sms"></i>まず無料で見学する
-      </a>
+      <a href="#contact" class="btn-cta" style="width:100%;"><i class="fa-solid fa-comment-sms"></i>まず無料で見学する</a>
     </div>
   </div>
 </section>
 
-<!-- ── 入団の流れ ── -->
-<section class="section section-alt" id="flow">
+<!-- 入団の流れ -->
+<section class="section" id="flow">
   <div class="container text-center">
     <div class="sec-label">入団の流れ</div>
     <h2 class="h-sub">入団まで、たった4ステップ</h2>
     <div class="steps-wrap">
       <div class="steps-line"></div>
-      <div class="step-item">
-        <div class="step-icon-wrap"><i class="fa-solid fa-comment-sms"></i></div>
-        <div class="step-content"><div class="step-num-label">STEP 01</div><div class="step-title">ショートメッセージで申込み</div><p class="step-desc">下記のボタンからSMSを送るだけ。「見学希望」とひと言で大丈夫です。</p></div>
-      </div>
-      <div class="step-item">
-        <div class="step-icon-wrap"><i class="fa-solid fa-phone"></i></div>
-        <div class="step-content"><div class="step-num-label">STEP 02</div><div class="step-title">担当者から折り返し連絡</div><p class="step-desc">近藤または小池からSMSまたはお電話でご連絡し、見学日を一緒に決めます。</p></div>
-      </div>
-      <div class="step-item">
-        <div class="step-icon-wrap"><i class="fa-solid fa-eye"></i></div>
-        <div class="step-content"><div class="step-num-label">STEP 03</div><div class="step-title">無料見学・体験</div><p class="step-desc">練習を見学または一緒に体験できます。その場で入団を決める必要はありません。</p></div>
-      </div>
-      <div class="step-item">
-        <div class="step-icon-wrap"><i class="fa-solid fa-star"></i></div>
-        <div class="step-content"><div class="step-num-label">STEP 04</div><div class="step-title">入団・歌人生スタート！</div><p class="step-desc">入団届を記入するだけ。入会金不要で、その月から仲間の一員になれます。</p></div>
-      </div>
+      <div class="step-item"><div class="step-icon-wrap"><i class="fa-solid fa-comment-sms"></i></div><div class="step-content"><div class="step-num-label">STEP 01</div><div class="step-title">SMSで申込み</div><p class="step-desc">下記ボタンからSMSを送るだけ。「見学希望」とひと言で大丈夫です。</p></div></div>
+      <div class="step-item"><div class="step-icon-wrap"><i class="fa-solid fa-phone"></i></div><div class="step-content"><div class="step-num-label">STEP 02</div><div class="step-title">担当者から折り返し連絡</div><p class="step-desc">近藤または小池からSMSまたは電話でご連絡し、見学日を一緒に決めます。</p></div></div>
+      <div class="step-item"><div class="step-icon-wrap"><i class="fa-solid fa-eye"></i></div><div class="step-content"><div class="step-num-label">STEP 03</div><div class="step-title">無料見学・体験</div><p class="step-desc">練習を見学または体験できます。その場で入団を決める必要はありません。</p></div></div>
+      <div class="step-item"><div class="step-icon-wrap"><i class="fa-solid fa-star"></i></div><div class="step-content"><div class="step-num-label">STEP 04</div><div class="step-title">入団・歌人生スタート！</div><p class="step-desc">入団届を記入するだけ。入会金不要で、その月から仲間の一員になれます。</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- ── FAQ ── -->
-<section class="section" id="faq">
+<!-- FAQ -->
+<section class="section section-alt" id="faq">
   <div class="container text-center">
     <div class="sec-label">よくある質問</div>
     <h2 class="h-sub">「迷ったら読んでください」</h2>
@@ -747,67 +978,49 @@ footer a { color: var(--gold); }
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-icon">Q</div>年齢制限はありますか？<i class="fa-solid fa-chevron-down faq-toggle"></i></div><div class="faq-a"><p>年齢制限は一切ありません。50〜70代の方が中心に活躍されています。「歌うのが好き」というお気持ちがあれば何歳でも大歓迎です。</p></div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-icon">Q</div>練習の頻度・時間・場所は？<i class="fa-solid fa-chevron-down faq-toggle"></i></div><div class="faq-a"><p>月2回（第2・第4月曜日）、18:00〜20:00です。練習場所は福岡市博多区東光2-7-25 正興電機製作所本社ビル 別館8階ホールです。</p></div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-icon">Q</div>見学だけでもできますか？<i class="fa-solid fa-chevron-down faq-toggle"></i></div><div class="faq-a"><p>もちろんです。入団を急かすことは一切しませんので、雰囲気を見てからゆっくり考えてください。何回でも見学いただけます。</p></div></div>
-      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-icon">Q</div>月会費以外に費用はかかりますか？<i class="fa-solid fa-chevron-down faq-toggle"></i></div><div class="faq-a"><p>月額4,000円（演奏会積立¥1,500含む）のほか、演奏会時の衣装費（スーツ着用のため、お持ちの方は不要）や楽譜代が一部かかる場合があります。詳細は見学時にご説明します。</p></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-icon">Q</div>月会費以外に費用はかかりますか？<i class="fa-solid fa-chevron-down faq-toggle"></i></div><div class="faq-a"><p>月額4,000円（演奏会積立¥1,500含む）のほか、演奏会時の衣装費や楽譜代が一部かかる場合があります。詳細は見学時にご説明します。</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- ── 緊急性 ── -->
+<!-- 緊急性 -->
 <div class="container">
   <div class="urgency-banner">
     <div class="urgency-tag">📣 見学随時受付中</div>
     <h3>「いつか始めよう」が、<br>一番遠い道のりです。</h3>
     <p>次の定期演奏会（2026年9月27日）まで、今から入団すれば舞台に立てます。</p>
-    <p style="font-size:13px;margin-bottom:24px;opacity:0.85;">※見学は随時受付中。SMSでお気軽にご連絡ください。</p>
-    <a href="#contact" class="btn-cta">
-      <i class="fa-solid fa-comment-sms"></i>今すぐSMSで申込む
-    </a>
+    <p style="font-size:13px;margin-bottom:24px;font-family:'Noto Sans JP',sans-serif;">※見学は随時受付中。SMSでお気軽にご連絡ください。</p>
+    <a href="#contact" class="btn-cta"><i class="fa-solid fa-comment-sms"></i>今すぐSMSで申込む</a>
   </div>
 </div>
 
-<!-- ══════════════════════
-     最終CTA — SMS連絡
-══════════════════════ -->
-<section class="final-cta" id="contact">
+<!-- 最終CTA / SMS -->
+<section class="final-cta aurora-bg" id="contact">
   <div class="container">
     <div class="sec-label" style="justify-content:center;">お問い合わせ・見学申込</div>
     <h2 class="h-sub">ショートメッセージ（SMS）で<br>気軽にお問い合わせください</h2>
     <p class="lead" style="max-width:540px;margin:12px auto 0;">
-      ボタンを押すとSMSアプリが開き、メッセージを送るだけで申込み完了。<br>
-      担当者から折り返しご連絡します。
+      ボタンを押すとSMSアプリが開き、メッセージを送るだけで申込み完了。<br>担当者から折り返しご連絡します。
     </p>
-
     <div class="sms-cards">
       <div class="sms-card">
         <div class="sms-role"><i class="fa-solid fa-user" style="margin-right:4px;"></i>担当：近藤</div>
         <div class="sms-icon"><i class="fa-solid fa-comment-sms"></i></div>
         <div class="sms-name">近藤</div>
-        <div class="sms-tel">090-4588-0395</div>
-        <a href="sms:090-4588-0395?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。%0Aお名前：%0Aご年齢：%0Aご都合の良い日：" class="btn-sms">
-          <i class="fa-solid fa-comment-sms"></i> SMSで申し込む
-        </a>
-        <p class="sms-note">
-          <i class="fa-solid fa-circle-info"></i> ボタンを押すとSMSアプリが開きます<br>
-          電話でのご連絡も歓迎です
-        </p>
+        <div class="sms-tel sans">090-4588-0395</div>
+        <a href="sms:090-4588-0395?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。%0Aお名前：%0Aご年齢：%0Aご都合の良い日：" class="btn-sms"><i class="fa-solid fa-comment-sms"></i> SMSで申し込む</a>
+        <p class="sms-note"><i class="fa-solid fa-circle-info"></i> ボタンを押すとSMSアプリが開きます</p>
       </div>
-
       <div class="sms-card">
         <div class="sms-role"><i class="fa-solid fa-user" style="margin-right:4px;"></i>担当：小池</div>
         <div class="sms-icon"><i class="fa-solid fa-comment-sms"></i></div>
         <div class="sms-name">小池</div>
-        <div class="sms-tel">080-3187-0647</div>
-        <a href="sms:080-3187-0647?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。%0Aお名前：%0Aご年齢：%0Aご都合の良い日：" class="btn-sms">
-          <i class="fa-solid fa-comment-sms"></i> SMSで申し込む
-        </a>
-        <p class="sms-note">
-          <i class="fa-solid fa-circle-info"></i> ボタンを押すとSMSアプリが開きます<br>
-          電話でのご連絡も歓迎です
-        </p>
+        <div class="sms-tel sans">080-3187-0647</div>
+        <a href="sms:080-3187-0647?body=【見学希望】男声合唱団ジョイフル・スーベニールの見学を希望します。%0Aお名前：%0Aご年齢：%0Aご都合の良い日：" class="btn-sms"><i class="fa-solid fa-comment-sms"></i> SMSで申し込む</a>
+        <p class="sms-note"><i class="fa-solid fa-circle-info"></i> ボタンを押すとSMSアプリが開きます</p>
       </div>
     </div>
-
-    <div style="margin-top:36px;padding:20px 24px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);max-width:500px;margin-left:auto;margin-right:auto;font-size:13px;color:var(--text-muted);line-height:1.8;box-shadow:var(--shadow-card);">
+    <div style="margin-top:36px;padding:20px 24px;background:rgba(255,255,255,0.85);border:1.5px solid rgba(200,180,240,0.40);border-radius:var(--radius);max-width:500px;margin-left:auto;margin-right:auto;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text-muted);line-height:1.85;box-shadow:var(--shadow-card);">
       <p><i class="fa-solid fa-shield-halved" style="color:var(--gold);margin-right:6px;"></i>いただいた情報は見学のご案内のみに使用します</p>
       <p><i class="fa-solid fa-clock" style="color:var(--gold);margin-right:6px;"></i>担当者から2営業日以内にご返信します</p>
       <p><i class="fa-solid fa-circle-check" style="color:var(--gold);margin-right:6px;"></i>見学当日の入団強要は一切ありません</p>
@@ -846,11 +1059,13 @@ function toggleFaq(el) {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.pain-card,.reason-card,.ba-item,.testi-card,.step-content,.faq-item,.concert-card,.staff-card,.sms-card').forEach(function(el) {
+  }, { threshold: 0.10 });
+  document.querySelectorAll(
+    '.pain-card,.reason-card,.ba-item,.testi-card,.step-content,.faq-item,.concert-card,.staff-card,.sms-card,.gallery-main,.gallery-sub'
+  ).forEach(function(el) {
     el.style.opacity = '0';
     el.style.transform = 'translateY(24px)';
-    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
     observer.observe(el);
   });
 })();
