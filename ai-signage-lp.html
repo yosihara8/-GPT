@@ -11,202 +11,166 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
 /* ============================================================
-   DESIGN TOKENS — Near-Future Color System
+   DESIGN TOKENS
    ============================================================ */
 :root {
-  /* Core accent palette */
-  --cyan:        #00D4FF;
-  --cyan-dark:   #00A8CC;
-  --cyan-glow:   rgba(0,212,255,0.35);
-  --purple:      #7B2FFF;
-  --purple-dark: #5B1FCC;
-  --purple-glow: rgba(123,47,255,0.35);
-  --grad-main:   linear-gradient(135deg, #00D4FF 0%, #7B2FFF 100%);
-  --grad-hero:   linear-gradient(160deg, #050A1A 0%, #0D1433 50%, #140A2E 100%);
-  --grad-section:linear-gradient(180deg, #F0F4FF 0%, #FAFBFF 100%);
-
-  /* Backgrounds */
-  --bg-dark:     #050A1A;
-  --bg-mid:      #0D1433;
-  --bg-light:    #F0F4FF;
-  --bg-white:    #FFFFFF;
-  --bg-card:     rgba(255,255,255,0.06);
-
-  /* Text */
-  --text-white:  #FFFFFF;
-  --text-dark:   #0A0E2A;
-  --text-sub:    #4A5568;
-  --text-muted:  #8896A8;
-
-  /* UI */
-  --radius-sm:  8px;
-  --radius:     16px;
-  --radius-lg:  24px;
-  --radius-xl:  40px;
-  --shadow-glow: 0 0 40px rgba(0,212,255,0.25);
-  --shadow-card: 0 4px 32px rgba(10,14,42,0.12);
-  --border-glass:1px solid rgba(255,255,255,0.12);
-
-  /* Spacing scale */
-  --space-xs:   8px;
-  --space-sm:   16px;
-  --space-md:   32px;
-  --space-lg:   64px;
-  --space-xl:   96px;
+  --cyan:         #00D4FF;
+  --cyan-dark:    #00A8CC;
+  --purple:       #7B2FFF;
+  --grad:         linear-gradient(135deg, #00D4FF 0%, #7B2FFF 100%);
+  --grad-hero:    linear-gradient(160deg, #050A1A 0%, #0D1433 55%, #140A2E 100%);
+  --bg-dark:      #050A1A;
+  --bg-mid:       #0D1433;
+  --bg-light:     #F0F4FF;
+  --bg-white:     #FFFFFF;
+  --text-white:   #FFFFFF;
+  --text-dark:    #0A0E2A;
+  --text-sub:     #4A5568;
+  --text-muted:   #8896A8;
+  --radius:       16px;
+  --radius-lg:    24px;
+  --radius-xl:    40px;
+  --shadow:       0 4px 32px rgba(10,14,42,0.12);
+  --glow-cyan:    0 0 32px rgba(0,212,255,0.3);
 }
 
 /* ============================================================
-   RESET & BASE
+   RESET
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
-  background: var(--bg-white);
+  font-family: 'Noto Sans JP', sans-serif;
+  background: #fff;
   color: var(--text-dark);
   line-height: 1.7;
   overflow-x: hidden;
 }
-img { max-width: 100%; height: auto; display: block; }
-a { text-decoration: none; color: inherit; }
 ul { list-style: none; }
+a  { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
 
 /* ============================================================
-   UTILITIES
+   COMMON PARTS
    ============================================================ */
-.container {
-  width: 100%;
+.wrap {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 var(--space-md);
+  padding: 0 24px;
 }
-.text-center { text-align: center; }
-.text-left   { text-align: left; }
 
-.section-label {
+.sec-label {
   display: inline-block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  background: var(--grad-main);
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: var(--space-sm);
+  margin-bottom: 12px;
 }
-.section-title {
-  font-size: clamp(28px, 4vw, 42px);
+
+.sec-title {
+  font-size: clamp(26px, 3.8vw, 42px);
   font-weight: 900;
   line-height: 1.3;
   color: var(--text-dark);
 }
-.section-title--white { color: var(--text-white); }
-.section-body {
-  font-size: 16px;
-  color: var(--text-sub);
-  max-width: 680px;
-  margin: var(--space-sm) auto 0;
-}
-.section-body--white { color: rgba(255,255,255,0.75); }
+.sec-title-w { color: #fff; }
 
-/* Gradient text helper */
+.sec-body {
+  font-size: 15px;
+  color: var(--text-sub);
+  line-height: 1.85;
+  max-width: 680px;
+  margin: 12px auto 0;
+}
+.sec-body-w { color: rgba(255,255,255,0.72); }
+
 .grad-text {
-  background: var(--grad-main);
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ============================================================
-   CTA BUTTONS
-   ============================================================ */
+.center { text-align: center; }
+
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 18px 40px;
+  padding: 17px 38px;
   border-radius: 50px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
   border: none;
-  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
   white-space: nowrap;
 }
-.btn:hover { transform: translateY(-2px); opacity: 0.92; }
+.btn:hover  { transform: translateY(-2px); opacity: 0.9; }
 .btn:active { transform: translateY(0); }
 
-.btn--primary {
-  background: var(--grad-main);
-  color: var(--text-white);
-  box-shadow: 0 8px 32px var(--cyan-glow), 0 4px 16px var(--purple-glow);
+.btn-main {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 6px 28px rgba(0,212,255,0.35), 0 3px 14px rgba(123,47,255,0.3);
 }
-.btn--primary:hover {
-  box-shadow: 0 12px 40px var(--cyan-glow), 0 6px 20px var(--purple-glow);
+.btn-main:hover {
+  box-shadow: 0 10px 36px rgba(0,212,255,0.45), 0 5px 18px rgba(123,47,255,0.4);
 }
-.btn--outline {
-  background: transparent;
-  color: var(--text-white);
-  border: 2px solid rgba(255,255,255,0.5);
-}
-.btn--outline:hover { border-color: var(--cyan); color: var(--cyan); }
-
-.btn--large { padding: 22px 52px; font-size: 19px; }
-.btn--block { width: 100%; max-width: 480px; }
-
-.btn-note {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 10px;
-  text-align: center;
-}
+.btn-lg { padding: 20px 48px; font-size: 18px; }
 
 /* ============================================================
-   STICKY NAVIGATION
+   NAVIGATION
    ============================================================ */
 .nav {
   position: fixed;
   top: 0; left: 0; right: 0;
-  z-index: 1000;
-  padding: 14px 0;
-  background: rgba(5,10,26,0.85);
+  z-index: 999;
+  background: rgba(5,10,26,0.92);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0,212,255,0.15);
-  transition: background 0.3s;
+  border-bottom: 1px solid rgba(0,212,255,0.12);
+  padding: 14px 0;
 }
-.nav__inner {
+.nav-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
 }
-.nav__logo {
-  font-size: 18px;
+.nav-logo {
+  font-size: 17px;
   font-weight: 900;
-  background: var(--grad-main);
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: -0.02em;
 }
-.nav__cta {
-  padding: 10px 24px;
-  font-size: 14px;
-  background: var(--grad-main);
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 22px;
+  background: var(--grad);
   color: #fff;
   border-radius: 50px;
+  font-size: 13px;
   font-weight: 700;
-  border: none;
+  font-family: inherit;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  border: none;
+  transition: opacity 0.18s, transform 0.18s;
 }
-.nav__cta:hover { opacity: 0.88; transform: translateY(-1px); }
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
 
 /* ============================================================
-   SECTION 1: HERO / FIRST VIEW
+   SECTION 1: HERO
    ============================================================ */
 .hero {
   position: relative;
@@ -215,10 +179,9 @@ ul { list-style: none; }
   align-items: center;
   background: var(--grad-hero);
   overflow: hidden;
-  padding-top: 80px;
+  padding: 100px 0 80px;
 }
-
-/* Animated grid background */
+/* Grid lines */
 .hero::before {
   content: '';
   position: absolute;
@@ -227,242 +190,240 @@ ul { list-style: none; }
     linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,212,255,0.07) 1px, transparent 1px);
   background-size: 60px 60px;
-  animation: gridMove 20s linear infinite;
+  animation: gridScroll 25s linear infinite;
+  pointer-events: none;
 }
-@keyframes gridMove {
+@keyframes gridScroll {
   0%   { background-position: 0 0; }
   100% { background-position: 60px 60px; }
 }
-
 /* Glow orbs */
-.hero::after {
-  content: '';
+.hero-orb1 {
+  position: absolute;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,212,255,0.14) 0%, transparent 65%);
+  top: -200px; left: -200px;
+  pointer-events: none;
+}
+.hero-orb2 {
   position: absolute;
   width: 600px; height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,212,255,0.18) 0%, transparent 70%);
-  top: -100px; left: -150px;
-  pointer-events: none;
-}
-.hero__orb2 {
-  position: absolute;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(123,47,255,0.18) 0%, transparent 70%);
-  bottom: -100px; right: -100px;
+  background: radial-gradient(circle, rgba(123,47,255,0.14) 0%, transparent 65%);
+  bottom: -150px; right: -150px;
   pointer-events: none;
 }
 
-.hero__inner {
+.hero-inner {
   position: relative;
   z-index: 2;
-  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-lg);
+  gap: 64px;
   align-items: center;
+  width: 100%;
 }
 
-.hero__badge-row {
+/* Badges */
+.badge-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: var(--space-sm);
+  gap: 8px;
+  margin-bottom: 20px;
 }
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 5px 13px;
   border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(0,212,255,0.45);
+  background: rgba(0,212,255,0.09);
+  color: var(--cyan);
+}
+.badge i { font-size: 10px; }
+
+.hero-eyebrow {
   font-size: 12px;
   font-weight: 700;
-  border: 1px solid rgba(0,212,255,0.4);
-  background: rgba(0,212,255,0.08);
-  color: var(--cyan);
-  letter-spacing: 0.04em;
-}
-.badge i { font-size: 11px; }
-
-.hero__eyebrow {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--cyan);
   margin-bottom: 16px;
 }
-.hero__title {
-  font-size: clamp(32px, 4.5vw, 54px);
-  font-weight: 900;
-  line-height: 1.2;
-  color: var(--text-white);
-  margin-bottom: 20px;
-  letter-spacing: -0.02em;
-}
-.hero__title .line-accent {
-  display: block;
-  background: var(--grad-main);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.hero__sub {
-  font-size: 16px;
-  color: rgba(255,255,255,0.72);
-  line-height: 1.8;
-  margin-bottom: var(--space-md);
-  max-width: 520px;
-}
-.hero__cta-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-}
-.hero__stats {
-  display: flex;
-  gap: var(--space-md);
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-.hero__stat-item { text-align: left; }
-.hero__stat-num {
-  font-size: 28px;
-  font-weight: 900;
-  background: var(--grad-main);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: block;
-}
-.hero__stat-label { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
 
-/* Hero visual card */
-.hero__visual {
-  position: relative;
+.hero-title {
+  font-size: clamp(30px, 4.2vw, 52px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
 }
-.hero__visual-card {
+.hero-title .accent {
+  display: block;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.85;
+  margin-bottom: 32px;
+  max-width: 500px;
+}
+.hero-sub strong { color: #fff; }
+
+.hero-cta-note {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  flex-wrap: wrap;
+}
+.hero-stat-num {
+  font-size: 26px;
+  font-weight: 900;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: block;
+  line-height: 1;
+}
+.hero-stat-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+  display: block;
+}
+
+/* Visual card right side */
+.hero-visual-card {
   background: rgba(255,255,255,0.05);
-  border: var(--border-glass);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
-  overflow: hidden;
+  padding: 28px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 48px rgba(0,0,0,0.45);
   position: relative;
+  overflow: hidden;
 }
-.hero__visual-card::before {
+.hero-visual-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: var(--grad-main);
+  background: var(--grad);
 }
-.hero__img-wrap {
+.hero-visual-screen {
   width: 100%;
   aspect-ratio: 16/10;
-  border-radius: var(--radius);
-  overflow: hidden;
+  border-radius: 12px;
   background: linear-gradient(135deg, #0D1433 0%, #140A2E 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-.hero__img-placeholder {
-  text-align: center;
-  color: rgba(255,255,255,0.5);
-}
-.hero__img-placeholder i {
-  font-size: 64px;
-  background: var(--grad-main);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: block;
-  margin-bottom: 12px;
-}
-.hero__img-placeholder span { font-size: 13px; letter-spacing: 0.1em; }
-
-.hero__visual-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-}
-.hero__visual-tag {
-  font-size: 11px;
-  color: var(--cyan);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.hero__visual-dots {
-  display: flex;
-  gap: 6px;
-}
-.hero__visual-dots span {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-}
-.hero__visual-dots span:first-child { background: var(--cyan); }
-
-/* Scroll indicator */
-.hero__scroll {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  color: rgba(255,255,255,0.4);
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,212,255,0.15);
+}
+.hero-visual-screen i {
+  font-size: 56px;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-visual-screen p {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.7);
+}
+.hero-visual-screen small {
   font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.08em;
+}
+.hero-visual-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hero-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.1em;
+  color: #00FF88;
 }
-.hero__scroll-line {
-  width: 1px; height: 40px;
-  background: linear-gradient(180deg, var(--cyan) 0%, transparent 100%);
-  animation: scrollPulse 2s ease-in-out infinite;
+.hero-live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #00FF88;
+  animation: livePulse 1.5s ease-in-out infinite;
 }
-@keyframes scrollPulse {
-  0%, 100% { opacity: 0.4; transform: scaleY(1); }
-  50%       { opacity: 1;   transform: scaleY(1.15); }
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
 }
+.hero-visual-dots { display: flex; gap: 5px; }
+.hero-visual-dots span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+}
+.hero-visual-dots span:first-child { background: var(--cyan); }
 
 /* ============================================================
-   SECTION 2: PROBLEM / 共感
+   SECTION 2: PROBLEM（共感）
    ============================================================ */
 .problem {
-  padding: var(--space-xl) 0;
+  padding: 96px 0;
   background: var(--bg-light);
   position: relative;
-  overflow: hidden;
 }
 .problem::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 4px;
-  background: var(--grad-main);
+  background: var(--grad);
 }
 
 .problem-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
+  gap: 16px;
+  margin-top: 56px;
 }
+
 .problem-card {
-  background: var(--bg-white);
+  background: #fff;
   border: 1px solid rgba(0,212,255,0.15);
   border-radius: var(--radius);
-  padding: 28px 28px;
+  padding: 24px 24px;
   display: flex;
   align-items: flex-start;
   gap: 16px;
@@ -470,57 +431,58 @@ ul { list-style: none; }
 }
 .problem-card:hover {
   border-color: var(--cyan);
-  box-shadow: 0 4px 24px var(--cyan-glow);
+  box-shadow: 0 4px 24px rgba(0,212,255,0.18);
   transform: translateY(-2px);
 }
 .problem-icon {
   flex-shrink: 0;
-  width: 48px; height: 48px;
+  width: 46px; height: 46px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0,212,255,0.12) 0%, rgba(123,47,255,0.12) 100%);
+  background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(123,47,255,0.1) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .problem-icon i {
-  font-size: 20px;
-  background: var(--grad-main);
+  font-size: 19px;
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .problem-text h3 {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-dark);
   margin-bottom: 6px;
+  line-height: 1.5;
 }
-.problem-text p { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+.problem-text p { font-size: 12px; color: var(--text-sub); line-height: 1.65; }
 
-.problem-emphasis {
-  margin-top: var(--space-lg);
-  text-align: center;
-  padding: var(--space-md);
-  background: var(--bg-white);
+.problem-box {
+  margin-top: 48px;
+  padding: 28px 32px;
+  background: #fff;
   border-radius: var(--radius-lg);
   border: 1px solid rgba(123,47,255,0.2);
-  max-width: 720px;
+  max-width: 760px;
   margin-left: auto;
   margin-right: auto;
+  text-align: center;
 }
-.problem-emphasis p {
-  font-size: 18px;
+.problem-box p {
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-dark);
-  line-height: 1.8;
+  line-height: 1.85;
 }
-.problem-emphasis .accent { color: var(--purple); }
+.problem-box .hl { color: var(--purple); }
 
 /* ============================================================
-   SECTION 3: WHY / 理由
+   SECTION 3: WHY（選ばれる理由）
    ============================================================ */
 .why {
-  padding: var(--space-xl) 0;
+  padding: 96px 0;
   background: var(--bg-dark);
   position: relative;
   overflow: hidden;
@@ -533,507 +495,612 @@ ul { list-style: none; }
     linear-gradient(rgba(123,47,255,0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(123,47,255,0.06) 1px, transparent 1px);
   background-size: 80px 80px;
+  pointer-events: none;
 }
-.why__inner { position: relative; z-index: 1; }
 
 .why-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
+  gap: 16px;
+  margin-top: 56px;
 }
+
 .why-card {
-  background: var(--bg-card);
-  border: var(--border-glass);
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--radius-lg);
-  padding: var(--space-md);
+  padding: 36px 28px;
   text-align: center;
   position: relative;
   overflow: hidden;
-  transition: transform 0.25s, box-shadow 0.25s;
+  transition: transform 0.22s, box-shadow 0.22s;
 }
-.why-card::before {
+.why-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  border-color: rgba(0,212,255,0.3);
+}
+.why-card::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: var(--grad-main);
+  background: var(--grad);
   opacity: 0;
-  transition: opacity 0.25s;
+  transition: opacity 0.22s;
 }
-.why-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
-.why-card:hover::before { opacity: 1; }
+.why-card:hover::after { opacity: 1; }
 
-.why-card__num {
-  font-size: 48px;
+.why-num {
+  font-size: 44px;
   font-weight: 900;
-  background: var(--grad-main);
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
   margin-bottom: 12px;
 }
-.why-card__icon {
-  font-size: 32px;
-  margin-bottom: 16px;
-  background: var(--grad-main);
+.why-icon {
+  font-size: 30px;
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin-bottom: 16px;
+  display: block;
 }
 .why-card h3 {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--text-white);
+  color: #fff;
   margin-bottom: 12px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
-.why-card p { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.7; }
+.why-card p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.62);
+  line-height: 1.75;
+}
+.why-card p strong { color: rgba(255,255,255,0.9); }
 
 /* ============================================================
-   SECTION 4: BENEFITS / Before→After
+   SECTION 4: BENEFITS（Before→After）
    ============================================================ */
 .benefits {
-  padding: var(--space-xl) 0;
-  background: var(--bg-white);
+  padding: 96px 0;
+  background: #fff;
 }
-.benefits-list {
+
+.ba-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
+  gap: 28px;
+  margin-top: 56px;
 }
-.benefit-row {
+
+.ba-row {
   display: grid;
-  grid-template-columns: 1fr 60px 1fr;
-  gap: var(--space-sm);
+  grid-template-columns: 1fr 52px 1fr;
+  gap: 16px;
   align-items: center;
 }
-.benefit-box {
-  padding: var(--space-md);
+
+.ba-box {
+  padding: 24px 28px;
   border-radius: var(--radius);
-  position: relative;
 }
-.benefit-box--before {
+.ba-before {
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
 }
-.benefit-box--after {
-  background: linear-gradient(135deg, rgba(0,212,255,0.06) 0%, rgba(123,47,255,0.06) 100%);
+.ba-after {
+  background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(123,47,255,0.05));
   border: 1px solid rgba(0,212,255,0.25);
 }
-.benefit-box__label {
-  font-size: 11px;
+
+.ba-label {
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.benefit-box--before .benefit-box__label { color: var(--text-muted); }
-.benefit-box--after  .benefit-box__label { color: var(--cyan); }
-.benefit-box h3 { font-size: 17px; font-weight: 700; line-height: 1.5; }
-.benefit-box--before h3 { color: var(--text-sub); }
-.benefit-box--after  h3 { color: var(--text-dark); }
-.benefit-box p { font-size: 13px; color: var(--text-sub); margin-top: 8px; }
+.ba-before .ba-label { color: var(--text-muted); }
+.ba-after  .ba-label { color: var(--cyan); }
 
-.benefit-arrow {
+.ba-box h3 {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.ba-before h3 { color: var(--text-sub); }
+.ba-after  h3 { color: var(--text-dark); }
+.ba-box p  { font-size: 13px; color: var(--text-sub); line-height: 1.65; }
+
+.ba-arrow {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--grad);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  background: var(--grad-main);
-  margin: 0 auto;
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
   flex-shrink: 0;
+  margin: 0 auto;
+  box-shadow: var(--glow-cyan);
 }
 
 /* ============================================================
-   SECTION 5: SOCIAL PROOF / お客様の声
+   SECTION 5: SOCIAL PROOF（お客様の声）
    ============================================================ */
-.social-proof {
-  padding: var(--space-xl) 0;
+.proof {
+  padding: 96px 0;
   background: var(--grad-hero);
   position: relative;
   overflow: hidden;
 }
-.social-proof::before {
+.proof::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0,212,255,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.05) 1px, transparent 1px);
+    linear-gradient(rgba(0,212,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.045) 1px, transparent 1px);
   background-size: 60px 60px;
+  pointer-events: none;
 }
-.social-proof__inner { position: relative; z-index: 1; }
+.proof-inner { position: relative; z-index: 1; }
 
-.reviews-grid {
+.review-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
+  gap: 16px;
+  margin-top: 56px;
 }
+
 .review-card {
   background: rgba(255,255,255,0.06);
-  border: var(--border-glass);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--radius-lg);
-  padding: var(--space-md);
+  padding: 28px;
   position: relative;
-  transition: transform 0.25s, box-shadow 0.25s;
+  transition: transform 0.22s, box-shadow 0.22s;
 }
-.review-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.35); }
-.review-card::before {
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.38);
+}
+.review-card::after {
   content: '\201C';
   position: absolute;
   top: 16px; right: 20px;
-  font-size: 80px;
+  font-size: 72px;
   line-height: 1;
-  background: var(--grad-main);
+  font-family: Georgia, serif;
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  opacity: 0.25;
-  font-family: Georgia, serif;
+  opacity: 0.2;
 }
-.review-stars {
-  display: flex;
-  gap: 3px;
-  margin-bottom: 12px;
-}
-.review-stars i { color: #FFD700; font-size: 14px; }
+
+.review-stars { display: flex; gap: 3px; margin-bottom: 12px; }
+.review-stars i { color: #FFD700; font-size: 13px; }
+
 .review-text {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(255,255,255,0.82);
-  line-height: 1.8;
-  margin-bottom: var(--space-sm);
+  line-height: 1.85;
+  margin-bottom: 16px;
 }
-.review-result {
-  padding: 10px 14px;
+.review-text strong { color: #fff; }
+
+.review-kpi {
+  padding: 9px 14px;
   background: rgba(0,212,255,0.1);
   border-left: 3px solid var(--cyan);
   border-radius: 0 8px 8px 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--cyan);
   margin-bottom: 16px;
 }
+
 .review-author {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 .review-avatar {
-  width: 44px; height: 44px;
+  width: 40px; height: 40px;
   border-radius: 50%;
-  background: var(--grad-main);
+  background: var(--grad);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  color: #fff;
+  font-size: 16px;
   font-weight: 700;
+  color: #fff;
   flex-shrink: 0;
 }
-.review-author-name { font-size: 14px; font-weight: 700; color: var(--text-white); }
-.review-author-role { font-size: 12px; color: rgba(255,255,255,0.5); }
+.review-name { font-size: 13px; font-weight: 700; color: #fff; }
+.review-role { font-size: 11px; color: rgba(255,255,255,0.45); }
 
-.proof-numbers {
+/* 実績数字 */
+.proof-nums {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
-  padding-top: var(--space-lg);
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 48px;
   border-top: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
 }
-.proof-num-item { text-align: center; }
-.proof-num-value {
-  font-size: 36px;
+.proof-num-val {
+  font-size: 34px;
   font-weight: 900;
-  background: var(--grad-main);
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: block;
   line-height: 1.1;
 }
-.proof-num-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 6px; }
+.proof-num-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 6px;
+}
 
 /* ============================================================
-   MIDDLE CTA
+   MID CTA
    ============================================================ */
 .cta-mid {
-  padding: var(--space-lg) 0;
+  padding: 72px 0;
   background: var(--bg-light);
-  text-align: center;
 }
-.cta-mid__inner {
-  background: var(--bg-white);
+.cta-mid-box {
+  background: #fff;
   border-radius: var(--radius-xl);
-  padding: var(--space-lg) var(--space-md);
-  box-shadow: var(--shadow-card);
-  border: 1px solid rgba(0,212,255,0.15);
-  max-width: 780px;
+  padding: 56px 48px;
+  text-align: center;
+  max-width: 800px;
   margin: 0 auto;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0,212,255,0.15);
 }
-.cta-mid__badge {
+.cta-mid-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(123,47,255,0.1));
   border: 1px solid rgba(0,212,255,0.3);
   border-radius: 50px;
-  padding: 8px 20px;
+  padding: 7px 20px;
   font-size: 13px;
   font-weight: 700;
   color: var(--purple);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 20px;
 }
-.cta-mid__title {
-  font-size: clamp(24px, 3vw, 34px);
+.cta-mid-title {
+  font-size: clamp(22px, 3vw, 32px);
   font-weight: 900;
   color: var(--text-dark);
-  line-height: 1.4;
-  margin-bottom: var(--space-sm);
+  line-height: 1.45;
+  margin-bottom: 14px;
 }
-.cta-mid__body { font-size: 15px; color: var(--text-sub); margin-bottom: var(--space-md); }
-
-/* ============================================================
-   SECTION 6: FLOW / 利用の流れ
-   ============================================================ */
-.flow {
-  padding: var(--space-xl) 0;
-  background: var(--bg-white);
+.cta-mid-body {
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.85;
+  margin-bottom: 28px;
 }
-.flow-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-top: var(--space-lg);
-  max-width: 760px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.flow-step {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: var(--space-sm);
-  align-items: flex-start;
-  position: relative;
-}
-.flow-step + .flow-step { margin-top: 8px; }
-.flow-step__left {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-.flow-step__num {
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: var(--grad-main);
+.cta-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  gap: 6px;
+}
+
+/* ============================================================
+   SECTION 6: FLOW（利用の流れ）
+   ============================================================ */
+.flow {
+  padding: 96px 0;
+  background: #fff;
+}
+
+.flow-steps {
+  max-width: 760px;
+  margin: 56px auto 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flow-step {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 16px;
+  align-items: flex-start;
+}
+.flow-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.flow-num {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--grad);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
   font-weight: 900;
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px var(--cyan-glow);
+  box-shadow: 0 4px 16px rgba(0,212,255,0.3);
 }
-.flow-step__line {
+.flow-line {
   width: 2px;
+  min-height: 44px;
   flex: 1;
-  min-height: 48px;
   background: linear-gradient(180deg, var(--cyan) 0%, rgba(0,212,255,0.1) 100%);
   margin: 4px 0;
 }
-.flow-step:last-child .flow-step__line { display: none; }
+.flow-step:last-child .flow-line { display: none; }
 
-.flow-step__body {
+.flow-body {
   background: var(--bg-light);
   border-radius: var(--radius);
-  padding: 24px var(--space-md);
-  margin-bottom: var(--space-sm);
+  padding: 22px 24px;
+  margin-bottom: 8px;
   border: 1px solid rgba(0,212,255,0.1);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.flow-step__body:hover {
+.flow-body:hover {
   border-color: var(--cyan);
-  box-shadow: 0 4px 20px var(--cyan-glow);
+  box-shadow: 0 4px 20px rgba(0,212,255,0.15);
 }
-.flow-step__tag {
-  font-size: 11px;
+.flow-tag {
+  font-size: 10px;
   font-weight: 700;
   color: var(--cyan);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.flow-step__title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
-.flow-step__desc  { font-size: 14px; color: var(--text-sub); line-height: 1.7; }
+.flow-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 7px; }
+.flow-desc  { font-size: 13px; color: var(--text-sub); line-height: 1.75; }
 
 /* ============================================================
-   SECTION 7: PRICING
+   SECTION 7: PRICING（料金プラン）
    ============================================================ */
 .pricing {
-  padding: var(--space-xl) 0;
+  padding: 96px 0;
   background: var(--bg-light);
 }
+
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
+  gap: 16px;
+  margin-top: 56px;
   align-items: start;
 }
-.pricing-card {
-  background: var(--bg-white);
+
+.p-card {
+  background: #fff;
   border-radius: var(--radius-lg);
-  padding: var(--space-md);
-  border: 1px solid rgba(0,212,255,0.15);
+  padding: 32px 28px;
   text-align: center;
-  transition: transform 0.25s, box-shadow 0.25s;
+  border: 1px solid rgba(0,212,255,0.15);
+  transition: transform 0.22s, box-shadow 0.22s;
   position: relative;
   overflow: hidden;
 }
-.pricing-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); }
-.pricing-card--featured {
+.p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.p-card-featured {
   border-color: var(--cyan);
-  box-shadow: 0 8px 40px var(--cyan-glow);
-  transform: scale(1.03);
+  box-shadow: 0 8px 40px rgba(0,212,255,0.18);
+  transform: scale(1.025);
 }
-.pricing-card--featured:hover { transform: scale(1.03) translateY(-4px); }
-.pricing-card--featured::before {
+.p-card-featured:hover { transform: scale(1.025) translateY(-4px); }
+.p-card-featured::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 4px;
-  background: var(--grad-main);
+  background: var(--grad);
 }
-.pricing-pop {
+
+.p-pop {
   position: absolute;
   top: 12px; right: 12px;
-  background: var(--grad-main);
+  background: var(--grad);
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 4px 9px;
   border-radius: 50px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
 }
-.pricing-icon {
-  font-size: 36px;
-  background: var(--grad-main);
+
+.p-icon {
+  font-size: 34px;
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 12px;
+  display: block;
 }
-.pricing-name { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
-.pricing-duration {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
-.pricing-price {
-  font-size: 38px;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--text-dark);
-  margin-bottom: 4px;
-}
-.pricing-price span { font-size: 16px; font-weight: 500; }
-.pricing-tax { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
-.pricing-features {
-  text-align: left;
-  margin-bottom: var(--space-sm);
-}
-.pricing-features li {
+.p-name     { font-size: 17px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+.p-duration { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+.p-price    { font-size: 34px; font-weight: 900; color: var(--text-dark); line-height: 1; }
+.p-price span { font-size: 14px; font-weight: 500; }
+.p-tax      { font-size: 11px; color: var(--text-muted); margin-bottom: 20px; margin-top: 3px; }
+
+.p-features { text-align: left; margin-bottom: 20px; }
+.p-features li {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   padding: 7px 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-sub);
-  border-bottom: 1px solid var(--bg-light);
+  border-bottom: 1px solid #F0F4FF;
 }
-.pricing-features li:last-child { border-bottom: none; }
-.pricing-features li i { color: var(--cyan); margin-top: 2px; flex-shrink: 0; }
+.p-features li:last-child { border-bottom: none; }
+.p-features li i { color: var(--cyan); font-size: 12px; margin-top: 2px; flex-shrink: 0; }
+
+.p-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: var(--grad);
+  color: #fff;
+  transition: opacity 0.18s, transform 0.18s;
+}
+.p-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ROI box */
+.roi-box {
+  margin-top: 40px;
+  padding: 28px 32px;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0,212,255,0.15);
+  max-width: 820px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.roi-title {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+.roi-title i { color: var(--cyan); margin-right: 6px; }
+.roi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  text-align: center;
+}
+.roi-item {
+  padding: 14px;
+  background: var(--bg-light);
+  border-radius: 10px;
+}
+.roi-item-val { font-size: 20px; font-weight: 900; color: var(--purple); }
+.roi-item-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.roi-item-result {
+  background: linear-gradient(135deg, rgba(0,212,255,0.07), rgba(123,47,255,0.07));
+  border: 1px solid rgba(0,212,255,0.2);
+}
+.roi-item-result .roi-item-val {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 20px;
+}
+.roi-note {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 12px;
+}
 
 /* ============================================================
    SECTION 8: FAQ
    ============================================================ */
 .faq {
-  padding: var(--space-xl) 0;
-  background: var(--bg-white);
+  padding: 96px 0;
+  background: #fff;
 }
+
 .faq-list {
   max-width: 800px;
-  margin: var(--space-lg) auto 0;
+  margin: 56px auto 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
+
 .faq-item {
   border: 1px solid rgba(0,212,255,0.18);
   border-radius: var(--radius);
   overflow: hidden;
-  transition: border-color 0.2s;
 }
 .faq-item:hover { border-color: var(--cyan); }
-.faq-item details { }
-.faq-item summary {
+
+.faq-item details summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  padding: 20px 24px;
+  gap: 14px;
+  padding: 18px 22px;
   cursor: pointer;
   list-style: none;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-dark);
-  background: var(--bg-white);
   user-select: none;
 }
-.faq-item summary::-webkit-details-marker { display: none; }
-.faq-q-icon {
-  width: 28px; height: 28px;
+.faq-item details summary::-webkit-details-marker { display: none; }
+
+.faq-q {
+  width: 26px; height: 26px;
   border-radius: 50%;
-  background: var(--grad-main);
+  background: var(--grad);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  color: #fff;
+  font-size: 11px;
   font-weight: 900;
+  color: #fff;
   flex-shrink: 0;
 }
 .faq-q-text { flex: 1; }
-.faq-chevron { font-size: 14px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+.faq-chevron { font-size: 12px; color: var(--text-muted); flex-shrink: 0; transition: transform 0.2s; }
 .faq-item details[open] .faq-chevron { transform: rotate(180deg); color: var(--cyan); }
-.faq-answer {
-  padding: 0 24px 20px 24px;
-  font-size: 14px;
+
+.faq-ans {
+  padding: 0 22px 18px calc(22px + 26px + 14px);
+  font-size: 13px;
   color: var(--text-sub);
-  line-height: 1.8;
-  padding-left: calc(24px + 28px + 16px);
+  line-height: 1.85;
 }
+.faq-ans strong { color: var(--text-dark); }
 
 /* ============================================================
-   SECTION 9: URGENCY / 限定オファー
+   SECTION 9: URGENCY（限定・緊急性）
    ============================================================ */
 .urgency {
-  padding: var(--space-xl) 0;
+  padding: 96px 0;
   background: var(--bg-dark);
   position: relative;
   overflow: hidden;
@@ -1043,210 +1110,203 @@ ul { list-style: none; }
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 50%, rgba(123,47,255,0.2) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(123,47,255,0.22) 0%, transparent 65%);
   pointer-events: none;
 }
-.urgency__inner { position: relative; z-index: 1; }
+.urgency-inner { position: relative; z-index: 1; }
 
-.urgency__tag {
+.urgency-tag {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255,60,60,0.15);
-  border: 1px solid rgba(255,60,60,0.5);
-  color: #FF6B6B;
-  padding: 8px 20px;
+  gap: 7px;
+  background: rgba(255,80,80,0.15);
+  border: 1px solid rgba(255,80,80,0.45);
+  color: #FF7070;
+  padding: 7px 18px;
   border-radius: 50px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  margin-bottom: var(--space-sm);
+  letter-spacing: 0.07em;
+  margin-bottom: 20px;
 }
-.urgency__title {
-  font-size: clamp(28px, 4vw, 48px);
+
+.urgency-title {
+  font-size: clamp(26px, 3.8vw, 46px);
   font-weight: 900;
-  color: var(--text-white);
+  color: #fff;
   line-height: 1.3;
-  margin-bottom: var(--space-sm);
+  margin-bottom: 16px;
 }
-.urgency__title .highlight {
-  background: var(--grad-main);
+.urgency-title .hl {
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.urgency__body {
-  font-size: 16px;
-  color: rgba(255,255,255,0.7);
-  max-width: 640px;
-  margin: 0 auto var(--space-md);
-  line-height: 1.8;
-}
 
-.urgency__counter {
-  display: inline-flex;
-  align-items: center;
-  gap: 24px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(0,212,255,0.2);
-  border-radius: var(--radius-lg);
-  padding: 24px 40px;
-  margin-bottom: var(--space-md);
+.urgency-body {
+  font-size: 15px;
+  color: rgba(255,255,255,0.68);
+  max-width: 620px;
+  margin: 0 auto 32px;
+  line-height: 1.85;
 }
-.urgency__counter-item { text-align: center; }
-.urgency__counter-num {
-  display: block;
-  font-size: 44px;
-  font-weight: 900;
-  background: var(--grad-main);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-}
-.urgency__counter-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; letter-spacing: 0.1em; }
-.urgency__counter-sep { font-size: 32px; color: rgba(255,255,255,0.2); line-height: 1; }
+.urgency-body strong { color: #fff; }
 
-.urgency__slots {
+/* 残り枠スロット */
+.slots {
   display: inline-flex;
   gap: 10px;
-  margin-bottom: var(--space-md);
+  margin-bottom: 32px;
 }
 .slot {
-  width: 48px; height: 48px;
+  width: 52px; height: 52px;
   border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.4);
 }
-.slot--filled { background: var(--grad-main); border-color: var(--cyan); color: #fff; }
-.slot--empty  { color: rgba(255,255,255,0.4); }
+.slot-filled {
+  background: var(--grad);
+  border-color: var(--cyan);
+  color: #fff;
+  box-shadow: var(--glow-cyan);
+}
+
+.urgency-note {
+  font-size: 11px;
+  color: rgba(255,255,255,0.38);
+  margin-top: 12px;
+}
 
 /* ============================================================
-   SECTION 10: FINAL CTA
+   SECTION 10: FINAL CTA + FORM
    ============================================================ */
 .cta-final {
-  padding: var(--space-xl) 0;
-  background: var(--bg-white);
-  text-align: center;
+  padding: 96px 0;
+  background: #fff;
 }
-.cta-final__card {
+.cta-final-card {
   background: var(--grad-hero);
   border-radius: var(--radius-xl);
-  padding: var(--space-xl) var(--space-md);
+  padding: 80px 48px;
+  max-width: 920px;
+  margin: 0 auto;
   position: relative;
   overflow: hidden;
-  max-width: 900px;
-  margin: 0 auto;
-  box-shadow: 0 20px 80px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 80px rgba(0,0,0,0.18);
 }
-.cta-final__card::before {
+.cta-final-card::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0,212,255,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.06) 1px, transparent 1px);
+    linear-gradient(rgba(0,212,255,0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.055) 1px, transparent 1px);
   background-size: 50px 50px;
   pointer-events: none;
 }
-.cta-final__inner { position: relative; z-index: 1; }
-.cta-final__label {
-  display: inline-block;
-  font-size: 12px;
+.cta-final-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.cta-final-label {
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--cyan);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
-.cta-final__title {
-  font-size: clamp(28px, 4vw, 46px);
+.cta-final-title {
+  font-size: clamp(26px, 3.8vw, 44px);
   font-weight: 900;
-  color: var(--text-white);
-  line-height: 1.25;
-  margin-bottom: var(--space-sm);
+  color: #fff;
+  line-height: 1.3;
+  margin-bottom: 14px;
 }
-.cta-final__body {
-  font-size: 16px;
-  color: rgba(255,255,255,0.7);
-  max-width: 580px;
-  margin: 0 auto var(--space-md);
-  line-height: 1.8;
+.cta-final-body {
+  font-size: 14px;
+  color: rgba(255,255,255,0.68);
+  max-width: 560px;
+  margin: 0 auto 36px;
+  line-height: 1.85;
 }
 
-/* Contact Form */
-.contact-form {
-  max-width: 560px;
+/* Form */
+.form {
+  max-width: 540px;
   margin: 0 auto;
   text-align: left;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255,255,255,0.82);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
-.form-label .required {
-  font-size: 11px;
+.form-label i { color: var(--cyan); }
+.form-req {
+  font-size: 10px;
   background: #FF6B6B;
   color: #fff;
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 700;
 }
+
 .form-input,
 .form-select,
 .form-textarea {
   width: 100%;
-  padding: 14px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255,255,255,0.15);
+  padding: 13px 15px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
   background: rgba(255,255,255,0.07);
-  color: var(--text-white);
-  font-size: 15px;
+  color: #fff;
+  font-size: 14px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
 }
 .form-input::placeholder,
-.form-textarea::placeholder { color: rgba(255,255,255,0.3); }
+.form-textarea::placeholder { color: rgba(255,255,255,0.28); }
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   border-color: var(--cyan);
   background: rgba(0,212,255,0.06);
 }
-.form-select option { background: var(--bg-dark); color: #fff; }
-.form-textarea { resize: vertical; min-height: 100px; }
+.form-select option { background: #0D1433; color: #fff; }
+.form-textarea { resize: vertical; min-height: 90px; }
 
-.form-submit {
-  margin-top: 8px;
-  text-align: center;
-}
+.form-submit { text-align: center; margin-top: 6px; }
+.form-submit .btn-lg { width: 100%; max-width: 460px; }
+
 .form-micro {
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 16px;
-  text-align: center;
+  align-items: center;
 }
 .form-micro span {
-  font-size: 12px;
-  color: rgba(255,255,255,0.45);
+  font-size: 11px;
+  color: rgba(255,255,255,0.38);
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
 }
 
@@ -1254,249 +1314,209 @@ ul { list-style: none; }
    FOOTER
    ============================================================ */
 .footer {
-  padding: var(--space-lg) 0 var(--space-md);
+  padding: 52px 0 32px;
   background: var(--bg-dark);
   border-top: 1px solid rgba(255,255,255,0.06);
   text-align: center;
 }
-.footer__logo {
-  font-size: 22px;
+.footer-logo {
+  font-size: 20px;
   font-weight: 900;
-  background: var(--grad-main);
+  background: var(--grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: var(--space-sm);
+  margin-bottom: 16px;
 }
-.footer__links {
+.footer-links {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 24px;
-  margin-bottom: var(--space-sm);
+  gap: 22px;
+  margin-bottom: 16px;
 }
-.footer__links a {
-  font-size: 13px;
-  color: rgba(255,255,255,0.45);
-  transition: color 0.2s;
+.footer-links a {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  transition: color 0.18s;
 }
-.footer__links a:hover { color: var(--cyan); }
-.footer__copy { font-size: 12px; color: rgba(255,255,255,0.25); }
+.footer-links a:hover { color: var(--cyan); }
+.footer-copy { font-size: 11px; color: rgba(255,255,255,0.2); }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 900px) {
-  .hero__inner       { grid-template-columns: 1fr; }
-  .hero__visual      { display: none; }
-  .why-cards         { grid-template-columns: 1fr; }
-  .reviews-grid      { grid-template-columns: 1fr; }
-  .pricing-grid      { grid-template-columns: 1fr; }
-  .proof-numbers     { grid-template-columns: repeat(2, 1fr); }
-  .benefit-row       { grid-template-columns: 1fr; }
-  .benefit-arrow     { transform: rotate(90deg); width: 40px; height: 40px; }
-  .pricing-card--featured { transform: none; }
-  .pricing-card--featured:hover { transform: translateY(-4px); }
-  .hero__stats       { flex-wrap: wrap; gap: var(--space-sm); }
-  .urgency__counter  { flex-wrap: wrap; padding: 20px 24px; }
+  .hero-inner   { grid-template-columns: 1fr; }
+  .hero-visual-card { display: none; }
+  .why-cards    { grid-template-columns: 1fr; }
+  .review-grid  { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; }
+  .p-card-featured { transform: none; }
+  .proof-nums   { grid-template-columns: repeat(2, 1fr); }
+  .ba-row       { grid-template-columns: 1fr; }
+  .ba-arrow     { transform: rotate(90deg); }
+  .roi-grid     { grid-template-columns: 1fr; }
+  .hero-stats   { gap: 20px; }
 }
 @media (max-width: 640px) {
-  .container { padding: 0 var(--space-sm); }
-  :root {
-    --space-lg: 48px;
-    --space-xl: 64px;
-  }
-  .nav__logo  { font-size: 15px; }
-  .hero__badge-row { gap: 6px; }
-  .badge { font-size: 11px; padding: 5px 10px; }
-  .hero__cta-group { align-items: center; }
-  .hero__stats { justify-content: center; }
+  .wrap { padding: 0 16px; }
+  .hero { padding: 90px 0 64px; }
+  .cta-mid-box  { padding: 36px 22px; }
+  .cta-final-card { padding: 52px 22px; }
   .problem-grid { grid-template-columns: 1fr; }
-  .proof-numbers { grid-template-columns: repeat(2,1fr); gap: var(--space-sm); }
-  .faq-item summary { font-size: 14px; padding: 16px 18px; }
-  .faq-answer { padding-left: calc(18px + 28px + 12px); }
-  .urgency__counter { gap: 16px; }
-  .urgency__counter-num { font-size: 36px; }
-}
-
-/* ============================================================
-   SCROLL ANIMATIONS
-   ============================================================ */
-[data-aos] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-[data-aos].aos-in {
-  opacity: 1;
-  transform: translateY(0);
+  .proof-nums   { grid-template-columns: repeat(2, 1fr); }
+  .urgency-title { font-size: 26px; }
+  .faq-item details summary { font-size: 13px; padding: 15px 16px; }
+  .faq-ans { padding-left: calc(16px + 26px + 10px); }
 }
 </style>
 </head>
 <body>
 
-<!-- ============================================================
-     STICKY NAVIGATION
-     ============================================================ -->
-<nav class="nav" role="navigation" aria-label="グローバルナビゲーション">
-  <div class="container nav__inner">
-    <span class="nav__logo">
-      <i class="fa-solid fa-bolt" style="margin-right:6px;"></i>AI SIGNAGE PRO
+<!-- ============================
+     NAVIGATION
+     ============================ -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <span class="nav-logo">
+      <i class="fa-solid fa-bolt" style="margin-right:5px;"></i>AI SIGNAGE PRO
     </span>
-    <a href="#contact" class="nav__cta">
-      <i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>無料相談を予約
+    <a href="#contact" class="nav-cta">
+      <i class="fa-solid fa-calendar-check"></i> 無料相談を予約する
     </a>
   </div>
 </nav>
 
 
-<!-- ============================================================
+<!-- ============================
      SECTION 1: HERO / FIRST VIEW
-     ============================================================ -->
-<!--
+     ============================
+  【見出し】お客様が自然と足を止める。次世代AIサイネージ広告
+  【コピー案】元NHKディレクターの映像技術×AIビジュアル×NFT資産化
   【設計意図】
-  PASONA「Problem」フェーズ。「今のサイネージ広告は本当に機能しているか？」
-  という疑問を一瞬で植え付けるキャッチ。権威性バッジ（元NHK・AI・限定枠）で
-  即信頼構築。ダークテーマで「近未来感」を演出し、高単価商品にふさわしい
-  プレミアム感を出す。グリッドアニメーションで動的で先進的な印象を強化。
-
-  【Unsplash推奨キーワード】
-  "digital signage city night" / "LED billboard urban future" / "AI technology abstract blue"
+    近未来グリッドアニメーション背景でプレミアム感を演出。
+    3種の権威性バッジで即信頼を構築。
+    統計数値（15秒〜・3組限定・NFT）でBtoB意思決定者の関心を引く。
+  【Unsplashキーワード】"digital signage LED city night" / "AI technology abstract blue glow"
 -->
-<section class="hero" id="hero" aria-label="ファーストビュー">
-  <div class="hero__orb2" aria-hidden="true"></div>
-  <div class="container hero__inner">
+<section class="hero" id="top">
+  <div class="hero-orb1"></div>
+  <div class="hero-orb2"></div>
+  <div class="wrap hero-inner">
 
     <!-- LEFT: コピー -->
-    <div class="hero__copy">
-
-      <!-- 権威性バッジ（3種類） -->
-      <div class="hero__badge-row" data-aos>
-        <span class="badge">
-          <i class="fa-solid fa-video"></i> 元NHKディレクター監修
-        </span>
-        <span class="badge">
-          <i class="fa-solid fa-microchip"></i> AI × NFT対応
-        </span>
-        <span class="badge">
-          <i class="fa-solid fa-lock"></i> 毎月3組限定
-        </span>
+    <div>
+      <!-- 権威性バッジ 3種 -->
+      <div class="badge-row">
+        <span class="badge"><i class="fa-solid fa-video"></i> 元NHKディレクター監修</span>
+        <span class="badge"><i class="fa-solid fa-microchip"></i> AI × NFT 対応</span>
+        <span class="badge"><i class="fa-solid fa-lock"></i> 毎月 3組 限定</span>
       </div>
 
-      <p class="hero__eyebrow" data-aos>Next-Generation AI Signage Advertising</p>
+      <p class="hero-eyebrow">Next-Generation AI Signage Advertising</p>
 
-      <!-- メインキャッチコピー（案A） -->
-      <h1 class="hero__title" data-aos>
+      <!-- メインキャッチコピー 案A -->
+      <h1 class="hero-title">
         お客様が
-        <span class="line-accent">自然と足を止める</span>
+        <span class="accent">自然と足を止める</span>
         次世代AIサイネージ広告
       </h1>
       <!-- サブキャッチコピー -->
-      <p class="hero__sub" data-aos>
+      <p class="hero-sub">
         「なぜか目が離せない」映像の秘密は<strong>元NHKディレクター</strong>の構成力にあります。<br>
         AI生成の高画質ビジュアル・クーポン連携・NFT資産化まで、<br>
-        集客に直結する広告を<span style="color:var(--cyan);font-weight:700;">1本からご提供</span>します。
+        集客に直結する広告を<strong>1本からご提供</strong>します。
       </p>
 
-      <!-- ファーストCTAボタン（2案） -->
-      <!-- 案A: 行動直結型 -->
-      <div class="hero__cta-group" data-aos>
-        <a href="#contact" class="btn btn--primary btn--large">
-          <i class="fa-solid fa-calendar-check"></i>
-          今すぐ無料相談を予約する
-        </a>
-        <!-- 案B: 資料請求型（必要に応じて切り替え）
-        <a href="#contact" class="btn btn--primary btn--large">
-          <i class="fa-solid fa-file-arrow-down"></i>
-          無料で制作事例を見てみる
-        </a>
-        -->
-        <p class="btn-note"><i class="fa-solid fa-shield-halved"></i> 無料・30分・オンライン対応</p>
-      </div>
+      <!-- ファーストCTA ボタン 案A: 行動直結型 -->
+      <a href="#contact" class="btn btn-main btn-lg">
+        <i class="fa-solid fa-calendar-check"></i>
+        今すぐ無料相談を予約する
+      </a>
+      <!-- 案B（切替用）: 安心訴求型
+      <a href="#contact" class="btn btn-main btn-lg">
+        <i class="fa-solid fa-file-arrow-down"></i>
+        無料で制作事例・構成案を見てみる
+      </a>
+      -->
+      <p class="hero-cta-note">
+        <i class="fa-solid fa-shield-halved"></i> 無料・30分・オンライン対応・売り込み一切なし
+      </p>
 
       <!-- 数値訴求 -->
-      <div class="hero__stats" data-aos>
-        <div class="hero__stat-item">
-          <span class="hero__stat-num">15<small style="font-size:18px">秒〜</small></span>
-          <span class="hero__stat-label">動画尺の最小単位</span>
+      <div class="hero-stats">
+        <div>
+          <span class="hero-stat-num">15<small style="font-size:16px">秒〜</small></span>
+          <span class="hero-stat-label">動画の最小単位</span>
         </div>
-        <div class="hero__stat-item">
-          <span class="hero__stat-num">3<small style="font-size:18px">組</small></span>
-          <span class="hero__stat-label">今月の残り受注枠</span>
+        <div>
+          <span class="hero-stat-num">3<small style="font-size:16px">組</small></span>
+          <span class="hero-stat-label">今月の残り受注枠</span>
         </div>
-        <div class="hero__stat-item">
-          <span class="hero__stat-num">NFT</span>
-          <span class="hero__stat-label">AI画像を資産に転換</span>
+        <div>
+          <span class="hero-stat-num">NFT</span>
+          <span class="hero-stat-label">AI画像を資産に転換</span>
         </div>
       </div>
-    </div><!-- /.hero__copy -->
+    </div>
 
     <!-- RIGHT: ビジュアルカード -->
-    <div class="hero__visual" aria-hidden="true">
-      <div class="hero__visual-card">
-        <div class="hero__img-wrap">
+    <div>
+      <div class="hero-visual-card">
+        <div class="hero-visual-screen">
           <!--
-            推奨画像キーワード:
-            Unsplash: "digital signage LED night city"
-            または "AI technology abstract glowing screen"
-            <img src="https://images.unsplash.com/photo-XXXX?w=800" alt="">
+            推奨画像（Unsplash）:
+            "digital signage LED night city" または "AI technology glowing screen"
+            実際の画像は <img src="YOUR_IMAGE_URL" alt="AIサイネージ広告イメージ"> に置換
           -->
-          <div class="hero__img-placeholder">
-            <i class="fa-solid fa-display"></i>
-            <span>AI SIGNAGE</span>
-            <p style="font-size:11px;margin-top:6px;opacity:0.5;">15sec～ / 4K Quality</p>
-          </div>
+          <i class="fa-solid fa-display"></i>
+          <p>AI SIGNAGE PRO</p>
+          <small>15sec〜 / 4K Quality / Coupon + NFT</small>
         </div>
-        <div class="hero__visual-meta">
-          <span class="hero__visual-tag">
-            <i class="fa-solid fa-circle" style="color:#00FF88;font-size:8px;"></i>
-            NOW ON AIR
+        <div class="hero-visual-footer">
+          <span class="hero-live-badge">
+            <span class="hero-live-dot"></span>NOW ON AIR
           </span>
-          <div class="hero__visual-dots">
+          <div class="hero-visual-dots">
             <span></span><span></span><span></span>
           </div>
         </div>
       </div>
     </div>
 
-  </div><!-- /.container -->
-
-  <!-- スクロールインジケーター -->
-  <div class="hero__scroll" aria-hidden="true">
-    <span>SCROLL</span>
-    <div class="hero__scroll-line"></div>
-  </div>
+  </div><!-- /.hero-inner -->
 </section>
 
 
-<!-- ============================================================
-     SECTION 2: PROBLEM / 共感セクション
-     ============================================================ -->
-<!--
+<!-- ============================
+     SECTION 2: PROBLEM（共感）
+     ============================
+  【見出し】こんなお悩みはありませんか？
+  【コピー案】サイネージに費用をかけたのに、なぜか集客に繋がらない5つの理由
   【設計意図】
-  PASONA「Affinity（親近感）」フェーズ。
-  ターゲットが感じている痛みをそのまま言語化することで「これは自分のことだ」
-  と感じさせる。具体的な状況描写でリアリティを出し、読者の心理的摩擦を下げる。
-  アイコンで視認性を高め、各カードにホバーエフェクトを設けて
-  「自分に当てはまるもの」を探す行動を促す。
-
-  【Unsplash推奨キーワード】
-  "business owner frustrated looking at screen" / "empty store nobody coming in"
+    PASONA「Affinity（親近感）」フェーズ。
+    ターゲットの痛みを具体的に言語化し「これは自分のことだ」と感じさせる。
+    アイコンで視認性を高め、各カードがホバーで反応することで
+    「自分に当てはまるもの」を探す行動を促す。
+  【Font Awesome】fa-person-walking-arrow-right / fa-circle-question / fa-clone
+                   fa-ticket / fa-chart-line-down
+  【Unsplashキーワード】"empty store nobody" / "signage display urban"
 -->
-<section class="problem" id="problem" aria-label="お悩みセクション">
-  <div class="container">
-    <div class="text-center" data-aos>
-      <span class="section-label"><i class="fa-solid fa-triangle-exclamation"></i> Does this sound familiar?</span>
-      <h2 class="section-title">こんなお悩みは<br>ありませんか？</h2>
-      <p class="section-body">
-        多くの企業・個人事業主様が、サイネージ広告に費用をかけながらも<br>
+<section class="problem" id="problem">
+  <div class="wrap">
+    <div class="center">
+      <span class="sec-label"><i class="fa-solid fa-triangle-exclamation"></i> Does this sound familiar?</span>
+      <h2 class="sec-title">こんなお悩みは<br>ありませんか？</h2>
+      <p class="sec-body">
+        多くの企業・個人事業主様がサイネージ広告に費用をかけながらも<br>
         「なぜか集客につながらない」という状況に悩んでいます。
       </p>
     </div>
 
     <div class="problem-grid">
       <!-- 悩み1 -->
-      <div class="problem-card" data-aos>
+      <div class="problem-card">
         <div class="problem-icon">
           <i class="fa-solid fa-person-walking-arrow-right"></i>
         </div>
@@ -1506,50 +1526,50 @@ ul { list-style: none; }
         </div>
       </div>
       <!-- 悩み2 -->
-      <div class="problem-card" data-aos>
+      <div class="problem-card">
         <div class="problem-icon">
-          <i class="fa-solid fa-question-circle"></i>
+          <i class="fa-solid fa-circle-question"></i>
         </div>
         <div class="problem-text">
           <h3>「何を売っているのか」が伝わらない</h3>
-          <p>映像を作ってもらったが、見た人に商品・サービス内容が伝わっていない。</p>
+          <p>映像を作ってもらったが、見た人に商品・サービスの内容が伝わっていない。</p>
         </div>
       </div>
       <!-- 悩み3 -->
-      <div class="problem-card" data-aos>
+      <div class="problem-card">
         <div class="problem-icon">
           <i class="fa-solid fa-clone"></i>
         </div>
         <div class="problem-text">
           <h3>競合と同じような広告になってしまう</h3>
-          <p>業者に任せると似たような映像ばかり。自社の強みが全然出ない。</p>
+          <p>業者に任せると似たような映像ばかりで、自社の強みが全然出ない。</p>
         </div>
       </div>
       <!-- 悩み4 -->
-      <div class="problem-card" data-aos>
+      <div class="problem-card">
         <div class="problem-icon">
           <i class="fa-solid fa-ticket"></i>
         </div>
         <div class="problem-text">
           <h3>クーポン・キャンペーン情報を動画に入れられない</h3>
-          <p>サイネージでもクーポンを使いたいが、どう対応するかわからない。</p>
+          <p>サイネージでもクーポンを使いたいが、どう対応すればいいかわからない。</p>
         </div>
       </div>
       <!-- 悩み5 -->
-      <div class="problem-card" data-aos>
+      <div class="problem-card">
         <div class="problem-icon">
           <i class="fa-solid fa-chart-line-down"></i>
         </div>
         <div class="problem-text">
           <h3>費用対効果（ROI）が見えず稟議が通らない</h3>
-          <p>上司や経営者に「広告効果はどこに出るの？」と聞かれると答えられない。</p>
+          <p>上司に「広告効果はどこに出るの？」と聞かれると答えられない。</p>
         </div>
       </div>
     </div>
 
-    <div class="problem-emphasis" data-aos>
+    <div class="problem-box">
       <p>
-        それは<span class="accent">「映像の質の問題」ではなく</span>、<br>
+        それは<span class="hl">「映像の質の問題」ではなく</span>、<br>
         <strong>「ストーリー構成・訴求設計の問題」</strong>です。<br>
         正しい設計さえあれば、サイネージは最強の集客ツールになります。
       </p>
@@ -1558,68 +1578,65 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
-     SECTION 3: WHY / 選ばれる理由（USP）
-     ============================================================ -->
-<!--
+<!-- ============================
+     SECTION 3: WHY（選ばれる理由）
+     ============================
+  【見出し】なぜ「AIサイネージPRO」だけが集客に直結できるのか？
+  【コピー案】3つの独自技術を組み合わせた、他に真似できない広告体験
   【設計意図】
-  PASONA「Solution」フェーズ。
-  問題の本質を示した後、「なぜこのサービスだけが解決できるのか」を
-  具体的根拠とともに提示。元NHK・AI・NFTという3つの差別化要因を
-  カード形式で視覚的に整理。ダークセクションでプレミアム感を維持しながら、
-  BtoB意思決定者向けに「論理的な理由」を押さえる。
-
-  【Unsplash推奨キーワード】
-  "NHK broadcasting studio" / "AI generated artwork glowing"
-  "blockchain NFT digital art" / "video production editing room"
+    PASONA「Solution（解決策）」フェーズ。
+    元NHK・AI画像・NFTという3つの差別化要因をカード形式で整理。
+    ダークセクションでプレミアム感を維持しながら、
+    BtoB意思決定者向けに「論理的な理由」を押さえる。
+  【Font Awesome】fa-clapperboard / fa-microchip / fa-coins
+  【Unsplashキーワード】"TV broadcasting studio professional" / "AI generated artwork glowing"
 -->
-<section class="why" id="why" aria-label="選ばれる理由">
-  <div class="why__inner container">
-    <div class="text-center" data-aos>
-      <span class="section-label"><i class="fa-solid fa-star"></i> Why Choose Us</span>
-      <h2 class="section-title section-title--white">
+<section class="why" id="why">
+  <div class="wrap" style="position:relative;z-index:1;">
+    <div class="center">
+      <span class="sec-label"><i class="fa-solid fa-star"></i> Why Choose Us</span>
+      <h2 class="sec-title sec-title-w">
         なぜ「AIサイネージPRO」だけが<br>
         <span class="grad-text">集客に直結</span>できるのか？
       </h2>
-      <p class="section-body section-body--white">
+      <p class="sec-body sec-body-w">
         3つの独自技術を組み合わせることで、<br>
-        「見る人が行動したくなる」広告を実現します。
+        「見た人が行動したくなる」広告を実現します。
       </p>
     </div>
 
     <div class="why-cards">
-      <!-- 強み1: 元NHKディレクター -->
-      <div class="why-card" data-aos>
-        <div class="why-card__num">01</div>
-        <div class="why-card__icon"><i class="fa-solid fa-clapperboard"></i></div>
+      <!-- 強み1 -->
+      <div class="why-card">
+        <div class="why-num">01</div>
+        <span class="why-icon"><i class="fa-solid fa-clapperboard"></i></span>
         <h3>元NHKディレクターによる<br>「人を動かす」構成力</h3>
         <p>
-          視聴者を離脱させないテレビ演出のノウハウを広告に転用。
+          テレビで視聴者を離脱させないノウハウを広告に転用。
           15秒という短い時間の中で「問題提起→共感→行動喚起」を設計します。
-          街ゆく人が思わず立ち止まる映像は、技術ではなく<strong style="color:rgba(255,255,255,0.9)">構成設計</strong>から生まれます。
+          街ゆく人が思わず立ち止まる映像は、技術ではなく<strong>構成設計</strong>から生まれます。
         </p>
       </div>
-      <!-- 強み2: AI画像 + クーポン -->
-      <div class="why-card" data-aos>
-        <div class="why-card__num">02</div>
-        <div class="why-card__icon"><i class="fa-solid fa-microchip"></i></div>
+      <!-- 強み2 -->
+      <div class="why-card">
+        <div class="why-num">02</div>
+        <span class="why-icon"><i class="fa-solid fa-microchip"></i></span>
         <h3>クーポン搭載 ×<br>高画質AI生成ビジュアル</h3>
         <p>
-          動画の中にクーポンを組み込み、<strong style="color:rgba(255,255,255,0.9)">「見た人が今すぐ行動できる仕組み」</strong>を設計。
-          さらにAIが生成する4K相当の高画質画像を使用することで、
+          動画の中にクーポンを組み込み、<strong>「見た人が今すぐ行動できる仕組み」</strong>を設計。
+          さらにAIが生成する4K相当の高画質画像を使うことで、
           撮影コストを抑えながら大手並みのビジュアルクオリティを実現します。
         </p>
       </div>
-      <!-- 強み3: NFT資産化 -->
-      <div class="why-card" data-aos>
-        <div class="why-card__num">03</div>
-        <div class="why-card__icon"><i class="fa-solid fa-coins"></i></div>
+      <!-- 強み3 -->
+      <div class="why-card">
+        <div class="why-num">03</div>
+        <span class="why-icon"><i class="fa-solid fa-coins"></i></span>
         <h3>配布したAI画像を<br>NFTとして資産化</h3>
         <p>
-          広告に使ったAI画像を顧客・来場者へNFTとして配布。
-          <strong style="color:rgba(255,255,255,0.9)">「広告費がデジタル資産になる」</strong>という業界初の付加価値で、
-          ブランドのファン化・リピート促進・差別化を同時に実現します。
-          競合がまだ知らない次世代マーケティングです。
+          広告に使ったAI画像を顧客へNFTとして配布。
+          <strong>「広告費がデジタル資産になる」</strong>という業界初の付加価値で、
+          ブランドのファン化・リピート促進・競合との差別化を同時に実現します。
         </p>
       </div>
     </div>
@@ -1627,85 +1644,69 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
-     SECTION 4: BENEFITS / Before→After
-     ============================================================ -->
-<!--
+<!-- ============================
+     SECTION 4: BENEFITS（Before→After）
+     ============================
+  【見出し】導入前と導入後で何が変わるのか？
+  【コピー案】具体的な状態変化を3つのBefore→Afterで示します
   【設計意図】
-  PASONA「Offer」フェーズ。
-  抽象的なベネフィットではなく「導入前/後の具体的な状態変化」を
-  並列表示することで、意思決定者がROIを具体的にイメージできるようにする。
-  Before（課題状態）→After（理想状態）の対比で
-  感情的訴求と論理的訴求を同時に行う。
+    PASONA「Offer（提案）」フェーズ。
+    抽象的なベネフィットではなく「導入前後の具体的な変化」を並列表示。
+    BtoB意思決定者がROIをイメージできるよう、
+    数字・具体的事象を含めた記述にする。
+    社内稟議の資料にも転用できるよう設計。
+  【Font Awesome】fa-xmark / fa-check / fa-arrow-right
 -->
-<section class="benefits" id="benefits" aria-label="導入効果">
-  <div class="container">
-    <div class="text-center" data-aos>
-      <span class="section-label"><i class="fa-solid fa-arrow-right-arrow-left"></i> Before → After</span>
-      <h2 class="section-title">導入前と導入後で<br>何が変わるのか？</h2>
-      <p class="section-body">
+<section class="benefits" id="benefits">
+  <div class="wrap">
+    <div class="center">
+      <span class="sec-label"><i class="fa-solid fa-arrow-right-arrow-left"></i> Before → After</span>
+      <h2 class="sec-title">導入前と導入後で<br>何が変わるのか？</h2>
+      <p class="sec-body">
         実際に起こる「状態の変化」を具体的に示します。<br>
         社内稟議の資料にもそのままご活用いただけます。
       </p>
     </div>
 
-    <div class="benefits-list">
+    <div class="ba-list">
       <!-- B→A 1 -->
-      <div class="benefit-row" data-aos>
-        <div class="benefit-box benefit-box--before">
-          <div class="benefit-box__label">
-            <i class="fa-solid fa-xmark"></i> Before
-          </div>
+      <div class="ba-row">
+        <div class="ba-box ba-before">
+          <div class="ba-label"><i class="fa-solid fa-xmark"></i> Before</div>
           <h3>通行人がサイネージを素通り。<br>月30万円の広告費が効果不明</h3>
-          <p>再生はされているが誰も立ち止まらない。効果測定もできず、継続するか判断できない。</p>
+          <p>再生はされているが誰も立ち止まらない。効果測定もできず継続するか判断できない。</p>
         </div>
-        <div class="benefit-arrow">
-          <i class="fa-solid fa-arrow-right"></i>
-        </div>
-        <div class="benefit-box benefit-box--after">
-          <div class="benefit-box__label">
-            <i class="fa-solid fa-check"></i> After
-          </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-box ba-after">
+          <div class="ba-label"><i class="fa-solid fa-check"></i> After</div>
           <h3>「さっきサイネージ見て来ました」<br>という来店客が継続的に発生</h3>
           <p>広告起点の来店がトラッキング可能に。ROIが可視化され次回予算の稟議も通りやすくなる。</p>
         </div>
       </div>
       <!-- B→A 2 -->
-      <div class="benefit-row" data-aos>
-        <div class="benefit-box benefit-box--before">
-          <div class="benefit-box__label">
-            <i class="fa-solid fa-xmark"></i> Before
-          </div>
+      <div class="ba-row">
+        <div class="ba-box ba-before">
+          <div class="ba-label"><i class="fa-solid fa-xmark"></i> Before</div>
           <h3>「うちの広告、競合と<br>何が違うの？」と言われる</h3>
           <p>同業他社と見た目が似ており、ブランドの独自性が伝わらない。記憶に残らない広告。</p>
         </div>
-        <div class="benefit-arrow">
-          <i class="fa-solid fa-arrow-right"></i>
-        </div>
-        <div class="benefit-box benefit-box--after">
-          <div class="benefit-box__label">
-            <i class="fa-solid fa-check"></i> After
-          </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-box ba-after">
+          <div class="ba-label"><i class="fa-solid fa-check"></i> After</div>
           <h3>「あの映像のお店だよね」と<br>口コミで広がるブランド認知</h3>
           <p>AIビジュアル×テレビ品質の構成で「ここでしか見られない映像」を実現。SNS拡散も起きる。</p>
         </div>
       </div>
       <!-- B→A 3 -->
-      <div class="benefit-row" data-aos>
-        <div class="benefit-box benefit-box--before">
-          <div class="benefit-box__label">
-            <i class="fa-solid fa-xmark"></i> Before
-          </div>
+      <div class="ba-row">
+        <div class="ba-box ba-before">
+          <div class="ba-label"><i class="fa-solid fa-xmark"></i> Before</div>
           <h3>クーポン配布はチラシのみ。<br>来店率との連動が測れない</h3>
           <p>紙クーポンは使用率が不明で、どの施策が効いているかわからない。</p>
         </div>
-        <div class="benefit-arrow">
-          <i class="fa-solid fa-arrow-right"></i>
-        </div>
-        <div class="benefit-box benefit-box--after">
-          <div class="benefit-box__label">
-            <i class="fa-solid fa-check"></i> After
-          </div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-box ba-after">
+          <div class="ba-label"><i class="fa-solid fa-check"></i> After</div>
           <h3>動画内クーポン＋NFT配布で<br>「見た人が来る」仕組みが完成</h3>
           <p>サイネージで見たその場でクーポン取得→来店という動線が明確になる。リピート率も向上。</p>
         </div>
@@ -1715,36 +1716,34 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
-     SECTION 5: SOCIAL PROOF / お客様の声
-     ============================================================ -->
-<!--
+<!-- ============================
+     SECTION 5: SOCIAL PROOF（お客様の声）
+     ============================
+  【見出し】実際にご導入いただいたお客様の声
+  【コピー案】「集客に繋がらない」を解決した3社のリアルな変化
   【設計意図】
-  PASONA「Narrow down（絞込）」前の社会的証明フェーズ。
-  BtoBターゲットなので「業種・肩書・具体的な数字」入りの声が重要。
-  実績数字（ROI指標）を下部に配置し、経営者・マーケ担当者が
-  「他社でも実績があるなら安心」と感じられる構成にする。
-
-  【Unsplash推奨キーワード】
-  "business meeting smiling" / "restaurant owner happy"
-  "retail store manager confident"
+    社会的証明フェーズ。BtoBなので「業種・肩書・具体的数字」入りの声が重要。
+    実績数字（ROI指標）を下部に配置し、経営者・マーケ担当者が
+    「他社でも実績があるなら安心」と感じられる構成にする。
+  【Font Awesome】fa-star / fa-arrow-trend-up / fa-comments
+  【Unsplashキーワード】"restaurant owner happy smiling" / "retail business meeting"
 -->
-<section class="social-proof" id="proof" aria-label="お客様の声">
-  <div class="social-proof__inner container">
-    <div class="text-center" data-aos>
-      <span class="section-label"><i class="fa-solid fa-comments"></i> Customer Voice</span>
-      <h2 class="section-title section-title--white">
+<section class="proof" id="proof">
+  <div class="proof-inner wrap">
+    <div class="center">
+      <span class="sec-label"><i class="fa-solid fa-comments"></i> Customer Voice</span>
+      <h2 class="sec-title sec-title-w">
         実際にご導入いただいた<br>お客様の声
       </h2>
-      <p class="section-body section-body--white">
+      <p class="sec-body sec-body-w">
         「サイネージで集客できない」という課題を<br>
         同じように持っていた方々からのリアルな声です。
       </p>
     </div>
 
-    <div class="reviews-grid">
+    <div class="review-grid">
       <!-- レビュー1 -->
-      <div class="review-card" data-aos>
+      <div class="review-card">
         <div class="review-stars">
           <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
           <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -1754,19 +1753,19 @@ ul { list-style: none; }
           今回はストーリー構成から一緒に考えてもらい、放映開始後すぐに
           <strong>『サイネージ見て来ました』という来店が増えた</strong>のを実感しています。」
         </p>
-        <div class="review-result">
+        <div class="review-kpi">
           <i class="fa-solid fa-arrow-trend-up"></i> 広告起点の来店数：前月比 +42%
         </div>
         <div class="review-author">
           <div class="review-avatar">T</div>
           <div>
-            <div class="review-author-name">T.M 様</div>
-            <div class="review-author-role">飲食業 / 3店舗展開 / 代表取締役</div>
+            <div class="review-name">T.M 様</div>
+            <div class="review-role">飲食業 / 3店舗展開 / 代表取締役</div>
           </div>
         </div>
       </div>
       <!-- レビュー2 -->
-      <div class="review-card" data-aos>
+      <div class="review-card">
         <div class="review-stars">
           <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
           <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -1777,19 +1776,19 @@ ul { list-style: none; }
           <strong>クーポン機能を組み込んでもらったことで来店数と客単価が同時に上がりました。</strong>
           NFTの仕組みもお客様に喜ばれています。」
         </p>
-        <div class="review-result">
+        <div class="review-kpi">
           <i class="fa-solid fa-arrow-trend-up"></i> クーポン利用経由の売上：月+18万円
         </div>
         <div class="review-author">
           <div class="review-avatar">K</div>
           <div>
-            <div class="review-author-name">K.S 様</div>
-            <div class="review-author-role">アパレル小売業 / 直営2店舗 / オーナー</div>
+            <div class="review-name">K.S 様</div>
+            <div class="review-role">アパレル小売業 / 直営2店舗 / オーナー</div>
           </div>
         </div>
       </div>
       <!-- レビュー3 -->
-      <div class="review-card" data-aos>
+      <div class="review-card">
         <div class="review-stars">
           <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
           <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -1800,35 +1799,35 @@ ul { list-style: none; }
           打ち合わせ時に具体的なROI試算を提示していただけたので上司の承認が早かったです。
           <strong>映像品質がNHKさながら</strong>で、商業施設のオーナーにも高評価でした。」
         </p>
-        <div class="review-result">
+        <div class="review-kpi">
           <i class="fa-solid fa-arrow-trend-up"></i> 商業施設内でのブランド認知スコア：2倍
         </div>
         <div class="review-author">
           <div class="review-avatar">Y</div>
           <div>
-            <div class="review-author-name">Y.N 様</div>
-            <div class="review-author-role">美容・エステ / FC本部 / マーケティング担当</div>
+            <div class="review-name">Y.N 様</div>
+            <div class="review-role">美容・エステ / FC本部 / マーケティング担当</div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 実績数字 -->
-    <div class="proof-numbers" data-aos>
-      <div class="proof-num-item">
-        <span class="proof-num-value">98<small style="font-size:18px">%</small></span>
-        <div class="proof-num-label">顧客満足度（継続率）</div>
+    <div class="proof-nums">
+      <div>
+        <span class="proof-num-val">98<small style="font-size:16px">%</small></span>
+        <div class="proof-num-label">顧客継続率・満足度</div>
       </div>
-      <div class="proof-num-item">
-        <span class="proof-num-value">+35<small style="font-size:18px">%</small></span>
+      <div>
+        <span class="proof-num-val">+35<small style="font-size:16px">%</small></span>
         <div class="proof-num-label">平均来店数増加率</div>
       </div>
-      <div class="proof-num-item">
-        <span class="proof-num-value">4K</span>
+      <div>
+        <span class="proof-num-val">4K</span>
         <div class="proof-num-label">AI生成画像の解像度</div>
       </div>
-      <div class="proof-num-item">
-        <span class="proof-num-value">48H</span>
+      <div>
+        <span class="proof-num-val">48H</span>
         <div class="proof-num-label">初稿お届け目安</div>
       </div>
     </div>
@@ -1836,33 +1835,33 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
+<!-- ============================
      MIDDLE CTA
-     ============================================================ -->
-<section class="cta-mid" aria-label="中間CTA">
-  <div class="container">
-    <div class="cta-mid__inner" data-aos>
-      <div class="cta-mid__badge">
-        <i class="fa-solid fa-fire"></i>
-        今月の残り受注枠：あと2組
+     ============================
+  【見出し】「うちの場合、どんな動画になりますか？」
+  【コピー案（中間CTA）案A】30分の無料相談で具体案をご提案します
+  【コピー案（中間CTA）案B】まず事例と費用感だけ確認してみる
+-->
+<section class="cta-mid">
+  <div class="wrap">
+    <div class="cta-mid-box">
+      <div class="cta-mid-badge">
+        <i class="fa-solid fa-fire"></i> 今月の残り受注枠：あと2組
       </div>
-      <!-- 中間CTAボタン（2案） -->
-      <!-- 案A: 緊急性訴求 -->
-      <h2 class="cta-mid__title">
+      <h2 class="cta-mid-title">
         「うちの場合、どんな動画になりますか？」<br>
         30分の無料相談で具体案をご提案します
       </h2>
-      <p class="cta-mid__body">
+      <p class="cta-mid-body">
         業種・設置場所・予算・ターゲット層をお聞きし、<br>
         貴社専用の構成案と費用対効果試算をその場でお伝えします。<br>
         売り込みは一切しません。まずはお気軽にどうぞ。
       </p>
-      <!-- 案B: 安心訴求 「まずは事例を確認したい方はこちら」 -->
-      <a href="#contact" class="btn btn--primary">
-        <i class="fa-solid fa-comments"></i>
-        無料で構成案の相談をする
+      <!-- 案A: 行動直結 -->
+      <a href="#contact" class="btn btn-main">
+        <i class="fa-solid fa-comments"></i> 無料で構成案の相談をする
       </a>
-      <p class="btn-note">
+      <p class="cta-note">
         <i class="fa-solid fa-lock"></i> 相談は無料・秘密厳守・売り込み一切なし
       </p>
     </div>
@@ -1870,114 +1869,87 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
-     SECTION 6: FLOW / 利用の流れ
-     ============================================================ -->
-<!--
+<!-- ============================
+     SECTION 6: FLOW（利用の流れ）
+     ============================
+  【見出し】ご利用の流れ（最短2週間で納品）
+  【コピー案】お問い合わせから放映開始まで、5ステップでスムーズに進みます
   【設計意図】
-  PASONA「Action」の前段として「何をするのか」の不安を除去。
-  ステップ形式で「簡単・明確・短期間」を印象付ける。
-  BtoB担当者が「上司に説明できる」ようなシンプルな流れにまとめる。
+    購入前の「何をするの？」「面倒くさくない？」という不安を除去。
+    ステップ形式で「簡単・明確・短期間」を印象付ける。
+    BtoB担当者が上司に説明できるよう、シンプルな流れに整理する。
+  【Font Awesome】fa-calendar / fa-pen-ruler / fa-file-signature
+                   fa-eye / fa-rocket
 -->
-<section class="flow" id="flow" aria-label="ご利用の流れ">
-  <div class="container">
-    <div class="text-center" data-aos>
-      <span class="section-label"><i class="fa-solid fa-list-check"></i> How It Works</span>
-      <h2 class="section-title">ご利用の流れ</h2>
-      <p class="section-body">
+<section class="flow" id="flow">
+  <div class="wrap">
+    <div class="center">
+      <span class="sec-label"><i class="fa-solid fa-list-check"></i> How It Works</span>
+      <h2 class="sec-title">ご利用の流れ</h2>
+      <p class="sec-body">
         お問い合わせから納品まで、<strong>最短2週間</strong>でご対応可能です。
       </p>
     </div>
 
     <div class="flow-steps">
       <!-- Step 1 -->
-      <div class="flow-step" data-aos>
-        <div class="flow-step__left">
-          <div class="flow-step__num">1</div>
-          <div class="flow-step__line"></div>
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">1</div>
+          <div class="flow-line"></div>
         </div>
-        <div class="flow-step__body">
-          <div class="flow-step__tag">
-            <i class="fa-solid fa-calendar"></i> STEP 01
-          </div>
-          <h3 class="flow-step__title">無料相談・ヒアリング（30分・オンライン）</h3>
-          <p class="flow-step__desc">
-            業種・商品・ターゲット・設置場所・ご予算をお聞きします。
-            相談だけでもOK。その場でROI試算と構成イメージをお伝えします。
-            お電話・Zoom・Teamsのいずれかをお選びください。
-          </p>
+        <div class="flow-body">
+          <div class="flow-tag"><i class="fa-solid fa-calendar"></i> STEP 01</div>
+          <h3 class="flow-title">無料相談・ヒアリング（30分・オンライン）</h3>
+          <p class="flow-desc">業種・商品・ターゲット・設置場所・ご予算をお聞きします。相談だけでもOK。その場でROI試算と構成イメージをお伝えします。Zoom・Teamsいずれかをお選びください。</p>
         </div>
       </div>
       <!-- Step 2 -->
-      <div class="flow-step" data-aos>
-        <div class="flow-step__left">
-          <div class="flow-step__num">2</div>
-          <div class="flow-step__line"></div>
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">2</div>
+          <div class="flow-line"></div>
         </div>
-        <div class="flow-step__body">
-          <div class="flow-step__tag">
-            <i class="fa-solid fa-pen-ruler"></i> STEP 02
-          </div>
-          <h3 class="flow-step__title">構成案・絵コンテのご提出</h3>
-          <p class="flow-step__desc">
-            ヒアリング内容をもとに、元NHKディレクターが
-            「誰が・いつ・どこで見るか」を想定した構成案を作成します。
-            AIビジュアルのサンプル画像もあわせてご確認いただけます。
-          </p>
+        <div class="flow-body">
+          <div class="flow-tag"><i class="fa-solid fa-pen-ruler"></i> STEP 02</div>
+          <h3 class="flow-title">構成案・絵コンテのご提出</h3>
+          <p class="flow-desc">ヒアリング内容をもとに、元NHKディレクターが「誰が・いつ・どこで見るか」を想定した構成案を作成します。AIビジュアルのサンプル画像もあわせてご確認いただけます。</p>
         </div>
       </div>
       <!-- Step 3 -->
-      <div class="flow-step" data-aos>
-        <div class="flow-step__left">
-          <div class="flow-step__num">3</div>
-          <div class="flow-step__line"></div>
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">3</div>
+          <div class="flow-line"></div>
         </div>
-        <div class="flow-step__body">
-          <div class="flow-step__tag">
-            <i class="fa-solid fa-file-signature"></i> STEP 03
-          </div>
-          <h3 class="flow-step__title">ご発注・制作スタート</h3>
-          <p class="flow-step__desc">
-            構成案にご納得いただいた後、正式にご発注。
-            クーポンの内容・NFT配布の有無など詳細を確定し、制作を開始します。
-            制作期間中もLINEで進捗をご報告します。
-          </p>
+        <div class="flow-body">
+          <div class="flow-tag"><i class="fa-solid fa-file-signature"></i> STEP 03</div>
+          <h3 class="flow-title">ご発注・制作スタート</h3>
+          <p class="flow-desc">構成案にご納得いただいた後、正式にご発注。クーポンの内容・NFT配布の有無など詳細を確定し、制作を開始します。制作期間中もLINEで進捗をご報告します。</p>
         </div>
       </div>
       <!-- Step 4 -->
-      <div class="flow-step" data-aos>
-        <div class="flow-step__left">
-          <div class="flow-step__num">4</div>
-          <div class="flow-step__line"></div>
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">4</div>
+          <div class="flow-line"></div>
         </div>
-        <div class="flow-step__body">
-          <div class="flow-step__tag">
-            <i class="fa-solid fa-eye"></i> STEP 04
-          </div>
-          <h3 class="flow-step__title">初稿レビュー・修正対応</h3>
-          <p class="flow-step__desc">
-            初稿をご確認いただき、修正のご要望は2回まで無料で対応します。
-            「ここをもっと強調したい」「テキストを変えたい」等、
-            細かいご要望もお気軽にお申し付けください。
-          </p>
+        <div class="flow-body">
+          <div class="flow-tag"><i class="fa-solid fa-eye"></i> STEP 04</div>
+          <h3 class="flow-title">初稿レビュー・修正対応（2回まで無料）</h3>
+          <p class="flow-desc">初稿をご確認いただき、修正のご要望は2回まで無料で対応します。「ここをもっと強調したい」「テキストを変えたい」など細かいご要望もお気軽にどうぞ。</p>
         </div>
       </div>
       <!-- Step 5 -->
-      <div class="flow-step" data-aos>
-        <div class="flow-step__left">
-          <div class="flow-step__num">5</div>
-          <div class="flow-step__line"></div>
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">5</div>
+          <div class="flow-line"></div>
         </div>
-        <div class="flow-step__body">
-          <div class="flow-step__tag">
-            <i class="fa-solid fa-rocket"></i> STEP 05
-          </div>
-          <h3 class="flow-step__title">納品・放映スタート・効果測定サポート</h3>
-          <p class="flow-step__desc">
-            各種サイネージフォーマット（MP4/MOV/4K対応）で納品します。
-            NFTの発行・配布設定もサポート。放映後のクーポン利用率・来店数など、
-            効果測定の方法もアドバイスします。
-          </p>
+        <div class="flow-body">
+          <div class="flow-tag"><i class="fa-solid fa-rocket"></i> STEP 05</div>
+          <h3 class="flow-title">納品・放映スタート・効果測定サポート</h3>
+          <p class="flow-desc">各種サイネージフォーマット（MP4/MOV/4K対応）で納品します。NFTの発行・配布設定もサポート。放映後のクーポン利用率・来店数など効果測定の方法もアドバイスします。</p>
         </div>
       </div>
     </div>
@@ -1985,58 +1957,58 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
-     SECTION 7: PRICING / 料金プラン
-     ============================================================ -->
-<!--
-  【設計意図】
-  BtoB稟議向けに「価格」を透明に提示することで信頼感を構築。
-  3プランで「選択肢」を与えながら、真ん中のプランに
-  視線誘導（featured）して平均単価を上げる設計。
-  「30万円から」という価格はあくまでエントリー、
-  上位プランほどROIが高いことを明示する。
+<!-- ============================
+     SECTION 7: PRICING（料金プラン）
+     ============================
+  【見出し】料金プラン
+  【コピー案】すべてのプランに元NHKディレクターの構成・編集が含まれます
+  【設計意見】
+    BtoB稟議向けに価格を透明に提示し信頼感を構築。
+    3プランで選択肢を与えながら中央プランへ視線誘導。
+    ROI試算ボックスで「投資回収」を具体的にイメージさせる。
+  【Font Awesome】fa-play-circle / fa-star-of-life / fa-crown / fa-check
 -->
-<section class="pricing" id="pricing" aria-label="料金プラン">
-  <div class="container">
-    <div class="text-center" data-aos>
-      <span class="section-label"><i class="fa-solid fa-tag"></i> Pricing</span>
-      <h2 class="section-title">料金プラン</h2>
-      <p class="section-body">
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="center">
+      <span class="sec-label"><i class="fa-solid fa-tag"></i> Pricing</span>
+      <h2 class="sec-title">料金プラン</h2>
+      <p class="sec-body">
         すべてのプランに元NHKディレクターの構成・編集が含まれます。<br>
         ご予算・用途に合わせてお選びください。
       </p>
     </div>
 
     <div class="pricing-grid">
-      <!-- プランS -->
-      <div class="pricing-card" data-aos>
-        <div class="pricing-icon"><i class="fa-solid fa-play-circle"></i></div>
-        <div class="pricing-name">スタンダード</div>
-        <div class="pricing-duration"><i class="fa-regular fa-clock"></i> 15秒 × 1本</div>
-        <div class="pricing-price">¥300,000<span>〜</span></div>
-        <div class="pricing-tax">税別 / 1本あたり</div>
-        <ul class="pricing-features">
+      <!-- スタンダード -->
+      <div class="p-card">
+        <span class="p-icon"><i class="fa-solid fa-play-circle"></i></span>
+        <div class="p-name">スタンダード</div>
+        <div class="p-duration"><i class="fa-regular fa-clock"></i> 15秒 × 1本</div>
+        <div class="p-price">¥300,000<span>〜</span></div>
+        <div class="p-tax">税別 / 1本あたり</div>
+        <ul class="p-features">
           <li><i class="fa-solid fa-check"></i>元NHKディレクター構成・編集</li>
           <li><i class="fa-solid fa-check"></i>AI生成高画質ビジュアル（3カット）</li>
           <li><i class="fa-solid fa-check"></i>クーポン組み込み（1種）</li>
           <li><i class="fa-solid fa-check"></i>修正2回まで無料</li>
           <li><i class="fa-solid fa-check"></i>各種形式で納品</li>
-          <li><i class="fa-regular fa-square"></i><span style="opacity:0.4">NFT資産化（オプション）</span></li>
+          <li><i class="fa-regular fa-square" style="color:#ccc;"></i><span style="color:#aaa;">NFT資産化（オプション）</span></li>
         </ul>
-        <a href="#contact" class="btn btn--primary" style="width:100%;padding:14px;">
+        <button class="p-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
           <i class="fa-solid fa-calendar-plus"></i> このプランで相談する
-        </a>
+        </button>
       </div>
 
-      <!-- プランM（おすすめ） -->
-      <div class="pricing-card pricing-card--featured" data-aos>
-        <span class="pricing-pop">人気No.1</span>
-        <div class="pricing-icon"><i class="fa-solid fa-star-of-life"></i></div>
-        <div class="pricing-name">プレミアム</div>
-        <div class="pricing-duration"><i class="fa-regular fa-clock"></i> 30秒 × 2本セット</div>
-        <div class="pricing-price">¥720,000<span>〜</span></div>
-        <div class="pricing-tax">税別 / セット価格</div>
-        <ul class="pricing-features">
+      <!-- プレミアム（おすすめ） -->
+      <div class="p-card p-card-featured">
+        <span class="p-pop">人気No.1</span>
+        <span class="p-icon"><i class="fa-solid fa-star-of-life"></i></span>
+        <div class="p-name">プレミアム</div>
+        <div class="p-duration"><i class="fa-regular fa-clock"></i> 30秒 × 2本セット</div>
+        <div class="p-price">¥720,000<span>〜</span></div>
+        <div class="p-tax">税別 / セット価格</div>
+        <ul class="p-features">
           <li><i class="fa-solid fa-check"></i>元NHKディレクター構成・編集</li>
           <li><i class="fa-solid fa-check"></i>AI生成高画質ビジュアル（8カット）</li>
           <li><i class="fa-solid fa-check"></i>クーポン組み込み（2種）</li>
@@ -2044,19 +2016,19 @@ ul { list-style: none; }
           <li><i class="fa-solid fa-check"></i>各種形式で納品</li>
           <li><i class="fa-solid fa-check"></i><strong>NFT資産化（最大50点）</strong></li>
         </ul>
-        <a href="#contact" class="btn btn--primary" style="width:100%;padding:14px;">
+        <button class="p-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
           <i class="fa-solid fa-calendar-plus"></i> このプランで相談する
-        </a>
+        </button>
       </div>
 
-      <!-- プランL -->
-      <div class="pricing-card" data-aos>
-        <div class="pricing-icon"><i class="fa-solid fa-crown"></i></div>
-        <div class="pricing-name">エンタープライズ</div>
-        <div class="pricing-duration"><i class="fa-regular fa-clock"></i> 60秒 × カスタム本数</div>
-        <div class="pricing-price" style="font-size:28px;">要相談</div>
-        <div class="pricing-tax">予算・用途に応じて最適提案</div>
-        <ul class="pricing-features">
+      <!-- エンタープライズ -->
+      <div class="p-card">
+        <span class="p-icon"><i class="fa-solid fa-crown"></i></span>
+        <div class="p-name">エンタープライズ</div>
+        <div class="p-duration"><i class="fa-regular fa-clock"></i> 60秒 × カスタム本数</div>
+        <div class="p-price" style="font-size:24px;">要相談</div>
+        <div class="p-tax">予算・用途に応じて最適提案</div>
+        <ul class="p-features">
           <li><i class="fa-solid fa-check"></i>元NHKディレクター構成・編集</li>
           <li><i class="fa-solid fa-check"></i>AI生成高画質ビジュアル（無制限）</li>
           <li><i class="fa-solid fa-check"></i>クーポン組み込み（複数種）</li>
@@ -2064,136 +2036,129 @@ ul { list-style: none; }
           <li><i class="fa-solid fa-check"></i>専用形式・多言語対応</li>
           <li><i class="fa-solid fa-check"></i><strong>NFT資産化（大量発行対応）</strong></li>
         </ul>
-        <a href="#contact" class="btn btn--outline" style="width:100%;padding:14px;border-color:var(--cyan);color:var(--text-dark);">
+        <button class="p-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
           <i class="fa-solid fa-phone"></i> 見積もりを依頼する
-        </a>
+        </button>
       </div>
     </div>
 
-    <!-- ROI説明 -->
-    <div style="margin-top:var(--space-md);padding:var(--space-md);background:var(--bg-white);border-radius:var(--radius-lg);border:1px solid rgba(0,212,255,0.15);max-width:800px;margin-left:auto;margin-right:auto;" data-aos>
-      <p style="text-align:center;font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:12px;">
-        <i class="fa-solid fa-calculator" style="color:var(--cyan);margin-right:6px;"></i>
-        ROI試算の例（スタンダードプランの場合）
-      </p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;">
-        <div style="padding:16px;background:var(--bg-light);border-radius:var(--radius-sm);">
-          <div style="font-size:22px;font-weight:900;color:var(--purple);">+10人/月</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">広告起点の来店増加</div>
+    <!-- ROI試算 -->
+    <div class="roi-box">
+      <p class="roi-title"><i class="fa-solid fa-calculator"></i>ROI試算の例（スタンダードプランの場合）</p>
+      <div class="roi-grid">
+        <div class="roi-item">
+          <div class="roi-item-val">+10人/月</div>
+          <div class="roi-item-label">広告起点の来店増加</div>
         </div>
-        <div style="padding:16px;background:var(--bg-light);border-radius:var(--radius-sm);">
-          <div style="font-size:22px;font-weight:900;color:var(--purple);">×¥5,000</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">客単価</div>
+        <div class="roi-item">
+          <div class="roi-item-val">×¥5,000</div>
+          <div class="roi-item-label">客単価</div>
         </div>
-        <div style="padding:16px;background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(123,47,255,0.08));border:1px solid rgba(0,212,255,0.2);border-radius:var(--radius-sm);">
-          <div style="font-size:22px;font-weight:900;" class="grad-text">5ヶ月で回収</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">投資回収の目安</div>
+        <div class="roi-item roi-item-result">
+          <div class="roi-item-val">5ヶ月で回収</div>
+          <div class="roi-item-label">投資回収の目安</div>
         </div>
       </div>
-      <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:12px;">
-        ※上記は一例です。業種・設置場所・運用方法により異なります。無料相談で貴社専用の試算をご提案します。
-      </p>
+      <p class="roi-note">※上記は一例です。業種・設置場所・運用方法により異なります。無料相談で貴社専用の試算をご提案します。</p>
     </div>
   </div>
 </section>
 
 
-<!-- ============================================================
-     SECTION 8: FAQ / よくある質問
-     ============================================================ -->
-<!--
+<!-- ============================
+     SECTION 8: FAQ（よくある質問）
+     ============================
+  【見出し】よくある質問
+  【コピー案】購入前に気になる5つの疑問にお答えします
   【設計意図】
-  購入直前の「最後の不安」を除去するセクション。
-  FAQはそのままメールでの質問回答テンプレートにもなるため、
-  営業コストの削減にも繋がる。BtoBらしく稟議・予算・納期・
-  著作権など実務的な質問を優先的に配置する。
+    購入直前の「最後の不安」を除去するセクション。
+    BtoBらしく稟議・予算・納期・著作権など実務的な質問を優先配置。
+    FAQはそのまま社内共有資料としても活用できる。
+  【Font Awesome】fa-circle-question / fa-chevron-down
 -->
-<section class="faq" id="faq" aria-label="よくある質問">
-  <div class="container">
-    <div class="text-center" data-aos>
-      <span class="section-label"><i class="fa-solid fa-circle-question"></i> FAQ</span>
-      <h2 class="section-title">よくある質問</h2>
-      <p class="section-body">ご不安な点はすべてお気軽にご相談ください。</p>
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="center">
+      <span class="sec-label"><i class="fa-solid fa-circle-question"></i> FAQ</span>
+      <h2 class="sec-title">よくある質問</h2>
+      <p class="sec-body">ご不安な点はすべてお気軽にご相談ください。</p>
     </div>
 
     <div class="faq-list">
       <!-- Q1 -->
-      <div class="faq-item" data-aos>
+      <div class="faq-item">
         <details>
           <summary>
-            <div class="faq-q-icon">Q</div>
+            <span class="faq-q">Q</span>
             <span class="faq-q-text">制作期間はどれくらいかかりますか？</span>
             <i class="fa-solid fa-chevron-down faq-chevron"></i>
           </summary>
-          <div class="faq-answer">
+          <div class="faq-ans">
             標準的なスタンダードプランで<strong>最短2週間</strong>が目安です。
-            お急ぎの場合はご相談ください。ヒアリング→構成案提出（3営業日）→
-            制作（5〜7営業日）→修正→納品、という流れで進めます。
-            なお、撮影が必要な場合は別途日程調整が必要です。
+            ヒアリング→構成案提出（3営業日）→制作（5〜7営業日）→修正→納品という流れで進みます。
+            お急ぎの場合はご相談ください。撮影が必要な場合は別途日程調整が必要です。
           </div>
         </details>
       </div>
       <!-- Q2 -->
-      <div class="faq-item" data-aos>
+      <div class="faq-item">
         <details>
           <summary>
-            <div class="faq-q-icon">Q</div>
+            <span class="faq-q">Q</span>
             <span class="faq-q-text">AI画像や映像の著作権はどうなりますか？</span>
             <i class="fa-solid fa-chevron-down faq-chevron"></i>
           </summary>
-          <div class="faq-answer">
-            <strong>納品した映像・AI画像の著作権は貴社に帰属します。</strong>
-            二次利用（SNS・WebサイトへのPR動画転用など）も自由に行っていただけます。
+          <div class="faq-ans">
+            <strong>納品した映像・AI画像の著作権はすべて貴社に帰属します。</strong>
+            SNS・Webサイトへの転用など二次利用も自由に行っていただけます。
             NFT化した画像についても同様に、貴社ブランドの資産として自由にご活用ください。
-            利用規約の詳細は契約書にて明記します。
           </div>
         </details>
       </div>
       <!-- Q3 -->
-      <div class="faq-item" data-aos>
+      <div class="faq-item">
         <details>
           <summary>
-            <div class="faq-q-icon">Q</div>
+            <span class="faq-q">Q</span>
             <span class="faq-q-text">サイネージ機器の購入・設置も依頼できますか？</span>
             <i class="fa-solid fa-chevron-down faq-chevron"></i>
           </summary>
-          <div class="faq-answer">
-            映像コンテンツ制作が専門です。サイネージ機器の販売・設置は対応しておりませんが、
+          <div class="faq-ans">
+            映像コンテンツの制作が専門です。機器の販売・設置は対応しておりませんが、
             信頼できる設置業者をご紹介することが可能です。
-            すでに機器をお持ちの場合は、対応フォーマット（MP4/MOV/4K等）で納品いたします。
-            対応フォーマットのご確認も無料相談時に承ります。
+            すでに機器をお持ちの場合は対応フォーマット（MP4/MOV/4K等）で納品します。
+            ご確認も無料相談時に承ります。
           </div>
         </details>
       </div>
       <!-- Q4 -->
-      <div class="faq-item" data-aos>
+      <div class="faq-item">
         <details>
           <summary>
-            <div class="faq-q-icon">Q</div>
+            <span class="faq-q">Q</span>
             <span class="faq-q-text">社内稟議を通すための見積書・提案書は発行してもらえますか？</span>
             <i class="fa-solid fa-chevron-down faq-chevron"></i>
           </summary>
-          <div class="faq-answer">
+          <div class="faq-ans">
             <strong>もちろん対応しています。</strong>
             見積書・提案書・ROI試算シートをご用意します。
-            「社内で検討したい」「上司への説明資料が必要」という場合も、
-            無料相談時にお申し付けいただければ、翌営業日には書類を送付します。
-            ご担当者様の稟議通過を全力でサポートします。
+            「上司への説明資料が必要」な場合も、無料相談時にお申し付けいただければ
+            翌営業日には書類を送付します。稟議通過を全力でサポートします。
           </div>
         </details>
       </div>
       <!-- Q5 -->
-      <div class="faq-item" data-aos>
+      <div class="faq-item">
         <details>
           <summary>
-            <div class="faq-q-icon">Q</div>
+            <span class="faq-q">Q</span>
             <span class="faq-q-text">NFTとはなんですか？難しくないですか？</span>
             <i class="fa-solid fa-chevron-down faq-chevron"></i>
           </summary>
-          <div class="faq-answer">
+          <div class="faq-ans">
             NFTとは「デジタルデータに本物の証明書を付けたもの」です。
-            難しい技術知識は一切不要です。貴社のお客様や来場者に
-            <strong>「特別なデジタル画像」をプレゼントする</strong>という感覚で運用できます。
+            難しい技術知識は一切不要です。お客様や来場者に
+            <strong>「特別なデジタル画像をプレゼントする」</strong>という感覚で運用できます。
             限定感・特別感が口コミやSNS拡散を生み、リピート来店の促進に繋がります。
             設定・配布の仕組みも弊社が全てサポートします。
           </div>
@@ -2204,151 +2169,120 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
-     SECTION 9: URGENCY / 限定オファー・緊急性訴求
-     ============================================================ -->
-<!--
+<!-- ============================
+     SECTION 9: URGENCY（限定・緊急性）
+     ============================
+  【見出し】品質を守るために、毎月3組だけ受け付けています
+  【コピー案 案A】品質を守るために、毎月3組だけ受け付けています
+  【コピー案 案B】元NHKディレクターの時間は月に3枠分しかありません
   【設計意図】
-  PASONA「Narrow down（絞込）」フェーズ。
-  「今すぐ行動しないと機会を失う」という事実を提示。
-  「毎月3組限定」はコピーではなく実際の制作キャパから来る事実であることを
-  強調することで信頼感を保ちながら希少性を訴求する。
+    PASONA「Narrow down（絞込）」フェーズ。
+    「毎月3組限定」は制作キャパから来る事実として提示し、
+    信頼感を保ちながら希少性を訴求する。
+    残り枠のビジュアル表現で「早く決めないと」という心理を喚起。
+  【Font Awesome】fa-fire / fa-user
 -->
-<section class="urgency" id="urgency" aria-label="限定オファー">
-  <div class="urgency__inner container">
-
-    <!-- 緊急性タグ -->
-    <div class="urgency__tag" data-aos>
-      <i class="fa-solid fa-fire"></i>
-      毎月 3組限定 — 今月の空き枠：残り2組
+<section class="urgency" id="urgency">
+  <div class="urgency-inner wrap">
+    <div class="urgency-tag">
+      <i class="fa-solid fa-fire"></i> 毎月 3組限定 — 今月の空き枠：残り2組
     </div>
 
-    <!-- 限定オファーコピー 案A -->
-    <h2 class="urgency__title" data-aos>
+    <!-- 案A -->
+    <h2 class="urgency-title">
       品質を守るために、<br>
-      <span class="highlight">毎月3組だけ</span>受け付けています。
+      <span class="hl">毎月3組だけ</span>受け付けています。
     </h2>
-
     <!-- 案B（A/Bテスト用）
-    <h2 class="urgency__title" data-aos>
+    <h2 class="urgency-title">
       元NHKディレクターの時間は<br>
-      <span class="highlight">月に3枠分しかありません。</span>
+      <span class="hl">月に3枠分しかありません。</span>
     </h2>
     -->
 
-    <p class="urgency__body" data-aos>
+    <p class="urgency-body">
       制作品質を妥協しないために、1ヶ月に受けられるご依頼は<strong>最大3組まで</strong>と決めています。
       「来月でいいか」と先送りにした結果、タイミングを逃してしまったというケースが多くあります。
-      今すぐ枠を確認してください。
+      今すぐ空き枠を確認してください。
     </p>
 
     <!-- 残り枠ビジュアル -->
-    <div class="urgency__slots" data-aos aria-label="今月の受付状況">
-      <div class="slot slot--filled"><i class="fa-solid fa-user"></i></div>
-      <div class="slot slot--filled"><i class="fa-solid fa-user"></i></div>
-      <div class="slot slot--empty">空き</div>
+    <div class="slots">
+      <div class="slot slot-filled"><i class="fa-solid fa-user"></i></div>
+      <div class="slot slot-filled"><i class="fa-solid fa-user"></i></div>
+      <div class="slot">空き</div>
     </div>
-
-    <a href="#contact" class="btn btn--primary btn--large" data-aos>
-      <i class="fa-solid fa-bolt"></i>
-      今すぐ空き枠を確認・予約する
+    <br>
+    <a href="#contact" class="btn btn-main btn-lg">
+      <i class="fa-solid fa-bolt"></i> 今すぐ空き枠を確認・予約する
     </a>
-    <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:12px;">
-      ※ 予約後のキャンセルも無料でできます。まずはお気軽にどうぞ。
-    </p>
+    <p class="urgency-note">※ 予約後のキャンセルも無料でできます。まずはお気軽にどうぞ。</p>
   </div>
 </section>
 
 
-<!-- ============================================================
+<!-- ============================
      SECTION 10: FINAL CTA + FORM
-     ============================================================ -->
-<!--
+     ============================
+  【見出し】まず相談だけでも大丈夫です。
+  【最終CTA案A】無料相談を申し込む（30秒で完了）
+  【最終CTA案B】今すぐ空き枠を確認・相談を予約する
   【設計意図】
-  PASONA「Action」フェーズ。
-  フォームの入力項目を最小限（5項目）にして離脱を防ぐ。
-  マイクロコピー（安心感・プライバシー・返信時間）で
-  「入力してもリスクがない」ことを伝え、CVRを最大化する。
-  フォーム上部に「あと少しで完了」的なメッセージで入力意欲を高める。
+    PASONA「Action（行動）」フェーズ。
+    フォームの入力項目を最小限（5項目）にして離脱を防ぐ。
+    マイクロコピー（安心・プライバシー・返信時間）で
+    「入力してもリスクがない」ことを伝えCVRを最大化する。
+  【Font Awesome】fa-building / fa-user / fa-envelope / fa-store / fa-comment / fa-paper-plane
 -->
-<section class="cta-final" id="contact" aria-label="お問い合わせ">
-  <div class="container">
-    <div class="cta-final__card">
-      <div class="cta-final__inner">
-        <p class="cta-final__label">FREE CONSULTATION — 30 MIN</p>
-        <h2 class="cta-final__title">
+<section class="cta-final" id="contact">
+  <div class="wrap">
+    <div class="cta-final-card">
+      <div class="cta-final-inner">
+        <p class="cta-final-label">FREE CONSULTATION — 30 MIN</p>
+        <h2 class="cta-final-title">
           まず相談だけでも大丈夫です。<br>
-          <span style="background:var(--grad-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
-            今月の空き枠をチェックする
-          </span>
+          <span class="grad-text">今月の空き枠をチェックする</span>
         </h2>
-        <p class="cta-final__body">
+        <p class="cta-final-body">
           売り込みは一切しません。<br>
           貴社の状況をお聞きし、効果が出そうかどうかを正直にお伝えします。<br>
           「まだ検討段階」でも大歓迎です。
         </p>
 
-        <!-- フォーム -->
-        <form class="contact-form" action="#" method="post" onsubmit="handleSubmit(event)">
-
+        <form class="form" onsubmit="submitForm(event)">
           <!-- 会社名 -->
           <div class="form-group">
-            <label class="form-label" for="company">
-              <i class="fa-solid fa-building" style="color:var(--cyan);"></i>
-              会社名・屋号
-              <span class="required">必須</span>
+            <label class="form-label" for="f-company">
+              <i class="fa-solid fa-building"></i> 会社名・屋号
+              <span class="form-req">必須</span>
             </label>
-            <input
-              class="form-input"
-              type="text"
-              id="company"
-              name="company"
-              placeholder="例）株式会社〇〇 / 〇〇カフェ"
-              required
-            />
+            <input class="form-input" type="text" id="f-company" name="company"
+              placeholder="例）株式会社〇〇 / 〇〇カフェ" required />
           </div>
-
-          <!-- お名前 -->
+          <!-- 担当者名 -->
           <div class="form-group">
-            <label class="form-label" for="name">
-              <i class="fa-solid fa-user" style="color:var(--cyan);"></i>
-              ご担当者名
-              <span class="required">必須</span>
+            <label class="form-label" for="f-name">
+              <i class="fa-solid fa-user"></i> ご担当者名
+              <span class="form-req">必須</span>
             </label>
-            <input
-              class="form-input"
-              type="text"
-              id="name"
-              name="name"
-              placeholder="例）山田 太郎"
-              required
-            />
+            <input class="form-input" type="text" id="f-name" name="name"
+              placeholder="例）山田 太郎" required />
           </div>
-
           <!-- メール -->
           <div class="form-group">
-            <label class="form-label" for="email">
-              <i class="fa-solid fa-envelope" style="color:var(--cyan);"></i>
-              メールアドレス
-              <span class="required">必須</span>
+            <label class="form-label" for="f-email">
+              <i class="fa-solid fa-envelope"></i> メールアドレス
+              <span class="form-req">必須</span>
             </label>
-            <input
-              class="form-input"
-              type="email"
-              id="email"
-              name="email"
-              placeholder="例）info@example.co.jp"
-              required
-            />
+            <input class="form-input" type="email" id="f-email" name="email"
+              placeholder="例）info@example.co.jp" required />
           </div>
-
           <!-- 業種 -->
           <div class="form-group">
-            <label class="form-label" for="industry">
-              <i class="fa-solid fa-store" style="color:var(--cyan);"></i>
-              業種
+            <label class="form-label" for="f-industry">
+              <i class="fa-solid fa-store"></i> 業種
             </label>
-            <select class="form-select" id="industry" name="industry">
+            <select class="form-select" id="f-industry" name="industry">
               <option value="">業種を選択してください</option>
               <option>飲食・カフェ・レストラン</option>
               <option>小売・アパレル</option>
@@ -2360,34 +2294,31 @@ ul { list-style: none; }
               <option>その他</option>
             </select>
           </div>
-
           <!-- ご相談内容 -->
           <div class="form-group">
-            <label class="form-label" for="message">
-              <i class="fa-solid fa-comment" style="color:var(--cyan);"></i>
-              ご相談内容・ご要望（任意）
+            <label class="form-label" for="f-msg">
+              <i class="fa-solid fa-comment"></i> ご相談内容（任意）
             </label>
-            <textarea
-              class="form-textarea"
-              id="message"
-              name="message"
-              placeholder="例）現在どんなサイネージを使っているか、どんな課題があるかなど、なんでもお書きください。"
-            ></textarea>
+            <textarea class="form-textarea" id="f-msg" name="message"
+              placeholder="例）現在どんなサイネージを使っているか、課題や気になる点など何でもお書きください。"></textarea>
           </div>
 
           <!-- 送信ボタン -->
           <div class="form-submit">
-            <!-- 最終CTAボタン -->
-            <button type="submit" class="btn btn--primary btn--large btn--block">
-              <i class="fa-solid fa-paper-plane"></i>
-              無料相談を申し込む（30秒で完了）
+            <!-- 最終CTAボタン 案A -->
+            <button type="submit" class="btn btn-main btn-lg" style="width:100%;max-width:460px;">
+              <i class="fa-solid fa-paper-plane"></i> 無料相談を申し込む（30秒で完了）
             </button>
+            <!-- 案B（切替用）
+            <button type="submit" class="btn btn-main btn-lg" style="width:100%;max-width:460px;">
+              <i class="fa-solid fa-bolt"></i> 今すぐ空き枠を確認・相談を予約する
+            </button>
+            -->
           </div>
-
         </form>
 
         <!-- マイクロコピー（安心感） -->
-        <div class="form-micro" data-aos>
+        <div class="form-micro">
           <span><i class="fa-solid fa-shield-halved"></i> 個人情報は厳重に管理し、第三者への提供は一切しません</span>
           <span><i class="fa-regular fa-clock"></i> 通常1〜2営業日以内にご返信します</span>
           <span><i class="fa-solid fa-ban"></i> 売り込み・強引な営業は一切行いません</span>
@@ -2399,95 +2330,55 @@ ul { list-style: none; }
 </section>
 
 
-<!-- ============================================================
+<!-- ============================
      FOOTER
-     ============================================================ -->
-<footer class="footer" role="contentinfo">
-  <div class="container">
-    <div class="footer__logo">
-      <i class="fa-solid fa-bolt" style="margin-right:6px;"></i>AI SIGNAGE PRO
+     ============================ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-logo">
+      <i class="fa-solid fa-bolt" style="margin-right:5px;"></i>AI SIGNAGE PRO
     </div>
-    <nav class="footer__links" aria-label="フッターナビゲーション">
-      <a href="#hero">トップ</a>
+    <nav class="footer-links">
+      <a href="#top">トップ</a>
       <a href="#problem">お悩み</a>
       <a href="#why">選ばれる理由</a>
       <a href="#pricing">料金</a>
       <a href="#faq">よくある質問</a>
       <a href="#contact">無料相談</a>
     </nav>
-    <p class="footer__copy">
-      © 2024 AI Signage Pro. All rights reserved.
-    </p>
+    <p class="footer-copy">© 2024 AI Signage Pro. All rights reserved.</p>
   </div>
 </footer>
 
 
-<!-- ============================================================
-     JAVASCRIPT: Scroll Animations + Form
-     ============================================================ -->
 <script>
-/* -----------------------------------------------------------
-   Scroll-triggered fade-in animation
-   ----------------------------------------------------------- */
-(function() {
-  var items = document.querySelectorAll('[data-aos]');
-  if (!items.length) return;
-
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('aos-in');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-  items.forEach(function(el, i) {
-    el.style.transitionDelay = (i % 4) * 0.08 + 's';
-    observer.observe(el);
-  });
-})();
-
-/* -----------------------------------------------------------
-   FAQ accordion — ensure only one open at a time (optional)
-   ----------------------------------------------------------- */
-document.querySelectorAll('.faq-item details').forEach(function(details) {
-  details.addEventListener('toggle', function() {
-    if (details.open) {
-      document.querySelectorAll('.faq-item details').forEach(function(other) {
-        if (other !== details && other.open) other.removeAttribute('open');
+/* FAQ: 1つだけ開く */
+document.querySelectorAll('.faq-item details').forEach(function(d) {
+  d.addEventListener('toggle', function() {
+    if (d.open) {
+      document.querySelectorAll('.faq-item details').forEach(function(o) {
+        if (o !== d && o.open) o.removeAttribute('open');
       });
     }
   });
 });
 
-/* -----------------------------------------------------------
-   Form submission handler (demo)
-   ----------------------------------------------------------- */
-function handleSubmit(e) {
+/* フォーム送信（デモ） */
+function submitForm(e) {
   e.preventDefault();
   var btn = e.target.querySelector('button[type=submit]');
   btn.innerHTML = '<i class="fa-solid fa-check"></i> 送信完了！1〜2営業日以内にご連絡します';
   btn.style.background = 'linear-gradient(135deg,#00C896,#00A878)';
-  btn.style.boxShadow = '0 8px 32px rgba(0,200,150,0.35)';
+  btn.style.boxShadow  = '0 8px 32px rgba(0,200,150,0.35)';
   btn.disabled = true;
-  e.target.querySelectorAll('input,select,textarea').forEach(function(el) {
-    el.disabled = true;
-  });
+  e.target.querySelectorAll('input,select,textarea').forEach(function(el) { el.disabled = true; });
 }
 
-/* -----------------------------------------------------------
-   Nav background opacity on scroll
-   ----------------------------------------------------------- */
+/* Nav 透明度調整 */
 window.addEventListener('scroll', function() {
-  var nav = document.querySelector('.nav');
-  if (window.scrollY > 40) {
-    nav.style.background = 'rgba(5,10,26,0.97)';
-  } else {
-    nav.style.background = 'rgba(5,10,26,0.85)';
-  }
+  document.querySelector('.nav').style.background =
+    window.scrollY > 40 ? 'rgba(5,10,26,0.97)' : 'rgba(5,10,26,0.92)';
 }, { passive: true });
 </script>
-
 </body>
 </html>
