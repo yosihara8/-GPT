@@ -182,34 +182,34 @@ a { color: inherit; text-decoration: none; }
 
 .fv {
   position: relative;
-  height: 100svh; min-height: 560px; max-height: 1000px;
+  height: 100svh; min-height: 600px; max-height: 1000px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  /* フリー素材：ピアノ演奏（Unsplash / Dolo Iglesias） */
-  background-color: #0d0820;
+  /* フリー素材：ピアノ演奏（Unsplash） */
+  background-color: #1a0e3a;
   background-image: url('https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=1600&q=80&fit=crop&crop=center');
   background-size: cover;
   background-position: center 30%;
 }
-/* 写真を暗くして文字を際立たせるオーバーレイ */
+/* 明るめのオーバーレイ（周囲と調和する淡い色調） */
 .fv::before {
   content: '';
   position: absolute; inset: 0; z-index: 0;
   background: linear-gradient(
     170deg,
-    rgba(8,4,28,0.78) 0%,
-    rgba(12,6,36,0.68) 45%,
-    rgba(6,18,40,0.72) 100%
+    rgba(30,15,70,0.62) 0%,
+    rgba(20,10,55,0.52) 45%,
+    rgba(10,25,60,0.56) 100%
   );
 }
-/* オーロラ光彩レイヤー */
+/* オーロラ光彩レイヤー（明るめ） */
 .fv::after {
   content: '';
   position: absolute; inset: 0; z-index: 0;
   background: linear-gradient(135deg,
-    rgba(100,40,180,0.22) 0%, rgba(40,100,200,0.16) 35%,
-    rgba(20,160,140,0.10) 60%, rgba(180,120,40,0.08) 80%,
-    rgba(100,40,180,0.18) 100%);
+    rgba(160,80,240,0.28) 0%, rgba(80,150,240,0.20) 35%,
+    rgba(60,210,180,0.14) 60%, rgba(240,180,80,0.12) 80%,
+    rgba(160,80,240,0.22) 100%);
   background-size: 400% 400%;
   animation: aurora 14s ease infinite;
 }
@@ -217,53 +217,57 @@ a { color: inherit; text-decoration: none; }
 .fv-inner {
   position: relative; z-index: 1;
   width: 100%; max-width: 860px;
-  margin: 0 auto; padding: 0 24px;
+  margin: 0 auto; padding: 20px 24px 20px;
   display: flex; flex-direction: column; align-items: center;
   gap: 0;
 }
 
-/* ── 団体名（ナビより先に目に入るサブブランド） ── */
+/* ── 団体名 ── */
 .fv-brand {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(11px, 1.6vw, 14px);
-  color: rgba(255,255,255,0.60);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
+  font-size: clamp(12px, 1.8vw, 15px);
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.18em;
+  margin-bottom: 4px;
   display: flex; align-items: center; gap: 10px;
 }
 .fv-brand::before, .fv-brand::after {
   content: ''; flex: 1; height: 1px;
-  background: rgba(255,255,255,0.22);
-  max-width: 60px;
+  background: rgba(255,255,255,0.28);
+  max-width: 56px;
 }
 
-/* ── ト音記号 ── */
+/* ── ト音記号（下が切れないよう余白確保） ── */
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 .treble-clef-wrap {
   display: block; text-align: center;
-  margin: 0 auto 6px; overflow: visible;
+  margin: 0 auto 4px;
+  overflow: visible;
+  /* 下の尻尾が切れないようpadding確保 */
+  padding-bottom: 16px;
+  line-height: 1;
 }
 .treble-clef {
   display: inline-block;
-  font-size: clamp(64px, 9vw, 90px);
-  line-height: 1.5; padding-bottom: 8px; overflow: visible;
+  font-size: clamp(56px, 8vw, 80px);
+  line-height: 1.8;
+  overflow: visible;
   background: linear-gradient(135deg, #e8c8ff, #a8d8ff, #a8fde8, #ffecc8, #ffb8d0, #e8c8ff);
   background-size: 300%;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   animation: aurora 7s ease infinite, float 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 20px rgba(180,140,255,0.55));
+  filter: drop-shadow(0 0 20px rgba(180,140,255,0.65));
   font-family: 'Times New Roman', Georgia, serif;
 }
 
 /* ── メインキャッチ ── */
-.fv-catch { margin-bottom: 10px; text-align: center; }
+.fv-catch { margin-bottom: 8px; text-align: center; }
 .main-catch {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(28px, 5.5vw, 52px);
-  font-weight: 800; line-height: 1.4;
+  font-size: clamp(26px, 5vw, 48px);
+  font-weight: 800; line-height: 1.45;
   color: #fff; letter-spacing: 0.06em;
-  text-shadow: 0 2px 24px rgba(0,0,0,0.50);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.40);
 }
 .main-catch .hl {
   background: linear-gradient(90deg, #e8c8ff 0%, #a8d8ff 40%, #a8fde8 70%, #ffecc8 100%);
@@ -272,47 +276,48 @@ a { color: inherit; text-decoration: none; }
   animation: aurora 7s ease infinite;
 }
 
-/* ── サブコピー（1行に凝縮） ── */
+/* ── サブコピー ── */
 .fv-sub {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: clamp(13px, 2vw, 16px);
-  color: rgba(255,255,255,0.80);
-  line-height: 1.75; margin: 0 0 18px;
+  font-size: clamp(13px, 1.9vw, 15px);
+  color: rgba(255,255,255,0.85);
+  line-height: 1.7; margin: 0 0 14px;
   text-align: center;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.30);
 }
 
 /* ── 数字実績バー ── */
 .fv-stats {
   display: flex; flex-wrap: nowrap; gap: 0;
-  width: 100%; max-width: 580px;
-  margin: 0 0 22px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.15);
+  width: 100%; max-width: 600px;
+  margin: 0 0 18px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
   border-radius: 14px; overflow: hidden;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
 }
 .fv-stat {
-  flex: 1; padding: 12px 8px; text-align: center;
-  border-right: 1px solid rgba(255,255,255,0.10);
+  flex: 1; padding: 13px 10px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.14);
 }
 .fv-stat:last-child { border-right: none; }
 .fv-stat-num {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(18px, 3vw, 26px); font-weight: 800; line-height: 1;
-  background: linear-gradient(135deg, #e8c8ff, #a8d8ff, #ffecc8);
+  font-size: clamp(16px, 2.8vw, 24px); font-weight: 800; line-height: 1.1;
+  background: linear-gradient(135deg, #f0dcff, #bce0ff, #fff5cc);
   background-size: 200%;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   animation: aurora 8s ease infinite;
+  white-space: nowrap;
 }
 .fv-stat-label {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 10px; color: rgba(255,255,255,0.65);
-  margin-top: 3px; letter-spacing: 0.04em; line-height: 1.3;
+  font-size: 10px; color: rgba(255,255,255,0.72);
+  margin-top: 4px; letter-spacing: 0.03em; line-height: 1.3;
 }
 
 /* ── CTA ── */
-.fv-cta-wrap { text-align: center; margin-bottom: 16px; }
+.fv-cta-wrap { text-align: center; margin-bottom: 14px; }
 @keyframes pulse-ring {
   0%   { box-shadow: 0 0 0 0 rgba(180,140,255,0.55), 0 10px 32px rgba(100,60,200,0.45); }
   70%  { box-shadow: 0 0 0 12px rgba(180,140,255,0), 0 10px 32px rgba(100,60,200,0.45); }
@@ -727,20 +732,20 @@ footer p { font-family: 'Noto Sans JP',sans-serif; }
     <!-- 数字実績バー -->
     <div class="fv-stats">
       <div class="fv-stat">
-        <div class="fv-stat-num">26<span style="font-size:.6em;opacity:.8;">年</span></div>
-        <div class="fv-stat-label">創設からの歴史</div>
+        <div class="fv-stat-num">創設<br>26年</div>
+        <div class="fv-stat-label">福岡市を拠点に活動</div>
       </div>
       <div class="fv-stat">
-        <div class="fv-stat-num">¥0</div>
-        <div class="fv-stat-label">入会金・見学費</div>
+        <div class="fv-stat-num">月額<br>4,000円</div>
+        <div class="fv-stat-label">入会金・見学費 無料</div>
       </div>
       <div class="fv-stat">
-        <div class="fv-stat-num">月<span style="font-size:.6em;opacity:.8;">  </span>4<span style="font-size:.6em;opacity:.8;">千円〜</span></div>
-        <div class="fv-stat-label">月会費</div>
+        <div class="fv-stat-num">未経験<br>歓迎</div>
+        <div class="fv-stat-label">シニア・初心者も活躍中</div>
       </div>
       <div class="fv-stat">
-        <div class="fv-stat-num" style="font-size:clamp(13px,2vw,18px);">アクロス<br>福岡</div>
-        <div class="fv-stat-label">定期演奏会の会場</div>
+        <div class="fv-stat-num">アクロス<br>福岡</div>
+        <div class="fv-stat-label">定期演奏会の舞台</div>
       </div>
     </div>
 
