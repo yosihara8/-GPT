@@ -173,218 +173,197 @@ a { color: inherit; text-decoration: none; }
 }
 .nav-cta:hover { opacity: 0.85; }
 
-/* ═══════════════════════════════════
-   FIRST VIEW — 離脱防止・高エンゲージメント設計
-   視線誘導：ト音記号 → 数字実績 → キャッチ → CTA
-═══════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   FIRST VIEW — 1画面完結・離脱ゼロ設計
+   ・背景：Unsplashフリー素材（ピアノ演奏）
+   ・全要素を 100svh に収める
+   ・視線順：ロゴ名 → キャッチ → 数字 → CTA → バッジ
+═══════════════════════════════════════════ */
 
-/* ── 背景：チラシ写真＋グラデーションオーバーレイ ── */
 .fv {
   position: relative;
-  min-height: 100svh;
-  display: flex; flex-direction: column; justify-content: center;
+  height: 100svh; min-height: 560px; max-height: 1000px;
+  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  background-color: #1a0e3a;
-  background-image: url('images/flyer.jpg');
+  /* フリー素材：ピアノ演奏（Unsplash / Dolo Iglesias） */
+  background-color: #0d0820;
+  background-image: url('https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=1600&q=80&fit=crop&crop=center');
   background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
+  background-position: center 30%;
 }
-/* 写真の上に半透明グラデをかぶせて文字を読みやすく */
+/* 写真を暗くして文字を際立たせるオーバーレイ */
 .fv::before {
   content: '';
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; z-index: 0;
   background: linear-gradient(
-    160deg,
-    rgba(20,10,50,0.82) 0%,
-    rgba(20,10,60,0.70) 40%,
-    rgba(10,30,60,0.65) 70%,
-    rgba(20,10,50,0.80) 100%
+    170deg,
+    rgba(8,4,28,0.78) 0%,
+    rgba(12,6,36,0.68) 45%,
+    rgba(6,18,40,0.72) 100%
   );
-  z-index: 0;
 }
-/* オーロラ光彩（写真がない場合でも成立するフォールバック背景） */
+/* オーロラ光彩レイヤー */
 .fv::after {
   content: '';
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; z-index: 0;
   background: linear-gradient(135deg,
-    rgba(120,60,200,0.30) 0%, rgba(60,120,200,0.20) 30%,
-    rgba(40,180,160,0.15) 55%, rgba(200,150,60,0.12) 75%,
-    rgba(120,60,200,0.25) 100%);
+    rgba(100,40,180,0.22) 0%, rgba(40,100,200,0.16) 35%,
+    rgba(20,160,140,0.10) 60%, rgba(180,120,40,0.08) 80%,
+    rgba(100,40,180,0.18) 100%);
   background-size: 400% 400%;
-  animation: aurora 12s ease infinite;
-  z-index: 0;
-}
-.fv-inner {
-  position: relative; z-index: 1;
-  max-width: 960px; margin: 0 auto; padding: 100px 24px 80px;
-  width: 100%;
+  animation: aurora 14s ease infinite;
 }
 
-/* ── ① ト音記号：最初に目が行くアイコン ── */
-@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.fv-inner {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 860px;
+  margin: 0 auto; padding: 0 24px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0;
+}
+
+/* ── 団体名（ナビより先に目に入るサブブランド） ── */
+.fv-brand {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(11px, 1.6vw, 14px);
+  color: rgba(255,255,255,0.60);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.fv-brand::before, .fv-brand::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.22);
+  max-width: 60px;
+}
+
+/* ── ト音記号 ── */
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 .treble-clef-wrap {
-  display: block;
-  margin: 0 auto 28px;
-  text-align: center;
-  overflow: visible;
+  display: block; text-align: center;
+  margin: 0 auto 6px; overflow: visible;
 }
 .treble-clef {
   display: inline-block;
-  font-size: 96px;
-  line-height: 1.5;
-  padding-bottom: 10px;
-  overflow: visible;
+  font-size: clamp(64px, 9vw, 90px);
+  line-height: 1.5; padding-bottom: 8px; overflow: visible;
   background: linear-gradient(135deg, #e8c8ff, #a8d8ff, #a8fde8, #ffecc8, #ffb8d0, #e8c8ff);
   background-size: 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   animation: aurora 7s ease infinite, float 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 24px rgba(180,140,255,0.60));
+  filter: drop-shadow(0 0 20px rgba(180,140,255,0.55));
   font-family: 'Times New Roman', Georgia, serif;
 }
 
-/* ── ② 数字で語る実績バー（社会的証明・即時信頼） ── */
+/* ── メインキャッチ ── */
+.fv-catch { margin-bottom: 10px; text-align: center; }
+.main-catch {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(28px, 5.5vw, 52px);
+  font-weight: 800; line-height: 1.4;
+  color: #fff; letter-spacing: 0.06em;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.50);
+}
+.main-catch .hl {
+  background: linear-gradient(90deg, #e8c8ff 0%, #a8d8ff 40%, #a8fde8 70%, #ffecc8 100%);
+  background-size: 300%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: aurora 7s ease infinite;
+}
+
+/* ── サブコピー（1行に凝縮） ── */
+.fv-sub {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: clamp(13px, 2vw, 16px);
+  color: rgba(255,255,255,0.80);
+  line-height: 1.75; margin: 0 0 18px;
+  text-align: center;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+}
+
+/* ── 数字実績バー ── */
 .fv-stats {
-  display: flex; flex-wrap: wrap; gap: 0;
-  justify-content: center;
-  margin: 0 0 36px;
+  display: flex; flex-wrap: nowrap; gap: 0;
+  width: 100%; max-width: 580px;
+  margin: 0 0 22px;
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  overflow: hidden;
+  border-radius: 14px; overflow: hidden;
+  backdrop-filter: blur(12px);
 }
 .fv-stat {
-  flex: 1; min-width: 120px;
-  padding: 18px 16px;
-  text-align: center;
-  border-right: 1px solid rgba(255,255,255,0.12);
+  flex: 1; padding: 12px 8px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.10);
 }
 .fv-stat:last-child { border-right: none; }
 .fv-stat-num {
   font-family: 'Shippori Mincho', serif;
-  font-size: clamp(26px, 4vw, 38px);
-  font-weight: 800;
-  line-height: 1;
+  font-size: clamp(18px, 3vw, 26px); font-weight: 800; line-height: 1;
   background: linear-gradient(135deg, #e8c8ff, #a8d8ff, #ffecc8);
   background-size: 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   animation: aurora 8s ease infinite;
-  letter-spacing: -0.02em;
 }
 .fv-stat-label {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 11px;
-  color: rgba(255,255,255,0.70);
-  margin-top: 4px;
-  letter-spacing: 0.06em;
+  font-size: 10px; color: rgba(255,255,255,0.65);
+  margin-top: 3px; letter-spacing: 0.04em; line-height: 1.3;
 }
 
-/* ── ③ メインキャッチコピー ── */
-.fv-catch { margin-bottom: 16px; text-align: center; }
-.main-catch {
-  font-family: 'Shippori Mincho', serif;
-  font-size: clamp(30px, 6vw, 58px);
-  font-weight: 800;
-  line-height: 1.45;
-  color: #fff;
-  letter-spacing: 0.06em;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.40);
+/* ── CTA ── */
+.fv-cta-wrap { text-align: center; margin-bottom: 16px; }
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(180,140,255,0.55), 0 10px 32px rgba(100,60,200,0.45); }
+  70%  { box-shadow: 0 0 0 12px rgba(180,140,255,0), 0 10px 32px rgba(100,60,200,0.45); }
+  100% { box-shadow: 0 0 0 0 rgba(180,140,255,0), 0 10px 32px rgba(100,60,200,0.45); }
 }
-.main-catch .hl {
-  background: linear-gradient(90deg, #e8c8ff 0%, #a8d8ff 35%, #a8fde8 65%, #ffecc8 100%);
-  background-size: 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: aurora 7s ease infinite;
-}
-
-/* ── ④ サブコピー ── */
-.fv-sub {
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: clamp(14px, 2.2vw, 18px);
-  color: rgba(255,255,255,0.85);
-  line-height: 1.9;
-  margin: 0 0 40px;
-  text-align: center;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.30);
-}
-
-/* ── ⑤ CTA（唯一の行動ボタン・目立つ配色） ── */
-.fv-cta-wrap { text-align: center; margin-bottom: 44px; }
 .btn-cta {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  background: linear-gradient(135deg, #c97af0 0%, #7ab0f0 45%, #7af0d0 100%);
-  background-size: 200%;
-  animation: aurora 5s ease infinite;
-  color: #fff;
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: clamp(15px, 2.5vw, 18px); font-weight: 700;
-  padding: 20px 52px; border-radius: 999px; border: none; cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(180,140,255,0.25), 0 12px 40px rgba(120,80,220,0.45);
-  transition: transform 0.18s, box-shadow 0.18s;
-  letter-spacing: 0.06em; text-decoration: none;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.20);
-  position: relative;
+  background: linear-gradient(135deg, #c97af0 0%, #7ab0f0 50%, #7af0d0 100%);
+  background-size: 200%; animation: aurora 5s ease infinite, pulse-ring 2.4s ease infinite;
+  color: #fff; font-family: 'Noto Sans JP', sans-serif;
+  font-size: clamp(14px, 2.2vw, 17px); font-weight: 700;
+  padding: 16px 44px; border-radius: 999px; border: none; cursor: pointer;
+  transition: transform 0.18s; letter-spacing: 0.06em;
+  text-decoration: none; text-shadow: 0 1px 6px rgba(0,0,0,0.20);
 }
-/* 点滅リング（注目を引くパルスアニメ） */
-@keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(180,140,255,0.50), 0 12px 40px rgba(120,80,220,0.45); }
-  70%  { box-shadow: 0 0 0 14px rgba(180,140,255,0), 0 12px 40px rgba(120,80,220,0.45); }
-  100% { box-shadow: 0 0 0 0 rgba(180,140,255,0), 0 12px 40px rgba(120,80,220,0.45); }
-}
-.btn-cta { animation: aurora 5s ease infinite, pulse-ring 2.4s ease infinite; }
-.btn-cta:hover { transform: translateY(-4px) scale(1.03); }
-
+.btn-cta:hover { transform: translateY(-3px) scale(1.02); }
 .fv-cta-note {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 12px; color: rgba(255,255,255,0.55);
-  margin-top: 12px; letter-spacing: 0.04em;
+  font-size: 11px; color: rgba(255,255,255,0.48); margin-top: 8px;
 }
 
-/* ── ⑥ 権威バッジ（CTA後の不安解消） ── */
+/* ── 権威バッジ ── */
 .fv-badges {
-  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
 }
 .badge {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 12px; font-weight: 700;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.22);
-  color: rgba(255,255,255,0.88);
-  padding: 7px 16px; border-radius: 999px;
-  letter-spacing: 0.04em;
-  backdrop-filter: blur(6px);
-  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700;
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.20);
+  color: rgba(255,255,255,0.82);
+  padding: 5px 13px; border-radius: 999px;
+  letter-spacing: 0.04em; backdrop-filter: blur(6px);
+  display: flex; align-items: center; gap: 5px;
 }
-.badge i { opacity: 0.80; }
 
-/* ── スクロール誘導矢印 ── */
-@keyframes bounce-down { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+/* ── スクロール誘導 ── */
+@keyframes bounce-down { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(7px)} }
 .scroll-hint {
-  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
-  z-index: 1; text-align: center;
+  position: absolute; bottom: 20px; left: 50%;
+  transform: translateX(-50%); z-index: 1; text-align: center;
 }
-.scroll-hint i {
-  font-size: 22px;
-  color: rgba(255,255,255,0.45);
-  animation: bounce-down 1.8s ease infinite;
-}
+.scroll-hint i { font-size: 18px; color: rgba(255,255,255,0.35); animation: bounce-down 1.8s ease infinite; }
 
-/* Authority Badges（他セクション用に残す） */
+/* Authority Badges（他セクション用） */
 .authority-row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 36px 0 0; }
 .auth-badge {
   display: flex; align-items: center; gap: 10px;
-  background: rgba(255,255,255,0.80);
-  border: 1.5px solid rgba(200,180,240,0.50);
+  background: rgba(255,255,255,0.80); border: 1.5px solid rgba(200,180,240,0.50);
   border-radius: var(--radius); padding: 14px 22px;
-  box-shadow: var(--shadow-card);
-  backdrop-filter: blur(4px);
+  box-shadow: var(--shadow-card); backdrop-filter: blur(4px);
 }
 .auth-badge .ab-icon { width: 40px; height: 40px; background: linear-gradient(135deg,#f0e6ff,#ddf0ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .auth-badge .ab-icon i { background: var(--rainbow); background-size:300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: aurora 8s ease infinite; font-size: 19px; }
@@ -686,11 +665,14 @@ footer p { font-family: 'Noto Sans JP',sans-serif; }
   .urgency-banner { padding: 28px 20px; }
   .section { padding: 52px 0; }
   .location-grid { grid-template-columns: 1fr; justify-items: center; }
-  .treble-clef { font-size: 76px; line-height: 1.5; }
-  .fv-stat { min-width: 80px; padding: 14px 10px; }
-  .fv-stat-num { font-size: 22px; }
-  .fv-inner { padding: 80px 16px 60px; }
-  .btn-cta { padding: 18px 28px; font-size: 15px; width: 100%; max-width: 340px; }
+  .treble-clef { font-size: 60px; }
+  .fv-stat { padding: 10px 6px; }
+  .fv-inner { padding: 0 14px; gap: 0; }
+  .btn-cta { padding: 14px 28px; font-size: 14px; width: 100%; max-width: 320px; }
+  .fv-brand { font-size: 10px; letter-spacing: 0.12em; }
+  .fv-stats { max-width: 100%; }
+  .fv-badges { gap: 6px; }
+  .badge { font-size: 10px; padding: 4px 10px; }
   .greeting-wrap { padding: 28px 20px; }
 }
 @media (max-width: 420px) {
@@ -713,44 +695,23 @@ footer p { font-family: 'Noto Sans JP',sans-serif; }
   </div>
 </nav>
 
-<!-- ══════════════════════
-     FIRST VIEW
-     設計原則：
-     ① 背景写真で世界観を即伝達
-     ② 数字実績で0.3秒で信頼獲得
-     ③ キャッチ→サブ→CTA の一直線視線誘導
-     ④ ボタンはひとつ・パルスで注目
-     ⑤ スクロール矢印で次へ誘導
-══════════════════════ -->
+<!-- ══════════════════════════════════════
+     FIRST VIEW — 1画面完結・離脱防止設計
+     背景: Unsplash フリー素材（ピアノ演奏）
+     全要素を 100svh に収め、スクロール不要
+══════════════════════════════════════ -->
 <section class="fv">
   <div class="fv-inner">
 
-    <!-- ① ト音記号（ブランドアイコン） -->
+    <!-- 団体名（ブランド認知） -->
+    <p class="fv-brand">男声合唱団 ジョイフル・スーベニール</p>
+
+    <!-- ト音記号 -->
     <div class="treble-clef-wrap">
       <span class="treble-clef">𝄞</span>
     </div>
 
-    <!-- ② 数字で語る実績（社会的証明・即時信頼） -->
-    <div class="fv-stats">
-      <div class="fv-stat">
-        <div class="fv-stat-num">26<small style="font-size:0.55em;opacity:.8;">年</small></div>
-        <div class="fv-stat-label">創設からの歴史</div>
-      </div>
-      <div class="fv-stat">
-        <div class="fv-stat-num">2<small style="font-size:0.55em;opacity:.8;">大ホール</small></div>
-        <div class="fv-stat-label">アクロス福岡で定期演奏</div>
-      </div>
-      <div class="fv-stat">
-        <div class="fv-stat-num">¥0</div>
-        <div class="fv-stat-label">入会金・見学費</div>
-      </div>
-      <div class="fv-stat">
-        <div class="fv-stat-num">月<small style="font-size:0.55em;opacity:.8;"> </small>4<small style="font-size:0.55em;opacity:.8;">千円</small></div>
-        <div class="fv-stat-label">からはじめられる</div>
-      </div>
-    </div>
-
-    <!-- ③ メインキャッチコピー -->
+    <!-- メインキャッチ -->
     <div class="fv-catch">
       <h1 class="main-catch">
         歌うって、こんなに<br>
@@ -758,13 +719,32 @@ footer p { font-family: 'Noto Sans JP',sans-serif; }
       </h1>
     </div>
 
-    <!-- ④ サブコピー -->
+    <!-- サブコピー -->
     <p class="fv-sub">
-      年齢も経験も関係ない。<br>
-      あなたの声が、仲間とひとつになる場所がある。
+      年齢も経験も関係ない。あなたの声が、仲間とひとつになる場所がある。
     </p>
 
-    <!-- ⑤ CTA（唯一の行動ボタン） -->
+    <!-- 数字実績バー -->
+    <div class="fv-stats">
+      <div class="fv-stat">
+        <div class="fv-stat-num">26<span style="font-size:.6em;opacity:.8;">年</span></div>
+        <div class="fv-stat-label">創設からの歴史</div>
+      </div>
+      <div class="fv-stat">
+        <div class="fv-stat-num">¥0</div>
+        <div class="fv-stat-label">入会金・見学費</div>
+      </div>
+      <div class="fv-stat">
+        <div class="fv-stat-num">月<span style="font-size:.6em;opacity:.8;">  </span>4<span style="font-size:.6em;opacity:.8;">千円〜</span></div>
+        <div class="fv-stat-label">月会費</div>
+      </div>
+      <div class="fv-stat">
+        <div class="fv-stat-num" style="font-size:clamp(13px,2vw,18px);">アクロス<br>福岡</div>
+        <div class="fv-stat-label">定期演奏会の会場</div>
+      </div>
+    </div>
+
+    <!-- CTA（唯一の行動ボタン） -->
     <div class="fv-cta-wrap">
       <a href="#contact" class="btn-cta">
         <i class="fa-solid fa-comment-sms"></i>
@@ -773,7 +753,7 @@ footer p { font-family: 'Noto Sans JP',sans-serif; }
       <p class="fv-cta-note">SMS送信後、担当者から折り返しご連絡します</p>
     </div>
 
-    <!-- ⑥ 権威バッジ（ボタン後の不安解消） -->
+    <!-- 権威バッジ（ボタン後の不安解消） -->
     <div class="fv-badges">
       <span class="badge"><i class="fa-solid fa-shield-halved"></i> 創設26年の実績</span>
       <span class="badge"><i class="fa-solid fa-user-plus"></i> 未経験者・シニア大歓迎</span>
@@ -782,7 +762,7 @@ footer p { font-family: 'Noto Sans JP',sans-serif; }
 
   </div>
 
-  <!-- スクロール誘導矢印 -->
+  <!-- スクロール誘導 -->
   <div class="scroll-hint">
     <i class="fa-solid fa-chevron-down"></i>
   </div>
