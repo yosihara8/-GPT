@@ -156,11 +156,16 @@ a { color: inherit; text-decoration: none; }
   display: flex; align-items: center; gap: 8px;
 }
 .nav-clef {
-  font-size: 24px; line-height: 1;
+  font-size: 24px;
+  line-height: 1.8;      /* 下が切れないよう高さ確保 */
+  padding-bottom: 4px;
+  overflow: visible;
+  display: inline-block;
   background: var(--rainbow); background-size: 300%;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: aurora 8s ease infinite;
+  font-family: 'Times New Roman', Georgia, serif;
 }
 .nav-cta {
   background: linear-gradient(135deg, #b06ad4, #6a9fd4);
@@ -185,39 +190,33 @@ a { color: inherit; text-decoration: none; }
   height: 100svh; min-height: 600px; max-height: 1000px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  /* フリー素材：ピアノ演奏（Unsplash） */
-  background-color: #1a0e3a;
-  background-image: url('https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=1600&q=80&fit=crop&crop=center');
+  /*
+    背景: Unsplash 4K高画質ピアノ写真（著作権フリー）
+    Photo by Yacine Petitprez / Unsplash
+  */
+  background-color: #111;
+  background-image: url('https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=2400&q=95&fit=crop&crop=center');
   background-size: cover;
-  background-position: center 30%;
+  background-position: center 25%;
 }
-/* 明るめのオーバーレイ（周囲と調和する淡い色調） */
+/* 文字を読みやすくする最小限の暗め薄オーバーレイ（色なし・写真優先） */
 .fv::before {
   content: '';
   position: absolute; inset: 0; z-index: 0;
   background: linear-gradient(
-    170deg,
-    rgba(30,15,70,0.62) 0%,
-    rgba(20,10,55,0.52) 45%,
-    rgba(10,25,60,0.56) 100%
+    180deg,
+    rgba(0,0,0,0.42) 0%,
+    rgba(0,0,0,0.28) 50%,
+    rgba(0,0,0,0.50) 100%
   );
 }
-/* オーロラ光彩レイヤー（明るめ） */
-.fv::after {
-  content: '';
-  position: absolute; inset: 0; z-index: 0;
-  background: linear-gradient(135deg,
-    rgba(160,80,240,0.28) 0%, rgba(80,150,240,0.20) 35%,
-    rgba(60,210,180,0.14) 60%, rgba(240,180,80,0.12) 80%,
-    rgba(160,80,240,0.22) 100%);
-  background-size: 400% 400%;
-  animation: aurora 14s ease infinite;
-}
+/* オーロラ光彩レイヤーは削除（写真そのものを活かす） */
+.fv::after { content: none; }
 
 .fv-inner {
   position: relative; z-index: 1;
   width: 100%; max-width: 860px;
-  margin: 0 auto; padding: 20px 24px 20px;
+  margin: 0 auto; padding: 32px 24px 28px;
   display: flex; flex-direction: column; align-items: center;
   gap: 0;
 }
@@ -226,14 +225,15 @@ a { color: inherit; text-decoration: none; }
 .fv-brand {
   font-family: 'Shippori Mincho', serif;
   font-size: clamp(12px, 1.8vw, 15px);
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.85);
   letter-spacing: 0.18em;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  padding: 6px 0 0;
   display: flex; align-items: center; gap: 10px;
 }
 .fv-brand::before, .fv-brand::after {
   content: ''; flex: 1; height: 1px;
-  background: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.32);
   max-width: 56px;
 }
 
@@ -315,6 +315,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 10px; color: rgba(255,255,255,0.72);
   margin-top: 4px; letter-spacing: 0.03em; line-height: 1.3;
 }
+.fv-unit { font-size: 0.62em; opacity: 0.80; letter-spacing: 0; }
 
 /* ── CTA ── */
 .fv-cta-wrap { text-align: center; margin-bottom: 14px; }
@@ -732,19 +733,19 @@ footer p { font-family: 'Noto Sans JP',sans-serif; }
     <!-- 数字実績バー -->
     <div class="fv-stats">
       <div class="fv-stat">
-        <div class="fv-stat-num">創設<br>26年</div>
-        <div class="fv-stat-label">福岡市を拠点に活動</div>
+        <div class="fv-stat-num">26<span class="fv-unit">年</span></div>
+        <div class="fv-stat-label">創設からの歴史</div>
       </div>
       <div class="fv-stat">
-        <div class="fv-stat-num">月額<br>4,000円</div>
+        <div class="fv-stat-num">¥4,000<span class="fv-unit">/月</span></div>
         <div class="fv-stat-label">入会金・見学費 無料</div>
       </div>
       <div class="fv-stat">
-        <div class="fv-stat-num">未経験<br>歓迎</div>
+        <div class="fv-stat-num">未経験<span class="fv-unit">OK</span></div>
         <div class="fv-stat-label">シニア・初心者も活躍中</div>
       </div>
       <div class="fv-stat">
-        <div class="fv-stat-num">アクロス<br>福岡</div>
+        <div class="fv-stat-num">アクロス<br><span style="font-size:.85em;">福岡</span></div>
         <div class="fv-stat-label">定期演奏会の舞台</div>
       </div>
     </div>
