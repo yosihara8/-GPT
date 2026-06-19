@@ -1,609 +1,1484 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LP プロンプトジェネレーター</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<style>
-  :root {
-    --accent: #29abe2;
-    --accent-light: #e8f6fd;
-    --accent-dark: #1a7fb5;
-    --bg: #f7fbfe;
-    --card: #ffffff;
-    --border: #d0eaf7;
-    --text-main: #1a2a3a;
-    --text-sub: #5a7a8a;
-    --text-muted: #8faabb;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow-card: 0 2px 12px rgba(41,171,226,0.10);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text-main);
-    min-height: 100vh;
-  }
-  .hero {
-    background: linear-gradient(135deg, #e8f6fd 0%, #ffffff 60%, #eaf7ff 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 56px 24px 40px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(41,171,226,0.12) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: -40px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(41,171,226,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero-icon {
-    width: 72px; height: 72px;
-    background: var(--accent);
-    border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px;
-    box-shadow: 0 8px 24px rgba(41,171,226,0.30);
-  }
-  .hero-icon i { color: #fff; font-size: 34px; }
-  .hero h1 {
-    font-size: 26px; font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 10px;
-  }
-  .hero p {
-    font-size: 14px; color: var(--text-sub);
-    line-height: 1.7; max-width: 520px; margin: 0 auto 20px;
-  }
-  .hero-badges {
-    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-  }
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(41,171,226,0.10);
-    border: 1px solid rgba(41,171,226,0.25);
-    color: var(--accent-dark);
-    font-size: 12px; font-weight: 500;
-    padding: 5px 12px; border-radius: 999px;
-  }
-  .main { max-width: 860px; margin: 0 auto; padding: 40px 20px 60px; }
-  .section-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--accent-light);
-  }
-  .section-header .icon-wrap {
-    width: 36px; height: 36px;
-    background: var(--accent-light);
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .section-header .icon-wrap i { color: var(--accent); font-size: 17px; }
-  .section-header h2 { font-size: 15px; font-weight: 600; color: var(--text-main); }
-  .section-header span { font-size: 12px; color: var(--text-muted); margin-left: auto; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-card);
-  }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 12px; font-weight: 500;
-    color: var(--text-sub);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .field label i { color: var(--accent); font-size: 13px; }
-  .field input, .field select, .field textarea {
-    width: 100%; padding: 10px 14px;
-    font-size: 13px; font-family: inherit;
-    color: var(--text-main); background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(41,171,226,0.12);
-    background: #fff;
-  }
-  .field textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
-  .field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2329abe2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px; cursor: pointer;
-  }
-  .color-field { display: flex; flex-direction: column; gap: 6px; }
-  .color-field label {
-    font-size: 12px; font-weight: 500; color: var(--text-sub);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .color-field label i { color: var(--accent); font-size: 13px; }
-  .color-row { display: flex; align-items: center; gap: 10px; }
-  .color-row input[type="color"] {
-    width: 44px; height: 38px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 2px 4px; cursor: pointer;
-    background: var(--bg); flex-shrink: 0;
-  }
-  .color-row input[type="text"] {
-    flex: 1; padding: 10px 14px;
-    font-size: 13px; font-family: monospace;
-    color: var(--text-main); background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm); outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .color-row input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(41,171,226,0.12);
-    background: #fff;
-  }
-  .theme-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .theme-swatch {
-    display: flex; flex-direction: column; align-items: center; gap: 5px;
-    cursor: pointer;
-  }
-  .theme-swatch .swatch {
-    width: 40px; height: 40px; border-radius: 10px;
-    border: 2px solid transparent;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-  .theme-swatch:hover .swatch { transform: scale(1.12); box-shadow: 0 4px 14px rgba(0,0,0,0.22); }
-  .theme-swatch.active .swatch { border-color: var(--text-main); transform: scale(1.08); }
-  .theme-swatch span { font-size: 10px; color: var(--text-muted); font-weight: 500; }
-  .theme-group-label {
-    font-size: 11px; font-weight: 600; color: var(--text-sub);
-    margin: 14px 0 6px; display: flex; align-items: center; gap: 5px;
-  }
-  .steps {
-    display: flex; gap: 0;
-    position: relative;
-  }
-  .steps::before {
-    content: ''; position: absolute;
-    top: 18px; left: 18px; right: 18px;
-    height: 2px; background: var(--border);
-  }
-  .step {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; gap: 8px; position: relative; z-index: 1;
-  }
-  .step-num {
-    width: 36px; height: 36px;
-    background: var(--accent-light);
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700; color: var(--accent);
-  }
-  .step-label { font-size: 11px; color: var(--text-sub); text-align: center; line-height: 1.4; }
-  .gen-btn {
-    width: 100%; padding: 16px;
-    font-size: 15px; font-weight: 700; font-family: inherit;
-    background: linear-gradient(90deg, var(--accent) 0%, #45c5f0 100%);
-    color: #fff; border: none; border-radius: var(--radius);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 6px 20px rgba(41,171,226,0.30);
-    transition: transform 0.15s, box-shadow 0.15s;
-    margin-bottom: 8px;
-  }
-  .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(41,171,226,0.38); }
-  .gen-btn:active { transform: translateY(0); }
-  #output { display: none; }
-  .output-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .output-header h3 {
-    font-size: 14px; font-weight: 600; color: var(--text-main);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .output-header h3 i { color: var(--accent); }
-  .copy-btn {
-    display: flex; align-items: center; gap: 6px;
-    padding: 9px 18px; font-size: 13px; font-weight: 600; font-family: inherit;
-    background: var(--accent-light);
-    border: 1.5px solid var(--accent);
-    border-radius: var(--radius-sm); cursor: pointer; color: var(--accent-dark);
-    transition: background 0.15s, transform 0.1s;
-    user-select: none;
-  }
-  .copy-btn:hover { background: #d0edfa; }
-  .copy-btn:active { transform: scale(0.97); }
-  #promptBox {
-    background: #f4fbff; border: 1.5px solid var(--border);
-    border-radius: var(--radius); padding: 20px 22px;
-    font-size: 12.5px; line-height: 1.85;
-    white-space: pre-wrap; color: var(--text-main);
-    font-family: 'Courier New', monospace;
-    max-height: 480px; overflow-y: auto; margin-bottom: 14px;
-  }
-  .copy-msg {
-    display: none; font-size: 12px; color: #22a06b;
-    text-align: center; margin-top: 8px; font-weight: 500;
-  }
-  .divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 28px 0 24px;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-  .divider span { font-size: 12px; color: var(--text-muted); white-space: nowrap; font-weight: 500; }
-  footer {
-    text-align: center; padding: 24px;
-    font-size: 11px; color: var(--text-muted);
-    border-top: 1px solid var(--border);
-  }
-  @media (max-width: 640px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .steps { flex-direction: column; gap: 12px; }
-    .steps::before { display: none; }
-    .card { padding: 20px 16px; }
-    .hero h1 { font-size: 21px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ★ 変更箇所：ページタイトル -->
+  <title>JapanAI研修 | バックヤード業務を自動化・人材不足を即解決【助成金活用で実質負担ゼロ】</title>
+  <meta name="description" content="300社以上の実績。オーダーメイドAI研修＋リスキリング補助金活用で、バックヤード事務の業務効率化を実現。無料相談・説明会受付中。">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* ============================
+       デザイントークン（CSS変数）
+    ============================ */
+    :root {
+      --color-accent: #06b6d4;
+      --color-accent-light: #38d9f0;
+      --color-accent-glow: rgba(6, 182, 212, 0.4);
+      --color-bg: #f7f7f7;
+      --color-surface: rgba(255, 255, 255, 0.72);
+      --color-text: #1a2a3a;
+      --color-text-sub: rgba(26, 42, 58, 0.6);
+      --color-white: #ffffff;
+      --radius-card: 20px;
+      --shadow-card: 0 8px 32px rgba(6, 182, 212, 0.12);
+      --shadow-glow: 0 8px 32px rgba(6, 182, 212, 0.4);
+      --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      --max-w: 1080px;
+      --section-py: 96px;
+    }
+
+    /* ============================
+       リセット & ベース
+    ============================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ============================
+       ユーティリティ
+    ============================ */
+    .container {
+      width: 100%;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .section { padding: var(--section-py) 0; }
+    .section-label {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 999px;
+      padding: 6px 18px;
+      margin-bottom: 18px;
+    }
+    .section-title {
+      font-size: clamp(1.7rem, 4vw, 2.6rem);
+      font-weight: 900;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      color: var(--color-text);
+    }
+    .section-title em { color: var(--color-accent); font-style: normal; }
+    .section-sub {
+      font-size: clamp(0.95rem, 2vw, 1.05rem);
+      color: var(--color-text-sub);
+      margin-top: 14px;
+      max-width: 620px;
+    }
+    .text-center { text-align: center; }
+    .text-center .section-sub { margin-left: auto; margin-right: auto; }
+
+    /* グラスモーフィズムカード */
+    .glass-card {
+      background: var(--color-surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(6, 182, 212, 0.18);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+    }
+
+    /* セクション区切りライン */
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+      opacity: 0.35;
+      margin: 0;
+    }
+
+    /* ============================
+       CTAボタン
+    ============================ */
+    .btn-cta {
+      display: block;
+      margin: 0 auto;
+      max-width: 440px;
+      width: 100%;
+      padding: 22px 40px;
+      border: none;
+      border-radius: 999px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #ffffff;
+      background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+      box-shadow: 0 8px 32px rgba(6, 182, 212, 0.55);
+      cursor: pointer;
+      text-align: center;
+      transition: transform var(--transition), box-shadow var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-cta::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.08) 100%);
+      border-radius: inherit;
+    }
+    .btn-cta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(6, 182, 212, 0.7);
+    }
+    .btn-cta:focus-visible {
+      outline: 3px solid var(--color-accent-light);
+      outline-offset: 4px;
+    }
+    .btn-cta i { margin-right: 10px; }
+    .cta-note {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.62);
+      text-align: center;
+      margin-top: 12px;
+    }
+    .cta-note-dark {
+      font-size: 0.78rem;
+      color: var(--color-text-sub);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    /* photo placeholder */
+    .photo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #e8f4f8;
+      color: #aab;
+      height: 200px;
+      border-radius: 10px;
+      font-size: 13px;
+      gap: 8px;
+    }
+    .photo-placeholder i { font-size: 32px; }
+
+    /* ============================
+       ① ファーストビュー (hero)
+    ============================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 80px 24px;
+      /* ★ 変更箇所：ヒーロー背景写真 */
+      background-image: url("https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1920&h=1080&fit=crop&auto=format");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      text-align: center;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(6, 182, 212, 0.75) 0%, rgba(0, 0, 18, 0.90) 100%);
+      z-index: 0;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* 緊急性バッジ */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      padding: 8px 20px;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+    }
+    .hero-badge .dot {
+      width: 8px; height: 8px;
+      background: #ff5c5c;
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    /* メインキャッチ */
+    .hero-catch {
+      font-family: 'Cormorant Garamond', 'Noto Sans JP', serif;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .hero-catch span {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--color-accent-light), #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* サブコピー */
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: rgba(255, 255, 255, 0.84);
+      max-width: 600px;
+      margin: 16px auto 32px;
+      line-height: 1.75;
+    }
+
+    /* 社会的証明バッジ */
+    .hero-badges {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .hero-trust-badge {
+      background: rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 12px;
+      padding: 12px 20px;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1.4;
+      text-align: center;
+      min-width: 110px;
+    }
+    .hero-trust-badge .num {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--color-accent-light);
+      line-height: 1;
+    }
+
+    /* ============================
+       ② 共感セクション
+    ============================ */
+    .pain { background: #eef8fb; }
+    .pain-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .pain-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 22px 28px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 16px;
+      border-left: 4px solid var(--color-accent);
+      box-shadow: 0 2px 12px rgba(6,182,212,0.08);
+      transition: box-shadow var(--transition);
+    }
+    .pain-item:hover { box-shadow: 0 6px 24px rgba(6,182,212,0.18); }
+    .pain-icon {
+      width: 46px;
+      height: 46px;
+      min-width: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+    }
+    .pain-text { font-size: 1rem; font-weight: 700; color: var(--color-text); line-height: 1.5; }
+    .pain-text small { display: block; font-weight: 400; color: var(--color-text-sub); font-size: 0.88rem; margin-top: 4px; }
+
+    /* ============================
+       ③ 解決策・選ばれる理由
+    ============================ */
+    .reasons-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .reason-card {
+      padding: 36px 28px;
+      text-align: center;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .reason-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(6,182,212,0.22);
+    }
+    .reason-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      line-height: 1;
+      opacity: 0.3;
+    }
+    .reason-icon {
+      font-size: 2.4rem;
+      color: var(--color-accent);
+      margin: 12px 0 16px;
+    }
+    .reason-title { font-size: 1.1rem; font-weight: 900; color: var(--color-text); margin-bottom: 10px; }
+    .reason-desc { font-size: 0.9rem; color: var(--color-text-sub); line-height: 1.65; }
+
+    /* ============================
+       ④ Before→After
+    ============================ */
+    .ba-section { background: linear-gradient(135deg, #eef8fb 0%, #f7f7f7 100%); }
+    .ba-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .ba-card { padding: 32px 24px; text-align: center; }
+    .ba-icon { font-size: 2.2rem; color: var(--color-accent); margin-bottom: 16px; }
+    .ba-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--color-accent);
+      margin: 14px 0;
+    }
+    .ba-before {
+      background: rgba(220,50,50,0.08);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      color: #c0392b;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+    .ba-after {
+      background: rgba(6,182,212,0.1);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      color: #0e7490;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+    .ba-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 6px; opacity: 0.7; }
+
+    /* ============================
+       ⑤ 社会的証明・お客様の声
+    ============================ */
+    .voices-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .voice-card { padding: 28px; }
+    .voice-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .voice-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--color-accent);
+      flex-shrink: 0;
+    }
+    .voice-name { font-weight: 900; font-size: 0.95rem; }
+    .voice-company { font-size: 0.78rem; color: var(--color-text-sub); margin-top: 2px; }
+    .voice-stars { color: #f59e0b; font-size: 0.85rem; margin-bottom: 12px; }
+    .voice-text { font-size: 0.9rem; color: var(--color-text-sub); line-height: 1.75; }
+
+    /* ============================
+       ⑥ ギャラリー
+    ============================ */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .gallery-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(6,182,212,0.12);
+      transition: transform var(--transition);
+    }
+    .gallery-img:hover { transform: scale(1.03); }
+
+    /* ============================
+       ⑦ 料金プラン
+    ============================ */
+    .pricing-section { background: linear-gradient(160deg, #0a1a2e 0%, #0d2a3a 100%); }
+    .pricing-section .section-title { color: #fff; }
+    .pricing-section .section-sub { color: rgba(255,255,255,0.65); }
+    .pricing-section .section-label { background: rgba(6,182,212,0.2); color: var(--color-accent-light); }
+    .pricing-card {
+      max-width: 560px;
+      margin: 48px auto 0;
+      padding: 48px 40px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(6,182,212,0.35);
+      border-radius: 28px;
+      box-shadow: 0 0 60px rgba(6,182,212,0.18);
+      text-align: center;
+      position: relative;
+    }
+    .pricing-tag {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      border-radius: 999px;
+      padding: 6px 20px;
+      margin-bottom: 20px;
+    }
+    .pricing-name { font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 8px; }
+    .pricing-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 7vw, 4rem);
+      font-weight: 700;
+      color: var(--color-accent-light);
+      line-height: 1;
+      margin: 16px 0 4px;
+    }
+    .pricing-price small { font-size: 1rem; color: rgba(255,255,255,0.6); font-family: 'Noto Sans JP', sans-serif; }
+    .pricing-note { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin-bottom: 28px; }
+    .pricing-features { text-align: left; margin-bottom: 32px; }
+    .pricing-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.92rem;
+      color: rgba(255,255,255,0.85);
+    }
+    .pricing-feature i { color: var(--color-accent-light); margin-top: 3px; flex-shrink: 0; }
+    .subsidy-box {
+      background: rgba(6,182,212,0.12);
+      border: 1px solid rgba(6,182,212,0.35);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 24px 0;
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.85);
+      text-align: left;
+    }
+    .subsidy-box strong { color: var(--color-accent-light); }
+
+    /* ============================
+       ⑧ 利用の流れ
+    ============================ */
+    .flow-steps {
+      display: flex;
+      gap: 0;
+      margin-top: 56px;
+      position: relative;
+    }
+    .flow-steps::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
+      z-index: 0;
+    }
+    .flow-step {
+      flex: 1;
+      text-align: center;
+      padding: 0 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .flow-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #fff;
+      margin: 0 auto 18px;
+      box-shadow: 0 6px 24px rgba(6,182,212,0.4);
+    }
+    .flow-num {
+      position: absolute;
+      top: -8px;
+      right: calc(50% - 46px);
+      background: #fff;
+      color: var(--color-accent);
+      font-size: 0.72rem;
+      font-weight: 900;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--color-accent);
+    }
+    .flow-title { font-size: 0.95rem; font-weight: 900; color: var(--color-text); margin-bottom: 6px; }
+    .flow-desc { font-size: 0.8rem; color: var(--color-text-sub); line-height: 1.55; }
+
+    /* ============================
+       ⑨ FAQ
+    ============================ */
+    .faq-list {
+      max-width: 720px;
+      margin: 48px auto 0;
+    }
+    details.faq-item {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(6,182,212,0.18);
+      border-radius: 14px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: box-shadow var(--transition);
+    }
+    details.faq-item[open] { box-shadow: 0 6px 24px rgba(6,182,212,0.15); }
+    details.faq-item summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 24px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.97rem;
+      color: var(--color-text);
+      user-select: none;
+    }
+    details.faq-item summary::-webkit-details-marker { display: none; }
+    details.faq-item summary .faq-q { display: flex; align-items: center; gap: 12px; }
+    details.faq-item summary .faq-q i { color: var(--color-accent); font-size: 1rem; flex-shrink: 0; }
+    details.faq-item summary .faq-chevron { color: var(--color-accent); transition: transform var(--transition); flex-shrink: 0; }
+    details.faq-item[open] summary .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      padding: 0 24px 22px 50px;
+      font-size: 0.92rem;
+      color: var(--color-text-sub);
+      line-height: 1.75;
+    }
+
+    /* ============================
+       ⑩ クロージング・緊急性
+    ============================ */
+    .closing { background: linear-gradient(160deg, #0a1a2e 0%, #031622 100%); padding: 96px 24px; }
+    .closing-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+    .closing-label {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--color-accent-light);
+      background: rgba(6,182,212,0.15);
+      border: 1px solid rgba(6,182,212,0.35);
+      border-radius: 999px;
+      padding: 6px 20px;
+      margin-bottom: 24px;
+    }
+    .closing-catch {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+    .closing-catch em { color: var(--color-accent-light); font-style: normal; }
+    .closing-sub {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.65);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.75;
+    }
+    .urgency-banners {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 32px 0 40px;
+    }
+    .urgency-banner {
+      background: rgba(6,182,212,0.1);
+      border: 1px solid rgba(6,182,212,0.35);
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-align: left;
+    }
+    .urgency-banner .u-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--color-accent-light);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .urgency-banner p { font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.6; }
+    .urgency-banner strong { color: #fff; }
+
+    /* CTAフォームエリア */
+    .form-wrap {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 40px 36px;
+      margin-top: 40px;
+    }
+    .form-title { font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 0.82rem; color: rgba(255,255,255,0.65); margin-bottom: 6px; font-weight: 700; }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: 'Noto Sans JP', sans-serif;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-group input::placeholder { color: rgba(255,255,255,0.35); }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(6,182,212,0.2);
+    }
+    .form-group select option { background: #0d2a3a; color: #fff; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .privacy-note {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    /* ============================
+       フッター
+    ============================ */
+    footer {
+      background: #040d14;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+    footer a { color: rgba(255,255,255,0.55); text-decoration: underline; }
+
+    /* ============================
+       固定フッターCTA（スマホ）
+    ============================ */
+    .sticky-cta {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: linear-gradient(0deg, rgba(4,13,20,0.97) 0%, rgba(4,13,20,0.0) 100%);
+      padding: 16px 20px 24px;
+    }
+    .sticky-cta .btn-cta { margin: 0 auto; font-size: 1rem; padding: 18px 28px; }
+
+    /* ============================
+       アニメーション
+    ============================ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { opacity: 0; animation: fadeUp 0.7s ease forwards; }
+    .fade-in-delay-1 { animation-delay: 0.15s; }
+    .fade-in-delay-2 { animation-delay: 0.3s; }
+    .fade-in-delay-3 { animation-delay: 0.45s; }
+    .fade-in-delay-4 { animation-delay: 0.6s; }
+    .fade-in-delay-5 { animation-delay: 0.75s; }
+
+    /* ============================
+       レスポンシブ
+    ============================ */
+    @media (max-width: 900px) {
+      .reasons-grid,
+      .ba-grid,
+      .voices-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      :root { --section-py: 64px; }
+      .hero {
+        min-height: 100svh;
+        padding: 70px 20px;
+        background-attachment: scroll;
+      }
+      .hero-catch { font-size: clamp(1.6rem, 8vw, 2.4rem); }
+      .hero-badges { gap: 10px; }
+      .hero-trust-badge { padding: 10px 14px; min-width: 90px; }
+      .reasons-grid,
+      .ba-grid,
+      .voices-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+      .flow-steps {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+      }
+      .flow-steps::before { display: none; }
+      .flow-step { width: 100%; max-width: 300px; }
+      .urgency-banners { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-wrap { padding: 28px 20px; }
+      .sticky-cta { display: block; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="hero-icon"><i class="fa-solid fa-rocket"></i></div>
-  <h1><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);margin-right:8px;"></i>LP プロンプトジェネレーター</h1>
-  <p>情報を入力するだけで、コンバージョン率を最大化する<br>プロ品質のLPプロンプトを自動生成します。</p>
-  <div class="hero-badges">
-    <span class="badge"><i class="fa-solid fa-check-circle"></i> PASONA法則準拠</span>
-    <span class="badge"><i class="fa-solid fa-arrows-rotate"></i> CTA 3点配置</span>
-    <span class="badge"><i class="fa-solid fa-building"></i> BtoC/BtoB対応</span>
-    <span class="badge"><i class="fa-solid fa-palette"></i> カラー指定対応</span>
-  </div>
-</div>
+<!-- ============================================================
+     ① ファーストビュー
+============================================================ -->
+<section class="hero">
+  <div class="hero-inner">
 
-<div class="main">
+    <!-- 緊急性バッジ -->
+    <div class="hero-badge fade-in">
+      <span class="dot"></span>
+      <!-- ★ 変更箇所：残席数・締切日 -->
+      今月の無料相談枠 残り<strong style="color:var(--color-accent-light);margin:0 4px;">7社</strong>限定 ／ 6月末まで
+    </div>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-list-ol"></i></div>
-    <h2>使い方</h2>
-  </div>
-  <div class="card" style="padding:24px 28px; margin-bottom:28px;">
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <span class="step-label">商品情報を<br>入力</span>
+    <!-- メインキャッチ -->
+    <h1 class="hero-catch fade-in fade-in-delay-1">
+      「AIを導入したいけど、<br>
+      <span>予算も時間も人材もない」</span><br>
+      その悩み、解決できます。
+    </h1>
+
+    <!-- サブコピー -->
+    <p class="hero-sub fade-in fade-in-delay-2">
+      リスキリング補助金を活用すれば、<strong style="color:#fff;">1人あたり実質負担ゼロ</strong>でAI研修が受けられます。<br>
+      300社以上が実証した、バックヤード業務を最短で自動化するオーダーメイド研修。
+    </p>
+
+    <!-- 社会的証明バッジ3種 -->
+    <div class="hero-badges fade-in fade-in-delay-3">
+      <div class="hero-trust-badge">
+        <span class="num">300<small style="font-size:1rem">社+</small></span>
+        研修実績
       </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <span class="step-label">テーマカラーを<br>設定</span>
+      <div class="hero-trust-badge">
+        <span class="num">95<small style="font-size:1rem">%</small></span>
+        受講者満足度
       </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <span class="step-label">ボタンを<br>クリック</span>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <span class="step-label">プロンプトを<br>コピー・活用</span>
+      <div class="hero-trust-badge">
+        <span class="num">¥0</span>
+        相談・説明会
       </div>
     </div>
-  </div>
 
-  <div class="divider"><span><i class="fa-solid fa-pen-to-square" style="margin-right:6px;color:var(--accent);"></i>情報を入力してプロンプトを生成</span></div>
+    <!-- CTAボタン（メイン） -->
+    <a href="#contact" class="btn-cta fade-in fade-in-delay-4" role="button">
+      <i class="fa-solid fa-calendar-check"></i>無料相談・説明会に申し込む
+    </a>
+    <p class="cta-note fade-in fade-in-delay-5">
+      <i class="fa-solid fa-shield-halved"></i>&nbsp;費用・勧誘なし&nbsp;｜&nbsp;キャンセル自由&nbsp;｜&nbsp;オンライン対応可
+    </p>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-box-open"></i></div>
-    <h2>商品・サービス情報</h2>
-    <span>必須項目を入力してください</span>
   </div>
-  <div class="card">
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-store"></i> 商品・サービス名</label>
-        <input type="text" id="product" placeholder="例：オンライン英会話スクール" />
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ② 共感セクション：こんなお悩みありませんか？
+============================================================ -->
+<section class="section pain" id="pain">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label"><i class="fa-solid fa-heart-crack"></i>&nbsp;お悩み</span>
+      <h2 class="section-title">こんなお悩み、<em>ありませんか？</em></h2>
+      <p class="section-sub">多くの中小企業の経営者・担当者が、同じ壁にぶつかっています。</p>
+    </div>
+
+    <div class="pain-list" style="max-width:720px;margin:40px auto 0;">
+
+      <div class="pain-item">
+        <div class="pain-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+        <div>
+          <p class="pain-text">AIを導入したいが、費用が高くて踏み出せない</p>
+          <p class="pain-text"><small>「どこに頼めばいいかわからないし、予算も確保できていない…」</small></p>
+        </div>
       </div>
-      <div class="field">
-        <label><i class="fa-solid fa-users"></i> ターゲット</label>
-        <input type="text" id="target" placeholder="例：30代の忙しいビジネスマン" />
+
+      <div class="pain-item">
+        <div class="pain-icon"><i class="fa-solid fa-user-minus"></i></div>
+        <div>
+          <p class="pain-text">人材不足で、事務作業に追われて本業に集中できない</p>
+          <p class="pain-text"><small>「採用してもすぐ辞めてしまう。今いるメンバーで何とかしたい。」</small></p>
+        </div>
+      </div>
+
+      <div class="pain-item">
+        <div class="pain-icon"><i class="fa-solid fa-circle-question"></i></div>
+        <div>
+          <p class="pain-text">AIのメリット・デメリットを正直に教えてもらえる場所がない</p>
+          <p class="pain-text"><small>「ベンダーに聞くと売り込まれるだけで、本音が聞けない。」</small></p>
+        </div>
+      </div>
+
+      <div class="pain-item">
+        <div class="pain-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div>
+          <p class="pain-text">「研修を受けて本当に売り上げが上がるのか」確信が持てない</p>
+          <p class="pain-text"><small>「投資対効果が見えないと、上司・経営陣を説得できない。」</small></p>
+        </div>
+      </div>
+
+      <div class="pain-item">
+        <div class="pain-icon"><i class="fa-solid fa-robot"></i></div>
+        <div>
+          <p class="pain-text">汎用研修を受けても自社業務に使えなかった経験がある</p>
+          <p class="pain-text"><small>「内容は理解できたが、実務に落とし込む方法がわからなかった。」</small></p>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="text-align:center;margin-top:36px;font-size:1.05rem;font-weight:700;color:var(--color-accent);">
+      <i class="fa-solid fa-arrow-down"></i>&nbsp; すべて、JapanAI研修で解決できます。
+    </p>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ③ 解決策：選ばれる理由
+============================================================ -->
+<section class="section" id="reasons">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label"><i class="fa-solid fa-star"></i>&nbsp;選ばれる理由</span>
+      <h2 class="section-title">なぜ300社以上が<em>選んだのか？</em></h2>
+      <p class="section-sub">汎用研修との決定的な違いは「自社業務に直結する」オーダーメイド設計にあります。</p>
+    </div>
+
+    <div class="reasons-grid">
+
+      <div class="reason-card glass-card">
+        <div class="reason-num">01</div>
+        <div class="reason-icon"><i class="fa-solid fa-puzzle-piece"></i></div>
+        <h3 class="reason-title">完全オーダーメイド研修</h3>
+        <p class="reason-desc">受講企業の業種・業務フローに合わせてカリキュラムを設計。「うちには関係ない」がゼロになります。</p>
+      </div>
+
+      <div class="reason-card glass-card">
+        <div class="reason-num">02</div>
+        <div class="reason-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <h3 class="reason-title">補助金で実質負担ゼロ</h3>
+        <p class="reason-desc">リスキリング補助金を最大活用。通常1人30万円の研修費が大幅圧縮。申請サポートまで伴走します。</p>
+      </div>
+
+      <div class="reason-card glass-card">
+        <div class="reason-num">03</div>
+        <div class="reason-icon"><i class="fa-solid fa-gauge-high"></i></div>
+        <h3 class="reason-title">研修翌日から即実践</h3>
+        <p class="reason-desc">座学ではなく「実際の業務画面」でのハンズオン形式。研修後すぐに職場で使えるスキルを習得。</p>
+      </div>
+
+      <div class="reason-card glass-card">
+        <div class="reason-num">04</div>
+        <div class="reason-icon"><i class="fa-solid fa-trophy"></i></div>
+        <h3 class="reason-title">累計300社超の実績</h3>
+        <p class="reason-desc">製造・医療・小売・士業など多業種での導入実績。社内稟議に使える導入事例も豊富に提供します。</p>
+      </div>
+
+      <div class="reason-card glass-card">
+        <div class="reason-num">05</div>
+        <div class="reason-icon"><i class="fa-solid fa-headset"></i></div>
+        <h3 class="reason-title">導入後も伴走サポート</h3>
+        <p class="reason-desc">研修終了後も専任担当者がフォロー。新システム導入も続々対応。「やりっぱなし」にならない安心感。</p>
+      </div>
+
+      <div class="reason-card glass-card" style="background:linear-gradient(135deg,rgba(6,182,212,0.12),rgba(56,217,240,0.08));border-color:rgba(6,182,212,0.4);">
+        <div class="reason-num" style="opacity:1;">AI</div>
+        <div class="reason-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <h3 class="reason-title">最新AIツールを続々導入</h3>
+        <p class="reason-desc">勝負名刺・仕訳無双・AIバイブコーディングなど、独自ツールを研修に組み込み。常に最前線のAI活用を体験。</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ④ Before→After ベネフィット
+============================================================ -->
+<section class="section ba-section" id="benefits">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label"><i class="fa-solid fa-arrow-right-arrow-left"></i>&nbsp;導入効果</span>
+      <h2 class="section-title">研修を受けた会社が<em>変わった3つのこと</em></h2>
+      <p class="section-sub">実際に研修を受けた企業のビフォーアフターです。</p>
+    </div>
+
+    <div class="ba-grid">
+
+      <div class="ba-card glass-card">
+        <div class="ba-icon"><i class="fa-solid fa-clock"></i></div>
+        <h3 class="reason-title" style="margin-bottom:14px;">経理・データ入力業務</h3>
+        <div class="ba-label" style="color:#c0392b;">BEFORE</div>
+        <div class="ba-before">毎月の締め作業に<strong>3日</strong>かかっていた。深夜残業が常態化。</div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="ba-label" style="color:#0e7490;">AFTER</div>
+        <div class="ba-after">「仕訳無双」導入で<strong>4時間</strong>に短縮。残業ゼロを達成。</div>
+      </div>
+
+      <div class="ba-card glass-card">
+        <div class="ba-icon"><i class="fa-solid fa-file-lines"></i></div>
+        <h3 class="reason-title" style="margin-bottom:14px;">提案書・資料作成</h3>
+        <div class="ba-label" style="color:#c0392b;">BEFORE</div>
+        <div class="ba-before">1件の提案書作成に<strong>半日</strong>以上。営業が事務作業で疲弊。</div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="ba-label" style="color:#0e7490;">AFTER</div>
+        <div class="ba-after">AIアシストで<strong>30分</strong>で完成。営業活動に集中できるように。</div>
+      </div>
+
+      <div class="ba-card glass-card">
+        <div class="ba-icon"><i class="fa-solid fa-users"></i></div>
+        <h3 class="reason-title" style="margin-bottom:14px;">採用・人材育成コスト</h3>
+        <div class="ba-label" style="color:#c0392b;">BEFORE</div>
+        <div class="ba-before">人手不足で毎年<strong>採用費100万円以上</strong>投じても解決しない。</div>
+        <div class="ba-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+        <div class="ba-label" style="color:#0e7490;">AFTER</div>
+        <div class="ba-after">今いる社員のスキルアップで対応。<strong>採用費ゼロ</strong>で業務量1.5倍。</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ⑤ お客様の声
+============================================================ -->
+<section class="section" id="voices">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label"><i class="fa-solid fa-comment-dots"></i>&nbsp;お客様の声</span>
+      <h2 class="section-title">受講した方々の<em>リアルな声</em></h2>
+      <p class="section-sub">社内稟議を通すための参考にしてください。</p>
+    </div>
+
+    <div class="voices-grid">
+
+      <div class="voice-card glass-card">
+        <div class="voice-header">
+          <img
+            class="voice-avatar"
+            src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&q=80"
+            alt="受講者の声"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="photo-placeholder" style="display:none;width:54px;height:54px;border-radius:50%;min-height:unset;"><i class="fa-solid fa-user" style="font-size:18px;"></i></div>
+          <div>
+            <div class="voice-name">田中 誠一 様</div>
+            <!-- ★ 変更箇所：お客様の会社名・役職 -->
+            <div class="voice-company">製造業・代表取締役 / 従業員18名</div>
+          </div>
+        </div>
+        <div class="voice-stars">★★★★★</div>
+        <p class="voice-text">「補助金を使えるとは知らず半信半疑でしたが、担当者が申請を全部サポートしてくれて、実質ほぼゼロ負担で受講できました。研修後は経理の残業が月20時間以上減り、コスト削減額も明確に出ています。」</p>
+      </div>
+
+      <div class="voice-card glass-card">
+        <div class="voice-header">
+          <img
+            class="voice-avatar"
+            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80"
+            alt="受講者の声"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="photo-placeholder" style="display:none;width:54px;height:54px;border-radius:50%;min-height:unset;"><i class="fa-solid fa-user" style="font-size:18px;"></i></div>
+          <div>
+            <div class="voice-name">佐藤 美穂 様</div>
+            <!-- ★ 変更箇所：お客様の会社名・役職 -->
+            <div class="voice-company">調剤薬局チェーン・総務部長</div>
+          </div>
+        </div>
+        <div class="voice-stars">★★★★★</div>
+        <p class="voice-text">「汎用AI研修は何度か受けましたが実務で使えなかった。JapanAI研修は最初のヒアリングから自社業務に合わせてくれ、翌週から職場で実践できました。社員のモチベーションも明らかに上がっています。」</p>
+      </div>
+
+      <div class="voice-card glass-card">
+        <div class="voice-header">
+          <img
+            class="voice-avatar"
+            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80"
+            alt="受講者の声"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="photo-placeholder" style="display:none;width:54px;height:54px;border-radius:50%;min-height:unset;"><i class="fa-solid fa-user" style="font-size:18px;"></i></div>
+          <div>
+            <div class="voice-name">木村 隆司 様</div>
+            <!-- ★ 変更箇所：お客様の会社名・役職 -->
+            <div class="voice-company">税理士法人・事務長</div>
+          </div>
+        </div>
+        <div class="voice-stars">★★★★★</div>
+        <p class="voice-text">「正直、AIに懐疑的でした。でも説明会でデメリットも包み隠さず教えてくれたので信頼できると判断。仕訳無双を導入したら決算期の残業が激減。今では全スタッフが毎日使っています。」</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ⑥ ギャラリー（研修風景）
+============================================================ -->
+<section class="section" style="background:#eef8fb;padding-top:64px;padding-bottom:64px;">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:8px;">
+      <span class="section-label"><i class="fa-solid fa-images"></i>&nbsp;研修風景</span>
+      <h2 class="section-title">実際の<em>研修の様子</em></h2>
+    </div>
+    <div class="gallery-grid">
+
+      <img class="gallery-img"
+        src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop&auto=format"
+        alt="AI研修の様子"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="photo-placeholder" style="display:none;"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+
+      <img class="gallery-img"
+        src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop&auto=format"
+        alt="グループワーク"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="photo-placeholder" style="display:none;"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+
+      <img class="gallery-img"
+        src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=400&fit=crop&auto=format"
+        alt="ビジネスミーティング"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="photo-placeholder" style="display:none;"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+
+      <img class="gallery-img"
+        src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop&auto=format"
+        alt="オンライン研修"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="photo-placeholder" style="display:none;"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     中間CTA
+============================================================ -->
+<section style="background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);padding:64px 24px;text-align:center;">
+  <div style="max-width:640px;margin:0 auto;">
+    <p style="font-size:0.85rem;color:rgba(255,255,255,0.75);letter-spacing:0.1em;margin-bottom:12px;font-weight:700;">STEP 1</p>
+    <h2 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:900;color:#fff;margin-bottom:16px;line-height:1.3;">
+      まずは「無料相談」で、あなたの会社に<br>合うプランを確認してみませんか？
+    </h2>
+    <p style="color:rgba(255,255,255,0.8);font-size:0.95rem;margin-bottom:32px;">
+      補助金の使い方・ROI試算・自社向けカリキュラム例を、<br>相談0円でご提案します。
+    </p>
+    <a href="#contact" class="btn-cta" style="background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.6);color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <i class="fa-solid fa-phone"></i>今すぐ無料相談を予約する
+    </a>
+    <p class="cta-note">所要時間 約30分・完全無料・オンライン可</p>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ⑦ 料金プラン
+============================================================ -->
+<section class="section pricing-section" id="pricing">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label"><i class="fa-solid fa-tag"></i>&nbsp;料金プラン</span>
+      <h2 class="section-title" style="color:#fff;">シンプルな<em style="color:var(--color-accent-light);">1プラン</em>で明快</h2>
+      <p class="section-sub" style="color:rgba(255,255,255,0.6);margin-left:auto;margin-right:auto;">補助金を最大活用することで、実質負担を大幅に抑えられます。</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-tag">おすすめ 唯一のプラン</div>
+      <div class="pricing-name">JapanAI研修 スタンダードプラン</div>
+      <!-- ★ 変更箇所：価格 -->
+      <div class="pricing-price">¥300,000<small>/人</small></div>
+      <div class="pricing-note">※ リスキリング補助金活用で実質負担が大幅軽減</div>
+
+      <div class="subsidy-box">
+        <p><i class="fa-solid fa-circle-info" style="color:var(--color-accent-light);margin-right:8px;"></i><strong>補助金活用モデルケース</strong></p>
+        <p style="margin-top:8px;line-height:1.75;">
+          人材開発支援助成金（リスキリング推進コース）を活用した場合、経費の<strong>最大70%</strong>が助成される可能性があります。<br>
+          ※ 企業規模・条件により異なります。申請サポートも無料で実施します。
+        </p>
+      </div>
+
+      <div class="pricing-features">
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i>事前ヒアリング・業務分析（無料）</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i>オーダーメイドカリキュラム設計</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i>ハンズオン形式 実践研修（全日程）</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i>独自AIツール（仕訳無双・勝負名刺 等）ライセンス</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i>補助金申請サポート（手続き伴走）</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i>研修後フォローアップ（3ヶ月）</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i>社内展開用マニュアル作成支援</div>
+      </div>
+
+      <a href="#contact" class="btn-cta">
+        <i class="fa-solid fa-calendar-check"></i>無料相談で詳細を確認する
+      </a>
+      <p class="privacy-note" style="color:rgba(255,255,255,0.45);">費用のご請求は一切ありません。詳細をヒアリング後にお見積もりを提示します。</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ⑧ 利用の流れ
+============================================================ -->
+<section class="section" id="flow">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label"><i class="fa-solid fa-list-ol"></i>&nbsp;ご利用の流れ</span>
+      <h2 class="section-title">申し込みから研修完了まで<em>5ステップ</em></h2>
+      <p class="section-sub">面倒な手続きも担当者がすべて伴走。安心してお任せください。</p>
+    </div>
+
+    <div class="flow-steps">
+
+      <div class="flow-step">
+        <div style="position:relative;display:inline-block;">
+          <div class="flow-icon"><i class="fa-solid fa-comment-medical"></i></div>
+          <span class="flow-num">1</span>
+        </div>
+        <div class="flow-title">無料相談・説明会</div>
+        <p class="flow-desc">オンライン30分。業務課題・予算感・補助金適用可否を確認</p>
+      </div>
+
+      <div class="flow-step">
+        <div style="position:relative;display:inline-block;">
+          <div class="flow-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+          <span class="flow-num">2</span>
+        </div>
+        <div class="flow-title">業務ヒアリング・分析</div>
+        <p class="flow-desc">現状の業務フローを整理し、AI化できる箇所を特定</p>
+      </div>
+
+      <div class="flow-step">
+        <div style="position:relative;display:inline-block;">
+          <div class="flow-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <span class="flow-num">3</span>
+        </div>
+        <div class="flow-title">補助金申請サポート</div>
+        <p class="flow-desc">必要書類の準備から提出まで担当者が完全サポート</p>
+      </div>
+
+      <div class="flow-step">
+        <div style="position:relative;display:inline-block;">
+          <div class="flow-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <span class="flow-num">4</span>
+        </div>
+        <div class="flow-title">オーダーメイド研修実施</div>
+        <p class="flow-desc">自社業務に特化したカリキュラムで実践研修を実施</p>
+      </div>
+
+      <div class="flow-step">
+        <div style="position:relative;display:inline-block;">
+          <div class="flow-icon"><i class="fa-solid fa-rocket"></i></div>
+          <span class="flow-num">5</span>
+        </div>
+        <div class="flow-title">フォローアップ・定着支援</div>
+        <p class="flow-desc">3ヶ月間の伴走サポートで社内定着まで責任をもって支援</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ⑨ FAQ
+============================================================ -->
+<section class="section" style="background:#eef8fb;" id="faq">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label"><i class="fa-solid fa-circle-question"></i>&nbsp;よくある質問</span>
+      <h2 class="section-title">導入前に<em>気になること</em></h2>
+      <p class="section-sub">社内稟議でよく使われる質問をまとめました。</p>
+    </div>
+
+    <div class="faq-list">
+
+      <details class="faq-item">
+        <summary>
+          <span class="faq-q"><i class="fa-solid fa-circle-question"></i>AIが苦手な社員でも受講できますか？</span>
+          <i class="fa-solid fa-chevron-down faq-chevron"></i>
+        </summary>
+        <div class="faq-answer">
+          はい、問題ありません。受講者のITリテラシーに合わせてカリキュラムを調整します。「スマホは使えるけどパソコンが苦手」という方でも、段階的に学べる設計です。実際に受講した方の約4割がAI初心者からスタートしています。
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span class="faq-q"><i class="fa-solid fa-circle-question"></i>補助金は確実にもらえますか？</span>
+          <i class="fa-solid fa-chevron-down faq-chevron"></i>
+        </summary>
+        <div class="faq-answer">
+          補助金（人材開発支援助成金）は国の制度ですが、企業の規模・条件・申請内容によって採択率が異なります。弊社では申請前に適用可否を無料で確認し、採択実績の高い申請書類の作成をサポートします。まずは無料相談でご確認ください。
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span class="faq-q"><i class="fa-solid fa-circle-question"></i>研修を受けると本当に売り上げは上がりますか？</span>
+          <i class="fa-solid fa-chevron-down faq-chevron"></i>
+        </summary>
+        <div class="faq-answer">
+          「研修を受けたら即売り上げが上がる」とは断言できません。ただし、バックヤード業務の時間が減ることで、営業・顧客対応・新規事業に使える時間が増え、結果として売り上げ向上につながるケースが多いです。無料相談でROI試算をご提示しますので、数値でご判断ください。
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span class="faq-q"><i class="fa-solid fa-circle-question"></i>研修はオンラインでも受けられますか？</span>
+          <i class="fa-solid fa-chevron-down faq-chevron"></i>
+        </summary>
+        <div class="faq-answer">
+          はい、オンライン・対面どちらにも対応しています。全国の企業様にご利用いただけます。グループ研修の場合は同一拠点への出張研修も可能です（交通費別途）。詳細はご相談ください。
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span class="faq-q"><i class="fa-solid fa-circle-question"></i>何名から申し込めますか？</span>
+          <i class="fa-solid fa-chevron-down faq-chevron"></i>
+        </summary>
+        <div class="faq-answer">
+          1名様からお申し込みいただけます。複数名でのグループ受講も可能で、チームで受けることで社内展開がスムーズになります。まずは担当者・経営層の1〜2名が受講し、社内推進役として動く企業様が多いです。
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ⑩ クロージング + 最終CTA
+============================================================ -->
+<section class="closing" id="contact">
+  <div class="closing-inner">
+
+    <span class="closing-label"><i class="fa-solid fa-fire"></i>&nbsp;限定オファー</span>
+
+    <h2 class="closing-catch">
+      今の「人手不足・残業」を<br>
+      <em>来月から変えませんか？</em>
+    </h2>
+    <p class="closing-sub">
+      毎月の残業代・採用費・非効率な手作業のコストは、知らぬ間に積み上がっています。<br>
+      AI研修への投資は、来年の今頃には何倍にもなって戻ってきます。
+    </p>
+
+    <!-- 緊急性バナー2案 -->
+    <div class="urgency-banners">
+      <div class="urgency-banner">
+        <div class="u-tag"><i class="fa-solid fa-hourglass-half"></i>&nbsp;緊急①</div>
+        <!-- ★ 変更箇所：今月の無料相談残枠数 -->
+        <p><strong>今月の無料相談枠、残り7社</strong>のみ。<br>先着順で締め切るため、お早めにお申し込みください。</p>
+      </div>
+      <div class="urgency-banner">
+        <div class="u-tag"><i class="fa-solid fa-calendar-xmark"></i>&nbsp;緊急②</div>
+        <!-- ★ 変更箇所：補助金締切情報 -->
+        <p>補助金の申請受付は<strong>年度内に締切があります。</strong><br>今から動かないと今年度の助成は受けられません。</p>
       </div>
     </div>
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-tag"></i> 価格帯・プラン</label>
-        <input type="text" id="price" placeholder="例：月額9,800円〜" />
+
+    <!-- お問い合わせフォーム -->
+    <div class="form-wrap">
+      <p class="form-title"><i class="fa-solid fa-calendar-check" style="color:var(--color-accent-light);margin-right:10px;"></i>無料相談・説明会のお申し込み</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">お名前 <span style="color:#ff6b6b;">*</span></label>
+          <input type="text" id="name" name="name" placeholder="山田 太郎" required>
+        </div>
+        <div class="form-group">
+          <label for="company">会社名 <span style="color:#ff6b6b;">*</span></label>
+          <input type="text" id="company" name="company" placeholder="株式会社〇〇" required>
+        </div>
       </div>
-      <div class="field">
-        <label><i class="fa-solid fa-star"></i> 最大の強み（USP）</label>
-        <input type="text" id="usp" placeholder="例：業界最安値＋返金保証付き" />
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">メールアドレス <span style="color:#ff6b6b;">*</span></label>
+          <input type="email" id="email" name="email" placeholder="info@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="tel">電話番号</label>
+          <!-- ★ 変更箇所：電話番号フィールド -->
+          <input type="tel" id="tel" name="tel" placeholder="03-0000-0000">
+        </div>
       </div>
-    </div>
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-building-user"></i> BtoC / BtoB</label>
-        <select id="biztype">
-          <option value="BtoC">BtoC（個人向け）</option>
-          <option value="BtoB">BtoB（法人向け）</option>
+
+      <div class="form-group">
+        <label for="size">従業員数</label>
+        <select id="size" name="size">
+          <option value="">選択してください</option>
+          <option value="1-10">1〜10名</option>
+          <option value="11-30">11〜30名</option>
+          <option value="31-100">31〜100名</option>
+          <option value="101+">101名以上</option>
         </select>
       </div>
-      <div class="field">
-        <label><i class="fa-solid fa-crosshairs"></i> 目標CV（コンバージョン）</label>
-        <input type="text" id="cv" placeholder="例：無料体験申し込み" />
+
+      <div class="form-group">
+        <label for="concern">一番のお悩み・お聞きしたいこと（任意）</label>
+        <input type="text" id="concern" name="concern" placeholder="例：補助金が使えるか確認したい、具体的なカリキュラムを知りたい">
       </div>
+
+      <!-- ★ 変更箇所：フォーム送信先URLまたはJavaScript処理 -->
+      <button type="button" class="btn-cta" onclick="alert('お申し込みありがとうございます！担当者より2営業日以内にご連絡いたします。')" style="margin-top:8px;">
+        <i class="fa-solid fa-paper-plane"></i>無料相談を申し込む（完全無料）
+      </button>
+      <p class="privacy-note">
+        <i class="fa-solid fa-lock"></i>&nbsp;
+        入力いただいた情報は個人情報保護方針に基づき適切に管理します。<br>
+        営業電話・迷惑メールは一切送りません。
+      </p>
     </div>
-    <div class="field" style="margin-bottom:16px;">
-      <label><i class="fa-solid fa-comment-dots"></i> ユーザーの主な悩み（箇条書きOK）</label>
-      <textarea id="pain" placeholder="例：英語が上達しない、忙しくて通えない、費用が高い"></textarea>
-    </div>
-    <div class="field">
-      <label><i class="fa-solid fa-medal"></i> 権威性・実績（任意）</label>
-      <input type="text" id="authority" placeholder="例：累計1万人受講・満足度98%・メディア掲載多数" />
-    </div>
+
   </div>
+</section>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-palette"></i></div>
-    <h2>テーマカラー設定</h2>
-    <span>LPのカラーをカスタマイズ</span>
-  </div>
-  <div class="card">
-    <div class="grid-3" style="margin-bottom:20px;">
-      <div class="color-field">
-        <label><i class="fa-solid fa-fill-drip"></i> メインカラー（アクセント）</label>
-        <div class="color-row">
-          <input type="color" id="colorAccentPicker" value="#29abe2" oninput="syncColor('colorAccentPicker','colorAccentHex')" />
-          <input type="text" id="colorAccentHex" value="#29abe2" placeholder="#29abe2" oninput="syncHex('colorAccentHex','colorAccentPicker')" />
-        </div>
-      </div>
-      <div class="color-field">
-        <label><i class="fa-solid fa-brush"></i> 背景カラー</label>
-        <div class="color-row">
-          <input type="color" id="colorBgPicker" value="#f7fbfe" oninput="syncColor('colorBgPicker','colorBgHex')" />
-          <input type="text" id="colorBgHex" value="#f7fbfe" placeholder="#f7fbfe" oninput="syncHex('colorBgHex','colorBgPicker')" />
-        </div>
-      </div>
-      <div class="color-field">
-        <label><i class="fa-solid fa-font"></i> テキストカラー</label>
-        <div class="color-row">
-          <input type="color" id="colorTextPicker" value="#1a2a3a" oninput="syncColor('colorTextPicker','colorTextHex')" />
-          <input type="text" id="colorTextHex" value="#1a2a3a" placeholder="#1a2a3a" oninput="syncHex('colorTextHex','colorTextPicker')" />
-        </div>
-      </div>
-    </div>
-    <div style="margin-bottom:16px;">
-      <p style="font-size:12px;color:var(--text-sub);margin-bottom:6px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-swatchbook" style="color:var(--accent);"></i> プリセットテーマから選ぶ</p>
-
-      <div class="theme-group-label"><i class="fa-solid fa-star" style="color:#a78bfa;"></i> 近未来・透明感・妖艶</div>
-      <div class="theme-preview" id="themePreview">
-        <div class="theme-swatch active" onclick="applyTheme('#7c3aed','#0f0a1e','#e8e0ff',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#7c3aed,#c084fc);"></div>
-          <span>オーラ</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#06b6d4','#030f1c','#cffafe',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0e7490,#06b6d4);"></div>
-          <span>サイバー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#ec4899','#120818','#fce7f3',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#9d174d,#ec4899);"></div>
-          <span>ブルーム</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#8b5cf6','#0d1117','#f0e6ff',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#4c1d95,#8b5cf6,#38bdf8);"></div>
-          <span>ギャラクシー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#34d399','#041a14','#d1fae5',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#065f46,#34d399);"></div>
-          <span>バイオ</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#f472b6','#1a0a14','#fdf2f8',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#831843,#f472b6,#fbbf24);"></div>
-          <span>サンセット</span>
-        </div>
-      </div>
-
-      <div class="theme-group-label"><i class="fa-solid fa-briefcase" style="color:#60a5fa;"></i> ビジネス・信頼感</div>
-      <div class="theme-preview">
-        <div class="theme-swatch" onclick="applyTheme('#0984e3','#f0f6ff','#0a2140',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0369a1,#0984e3);"></div>
-          <span>ロイヤル</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#1e40af','#f8faff','#0f172a',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#1e3a8a,#1e40af);"></div>
-          <span>ネイビー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#0f766e','#f0fdfa','#042f2e',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#134e4a,#0f766e);"></div>
-          <span>エメラルド</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#64748b','#f8fafc','#0f172a',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#334155,#64748b);"></div>
-          <span>スレート</span>
-        </div>
-      </div>
-
-      <div class="theme-group-label"><i class="fa-solid fa-heart" style="color:#fb7185;"></i> 温かみ・親しみ・ナチュラル</div>
-      <div class="theme-preview">
-        <div class="theme-swatch" onclick="applyTheme('#f59e0b','#fffbeb','#1c1003',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#d97706,#f59e0b);"></div>
-          <span>アンバー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#e17055','#fff5f2','#2d1a16',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#c2410c,#e17055);"></div>
-          <span>コーラル</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#00b894','#f0fdf8','#1a2e28',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#065f46,#00b894);"></div>
-          <span>ミント</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#a16207','#fefce8','#1c1003',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#854d0e,#ca8a04);"></div>
-          <span>ゴールド</span>
-        </div>
-      </div>
-
-      <div class="theme-group-label"><i class="fa-solid fa-moon" style="color:#94a3b8;"></i> ダーク・高級感・モード</div>
-      <div class="theme-preview">
-        <div class="theme-swatch" onclick="applyTheme('#e2e8f0','#0a0a0a','#f8fafc',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0a0a0a,#1e293b);"></div>
-          <span>オニキス</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#fbbf24','#0a0800','#fffbeb',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0a0800,#92400e);"></div>
-          <span>ラグジュアリー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#c084fc','#09050f','#f5f0ff',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#09050f,#4a044e);"></div>
-          <span>ミッドナイト</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#2d3436','#f8f8f8','#1a1a1a',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#1a1a1a,#4a4a4a);"></div>
-          <span>モノクロ</span>
-        </div>
-      </div>
-    </div>
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;">
-      <p style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> 設定したカラーはプロンプト内のカラー指定セクションに自動で反映されます。</p>
-    </div>
-  </div>
-
-  <button class="gen-btn" onclick="generate()">
-    <i class="fa-solid fa-wand-magic-sparkles"></i>
-    売れるプロンプトを生成する
-    <i class="fa-solid fa-arrow-right"></i>
-  </button>
-
-  <div id="output">
-    <div class="divider" style="margin-top:32px;"><span><i class="fa-solid fa-file-code" style="margin-right:6px;color:var(--accent);"></i>生成されたプロンプト</span></div>
-    <div class="card">
-      <div class="output-header">
-        <h3><i class="fa-solid fa-file-lines"></i> プロンプト</h3>
-        <button class="copy-btn" onclick="copyPrompt('copyMsg1')">
-          <i class="fa-regular fa-copy"></i> コピー
-        </button>
-      </div>
-      <div id="promptBox"></div>
-      <div id="copyMsg1" class="copy-msg"></div>
-      <div style="margin-top:16px;text-align:center;">
-        <button class="copy-btn" onclick="copyPrompt('copyMsg2')" style="margin:0 auto;font-size:14px;padding:12px 32px;border-radius:10px;display:inline-flex;">
-          <i class="fa-regular fa-copy" style="margin-right:8px;"></i> プロンプトをコピーする
-        </button>
-        <div id="copyMsg2" class="copy-msg"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
+<!-- ============================================================
+     フッター
+============================================================ -->
 <footer>
-  <i class="fa-solid fa-rocket" style="color:var(--accent);margin-right:6px;"></i>
-  LP プロンプトジェネレーター &nbsp;|&nbsp; コンバージョン率最大化のための専門ツール
+  <!-- ★ 変更箇所：会社情報・住所・電話番号 -->
+  <p style="margin-bottom:8px;">
+    <strong style="color:rgba(255,255,255,0.7);">株式会社MoMo｜JapanAI研修</strong>
+  </p>
+  <p>〒000-0000 東京都〇〇区〇〇0-0-0 ／ <!-- ★ 変更箇所：電話番号 -->TEL：0120-000-000</p>
+  <p style="margin-top:8px;">
+    <a href="#">プライバシーポリシー</a>&ensp;｜&ensp;
+    <a href="#">特定商取引法に基づく表記</a>&ensp;｜&ensp;
+    <a href="#">お問い合わせ</a>
+  </p>
+  <!-- ★ 変更箇所：著作権年 -->
+  <p style="margin-top:16px;">© 2025 株式会社MoMo All Rights Reserved.</p>
 </footer>
 
-<script>
-function syncColor(pickerId, hexId) {
-  document.getElementById(hexId).value = document.getElementById(pickerId).value;
-}
-function syncHex(hexId, pickerId) {
-  var v = document.getElementById(hexId).value;
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById(pickerId).value = v;
-}
-function applyTheme(accent, bg, text, el) {
-  document.getElementById('colorAccentPicker').value = accent;
-  document.getElementById('colorAccentHex').value = accent;
-  document.getElementById('colorBgPicker').value = bg;
-  document.getElementById('colorBgHex').value = bg;
-  document.getElementById('colorTextPicker').value = text;
-  document.getElementById('colorTextHex').value = text;
-  document.querySelectorAll('.theme-swatch').forEach(function(s){ s.classList.remove('active'); });
-  el.classList.add('active');
-}
-function generate() {
-  var product   = document.getElementById('product').value.trim()   || '【商品・サービス名】';
-  var target    = document.getElementById('target').value.trim()    || '【ターゲット】';
-  var price     = document.getElementById('price').value.trim()     || '【価格帯】';
-  var usp       = document.getElementById('usp').value.trim()       || '【最大の強み】';
-  var biztype   = document.getElementById('biztype').value;
-  var cv        = document.getElementById('cv').value.trim()        || '【コンバージョン目標】';
-  var pain      = document.getElementById('pain').value.trim()      || '【ユーザーの悩み】';
-  var authority = document.getElementById('authority').value.trim() || '【権威性・実績】';
-  var colorAccent = document.getElementById('colorAccentHex').value || '#29abe2';
-  var colorBg     = document.getElementById('colorBgHex').value     || '#f7fbfe';
-  var colorText   = document.getElementById('colorTextHex').value   || '#1a2a3a';
-  var btocFocus = biztype === 'BtoC'
-    ? '感情的ベネフィット・口コミ・共感ストーリーを重視し、読者が「自分のことだ」と感じるコピーにしてください。'
-    : '論理的データ・ROI・費用対効果・導入事例を前面に出し、意思決定者が社内稟議を通しやすい根拠を盛り込んでください。';
-  var promptText = 'あなたはシニアUI/UXデザイナー兼フロントエンドアーキテクト、かつコンバージョン率最大化を専門とするトップクラスのLPコピーライターです。\n以下の情報と設計原則をもとに、成約率の高いランディングページ（LP）の完全なHTMLファイルを1ファイルで作成してください。\n\n━━━━━━━━━━━━━━━━━━━━━\n■ UI/UX・CSS 定義と設計原則\n━━━━━━━━━━━━━━━━━━━━━\n\n【定義】\n・UI = ユーザーが直接見る/触る画面要素。見た目・配置・余白・配色・タイポグラフィ・操作部品。\n・UX = 利用体験全体。理解容易性・導線・安心感・納得感・目的達成率・離脱抑制。\n・CSS = HTMLの見た目とレイアウトを制御するスタイル定義。レスポンシブ・階層・状態表現・可読性を担う。\n\n【設計原則】\n・情報設計は1ページ1目的。\n・CTAは主CTA1つ、補助CTAは最大1つ（クロージングを除く）。\n・ファーストビューで価値提案を即時伝達。\n・視線誘導はF/Zパターンを考慮して配置。\n・モバイルファースト、レスポンシブ前提。\n・認知負荷を下げる短文コピーを使用。\n・trust signal（信頼要素）をCTA近傍に配置。\n・フォームは最小項目のみ。\n・UIは一貫性・可読性・十分なタップ領域・明確な状態差分を確保。\n・CSSはGrid/Flexboxを基本に、余白・階層・コントラスト・focus-visible・line-height・max-width・breakpointsを適切に設定。\n・画像はmax-width:100%、height:autoを基本にする。\n・文字サイズは相対単位（rem/em）を優先し、可読性を損なわない。\n・アクセシビリティを重視し、コントラストとキーボード操作性を確保。\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 商品・サービス情報\n━━━━━━━━━━━━━━━━━━━━━\n・商品名\t\t：' + product + '\n・ターゲット\t：' + target + '\n・価格帯\t\t：' + price + '\n・最大の強み（USP）：' + usp + '\n・権威性・実績\t：' + authority + '\n・ターゲットの悩み：' + pain + '\n・目標CV\t\t：' + cv + '\n・タイプ\t\t：' + biztype + '\n\n━━━━━━━━━━━━━━━━━━━━━\n■ カラー設計（デザイントークン）\n━━━━━━━━━━━━━━━━━━━━━\n・メインカラー（アクセント）：' + colorAccent + '\n・背景カラー\t：' + colorBg + '\n・テキストカラー：' + colorText + '\n\n【カラー設計の方針】\n・上記3色をベースに、以下のトークンをCSS変数（:root）で定義して全体に適用すること：\n  --color-accent: メインカラー\n  --color-accent-light: メインカラーを30%明るくした色（ホバー・ハイライト用）\n  --color-accent-glow: メインカラーにopacity 0.4のグロー（shadow用）\n  --color-bg: 背景カラー\n  --color-surface: 背景カラーより少し明るいカード背景色\n  --color-text: テキストカラー\n  --color-text-sub: テキストカラーを60%透明にしたサブテキスト色\n\n・ファーストビューは背景写真＋グラデーションオーバーレイを使用し、テキストはすべて白（#ffffff）\n・ボディ・クロージングセクションは --color-bg をベースに、カードには --color-surface + glassmorphismを使用\n・近未来感・透明感・妖艶さを演出するために以下を積極活用すること：\n  - backdrop-filter:blur() によるガラス質の半透明レイヤー\n  - box-shadow にメインカラーのグロー効果（0 8px 32px rgba(R,G,B,0.4)）\n  - グラデーション（linear-gradient）はメインカラー→明るいバリエーションの2色展開\n  - セクション間の区切りにグラデーションラインまたは薄い光の粒子（疑似要素で表現）\n・CTAボタンはグラデーション＋グロー＋hover浮き上がりアニメーション必須\n\n━━━━━━━━━━━━━━━━━━━━━\n■ HTMLファイル構成の必須要件\n━━━━━━━━━━━━━━━━━━━━━\n\n【必須タグ（headに必ず含めること）】\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n\n【写真の自動表示（Unsplash無料写真API）】\n・画像はすべて Unsplash の無料写真APIを使用して自動表示すること（ダウンロード・登録不要）\n・URL形式：https://images.unsplash.com/photo-{ID}?w={幅}&h={高さ}&fit=crop&auto=format\n・商品・サービスの内容に合ったキーワードで写真を選び、以下のように記述すること：\n\n▼ 使用箇所と推奨サイズ\n・ファーストビュー メイン画像：w=1200&h=600&fit=crop\n・お客様の声 アバター：w=80&h=80&fit=crop&q=80\n・ギャラリー 各写真：w=600&h=400&fit=crop\n\n▼ 記述例（実際のUnsplash写真IDを使うこと）\n<img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&h=600&fit=crop&auto=format"\n     alt="メイン画像"\n     onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">\n<div class="photo-placeholder" style="display:none;">\n  <i class="fa-solid fa-image"></i><span>写真準備中</span>\n</div>\n\n▼ 推奨写真ID例（商品・業種に近いものを選ぶこと）\n・人物/笑顔：photo-1529156069898-49953e39b3ac\n・ビジネス：photo-1573496359142-b8d87734a5a2\n・自然/癒し：photo-1506905925346-21bda4d32df4\n・学習/教育：photo-1524178232363-1fb2b075b655\n・料理/食事：photo-1498837167922-ddd27525d352\n・スポーツ：photo-1571019613454-1cb2f99b2d8b\n\n・必ず実在するUnsplash写真IDを使用し、all imgタグにonerrorを設定すること\n・.photo-placeholder のCSSは以下を使用：\n.photo-placeholder {\n  display: flex; flex-direction: column;\n  align-items: center; justify-content: center;\n  background: #f0f4f8; color: #aab;\n  height: 200px; border-radius: 10px;\n  font-size: 13px; gap: 8px;\n}\n.photo-placeholder i { font-size: 32px; }\n\n【ローカル画像も使いたい場合のフォルダ構成ルール】\n・追加画像は images/ フォルダに配置し、英数字ハイフンのみのファイル名を使うこと\n  OK例：concert1.jpg / hero-main.jpg　NG例：演奏会写真.jpg\n\n【修正しやすいコメントの挿入】\n・日付・価格・電話番号・場所など変更頻度の高い値の直前に\n  <!-- ★ 変更箇所：〇〇 --> のコメントを入れること\n  例：<!-- ★ 変更箇所：演奏会日付 -->\n      <span>2026年9月27日</span>\n\n━━━━━━━━━━━━━━━━━━━━━\n■ LP構成（3ブロック）\n━━━━━━━━━━━━━━━━━━━━━\n\n文字は中央揃えを基本とし、枠・余白のバランスを均等に保つよう設計してください。\n\n【① ファーストビュー（最重要・以下を厳守すること）】\n\n▼ 絶対目的\nファーストビューの唯一のゴールは「CTAボタンを押させること」。\n説明・装飾・自己紹介は一切不要。訪問者が3秒以内に「これだ」と感じ、迷わずボタンを押す画面を作る。\n\n▼ コピーライティング原則（厳守）\n・1行目（メインキャッチ）：訪問者の「一番強い悩み」または「一番強い欲望」をそのまま言葉にする\n  NG例：「私たちのサービスへようこそ」\n  OK例：「英語が話せないまま、また1年終わりますか？」\n・2行目（サブコピー）：解決策を1文で断言する。数字・具体性・保証を入れる\n  例：「たった90日で、日常会話が自然に出てくる。返金保証付き。」\n・ボタンテキスト：「詳しく見る」は禁止。行動を直接指示する言葉にする\n  例：「今すぐ無料体験を始める」「限定20名・申し込む」\n\n▼ 心理トリガー（必ずファーストビュー内に配置）\n1. 緊急性：「今だけ」「残り〇名」「〇月〇日まで」\n2. 社会的証明：バッジに「累計〇〇人」「満足度〇〇%」「★5.0 口コミ〇〇件」\n3. 損失回避：現状維持のデメリットを1フレーズで示す\n4. 保証：「返金保証」「無料体験」など安心ワードをCTA近傍に小さく添える\n\n▼ 背景の設定（必須）\n・section.hero の background に Unsplash の高品質写真をフルスクリーンで設定すること\n  background-image: url("https://images.unsplash.com/photo-{商品に合うID}?w=1920&h=1080&fit=crop&auto=format");\n  background-size: cover;\n  background-position: center;\n  background-attachment: fixed;（パララックス効果）\n・写真の上に半透明グラデーションオーバーレイを重ねること：\n  ::before 疑似要素で position:absolute / inset:0 / background:linear-gradient(160deg, rgba(メインカラー,0.75) 0%, rgba(0,0,10,0.88) 100%) を全面に適用\n\n▼ 構成要素（上から縦並び・すべて中央揃え・迷わせない順序）\n1. 緊急性タグ：glassmorphismバッジ「残り〇名限定」「〇月末まで」\n2. メインキャッチ：訪問者の悩み・欲望を直撃する1〜2行（白・極太・大きく）\n3. サブコピー：解決策＋数字＋保証を1文で（白70%透明）\n4. 社会的証明バッジ3種：累計数・満足度・受賞歴（glassmorphism・横並び）\n5. CTAボタン：グラデーション・大きく・押しやすい・行動直結テキスト\n6. 安心ワード：ボタン直下に小さく「返金保証あり」「クレジットカード不要」など\n\n▼ ファーストビューのCSS必須ルール\n・section.hero：min-height:100vh / display:flex / flex-direction:column / align-items:center / justify-content:center / position:relative / overflow:hidden / padding:80px 24px\n・テキストはすべて color:#ffffff / text-align:center\n・メインキャッチ：font-size:clamp(2rem,6vw,4rem) / font-weight:900 / letter-spacing:-0.02em / text-shadow:0 4px 24px rgba(0,0,0,0.5) / line-height:1.2\n・サブコピー：font-size:clamp(1rem,2.5vw,1.25rem) / color:rgba(255,255,255,0.82) / max-width:600px / margin:16px auto 0\n・Googleフォントで英語見出し用フォント追加（Playfair Display または Cormorant Garamond）\n・CTAボタン：display:block / margin:36px auto 0 / max-width:420px / width:100% / padding:22px 40px / border-radius:999px / font-size:1.15rem / font-weight:800 / background:linear-gradient(90deg, メインカラー, 明るいバリエーション) / box-shadow:0 8px 32px rgba(メインカラー,0.55) / transition:transform 0.2s,box-shadow 0.2s\n  hover時：transform:translateY(-4px) / box-shadow を強くする\n・安心ワード：font-size:0.8rem / color:rgba(255,255,255,0.6) / margin-top:12px / text-align:center\n\n▼ スマホ対応（@media max-width:640px）\n・メインキャッチ：font-size:clamp(1.6rem,8vw,2.4rem)\n・padding：上下 70px・左右 20px\n・background-attachment:scroll（固定解除）\n\n【② ボディ（中盤）】\n- 共感セクション：「こんなお悩みありませんか？」5項目（各項目にFont Awesomeアイコン）\n- 解決策：選ばれる理由（3〜5項目）\n- ベネフィット：Before→After形式で3つ\n- 社会的証明：お客様の声テンプレート3名分（アバター写真はUnsplash自動写真を使用）\n- ギャラリー：Unsplash自動写真を3〜4枚使用\n- 中間CTAボタン\n\n【③ クロージング】\n- 料金プラン・利用の流れ（3〜5ステップ、各ステップにアイコン）\n- FAQ（よくある質問）5問＋回答\n- 限定オファー・緊急性訴求コピー（2案）\n- 最終CTAボタン＋フォーム周りのマイクロコピー\n\n━━━━━━━━━━━━━━━━━━━━━\n■ デザイン・レイアウト指示\n━━━━━━━━━━━━━━━━━━━━━\n・CSSは<style>タグ内にまとめ、外部ファイル不要の1ファイル完結にすること\n・box-sizing:border-box を全要素に適用すること\n・flexbox / CSS Gridでレイアウトを組み、文字ずれ・枠ずれを防ぐこと\n・スマホ対応（レスポンシブ）：@media (max-width:640px) で1カラムに切り替えること\n・Font Awesome 6をCDNで読み込み、各セクションに適切なアイコンを使用すること\n・文字サイズはremを基本単位として使用し、本文は1rem以上を確保すること\n・CTAボタンのタップ領域は最低44×44px以上を確保すること\n・focus-visibleでキーボード操作時のフォーカス状態を明示すること\n・カラーコントラスト比はWCAG AA基準（4.5:1以上）を満たすこと\n・各セクションにmax-widthを設定し、大画面でも読みやすいレイアウトにすること\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 出力に含めること\n━━━━━━━━━━━━━━━━━━━━━\n1. LP構成案（各セクション名と目的）\n2. 各セクションのUI/UX意図（1〜2行で簡潔に）\n3. 重要な改善ポイント5つ\n4. 完全なHTMLファイル（即ブラウザで動作するもの）\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 追加指示\n━━━━━━━━━━━━━━━━━━━━━\n・' + btocFocus + '\n・CTAボタンは「ファーストビュー直下」「ボディ中間」「クロージング最後」の最低3か所に設置すること\n・各コピーはPASONAの法則（問題→親近感→解決策→提案→絞込→行動）に準拠すること\n・専門用語を避け、中学生でも理解できる平易な言葉で書くこと\n・完成したHTMLファイルはそのままブラウザで開けば動作する状態で出力すること\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 最終出力とダウンロード指示\n━━━━━━━━━━━━━━━━━━━━━\nHTMLコードをすべて出力し終えたら、必ず以下の手順をユーザーに案内すること：\n\n【ダウンロード手順】\n1. 上記のHTMLコード全体をコピーする\n2. パソコンのメモ帳（Windowsはメモ帳、Macはテキストエディット）を開く\n3. コピーしたコードを貼り付ける\n4. ファイル名を「index.html」として保存する（文字コード：UTF-8）\n5. 保存した index.html ファイルをダブルクリックしてブラウザで開いて確認する\n\n※ ChatGPTまたはClaudeを使用している場合、コードブロック右上の「コピー」ボタンを押すと全文をコピーできます。';
-  document.getElementById('promptBox').textContent = promptText;
-  document.getElementById('output').style.display = 'block';
-  document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+<!-- スマホ用固定フッターCTA -->
+<div class="sticky-cta">
+  <a href="#contact" class="btn-cta">
+    <i class="fa-solid fa-calendar-check"></i>無料相談を申し込む
+  </a>
+</div>
 
-/* ── コピー共通処理 ── */
-function copyPrompt(msgId) {
-  var text = document.getElementById('promptBox').textContent;
-  var msg = document.getElementById(msgId);
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function() {
-      showCopyMsg(msg);
-    }).catch(function() {
-      fallbackCopy(text, msg);
+<!-- スクロールアニメーション -->
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        observer.unobserve(entry.target);
+      }
     });
-  } else {
-    fallbackCopy(text, msg);
-  }
-}
-function fallbackCopy(text, msg) {
-  var ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-  try {
-    var ok = document.execCommand('copy');
-    if (ok) {
-      showCopyMsg(msg);
-    } else {
-      msg.textContent = '⚠ 手動でCtrl+Aして右クリック→コピーしてください';
-      msg.style.display = 'block';
-    }
-  } catch(e) {
-    msg.textContent = '⚠ コピーに失敗しました。手動でテキストを選択してください。';
-    msg.style.display = 'block';
-  }
-  document.body.removeChild(ta);
-}
-function showCopyMsg(msg) {
-  msg.textContent = '✓ クリップボードにコピーしました';
-  msg.style.color = '#22a06b';
-  msg.style.display = 'block';
-  setTimeout(function(){ msg.style.display = 'none'; }, 2500);
-}
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.pain-item, .reason-card, .ba-card, .voice-card, .flow-step, .faq-item, .gallery-img').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(28px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
 </script>
+
 </body>
 </html>
