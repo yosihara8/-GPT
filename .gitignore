@@ -1,0 +1,4 @@
+node_modules/
+tapnow/session.json
+tapnow/output/*.mp4
+tapnow/output/*.png

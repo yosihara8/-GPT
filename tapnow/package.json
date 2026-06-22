@@ -1,0 +1,12 @@
+{
+  "name": "tapnow-automation",
+  "version": "1.0.0",
+  "description": "TapNow.ai video generation automation",
+  "scripts": {
+    "save-session": "node save-session.js",
+    "generate": "node generate.js"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "imagePath": "./assets/product.jpg",
+  "description": "ここに商品説明を入力してください。例: 高品質なワイヤレスイヤホン。ノイズキャンセリング機能搭載、最大30時間再生可能。",
+  "videoStyle": "商品広告",
+  "outputDir": "./output"
+}

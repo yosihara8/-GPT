@@ -1,0 +1,67 @@
+name: TapNow.ai 動画生成
+
+on:
+  workflow_dispatch:
+    inputs:
+      description:
+        description: '商品説明テキスト'
+        required: true
+        default: '高品質な商品です。'
+      image_url:
+        description: '商品画像URL（任意）'
+        required: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 依存パッケージをインストール
+        working-directory: tapnow
+        run: npm install
+
+      - name: Playwright ブラウザをインストール
+        working-directory: tapnow
+        run: npx playwright install chromium --with-deps
+
+      - name: セッションファイルを復元
+        run: |
+          echo '${{ secrets.TAPNOW_SESSION }}' > tapnow/session.json
+
+      - name: 商品画像をダウンロード（URLが指定された場合）
+        if: ${{ inputs.image_url != '' }}
+        run: |
+          curl -L "${{ inputs.image_url }}" -o tapnow/assets/product.jpg
+
+      - name: 商品情報を設定
+        run: |
+          cat > tapnow/product.json << EOF
+          {
+            "imagePath": "./assets/product.jpg",
+            "description": "${{ inputs.description }}",
+            "videoStyle": "商品広告",
+            "outputDir": "./output"
+          }
+          EOF
+
+      - name: 動画を生成
+        working-directory: tapnow
+        run: node generate.js
+        env:
+          CI: 'true'
+
+      - name: 生成した動画をアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-video
+          path: tapnow/output/
+          retention-days: 7
