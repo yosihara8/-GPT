@@ -1,609 +1,822 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LP プロンプトジェネレーター</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<style>
-  :root {
-    --accent: #29abe2;
-    --accent-light: #e8f6fd;
-    --accent-dark: #1a7fb5;
-    --bg: #f7fbfe;
-    --card: #ffffff;
-    --border: #d0eaf7;
-    --text-main: #1a2a3a;
-    --text-sub: #5a7a8a;
-    --text-muted: #8faabb;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow-card: 0 2px 12px rgba(41,171,226,0.10);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text-main);
-    min-height: 100vh;
-  }
-  .hero {
-    background: linear-gradient(135deg, #e8f6fd 0%, #ffffff 60%, #eaf7ff 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 56px 24px 40px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(41,171,226,0.12) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: -40px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(41,171,226,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero-icon {
-    width: 72px; height: 72px;
-    background: var(--accent);
-    border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px;
-    box-shadow: 0 8px 24px rgba(41,171,226,0.30);
-  }
-  .hero-icon i { color: #fff; font-size: 34px; }
-  .hero h1 {
-    font-size: 26px; font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 10px;
-  }
-  .hero p {
-    font-size: 14px; color: var(--text-sub);
-    line-height: 1.7; max-width: 520px; margin: 0 auto 20px;
-  }
-  .hero-badges {
-    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-  }
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(41,171,226,0.10);
-    border: 1px solid rgba(41,171,226,0.25);
-    color: var(--accent-dark);
-    font-size: 12px; font-weight: 500;
-    padding: 5px 12px; border-radius: 999px;
-  }
-  .main { max-width: 860px; margin: 0 auto; padding: 40px 20px 60px; }
-  .section-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--accent-light);
-  }
-  .section-header .icon-wrap {
-    width: 36px; height: 36px;
-    background: var(--accent-light);
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .section-header .icon-wrap i { color: var(--accent); font-size: 17px; }
-  .section-header h2 { font-size: 15px; font-weight: 600; color: var(--text-main); }
-  .section-header span { font-size: 12px; color: var(--text-muted); margin-left: auto; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-card);
-  }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-size: 12px; font-weight: 500;
-    color: var(--text-sub);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .field label i { color: var(--accent); font-size: 13px; }
-  .field input, .field select, .field textarea {
-    width: 100%; padding: 10px 14px;
-    font-size: 13px; font-family: inherit;
-    color: var(--text-main); background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(41,171,226,0.12);
-    background: #fff;
-  }
-  .field textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
-  .field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2329abe2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px; cursor: pointer;
-  }
-  .color-field { display: flex; flex-direction: column; gap: 6px; }
-  .color-field label {
-    font-size: 12px; font-weight: 500; color: var(--text-sub);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .color-field label i { color: var(--accent); font-size: 13px; }
-  .color-row { display: flex; align-items: center; gap: 10px; }
-  .color-row input[type="color"] {
-    width: 44px; height: 38px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 2px 4px; cursor: pointer;
-    background: var(--bg); flex-shrink: 0;
-  }
-  .color-row input[type="text"] {
-    flex: 1; padding: 10px 14px;
-    font-size: 13px; font-family: monospace;
-    color: var(--text-main); background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm); outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .color-row input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(41,171,226,0.12);
-    background: #fff;
-  }
-  .theme-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .theme-swatch {
-    display: flex; flex-direction: column; align-items: center; gap: 5px;
-    cursor: pointer;
-  }
-  .theme-swatch .swatch {
-    width: 40px; height: 40px; border-radius: 10px;
-    border: 2px solid transparent;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-  .theme-swatch:hover .swatch { transform: scale(1.12); box-shadow: 0 4px 14px rgba(0,0,0,0.22); }
-  .theme-swatch.active .swatch { border-color: var(--text-main); transform: scale(1.08); }
-  .theme-swatch span { font-size: 10px; color: var(--text-muted); font-weight: 500; }
-  .theme-group-label {
-    font-size: 11px; font-weight: 600; color: var(--text-sub);
-    margin: 14px 0 6px; display: flex; align-items: center; gap: 5px;
-  }
-  .steps {
-    display: flex; gap: 0;
-    position: relative;
-  }
-  .steps::before {
-    content: ''; position: absolute;
-    top: 18px; left: 18px; right: 18px;
-    height: 2px; background: var(--border);
-  }
-  .step {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; gap: 8px; position: relative; z-index: 1;
-  }
-  .step-num {
-    width: 36px; height: 36px;
-    background: var(--accent-light);
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700; color: var(--accent);
-  }
-  .step-label { font-size: 11px; color: var(--text-sub); text-align: center; line-height: 1.4; }
-  .gen-btn {
-    width: 100%; padding: 16px;
-    font-size: 15px; font-weight: 700; font-family: inherit;
-    background: linear-gradient(90deg, var(--accent) 0%, #45c5f0 100%);
-    color: #fff; border: none; border-radius: var(--radius);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 6px 20px rgba(41,171,226,0.30);
-    transition: transform 0.15s, box-shadow 0.15s;
-    margin-bottom: 8px;
-  }
-  .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(41,171,226,0.38); }
-  .gen-btn:active { transform: translateY(0); }
-  #output { display: none; }
-  .output-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .output-header h3 {
-    font-size: 14px; font-weight: 600; color: var(--text-main);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .output-header h3 i { color: var(--accent); }
-  .copy-btn {
-    display: flex; align-items: center; gap: 6px;
-    padding: 9px 18px; font-size: 13px; font-weight: 600; font-family: inherit;
-    background: var(--accent-light);
-    border: 1.5px solid var(--accent);
-    border-radius: var(--radius-sm); cursor: pointer; color: var(--accent-dark);
-    transition: background 0.15s, transform 0.1s;
-    user-select: none;
-  }
-  .copy-btn:hover { background: #d0edfa; }
-  .copy-btn:active { transform: scale(0.97); }
-  #promptBox {
-    background: #f4fbff; border: 1.5px solid var(--border);
-    border-radius: var(--radius); padding: 20px 22px;
-    font-size: 12.5px; line-height: 1.85;
-    white-space: pre-wrap; color: var(--text-main);
-    font-family: 'Courier New', monospace;
-    max-height: 480px; overflow-y: auto; margin-bottom: 14px;
-  }
-  .copy-msg {
-    display: none; font-size: 12px; color: #22a06b;
-    text-align: center; margin-top: 8px; font-weight: 500;
-  }
-  .divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 28px 0 24px;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-  .divider span { font-size: 12px; color: var(--text-muted); white-space: nowrap; font-weight: 500; }
-  footer {
-    text-align: center; padding: 24px;
-    font-size: 11px; color: var(--text-muted);
-    border-top: 1px solid var(--border);
-  }
-  @media (max-width: 640px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .steps { flex-direction: column; gap: 12px; }
-    .steps::before { display: none; }
-    .card { padding: 20px 16px; }
-    .hero h1 { font-size: 21px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【商品・サービス名】 - 公式ランディングページ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --color-accent: #29abe2;
+      --color-accent-light: #5dc4f5;
+      --color-accent-glow: rgba(41,171,226,0.4);
+      --color-bg: #f7fbfe;
+      --color-surface: rgba(255,255,255,0.82);
+      --color-text: #1a2a3a;
+      --color-text-sub: rgba(26,42,58,0.6);
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 32px;
+      --radius-pill: 999px;
+      --shadow-card: 0 8px 32px rgba(41,171,226,0.12);
+      --shadow-glow: 0 8px 32px rgba(41,171,226,0.4);
+      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;font-size:16px}
+    body{font-family:'Noto Sans JP',sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.75;-webkit-font-smoothing:antialiased}
+    img{max-width:100%;height:auto;display:block}
+    a{color:inherit;text-decoration:none}
+    button{cursor:pointer;border:none;background:none;font-family:inherit}
+    .photo-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#e8f4fb;color:#7aadcc;height:200px;border-radius:10px;font-size:13px;gap:8px}
+    .photo-placeholder i{font-size:32px}
+
+    /* Utility */
+    .container{max-width:1100px;margin:0 auto;padding:0 24px}
+    .section{padding:96px 0}
+    .section-label{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--color-accent);background:rgba(41,171,226,.1);padding:6px 16px;border-radius:var(--radius-pill);margin-bottom:16px}
+    .section-title{font-size:clamp(1.75rem,4vw,2.75rem);font-weight:900;line-height:1.25;color:var(--color-text);text-align:center;margin-bottom:16px}
+    .section-desc{font-size:1.05rem;color:var(--color-text-sub);text-align:center;max-width:560px;margin:0 auto 56px}
+    .section-header{text-align:center}
+    .section-divider{height:2px;background:linear-gradient(90deg,transparent,var(--color-accent),transparent);opacity:.35}
+
+    /* CTA Buttons */
+    .btn-cta{display:block;width:100%;max-width:420px;margin:0 auto;padding:22px 40px;border-radius:var(--radius-pill);font-size:1.15rem;font-weight:800;color:#fff;text-align:center;background:linear-gradient(90deg,var(--color-accent) 0%,var(--color-accent-light) 100%);box-shadow:var(--shadow-glow);transition:transform var(--transition),box-shadow var(--transition);letter-spacing:.02em;line-height:1.3;min-height:44px}
+    .btn-cta:hover,.btn-cta:focus-visible{transform:translateY(-4px);box-shadow:0 16px 48px rgba(41,171,226,.6);outline:none}
+    .btn-cta:focus-visible{outline:3px solid var(--color-accent);outline-offset:4px}
+    .cta-note{font-size:.8rem;color:rgba(255,255,255,.6);text-align:center;margin-top:12px}
+    .cta-note-dark{font-size:.8rem;color:var(--color-text-sub);text-align:center;margin-top:12px}
+
+    /* ===== HERO ===== */
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:80px 24px;
+      background-image:url("https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1920&h=1080&fit=crop&auto=format");
+      background-size:cover;background-position:center top;background-attachment:fixed;text-align:center}
+    .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(41,171,226,.75) 0%,rgba(0,0,18,.88) 100%);z-index:0}
+    .hero::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,rgba(41,171,226,.18) 0%,transparent 60%),radial-gradient(circle at 80% 70%,rgba(93,196,245,.12) 0%,transparent 55%);z-index:0;pointer-events:none}
+    .hero-inner{position:relative;z-index:1;max-width:780px;width:100%}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:var(--radius-pill);background:rgba(255,255,255,.14);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.28);font-size:.85rem;font-weight:700;color:#fff;margin-bottom:28px;letter-spacing:.04em}
+    .hero-badge .dot{width:8px;height:8px;background:#ff6b6b;border-radius:50%;animation:pulse 1.5s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+    .hero-catch{font-size:clamp(2rem,6vw,4rem);font-weight:900;line-height:1.2;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.5);letter-spacing:-.02em;margin-bottom:8px}
+    .hero-catch em{font-style:normal;color:var(--color-accent-light)}
+    .hero-sub{font-size:clamp(1rem,2.5vw,1.25rem);color:rgba(255,255,255,.82);max-width:600px;margin:20px auto 0;line-height:1.8}
+    .hero-badges{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:36px}
+    .proof-badge{display:flex;flex-direction:column;align-items:center;padding:14px 24px;background:rgba(255,255,255,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.22);border-radius:var(--radius-md);color:#fff;min-width:130px}
+    .proof-badge .num{font-size:1.6rem;font-weight:900;line-height:1;color:var(--color-accent-light)}
+    .proof-badge .label{font-size:.78rem;opacity:.85;margin-top:4px}
+
+    /* ===== PAIN ===== */
+    .pain{background:var(--color-bg)}
+    .pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:48px}
+    .pain-item{display:flex;align-items:flex-start;gap:16px;padding:24px;background:var(--color-surface);backdrop-filter:blur(8px);border-radius:var(--radius-md);border:1px solid rgba(41,171,226,.12);box-shadow:var(--shadow-card);transition:transform var(--transition),box-shadow var(--transition)}
+    .pain-item:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(41,171,226,.2)}
+    .pain-icon{width:48px;height:48px;min-width:48px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--color-accent),var(--color-accent-light));border-radius:var(--radius-sm);color:#fff;font-size:1.2rem}
+    .pain-item p{font-size:.95rem;line-height:1.7;color:var(--color-text);font-weight:500}
+
+    /* ===== REASONS ===== */
+    .reasons{background:linear-gradient(180deg,var(--color-bg) 0%,#edf6fd 100%)}
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;margin-top:56px}
+    .reason-card{padding:36px 28px;background:var(--color-surface);backdrop-filter:blur(10px);border-radius:var(--radius-lg);border:1px solid rgba(41,171,226,.15);box-shadow:var(--shadow-card);text-align:center;transition:transform var(--transition),box-shadow var(--transition)}
+    .reason-card:hover{transform:translateY(-5px);box-shadow:0 16px 48px rgba(41,171,226,.22)}
+    .reason-icon-wrap{width:72px;height:72px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--color-accent),var(--color-accent-light));border-radius:50%;margin:0 auto 24px;font-size:1.8rem;color:#fff;box-shadow:var(--shadow-glow)}
+    .reason-card h3{font-size:1.15rem;font-weight:800;margin-bottom:12px}
+    .reason-card p{font-size:.92rem;color:var(--color-text-sub);line-height:1.8}
+
+    /* ===== BENEFIT Before→After ===== */
+    .benefit{background:var(--color-bg)}
+    .ba-list{display:grid;gap:28px;margin-top:56px}
+    .ba-item{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;padding:32px;background:var(--color-surface);border-radius:var(--radius-lg);border:1px solid rgba(41,171,226,.12);box-shadow:var(--shadow-card)}
+    .ba-before,.ba-after{padding:20px;border-radius:var(--radius-md);text-align:center}
+    .ba-before{background:rgba(255,100,100,.06);border:1px solid rgba(255,100,100,.2)}
+    .ba-after{background:rgba(41,171,226,.06);border:1px solid rgba(41,171,226,.25)}
+    .ba-label{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:3px 12px;border-radius:var(--radius-pill);margin-bottom:10px}
+    .ba-before .ba-label{background:rgba(255,100,100,.12);color:#cc4444}
+    .ba-after .ba-label{background:rgba(41,171,226,.15);color:var(--color-accent)}
+    .ba-before p{font-size:.9rem;color:#884444;line-height:1.65}
+    .ba-after p{font-size:.9rem;color:#1a5a7a;line-height:1.65;font-weight:600}
+    .ba-arrow{width:44px;height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--color-accent),var(--color-accent-light));border-radius:50%;color:#fff;font-size:1.1rem;box-shadow:var(--shadow-glow)}
+
+    /* ===== TESTIMONIALS ===== */
+    .testimonials{background:linear-gradient(180deg,#edf6fd 0%,var(--color-bg) 100%)}
+    .testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:56px}
+    .testi-card{padding:32px;background:var(--color-surface);backdrop-filter:blur(12px);border-radius:var(--radius-lg);border:1px solid rgba(41,171,226,.15);box-shadow:var(--shadow-card);transition:transform var(--transition)}
+    .testi-card:hover{transform:translateY(-4px)}
+    .testi-stars{color:#f5a623;font-size:1rem;margin-bottom:16px;letter-spacing:2px}
+    .testi-text{font-size:.95rem;line-height:1.85;color:var(--color-text);margin-bottom:20px}
+    .testi-author{display:flex;align-items:center;gap:14px}
+    .testi-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(41,171,226,.3)}
+    .testi-name{font-weight:700;font-size:.9rem}
+    .testi-meta{font-size:.78rem;color:var(--color-text-sub)}
+
+    /* ===== GALLERY ===== */
+    .gallery{background:var(--color-bg)}
+    .gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:48px}
+    .gallery-item{border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);transition:transform var(--transition);aspect-ratio:4/3}
+    .gallery-item:hover{transform:scale(1.03)}
+    .gallery-item img{width:100%;height:100%;object-fit:cover}
+
+    /* ===== MID CTA ===== */
+    .mid-cta{background:linear-gradient(135deg,var(--color-accent) 0%,var(--color-accent-light) 100%);padding:80px 24px;text-align:center;position:relative;overflow:hidden}
+    .mid-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.1) 0%,transparent 70%)}
+    .mid-cta-inner{position:relative;z-index:1}
+    .mid-cta h2{font-size:clamp(1.5rem,4vw,2.25rem);font-weight:900;color:#fff;margin-bottom:16px;line-height:1.3}
+    .mid-cta p{color:rgba(255,255,255,.85);font-size:1rem;margin-bottom:36px}
+    .mid-cta .btn-cta{background:#fff;color:var(--color-accent);box-shadow:0 8px 32px rgba(0,0,0,.2)}
+    .mid-cta .btn-cta:hover{box-shadow:0 16px 48px rgba(0,0,0,.3)}
+    .mid-cta .cta-note{color:rgba(255,255,255,.65)}
+
+    /* ===== PRICING ===== */
+    .pricing{background:var(--color-bg)}
+    .pricing-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:56px}
+    .pricing-card{padding:40px 32px;background:var(--color-surface);border-radius:var(--radius-lg);border:1px solid rgba(41,171,226,.15);box-shadow:var(--shadow-card);text-align:center;position:relative;transition:transform var(--transition),box-shadow var(--transition)}
+    .pricing-card:hover{transform:translateY(-6px);box-shadow:0 20px 56px rgba(41,171,226,.25)}
+    .pricing-card.featured{background:linear-gradient(160deg,#1a6fa0 0%,#0d3d5c 100%);border-color:var(--color-accent-light);box-shadow:0 12px 48px rgba(41,171,226,.45);color:#fff}
+    .popular-tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--color-accent),var(--color-accent-light));color:#fff;font-size:.75rem;font-weight:700;padding:6px 20px;border-radius:var(--radius-pill);white-space:nowrap;box-shadow:var(--shadow-glow)}
+    .plan-name{font-size:.85rem;font-weight:700;letter-spacing:.1em;opacity:.7;margin-bottom:12px}
+    .plan-price{font-size:2.8rem;font-weight:900;line-height:1;margin-bottom:6px}
+    .plan-price span{font-size:1rem;font-weight:500}
+    .plan-note{font-size:.8rem;opacity:.65;margin-bottom:28px}
+    .plan-features{list-style:none;text-align:left;margin-bottom:32px}
+    .plan-features li{display:flex;align-items:center;gap:10px;font-size:.9rem;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+    .plan-features li:last-child{border-bottom:none}
+    .plan-features li i{color:var(--color-accent-light);font-size:.9rem}
+    .pricing-card.featured .plan-features li{color:rgba(255,255,255,.9)}
+    .plan-cta{display:block;padding:16px 32px;border-radius:var(--radius-pill);font-size:1rem;font-weight:800;text-align:center;transition:transform var(--transition),box-shadow var(--transition)}
+    .pricing-card:not(.featured) .plan-cta{background:linear-gradient(90deg,var(--color-accent),var(--color-accent-light));color:#fff;box-shadow:var(--shadow-glow)}
+    .pricing-card.featured .plan-cta{background:#fff;color:var(--color-accent)}
+    .plan-cta:hover{transform:translateY(-3px)}
+
+    /* ===== FLOW ===== */
+    .flow{background:linear-gradient(180deg,var(--color-bg) 0%,#edf6fd 100%)}
+    .flow-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;margin-top:56px;position:relative}
+    .flow-steps::before{content:'';position:absolute;top:36px;left:60px;right:60px;height:2px;background:linear-gradient(90deg,var(--color-accent),var(--color-accent-light));opacity:.35}
+    .flow-step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 16px;position:relative;z-index:1}
+    .step-num-wrap{width:72px;height:72px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--color-accent),var(--color-accent-light));border-radius:50%;color:#fff;font-size:1.5rem;margin-bottom:20px;box-shadow:var(--shadow-glow)}
+    .flow-step h3{font-size:.95rem;font-weight:800;margin-bottom:8px}
+    .flow-step p{font-size:.82rem;color:var(--color-text-sub);line-height:1.7}
+
+    /* ===== FAQ ===== */
+    .faq{background:var(--color-bg)}
+    .faq-list{max-width:760px;margin:56px auto 0;display:flex;flex-direction:column;gap:16px}
+    .faq-item{background:var(--color-surface);border-radius:var(--radius-md);border:1px solid rgba(41,171,226,.15);overflow:hidden;box-shadow:var(--shadow-card)}
+    .faq-question{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:22px 28px;font-size:.98rem;font-weight:700;color:var(--color-text);text-align:left;background:none;cursor:pointer;transition:background var(--transition)}
+    .faq-question:hover{background:rgba(41,171,226,.05)}
+    .faq-question:focus-visible{outline:2px solid var(--color-accent);outline-offset:-2px}
+    .faq-question .q-icon{width:28px;height:28px;min-width:28px;display:flex;align-items:center;justify-content:center;background:rgba(41,171,226,.1);border-radius:50%;color:var(--color-accent);font-size:.85rem;transition:transform var(--transition),background var(--transition)}
+    .faq-item.open .q-icon{transform:rotate(45deg);background:var(--color-accent);color:#fff}
+    .faq-answer{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s ease;padding:0 28px}
+    .faq-item.open .faq-answer{max-height:300px;padding:0 28px 22px}
+    .faq-answer p{font-size:.92rem;color:var(--color-text-sub);line-height:1.85}
+
+    /* ===== OFFER ===== */
+    .offer{background:var(--color-text);padding:96px 24px;text-align:center;position:relative;overflow:hidden}
+    .offer::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,rgba(41,171,226,.2) 0%,transparent 55%),radial-gradient(circle at 80% 70%,rgba(93,196,245,.12) 0%,transparent 50%);pointer-events:none}
+    .offer-inner{position:relative;z-index:1;max-width:680px;margin:0 auto}
+    .offer-tag{display:inline-block;background:linear-gradient(90deg,var(--color-accent),var(--color-accent-light));color:#fff;font-size:.8rem;font-weight:700;letter-spacing:.12em;padding:6px 20px;border-radius:var(--radius-pill);margin-bottom:24px}
+    .offer h2{font-size:clamp(1.6rem,4vw,2.5rem);font-weight:900;color:#fff;line-height:1.3;margin-bottom:20px}
+    .offer h2 em{font-style:normal;color:var(--color-accent-light)}
+    .offer-subtext{font-size:1rem;color:rgba(255,255,255,.7);margin-bottom:40px;line-height:1.8}
+    .countdown{display:flex;justify-content:center;gap:16px;margin-bottom:40px}
+    .countdown-item{display:flex;flex-direction:column;align-items:center;min-width:72px}
+    .countdown-num{font-size:2.5rem;font-weight:900;color:var(--color-accent-light);line-height:1;font-variant-numeric:tabular-nums}
+    .countdown-label{font-size:.72rem;color:rgba(255,255,255,.6);margin-top:6px}
+    .countdown-sep{font-size:2rem;color:var(--color-accent);font-weight:900;line-height:1.2;align-self:flex-start;margin-top:6px}
+
+    /* ===== FINAL CTA / FORM ===== */
+    .final-cta{background:var(--color-bg);padding:96px 24px}
+    .final-cta-inner{max-width:620px;margin:0 auto;text-align:center}
+    .form-wrap{background:var(--color-surface);backdrop-filter:blur(16px);border-radius:var(--radius-lg);padding:48px 40px;border:1px solid rgba(41,171,226,.2);box-shadow:0 16px 64px rgba(41,171,226,.15);margin-top:40px}
+    .form-title{font-size:1.35rem;font-weight:900;margin-bottom:8px;color:var(--color-text)}
+    .form-sub{font-size:.88rem;color:var(--color-text-sub);margin-bottom:28px}
+    .form-group{margin-bottom:16px;text-align:left}
+    .form-group label{display:block;font-size:.82rem;font-weight:700;color:var(--color-text);margin-bottom:6px}
+    .form-group input,.form-group select{width:100%;padding:14px 16px;border:1.5px solid rgba(41,171,226,.25);border-radius:var(--radius-sm);font-size:1rem;font-family:inherit;color:var(--color-text);background:#fff;transition:border-color var(--transition),box-shadow var(--transition);min-height:44px}
+    .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(41,171,226,.18)}
+    .form-submit{width:100%;padding:20px;border-radius:var(--radius-pill);font-size:1.1rem;font-weight:800;color:#fff;background:linear-gradient(90deg,var(--color-accent) 0%,var(--color-accent-light) 100%);box-shadow:var(--shadow-glow);margin-top:8px;transition:transform var(--transition),box-shadow var(--transition);min-height:44px}
+    .form-submit:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(41,171,226,.6)}
+    .form-submit:focus-visible{outline:3px solid var(--color-accent);outline-offset:3px}
+    .micro-copy{font-size:.78rem;color:var(--color-text-sub);text-align:center;margin-top:16px;line-height:1.7}
+    .micro-copy i{color:var(--color-accent);margin-right:4px}
+
+    /* ===== FOOTER ===== */
+    .footer{background:var(--color-text);color:rgba(255,255,255,.55);text-align:center;padding:40px 24px;font-size:.82rem}
+    .footer a{color:rgba(255,255,255,.55);transition:color var(--transition)}
+    .footer a:hover{color:var(--color-accent-light)}
+    .footer-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:640px){
+      .hero{padding:70px 20px;background-attachment:scroll;min-height:100svh}
+      .hero-catch{font-size:clamp(1.6rem,8vw,2.4rem)}
+      .proof-badge{min-width:100px;padding:12px 16px}
+      .proof-badge .num{font-size:1.3rem}
+      .ba-item{grid-template-columns:1fr;text-align:center}
+      .ba-arrow{margin:0 auto;transform:rotate(90deg)}
+      .flow-steps::before{display:none}
+      .form-wrap{padding:32px 24px}
+      .countdown-num{font-size:2rem}
+      .countdown-item{min-width:56px}
+      .section{padding:64px 0}
+      .reason-cards,.testi-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:480px){
+      .hero-badges{flex-direction:column;align-items:center}
+      .pricing-cards{grid-template-columns:1fr}
+      .gallery-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="hero-icon"><i class="fa-solid fa-rocket"></i></div>
-  <h1><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);margin-right:8px;"></i>LP プロンプトジェネレーター</h1>
-  <p>情報を入力するだけで、コンバージョン率を最大化する<br>プロ品質のLPプロンプトを自動生成します。</p>
-  <div class="hero-badges">
-    <span class="badge"><i class="fa-solid fa-check-circle"></i> PASONA法則準拠</span>
-    <span class="badge"><i class="fa-solid fa-arrows-rotate"></i> CTA 3点配置</span>
-    <span class="badge"><i class="fa-solid fa-building"></i> BtoC/BtoB対応</span>
-    <span class="badge"><i class="fa-solid fa-palette"></i> カラー指定対応</span>
-  </div>
-</div>
+<!-- ① ファーストビュー -->
+<section class="hero" aria-label="メインビジュアル">
+  <div class="hero-inner">
+    <!-- ★ 変更箇所：残席数・締切日 -->
+    <div class="hero-badge" aria-label="限定情報">
+      <span class="dot" aria-hidden="true"></span>
+      残り <strong>12名</strong> 限定 ／ 2026年7月31日まで
+    </div>
 
-<div class="main">
+    <!-- ★ 変更箇所：メインキャッチコピー -->
+    <h1 class="hero-catch">
+      英語が話せないまま、<br><em>また1年終わりますか？</em>
+    </h1>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-list-ol"></i></div>
-    <h2>使い方</h2>
-  </div>
-  <div class="card" style="padding:24px 28px; margin-bottom:28px;">
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <span class="step-label">商品情報を<br>入力</span>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <span class="step-label">テーマカラーを<br>設定</span>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <span class="step-label">ボタンを<br>クリック</span>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <span class="step-label">プロンプトを<br>コピー・活用</span>
-      </div>
-    </div>
-  </div>
+    <!-- ★ 変更箇所：サブコピー -->
+    <p class="hero-sub">
+      たった<strong>90日</strong>で日常会話が自然に出てくるようになる。<br>
+      現役バイリンガルコーチが毎日伴走。<strong>成果保証付き。</strong>
+    </p>
 
-  <div class="divider"><span><i class="fa-solid fa-pen-to-square" style="margin-right:6px;color:var(--accent);"></i>情報を入力してプロンプトを生成</span></div>
+    <div class="hero-badges" role="list" aria-label="実績">
+      <!-- ★ 変更箇所：累計受講者数・満足度・口コミ件数 -->
+      <div class="proof-badge" role="listitem">
+        <span class="num">3,800<span style="font-size:1.1rem">+</span></span>
+        <span class="label">累計受講者</span>
+      </div>
+      <div class="proof-badge" role="listitem">
+        <span class="num">97<span style="font-size:1.1rem">%</span></span>
+        <span class="label">満足度</span>
+      </div>
+      <div class="proof-badge" role="listitem">
+        <span class="num">★4.9</span>
+        <span class="label">口コミ 820件</span>
+      </div>
+    </div>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-box-open"></i></div>
-    <h2>商品・サービス情報</h2>
-    <span>必須項目を入力してください</span>
+    <!-- ★ 変更箇所：CTAボタンのテキスト・リンク先 -->
+    <a href="#form" class="btn-cta" style="margin-top:40px;" aria-label="無料体験セッションに申し込む">
+      <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+      今すぐ無料体験セッションを申し込む
+    </a>
+    <p class="cta-note">
+      <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+      返金保証あり ／ クレジットカード不要 ／ いつでもキャンセル可
+    </p>
   </div>
-  <div class="card">
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-store"></i> 商品・サービス名</label>
-        <input type="text" id="product" placeholder="例：オンライン英会話スクール" />
-      </div>
-      <div class="field">
-        <label><i class="fa-solid fa-users"></i> ターゲット</label>
-        <input type="text" id="target" placeholder="例：30代の忙しいビジネスマン" />
-      </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- 共感セクション -->
+<section class="section pain" aria-labelledby="pain-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">あなたのお悩み</div>
+      <h2 class="section-title" id="pain-title">こんなお悩み、ありませんか？</h2>
+      <p class="section-desc">多くの方が同じ壁にぶつかっています。あなただけじゃありません。</p>
     </div>
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-tag"></i> 価格帯・プラン</label>
-        <input type="text" id="price" placeholder="例：月額9,800円〜" />
+    <div class="pain-grid" role="list">
+      <!-- ★ 変更箇所：お悩みリスト（業種・商品に合わせて書き換える） -->
+      <div class="pain-item" role="listitem">
+        <div class="pain-icon" aria-hidden="true"><i class="fa-solid fa-comment-slash"></i></div>
+        <p>英語の勉強は続けているのに、<strong>いざ話す場面になると頭が真っ白</strong>になってしまう</p>
       </div>
-      <div class="field">
-        <label><i class="fa-solid fa-star"></i> 最大の強み（USP）</label>
-        <input type="text" id="usp" placeholder="例：業界最安値＋返金保証付き" />
+      <div class="pain-item" role="listitem">
+        <div class="pain-icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></div>
+        <p>参考書や単語帳を買い漁っても、<strong>実際の会話では全然使えない</strong>ことに気づいた</p>
       </div>
-    </div>
-    <div class="grid-2" style="margin-bottom:16px;">
-      <div class="field">
-        <label><i class="fa-solid fa-building-user"></i> BtoC / BtoB</label>
-        <select id="biztype">
-          <option value="BtoC">BtoC（個人向け）</option>
-          <option value="BtoB">BtoB（法人向け）</option>
-        </select>
+      <div class="pain-item" role="listitem">
+        <div class="pain-icon" aria-hidden="true"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <p>忙しくて毎日まとまった勉強時間が取れず、<strong>何年も「来年こそは」を繰り返している</strong></p>
       </div>
-      <div class="field">
-        <label><i class="fa-solid fa-crosshairs"></i> 目標CV（コンバージョン）</label>
-        <input type="text" id="cv" placeholder="例：無料体験申し込み" />
+      <div class="pain-item" role="listitem">
+        <div class="pain-icon" aria-hidden="true"><i class="fa-solid fa-user-slash"></i></div>
+        <p>スクールに通ったが講師の質がバラバラで、<strong>結局お金と時間を無駄にした</strong>経験がある</p>
       </div>
-    </div>
-    <div class="field" style="margin-bottom:16px;">
-      <label><i class="fa-solid fa-comment-dots"></i> ユーザーの主な悩み（箇条書きOK）</label>
-      <textarea id="pain" placeholder="例：英語が上達しない、忙しくて通えない、費用が高い"></textarea>
-    </div>
-    <div class="field">
-      <label><i class="fa-solid fa-medal"></i> 権威性・実績（任意）</label>
-      <input type="text" id="authority" placeholder="例：累計1万人受講・満足度98%・メディア掲載多数" />
+      <div class="pain-item" role="listitem">
+        <div class="pain-icon" aria-hidden="true"><i class="fa-solid fa-arrow-trend-down"></i></div>
+        <p>このまま英語が使えないと、<strong>仕事でのチャンスを永遠に逃し続ける</strong>気がしている</p>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="section-header">
-    <div class="icon-wrap"><i class="fa-solid fa-palette"></i></div>
-    <h2>テーマカラー設定</h2>
-    <span>LPのカラーをカスタマイズ</span>
-  </div>
-  <div class="card">
-    <div class="grid-3" style="margin-bottom:20px;">
-      <div class="color-field">
-        <label><i class="fa-solid fa-fill-drip"></i> メインカラー（アクセント）</label>
-        <div class="color-row">
-          <input type="color" id="colorAccentPicker" value="#29abe2" oninput="syncColor('colorAccentPicker','colorAccentHex')" />
-          <input type="text" id="colorAccentHex" value="#29abe2" placeholder="#29abe2" oninput="syncHex('colorAccentHex','colorAccentPicker')" />
-        </div>
-      </div>
-      <div class="color-field">
-        <label><i class="fa-solid fa-brush"></i> 背景カラー</label>
-        <div class="color-row">
-          <input type="color" id="colorBgPicker" value="#f7fbfe" oninput="syncColor('colorBgPicker','colorBgHex')" />
-          <input type="text" id="colorBgHex" value="#f7fbfe" placeholder="#f7fbfe" oninput="syncHex('colorBgHex','colorBgPicker')" />
-        </div>
-      </div>
-      <div class="color-field">
-        <label><i class="fa-solid fa-font"></i> テキストカラー</label>
-        <div class="color-row">
-          <input type="color" id="colorTextPicker" value="#1a2a3a" oninput="syncColor('colorTextPicker','colorTextHex')" />
-          <input type="text" id="colorTextHex" value="#1a2a3a" placeholder="#1a2a3a" oninput="syncHex('colorTextHex','colorTextPicker')" />
-        </div>
-      </div>
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- 選ばれる理由 -->
+<section class="section reasons" aria-labelledby="reasons-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">選ばれる理由</div>
+      <!-- ★ 変更箇所：サービス名 -->
+      <h2 class="section-title" id="reasons-title">【サービス名】が選ばれる<br>5つの理由</h2>
+      <p class="section-desc">「また失敗するかも」という不安を、仕組みで解消しました。</p>
     </div>
-    <div style="margin-bottom:16px;">
-      <p style="font-size:12px;color:var(--text-sub);margin-bottom:6px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-swatchbook" style="color:var(--accent);"></i> プリセットテーマから選ぶ</p>
-
-      <div class="theme-group-label"><i class="fa-solid fa-star" style="color:#a78bfa;"></i> 近未来・透明感・妖艶</div>
-      <div class="theme-preview" id="themePreview">
-        <div class="theme-swatch active" onclick="applyTheme('#7c3aed','#0f0a1e','#e8e0ff',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#7c3aed,#c084fc);"></div>
-          <span>オーラ</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#06b6d4','#030f1c','#cffafe',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0e7490,#06b6d4);"></div>
-          <span>サイバー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#ec4899','#120818','#fce7f3',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#9d174d,#ec4899);"></div>
-          <span>ブルーム</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#8b5cf6','#0d1117','#f0e6ff',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#4c1d95,#8b5cf6,#38bdf8);"></div>
-          <span>ギャラクシー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#34d399','#041a14','#d1fae5',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#065f46,#34d399);"></div>
-          <span>バイオ</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#f472b6','#1a0a14','#fdf2f8',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#831843,#f472b6,#fbbf24);"></div>
-          <span>サンセット</span>
-        </div>
+    <div class="reason-cards" role="list">
+      <!-- ★ 変更箇所：強み・特徴（5項目） -->
+      <div class="reason-card" role="listitem">
+        <div class="reason-icon-wrap" aria-hidden="true"><i class="fa-solid fa-user-tie"></i></div>
+        <h3>現役バイリンガルが専属コーチ</h3>
+        <p>すべてのコーチは英語圏在住5年以上の実務経験者。ビジネス英語から日常会話まで、現場で使える英語を教えます。</p>
       </div>
-
-      <div class="theme-group-label"><i class="fa-solid fa-briefcase" style="color:#60a5fa;"></i> ビジネス・信頼感</div>
-      <div class="theme-preview">
-        <div class="theme-swatch" onclick="applyTheme('#0984e3','#f0f6ff','#0a2140',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0369a1,#0984e3);"></div>
-          <span>ロイヤル</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#1e40af','#f8faff','#0f172a',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#1e3a8a,#1e40af);"></div>
-          <span>ネイビー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#0f766e','#f0fdfa','#042f2e',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#134e4a,#0f766e);"></div>
-          <span>エメラルド</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#64748b','#f8fafc','#0f172a',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#334155,#64748b);"></div>
-          <span>スレート</span>
-        </div>
+      <div class="reason-card" role="listitem">
+        <div class="reason-icon-wrap" aria-hidden="true"><i class="fa-solid fa-calendar-check"></i></div>
+        <h3>毎日15分でOK。スキマ時間活用</h3>
+        <p>専用アプリで朝の通勤中でも学習可能。科学的な復習サイクルで短時間でも確実に定着します。</p>
       </div>
-
-      <div class="theme-group-label"><i class="fa-solid fa-heart" style="color:#fb7185;"></i> 温かみ・親しみ・ナチュラル</div>
-      <div class="theme-preview">
-        <div class="theme-swatch" onclick="applyTheme('#f59e0b','#fffbeb','#1c1003',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#d97706,#f59e0b);"></div>
-          <span>アンバー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#e17055','#fff5f2','#2d1a16',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#c2410c,#e17055);"></div>
-          <span>コーラル</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#00b894','#f0fdf8','#1a2e28',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#065f46,#00b894);"></div>
-          <span>ミント</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#a16207','#fefce8','#1c1003',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#854d0e,#ca8a04);"></div>
-          <span>ゴールド</span>
-        </div>
+      <div class="reason-card" role="listitem">
+        <div class="reason-icon-wrap" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>90日成果保証制度</h3>
+        <p>プログラム終了時に目標が達成できなかった場合は全額返金。受講者が損をするリスクは一切ありません。</p>
       </div>
-
-      <div class="theme-group-label"><i class="fa-solid fa-moon" style="color:#94a3b8;"></i> ダーク・高級感・モード</div>
-      <div class="theme-preview">
-        <div class="theme-swatch" onclick="applyTheme('#e2e8f0','#0a0a0a','#f8fafc',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0a0a0a,#1e293b);"></div>
-          <span>オニキス</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#fbbf24','#0a0800','#fffbeb',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#0a0800,#92400e);"></div>
-          <span>ラグジュアリー</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#c084fc','#09050f','#f5f0ff',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#09050f,#4a044e);"></div>
-          <span>ミッドナイト</span>
-        </div>
-        <div class="theme-swatch" onclick="applyTheme('#2d3436','#f8f8f8','#1a1a1a',this)">
-          <div class="swatch" style="background:linear-gradient(135deg,#1a1a1a,#4a4a4a);"></div>
-          <span>モノクロ</span>
-        </div>
+      <div class="reason-card" role="listitem">
+        <div class="reason-icon-wrap" aria-hidden="true"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>AIとコーチのW伴走</h3>
+        <p>AIが弱点を分析し、コーチが感情面もサポート。データと人間の温かさを掛け合わせた独自メソッドです。</p>
       </div>
-    </div>
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;">
-      <p style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> 設定したカラーはプロンプト内のカラー指定セクションに自動で反映されます。</p>
+      <div class="reason-card" role="listitem">
+        <div class="reason-icon-wrap" aria-hidden="true"><i class="fa-solid fa-users"></i></div>
+        <h3>累計3,800人以上が成果を実感</h3>
+        <p>20代〜50代まで幅広い層が受講。英語初心者から上級者まで、それぞれの目標に合わせてカスタマイズ。</p>
+      </div>
     </div>
   </div>
+</section>
 
-  <button class="gen-btn" onclick="generate()">
-    <i class="fa-solid fa-wand-magic-sparkles"></i>
-    売れるプロンプトを生成する
-    <i class="fa-solid fa-arrow-right"></i>
-  </button>
+<div class="section-divider" aria-hidden="true"></div>
 
-  <div id="output">
-    <div class="divider" style="margin-top:32px;"><span><i class="fa-solid fa-file-code" style="margin-right:6px;color:var(--accent);"></i>生成されたプロンプト</span></div>
-    <div class="card">
-      <div class="output-header">
-        <h3><i class="fa-solid fa-file-lines"></i> プロンプト</h3>
-        <button class="copy-btn" onclick="copyPrompt('copyMsg1')">
-          <i class="fa-regular fa-copy"></i> コピー
+<!-- Before→After -->
+<section class="section benefit" aria-labelledby="benefit-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">受講前後の変化</div>
+      <h2 class="section-title" id="benefit-title">たった90日で、あなたの世界が変わる</h2>
+      <p class="section-desc">受講生が実際に体験した「Before → After」をご覧ください。</p>
+    </div>
+    <div class="ba-list" role="list">
+      <!-- ★ 変更箇所：Before/After（3項目） -->
+      <div class="ba-item" role="listitem">
+        <div class="ba-before">
+          <span class="ba-label">BEFORE</span>
+          <p>外国人に話しかけられると<br>パニックになって固まってしまう。<br>頭が真っ白で何も出てこない。</p>
+        </div>
+        <div class="ba-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-after">
+          <span class="ba-label">AFTER</span>
+          <p>海外出張で自信を持って<br>プレゼン・交渉ができるように。<br>昇進の評価にも繋がった。</p>
+        </div>
+      </div>
+      <div class="ba-item" role="listitem">
+        <div class="ba-before">
+          <span class="ba-label">BEFORE</span>
+          <p>英語の勉強を何年も続けているのに<br>TOEICスコアが500点台から<br>ずっと上がらない。</p>
+        </div>
+        <div class="ba-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-after">
+          <span class="ba-label">AFTER</span>
+          <p>90日でTOEICが650点→850点に。<br>志望していたグローバルチームへの<br>異動が叶った。</p>
+        </div>
+      </div>
+      <div class="ba-item" role="listitem">
+        <div class="ba-before">
+          <span class="ba-label">BEFORE</span>
+          <p>忙しくて継続できない。<br>スクールに通うお金と時間が<br>無駄になることへの不安が大きい。</p>
+        </div>
+        <div class="ba-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="ba-after">
+          <span class="ba-label">AFTER</span>
+          <p>スキマ時間15分/日で継続できた。<br>海外旅行で現地の人と友達に。<br>英語が「楽しい」に変わった。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- お客様の声 -->
+<section class="section testimonials" aria-labelledby="testi-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">お客様の声</div>
+      <h2 class="section-title" id="testi-title">受講生3,800人が実感した変化</h2>
+      <p class="section-desc">「半信半疑でしたが本当に変わりました」という声を多くいただいています。</p>
+    </div>
+    <div class="testi-grid" role="list">
+      <!-- ★ 変更箇所：お客様の声（3名分） -->
+      <article class="testi-card" role="listitem">
+        <div class="testi-stars" aria-label="評価5つ星">★★★★★</div>
+        <p class="testi-text">「正直、また失敗するんじゃないかと思っていました。でも専属コーチとのセッションが毎回楽しくて、気づいたら3ヶ月で外国人の同僚と冗談が言えるようになっていました。人生が変わった感覚です。」</p>
+        <div class="testi-author">
+          <!-- ★ 変更箇所：アバター写真URL -->
+          <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=80&h=80&fit=crop&q=80" alt="田中恵美さん" class="testi-avatar" onerror="this.style.display='none'">
+          <div>
+            <!-- ★ 変更箇所：お客様名・属性 -->
+            <div class="testi-name">田中 恵美さん（34歳）</div>
+            <div class="testi-meta">IT企業 プロジェクトマネージャー ／ 受講3ヶ月目</div>
+          </div>
+        </div>
+      </article>
+      <article class="testi-card" role="listitem">
+        <div class="testi-stars" aria-label="評価5つ星">★★★★★</div>
+        <p class="testi-text">「40代で英語を始めるのは遅いと思っていましたが、コーチに『年齢は関係ない』と言われて信じてみました。今では週1のオンラインMTGで流暢に発言できています。投資した価値が十分ありました。」</p>
+        <div class="testi-author">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&q=80" alt="鈴木隆史さん" class="testi-avatar" onerror="this.style.display='none'">
+          <div>
+            <div class="testi-name">鈴木 隆史さん（43歳）</div>
+            <div class="testi-meta">製造業 部長 ／ 受講6ヶ月目</div>
+          </div>
+        </div>
+      </article>
+      <article class="testi-card" role="listitem">
+        <div class="testi-stars" aria-label="評価5つ星">★★★★★</div>
+        <p class="testi-text">「育児中で時間が全然なかったんですが、スキマ時間で続けられる設計が本当に助かりました。子どもの昼寝中に15分やるだけで、気づいたら海外ドラマが字幕なしで楽しめるように！」</p>
+        <div class="testi-author">
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=80&h=80&fit=crop&q=80" alt="山本さくらさん" class="testi-avatar" onerror="this.style.display='none'">
+          <div>
+            <div class="testi-name">山本 さくらさん（29歳）</div>
+            <div class="testi-meta">育休中のワーキングマザー ／ 受講4ヶ月目</div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- ギャラリー -->
+<section class="section gallery" aria-labelledby="gallery-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">学習の様子</div>
+      <h2 class="section-title" id="gallery-title">あなたも、この環境で変われる</h2>
+    </div>
+    <div class="gallery-grid" role="list">
+      <!-- ★ 変更箇所：ギャラリー写真（4枚） -->
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop&auto=format" alt="オンライン学習" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="photo-placeholder" style="display:none"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop&auto=format" alt="グループセッション" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="photo-placeholder" style="display:none"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop&auto=format" alt="コーチングセッション" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="photo-placeholder" style="display:none"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1456406644174-8ddd4cd52a06?w=600&h=400&fit=crop&auto=format" alt="学習成果" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="photo-placeholder" style="display:none"><i class="fa-solid fa-image"></i><span>写真準備中</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 中間CTA -->
+<section class="mid-cta" aria-label="中間お申し込み">
+  <div class="container">
+    <div class="mid-cta-inner">
+      <!-- ★ 変更箇所：中間CTAコピー -->
+      <h2>まず、無料体験で<br>実力診断を受けてみませんか？</h2>
+      <p>今すぐ申し込めば、プロコーチによる<strong>無料30分診断セッション</strong>が受けられます。<br>「自分に合った学習法」が明確になるだけで、これまでとは全く違う結果が出ます。</p>
+      <a href="#form" class="btn-cta" aria-label="無料診断を受ける">
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        無料診断セッションを受ける（残り12名）
+      </a>
+      <p class="cta-note"><i class="fa-solid fa-lock" aria-hidden="true"></i> 個人情報は厳重に管理されます</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- 料金プラン -->
+<section class="section pricing" aria-labelledby="pricing-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">料金プラン</div>
+      <h2 class="section-title" id="pricing-title">あなたに合ったプランを選べる</h2>
+      <p class="section-desc">すべてのプランに90日間の成果保証が含まれています。</p>
+    </div>
+    <div class="pricing-cards" role="list">
+      <!-- ★ 変更箇所：料金プラン（3プラン） -->
+      <div class="pricing-card" role="listitem">
+        <div class="plan-name">スタータープラン</div>
+        <!-- ★ 変更箇所：価格 -->
+        <div class="plan-price">¥<span style="font-size:2.8rem;font-weight:900">29,800</span></div>
+        <div class="plan-note">/ 月（3ヶ月コース）</div>
+        <ul class="plan-features">
+          <li><i class="fa-solid fa-check"></i> 専属コーチ月2回セッション</li>
+          <li><i class="fa-solid fa-check"></i> AIスコア分析レポート</li>
+          <li><i class="fa-solid fa-check"></i> 学習アプリ使い放題</li>
+          <li><i class="fa-solid fa-check"></i> Slackサポート（平日）</li>
+          <li style="opacity:.4"><i class="fa-solid fa-xmark"></i> グループセッション</li>
+        </ul>
+        <a href="#form" class="plan-cta">このプランを選ぶ</a>
+      </div>
+      <div class="pricing-card featured" role="listitem">
+        <div class="popular-tag"><i class="fa-solid fa-fire" aria-hidden="true"></i> 最も人気</div>
+        <div class="plan-name" style="color:rgba(255,255,255,.7)">スタンダードプラン</div>
+        <!-- ★ 変更箇所：人気プランの価格 -->
+        <div class="plan-price" style="color:#fff">¥<span style="font-size:2.8rem;font-weight:900;color:var(--color-accent-light)">49,800</span></div>
+        <div class="plan-note" style="color:rgba(255,255,255,.65)">/ 月（3ヶ月コース）</div>
+        <ul class="plan-features">
+          <li><i class="fa-solid fa-check"></i> 専属コーチ週1回セッション</li>
+          <li><i class="fa-solid fa-check"></i> AIスコア分析レポート</li>
+          <li><i class="fa-solid fa-check"></i> 学習アプリ使い放題</li>
+          <li><i class="fa-solid fa-check"></i> Slackサポート（毎日）</li>
+          <li><i class="fa-solid fa-check"></i> グループセッション月4回</li>
+        </ul>
+        <a href="#form" class="plan-cta">このプランを選ぶ</a>
+      </div>
+      <div class="pricing-card" role="listitem">
+        <div class="plan-name">プレミアムプラン</div>
+        <!-- ★ 変更箇所：プレミアム価格 -->
+        <div class="plan-price">¥<span style="font-size:2.8rem;font-weight:900">79,800</span></div>
+        <div class="plan-note">/ 月（3ヶ月コース）</div>
+        <ul class="plan-features">
+          <li><i class="fa-solid fa-check"></i> 専属コーチ週2回セッション</li>
+          <li><i class="fa-solid fa-check"></i> AIスコア分析レポート</li>
+          <li><i class="fa-solid fa-check"></i> 学習アプリ使い放題</li>
+          <li><i class="fa-solid fa-check"></i> Slackサポート（24時間）</li>
+          <li><i class="fa-solid fa-check"></i> グループセッション無制限</li>
+        </ul>
+        <a href="#form" class="plan-cta">このプランを選ぶ</a>
+      </div>
+    </div>
+    <p class="cta-note-dark" style="margin-top:32px;font-size:.85rem">
+      <i class="fa-solid fa-shield-halved" style="color:var(--color-accent)"></i>
+      全プラン共通：90日間成果保証付き ／ いつでも解約可能 ／ 初回無料カウンセリングあり
+    </p>
+  </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- 利用の流れ -->
+<section class="section flow" aria-labelledby="flow-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">利用の流れ</div>
+      <h2 class="section-title" id="flow-title">申し込みから成果まで、たったの4ステップ</h2>
+      <p class="section-desc">難しい準備は一切不要。今日から始められます。</p>
+    </div>
+    <div class="flow-steps" role="list">
+      <!-- ★ 変更箇所：利用の流れ（各ステップのテキスト） -->
+      <div class="flow-step" role="listitem">
+        <div class="step-num-wrap"><i class="fa-solid fa-file-signature" aria-hidden="true"></i></div>
+        <h3>① 無料相談申し込み</h3>
+        <p>フォームに入力するだけ。30秒で完了。費用は一切かかりません。</p>
+      </div>
+      <div class="flow-step" role="listitem">
+        <div class="step-num-wrap"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></div>
+        <h3>② 現状ヒアリング</h3>
+        <p>プロコーチがあなたの英語レベルと目標をヒアリング。最適なプランをご提案します。</p>
+      </div>
+      <div class="flow-step" role="listitem">
+        <div class="step-num-wrap"><i class="fa-solid fa-rocket" aria-hidden="true"></i></div>
+        <h3>③ 学習スタート</h3>
+        <p>専属コーチとの初回セッション翌日から学習開始。毎日15分からOK。</p>
+      </div>
+      <div class="flow-step" role="listitem">
+        <div class="step-num-wrap"><i class="fa-solid fa-trophy" aria-hidden="true"></i></div>
+        <h3>④ 90日で成果確認</h3>
+        <p>目標達成を確認。達成できなければ全額返金。安心して取り組めます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider" aria-hidden="true"></div>
+
+<!-- FAQ -->
+<section class="section faq" aria-labelledby="faq-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">よくある質問</div>
+      <h2 class="section-title" id="faq-title">不安を解消します</h2>
+      <p class="section-desc">申し込み前によく聞かれる質問にお答えします。</p>
+    </div>
+    <div class="faq-list" role="list">
+      <!-- ★ 変更箇所：FAQ（5問） -->
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq1">
+          英語がほぼゼロから始められますか？
+          <span class="q-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
         </button>
+        <div class="faq-answer" id="faq1" role="region" aria-hidden="true">
+          <p>はい、英語が全くわからない状態でも大丈夫です。受講生の約40%が英語初心者からのスタートです。専属コーチがあなたのレベルに合わせて完全カスタマイズします。</p>
+        </div>
       </div>
-      <div id="promptBox"></div>
-      <div id="copyMsg1" class="copy-msg"></div>
-      <div style="margin-top:16px;text-align:center;">
-        <button class="copy-btn" onclick="copyPrompt('copyMsg2')" style="margin:0 auto;font-size:14px;padding:12px 32px;border-radius:10px;display:inline-flex;">
-          <i class="fa-regular fa-copy" style="margin-right:8px;"></i> プロンプトをコピーする
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq2">
+          毎日どのくらい時間が必要ですか？
+          <span class="q-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
         </button>
-        <div id="copyMsg2" class="copy-msg"></div>
+        <div class="faq-answer" id="faq2" role="region" aria-hidden="true">
+          <p>最低15分／日から始められます。科学的な間隔反復学習を採用しているため、短時間でも効果的に定着します。忙しい社会人・育児中の方でも無理なく続けられる設計です。</p>
+        </div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq3">
+          90日で必ず成果が出る保証はありますか？
+          <span class="q-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+        </button>
+        <div class="faq-answer" id="faq3" role="region" aria-hidden="true">
+          <p>はい、90日間の成果保証があります。入会時に設定した目標が達成できなかった場合、受講料の全額を返金いたします（条件：週3回以上の学習実績がある場合）。詳細は無料相談時にご説明します。</p>
+        </div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq4">
+          途中でやめることはできますか？
+          <span class="q-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+        </button>
+        <div class="faq-answer" id="faq4" role="region" aria-hidden="true">
+          <!-- ★ 変更箇所：解約条件 -->
+          <p>コース開始から14日以内であれば全額返金が可能です。それ以降は残余期間分を日割りで計算した返金となります。長期契約で縛るようなことは一切しておりません。</p>
+        </div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq5">
+          スマートフォンだけで受講できますか？
+          <span class="q-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+        </button>
+        <div class="faq-answer" id="faq5" role="region" aria-hidden="true">
+          <p>はい、スマートフォンだけで全ての機能が使えます。専用アプリ（iOS / Android対応）をダウンロードするだけで、コーチとのビデオセッション・学習コンテンツ・チャット機能が全て利用可能です。</p>
+        </div>
       </div>
     </div>
   </div>
+</section>
 
-</div>
+<div class="section-divider" aria-hidden="true"></div>
 
-<footer>
-  <i class="fa-solid fa-rocket" style="color:var(--accent);margin-right:6px;"></i>
-  LP プロンプトジェネレーター &nbsp;|&nbsp; コンバージョン率最大化のための専門ツール
+<!-- 限定オファー・緊急性 -->
+<section class="offer" aria-labelledby="offer-title">
+  <div class="container">
+    <div class="offer-inner">
+      <!-- ★ 変更箇所：オファー内容 -->
+      <div class="offer-tag"><i class="fa-solid fa-fire" aria-hidden="true"></i> 期間限定オファー</div>
+      <h2 id="offer-title">
+        今月末までなら、<em>初月50%OFF</em>。<br>
+        <!-- ★ 変更箇所：締切日 -->
+        でも、この価格は7月31日で終わります。
+      </h2>
+      <p class="offer-subtext">
+        「後で考えよう」と思っていた方の多くが、翌月には<strong>定価での申し込み</strong>を余儀なくされています。<br>
+        今この瞬間に決めた人だけが、特別価格の恩恵を受けられます。
+      </p>
+      <div class="countdown" aria-label="残り時間">
+        <div class="countdown-item">
+          <span class="countdown-num" id="cd-days" aria-live="polite">05</span>
+          <span class="countdown-label">日</span>
+        </div>
+        <span class="countdown-sep" aria-hidden="true">:</span>
+        <div class="countdown-item">
+          <span class="countdown-num" id="cd-hours" aria-live="polite">23</span>
+          <span class="countdown-label">時間</span>
+        </div>
+        <span class="countdown-sep" aria-hidden="true">:</span>
+        <div class="countdown-item">
+          <span class="countdown-num" id="cd-mins" aria-live="polite">59</span>
+          <span class="countdown-label">分</span>
+        </div>
+        <span class="countdown-sep" aria-hidden="true">:</span>
+        <div class="countdown-item">
+          <span class="countdown-num" id="cd-secs" aria-live="polite">59</span>
+          <span class="countdown-label">秒</span>
+        </div>
+      </div>
+      <a href="#form" class="btn-cta" style="max-width:460px">
+        <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+        <!-- ★ 変更箇所：残席数 -->
+        特別価格で今すぐ申し込む（残り12名）
+      </a>
+      <p class="cta-note">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        90日間の全額返金保証 ／ いつでも解約可能
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 最終CTA + フォーム -->
+<section class="final-cta" id="form" aria-labelledby="final-form-title">
+  <div class="container">
+    <div class="final-cta-inner">
+      <div class="section-label">無料カウンセリング申し込み</div>
+      <h2 class="section-title" id="final-form-title">今すぐ、最初の一歩を踏み出そう</h2>
+      <p class="section-desc">30秒で完了。費用はかかりません。</p>
+      <div class="form-wrap">
+        <div class="form-title">無料体験・カウンセリング予約</div>
+        <p class="form-sub">担当コーチが24時間以内にご連絡します。</p>
+        <!-- ★ 変更箇所：フォームのaction URL -->
+        <form action="#" method="post" novalidate aria-label="お申し込みフォーム">
+          <div class="form-group">
+            <label for="f-name">お名前 <span style="color:#cc4444;font-size:.75rem">*必須</span></label>
+            <input type="text" id="f-name" name="name" placeholder="山田 太郎" required autocomplete="name" aria-required="true">
+          </div>
+          <div class="form-group">
+            <label for="f-email">メールアドレス <span style="color:#cc4444;font-size:.75rem">*必須</span></label>
+            <input type="email" id="f-email" name="email" placeholder="example@email.com" required autocomplete="email" aria-required="true">
+          </div>
+          <!-- ★ 変更箇所：セレクト項目（商品・業種に合わせて変更） -->
+          <div class="form-group">
+            <label for="f-level">現在の英語レベル</label>
+            <select id="f-level" name="level">
+              <option value="">-- 選んでください --</option>
+              <option value="beginner">ほぼゼロから（初心者）</option>
+              <option value="elementary">日常的な単語は分かる</option>
+              <option value="intermediate">読むのはできるが話せない</option>
+              <option value="advanced">ある程度話せるがブラッシュアップしたい</option>
+            </select>
+          </div>
+          <button type="submit" class="form-submit">
+            <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+            無料カウンセリングを予約する
+          </button>
+        </form>
+        <div class="micro-copy">
+          <p><i class="fa-solid fa-lock"></i> 個人情報は厳重に管理します（プライバシーポリシー）</p>
+          <p><i class="fa-solid fa-check"></i> クレジットカード不要 ／ <i class="fa-solid fa-check"></i> いつでもキャンセル可 ／ <i class="fa-solid fa-check"></i> 返金保証あり</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- フッター -->
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-links">
+      <!-- ★ 変更箇所：フッターリンク -->
+      <a href="#">プライバシーポリシー</a>
+      <a href="#">特定商取引法に基づく表記</a>
+      <a href="#">利用規約</a>
+      <a href="#">お問い合わせ</a>
+    </div>
+    <!-- ★ 変更箇所：会社名・年度 -->
+    <p>© 2026 【会社名】 All Rights Reserved.</p>
+  </div>
 </footer>
 
 <script>
-function syncColor(pickerId, hexId) {
-  document.getElementById(hexId).value = document.getElementById(pickerId).value;
-}
-function syncHex(hexId, pickerId) {
-  var v = document.getElementById(hexId).value;
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById(pickerId).value = v;
-}
-function applyTheme(accent, bg, text, el) {
-  document.getElementById('colorAccentPicker').value = accent;
-  document.getElementById('colorAccentHex').value = accent;
-  document.getElementById('colorBgPicker').value = bg;
-  document.getElementById('colorBgHex').value = bg;
-  document.getElementById('colorTextPicker').value = text;
-  document.getElementById('colorTextHex').value = text;
-  document.querySelectorAll('.theme-swatch').forEach(function(s){ s.classList.remove('active'); });
-  el.classList.add('active');
-}
-function generate() {
-  var product   = document.getElementById('product').value.trim()   || '【商品・サービス名】';
-  var target    = document.getElementById('target').value.trim()    || '【ターゲット】';
-  var price     = document.getElementById('price').value.trim()     || '【価格帯】';
-  var usp       = document.getElementById('usp').value.trim()       || '【最大の強み】';
-  var biztype   = document.getElementById('biztype').value;
-  var cv        = document.getElementById('cv').value.trim()        || '【コンバージョン目標】';
-  var pain      = document.getElementById('pain').value.trim()      || '【ユーザーの悩み】';
-  var authority = document.getElementById('authority').value.trim() || '【権威性・実績】';
-  var colorAccent = document.getElementById('colorAccentHex').value || '#29abe2';
-  var colorBg     = document.getElementById('colorBgHex').value     || '#f7fbfe';
-  var colorText   = document.getElementById('colorTextHex').value   || '#1a2a3a';
-  var btocFocus = biztype === 'BtoC'
-    ? '感情的ベネフィット・口コミ・共感ストーリーを重視し、読者が「自分のことだ」と感じるコピーにしてください。'
-    : '論理的データ・ROI・費用対効果・導入事例を前面に出し、意思決定者が社内稟議を通しやすい根拠を盛り込んでください。';
-  var promptText = 'あなたはシニアUI/UXデザイナー兼フロントエンドアーキテクト、かつコンバージョン率最大化を専門とするトップクラスのLPコピーライターです。\n以下の情報と設計原則をもとに、成約率の高いランディングページ（LP）の完全なHTMLファイルを1ファイルで作成してください。\n\n━━━━━━━━━━━━━━━━━━━━━\n■ UI/UX・CSS 定義と設計原則\n━━━━━━━━━━━━━━━━━━━━━\n\n【定義】\n・UI = ユーザーが直接見る/触る画面要素。見た目・配置・余白・配色・タイポグラフィ・操作部品。\n・UX = 利用体験全体。理解容易性・導線・安心感・納得感・目的達成率・離脱抑制。\n・CSS = HTMLの見た目とレイアウトを制御するスタイル定義。レスポンシブ・階層・状態表現・可読性を担う。\n\n【設計原則】\n・情報設計は1ページ1目的。\n・CTAは主CTA1つ、補助CTAは最大1つ（クロージングを除く）。\n・ファーストビューで価値提案を即時伝達。\n・視線誘導はF/Zパターンを考慮して配置。\n・モバイルファースト、レスポンシブ前提。\n・認知負荷を下げる短文コピーを使用。\n・trust signal（信頼要素）をCTA近傍に配置。\n・フォームは最小項目のみ。\n・UIは一貫性・可読性・十分なタップ領域・明確な状態差分を確保。\n・CSSはGrid/Flexboxを基本に、余白・階層・コントラスト・focus-visible・line-height・max-width・breakpointsを適切に設定。\n・画像はmax-width:100%、height:autoを基本にする。\n・文字サイズは相対単位（rem/em）を優先し、可読性を損なわない。\n・アクセシビリティを重視し、コントラストとキーボード操作性を確保。\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 商品・サービス情報\n━━━━━━━━━━━━━━━━━━━━━\n・商品名\t\t：' + product + '\n・ターゲット\t：' + target + '\n・価格帯\t\t：' + price + '\n・最大の強み（USP）：' + usp + '\n・権威性・実績\t：' + authority + '\n・ターゲットの悩み：' + pain + '\n・目標CV\t\t：' + cv + '\n・タイプ\t\t：' + biztype + '\n\n━━━━━━━━━━━━━━━━━━━━━\n■ カラー設計（デザイントークン）\n━━━━━━━━━━━━━━━━━━━━━\n・メインカラー（アクセント）：' + colorAccent + '\n・背景カラー\t：' + colorBg + '\n・テキストカラー：' + colorText + '\n\n【カラー設計の方針】\n・上記3色をベースに、以下のトークンをCSS変数（:root）で定義して全体に適用すること：\n  --color-accent: メインカラー\n  --color-accent-light: メインカラーを30%明るくした色（ホバー・ハイライト用）\n  --color-accent-glow: メインカラーにopacity 0.4のグロー（shadow用）\n  --color-bg: 背景カラー\n  --color-surface: 背景カラーより少し明るいカード背景色\n  --color-text: テキストカラー\n  --color-text-sub: テキストカラーを60%透明にしたサブテキスト色\n\n・ファーストビューは背景写真＋グラデーションオーバーレイを使用し、テキストはすべて白（#ffffff）\n・ボディ・クロージングセクションは --color-bg をベースに、カードには --color-surface + glassmorphismを使用\n・近未来感・透明感・妖艶さを演出するために以下を積極活用すること：\n  - backdrop-filter:blur() によるガラス質の半透明レイヤー\n  - box-shadow にメインカラーのグロー効果（0 8px 32px rgba(R,G,B,0.4)）\n  - グラデーション（linear-gradient）はメインカラー→明るいバリエーションの2色展開\n  - セクション間の区切りにグラデーションラインまたは薄い光の粒子（疑似要素で表現）\n・CTAボタンはグラデーション＋グロー＋hover浮き上がりアニメーション必須\n\n━━━━━━━━━━━━━━━━━━━━━\n■ HTMLファイル構成の必須要件\n━━━━━━━━━━━━━━━━━━━━━\n\n【必須タグ（headに必ず含めること）】\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n\n【写真の自動表示（Unsplash無料写真API）】\n・画像はすべて Unsplash の無料写真APIを使用して自動表示すること（ダウンロード・登録不要）\n・URL形式：https://images.unsplash.com/photo-{ID}?w={幅}&h={高さ}&fit=crop&auto=format\n・商品・サービスの内容に合ったキーワードで写真を選び、以下のように記述すること：\n\n▼ 使用箇所と推奨サイズ\n・ファーストビュー メイン画像：w=1200&h=600&fit=crop\n・お客様の声 アバター：w=80&h=80&fit=crop&q=80\n・ギャラリー 各写真：w=600&h=400&fit=crop\n\n▼ 記述例（実際のUnsplash写真IDを使うこと）\n<img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&h=600&fit=crop&auto=format"\n     alt="メイン画像"\n     onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">\n<div class="photo-placeholder" style="display:none;">\n  <i class="fa-solid fa-image"></i><span>写真準備中</span>\n</div>\n\n▼ 推奨写真ID例（商品・業種に近いものを選ぶこと）\n・人物/笑顔：photo-1529156069898-49953e39b3ac\n・ビジネス：photo-1573496359142-b8d87734a5a2\n・自然/癒し：photo-1506905925346-21bda4d32df4\n・学習/教育：photo-1524178232363-1fb2b075b655\n・料理/食事：photo-1498837167922-ddd27525d352\n・スポーツ：photo-1571019613454-1cb2f99b2d8b\n\n・必ず実在するUnsplash写真IDを使用し、all imgタグにonerrorを設定すること\n・.photo-placeholder のCSSは以下を使用：\n.photo-placeholder {\n  display: flex; flex-direction: column;\n  align-items: center; justify-content: center;\n  background: #f0f4f8; color: #aab;\n  height: 200px; border-radius: 10px;\n  font-size: 13px; gap: 8px;\n}\n.photo-placeholder i { font-size: 32px; }\n\n【ローカル画像も使いたい場合のフォルダ構成ルール】\n・追加画像は images/ フォルダに配置し、英数字ハイフンのみのファイル名を使うこと\n  OK例：concert1.jpg / hero-main.jpg　NG例：演奏会写真.jpg\n\n【修正しやすいコメントの挿入】\n・日付・価格・電話番号・場所など変更頻度の高い値の直前に\n  <!-- ★ 変更箇所：〇〇 --> のコメントを入れること\n  例：<!-- ★ 変更箇所：演奏会日付 -->\n      <span>2026年9月27日</span>\n\n━━━━━━━━━━━━━━━━━━━━━\n■ LP構成（3ブロック）\n━━━━━━━━━━━━━━━━━━━━━\n\n文字は中央揃えを基本とし、枠・余白のバランスを均等に保つよう設計してください。\n\n【① ファーストビュー（最重要・以下を厳守すること）】\n\n▼ 絶対目的\nファーストビューの唯一のゴールは「CTAボタンを押させること」。\n説明・装飾・自己紹介は一切不要。訪問者が3秒以内に「これだ」と感じ、迷わずボタンを押す画面を作る。\n\n▼ コピーライティング原則（厳守）\n・1行目（メインキャッチ）：訪問者の「一番強い悩み」または「一番強い欲望」をそのまま言葉にする\n  NG例：「私たちのサービスへようこそ」\n  OK例：「英語が話せないまま、また1年終わりますか？」\n・2行目（サブコピー）：解決策を1文で断言する。数字・具体性・保証を入れる\n  例：「たった90日で、日常会話が自然に出てくる。返金保証付き。」\n・ボタンテキスト：「詳しく見る」は禁止。行動を直接指示する言葉にする\n  例：「今すぐ無料体験を始める」「限定20名・申し込む」\n\n▼ 心理トリガー（必ずファーストビュー内に配置）\n1. 緊急性：「今だけ」「残り〇名」「〇月〇日まで」\n2. 社会的証明：バッジに「累計〇〇人」「満足度〇〇%」「★5.0 口コミ〇〇件」\n3. 損失回避：現状維持のデメリットを1フレーズで示す\n4. 保証：「返金保証」「無料体験」など安心ワードをCTA近傍に小さく添える\n\n▼ 背景の設定（必須）\n・section.hero の background に Unsplash の高品質写真をフルスクリーンで設定すること\n  background-image: url("https://images.unsplash.com/photo-{商品に合うID}?w=1920&h=1080&fit=crop&auto=format");\n  background-size: cover;\n  background-position: center;\n  background-attachment: fixed;（パララックス効果）\n・写真の上に半透明グラデーションオーバーレイを重ねること：\n  ::before 疑似要素で position:absolute / inset:0 / background:linear-gradient(160deg, rgba(メインカラー,0.75) 0%, rgba(0,0,10,0.88) 100%) を全面に適用\n\n▼ 構成要素（上から縦並び・すべて中央揃え・迷わせない順序）\n1. 緊急性タグ：glassmorphismバッジ「残り〇名限定」「〇月末まで」\n2. メインキャッチ：訪問者の悩み・欲望を直撃する1〜2行（白・極太・大きく）\n3. サブコピー：解決策＋数字＋保証を1文で（白70%透明）\n4. 社会的証明バッジ3種：累計数・満足度・受賞歴（glassmorphism・横並び）\n5. CTAボタン：グラデーション・大きく・押しやすい・行動直結テキスト\n6. 安心ワード：ボタン直下に小さく「返金保証あり」「クレジットカード不要」など\n\n▼ ファーストビューのCSS必須ルール\n・section.hero：min-height:100vh / display:flex / flex-direction:column / align-items:center / justify-content:center / position:relative / overflow:hidden / padding:80px 24px\n・テキストはすべて color:#ffffff / text-align:center\n・メインキャッチ：font-size:clamp(2rem,6vw,4rem) / font-weight:900 / letter-spacing:-0.02em / text-shadow:0 4px 24px rgba(0,0,0,0.5) / line-height:1.2\n・サブコピー：font-size:clamp(1rem,2.5vw,1.25rem) / color:rgba(255,255,255,0.82) / max-width:600px / margin:16px auto 0\n・Googleフォントで英語見出し用フォント追加（Playfair Display または Cormorant Garamond）\n・CTAボタン：display:block / margin:36px auto 0 / max-width:420px / width:100% / padding:22px 40px / border-radius:999px / font-size:1.15rem / font-weight:800 / background:linear-gradient(90deg, メインカラー, 明るいバリエーション) / box-shadow:0 8px 32px rgba(メインカラー,0.55) / transition:transform 0.2s,box-shadow 0.2s\n  hover時：transform:translateY(-4px) / box-shadow を強くする\n・安心ワード：font-size:0.8rem / color:rgba(255,255,255,0.6) / margin-top:12px / text-align:center\n\n▼ スマホ対応（@media max-width:640px）\n・メインキャッチ：font-size:clamp(1.6rem,8vw,2.4rem)\n・padding：上下 70px・左右 20px\n・background-attachment:scroll（固定解除）\n\n【② ボディ（中盤）】\n- 共感セクション：「こんなお悩みありませんか？」5項目（各項目にFont Awesomeアイコン）\n- 解決策：選ばれる理由（3〜5項目）\n- ベネフィット：Before→After形式で3つ\n- 社会的証明：お客様の声テンプレート3名分（アバター写真はUnsplash自動写真を使用）\n- ギャラリー：Unsplash自動写真を3〜4枚使用\n- 中間CTAボタン\n\n【③ クロージング】\n- 料金プラン・利用の流れ（3〜5ステップ、各ステップにアイコン）\n- FAQ（よくある質問）5問＋回答\n- 限定オファー・緊急性訴求コピー（2案）\n- 最終CTAボタン＋フォーム周りのマイクロコピー\n\n━━━━━━━━━━━━━━━━━━━━━\n■ デザイン・レイアウト指示\n━━━━━━━━━━━━━━━━━━━━━\n・CSSは<style>タグ内にまとめ、外部ファイル不要の1ファイル完結にすること\n・box-sizing:border-box を全要素に適用すること\n・flexbox / CSS Gridでレイアウトを組み、文字ずれ・枠ずれを防ぐこと\n・スマホ対応（レスポンシブ）：@media (max-width:640px) で1カラムに切り替えること\n・Font Awesome 6をCDNで読み込み、各セクションに適切なアイコンを使用すること\n・文字サイズはremを基本単位として使用し、本文は1rem以上を確保すること\n・CTAボタンのタップ領域は最低44×44px以上を確保すること\n・focus-visibleでキーボード操作時のフォーカス状態を明示すること\n・カラーコントラスト比はWCAG AA基準（4.5:1以上）を満たすこと\n・各セクションにmax-widthを設定し、大画面でも読みやすいレイアウトにすること\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 出力に含めること\n━━━━━━━━━━━━━━━━━━━━━\n1. LP構成案（各セクション名と目的）\n2. 各セクションのUI/UX意図（1〜2行で簡潔に）\n3. 重要な改善ポイント5つ\n4. 完全なHTMLファイル（即ブラウザで動作するもの）\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 追加指示\n━━━━━━━━━━━━━━━━━━━━━\n・' + btocFocus + '\n・CTAボタンは「ファーストビュー直下」「ボディ中間」「クロージング最後」の最低3か所に設置すること\n・各コピーはPASONAの法則（問題→親近感→解決策→提案→絞込→行動）に準拠すること\n・専門用語を避け、中学生でも理解できる平易な言葉で書くこと\n・完成したHTMLファイルはそのままブラウザで開けば動作する状態で出力すること\n\n━━━━━━━━━━━━━━━━━━━━━\n■ 最終出力とダウンロード指示\n━━━━━━━━━━━━━━━━━━━━━\nHTMLコードをすべて出力し終えたら、必ず以下の手順をユーザーに案内すること：\n\n【ダウンロード手順】\n1. 上記のHTMLコード全体をコピーする\n2. パソコンのメモ帳（Windowsはメモ帳、Macはテキストエディット）を開く\n3. コピーしたコードを貼り付ける\n4. ファイル名を「index.html」として保存する（文字コード：UTF-8）\n5. 保存した index.html ファイルをダブルクリックしてブラウザで開いて確認する\n\n※ ChatGPTまたはClaudeを使用している場合、コードブロック右上の「コピー」ボタンを押すと全文をコピーできます。';
-  document.getElementById('promptBox').textContent = promptText;
-  document.getElementById('output').style.display = 'block';
-  document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-/* ── コピー共通処理 ── */
-function copyPrompt(msgId) {
-  var text = document.getElementById('promptBox').textContent;
-  var msg = document.getElementById(msgId);
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function() {
-      showCopyMsg(msg);
-    }).catch(function() {
-      fallbackCopy(text, msg);
+  // FAQ アコーディオン
+  document.querySelectorAll('.faq-question').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var item=this.closest('.faq-item');
+      var isOpen=item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(o){
+        o.classList.remove('open');
+        o.querySelector('.faq-question').setAttribute('aria-expanded','false');
+        o.querySelector('.faq-answer').setAttribute('aria-hidden','true');
+      });
+      if(!isOpen){
+        item.classList.add('open');
+        this.setAttribute('aria-expanded','true');
+        item.querySelector('.faq-answer').setAttribute('aria-hidden','false');
+      }
     });
-  } else {
-    fallbackCopy(text, msg);
+  });
+
+  // カウントダウンタイマー
+  // ★ 変更箇所：締切日時
+  var deadline=new Date('2026-07-31T23:59:59+09:00');
+  function pad(n){return String(n).padStart(2,'0')}
+  function updateCd(){
+    var diff=deadline-new Date();
+    if(diff<=0){['cd-days','cd-hours','cd-mins','cd-secs'].forEach(function(id){document.getElementById(id).textContent='00'});return}
+    document.getElementById('cd-days').textContent=pad(Math.floor(diff/864e5));
+    document.getElementById('cd-hours').textContent=pad(Math.floor(diff%864e5/36e5));
+    document.getElementById('cd-mins').textContent=pad(Math.floor(diff%36e5/6e4));
+    document.getElementById('cd-secs').textContent=pad(Math.floor(diff%6e4/1e3));
   }
-}
-function fallbackCopy(text, msg) {
-  var ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-  try {
-    var ok = document.execCommand('copy');
-    if (ok) {
-      showCopyMsg(msg);
-    } else {
-      msg.textContent = '⚠ 手動でCtrl+Aして右クリック→コピーしてください';
-      msg.style.display = 'block';
-    }
-  } catch(e) {
-    msg.textContent = '⚠ コピーに失敗しました。手動でテキストを選択してください。';
-    msg.style.display = 'block';
-  }
-  document.body.removeChild(ta);
-}
-function showCopyMsg(msg) {
-  msg.textContent = '✓ クリップボードにコピーしました';
-  msg.style.color = '#22a06b';
-  msg.style.display = 'block';
-  setTimeout(function(){ msg.style.display = 'none'; }, 2500);
-}
+  updateCd();
+  setInterval(updateCd,1000);
+
+  // スムーススクロール
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var t=document.querySelector(this.getAttribute('href'));
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})}
+    });
+  });
 </script>
 </body>
 </html>
