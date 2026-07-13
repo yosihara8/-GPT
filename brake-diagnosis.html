@@ -115,59 +115,22 @@
   .diagnose-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
   .warn-msg { font-size: 12px; color: #e17055; text-align: center; margin-top: 10px; display: none; }
   #result { display: none; margin-top: 8px; }
-  .result-hero {
-    background: linear-gradient(135deg, var(--accent-dark), var(--accent));
-    border-radius: var(--radius);
-    padding: 30px 26px;
-    color: #fff;
+  .done-card {
     text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(108,92,231,0.30);
+    padding: 8px 4px 4px;
   }
-  .result-hero .result-label { font-size: 12px; opacity: 0.85; margin-bottom: 6px; letter-spacing: 0.05em; }
-  .result-hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-  .result-hero p { font-size: 13px; opacity: 0.92; }
-  .result-section { margin-bottom: 18px; }
-  .result-section h3 {
-    font-size: 13.5px; font-weight: 700; color: var(--accent-dark);
-    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
-  }
-  .result-section h3 i { font-size: 14px; }
-  .result-section .body { font-size: 13px; line-height: 1.85; color: var(--text-main); }
-  .plan-list { list-style: none; counter-reset: day; }
-  .plan-list li {
-    counter-increment: day;
-    display: flex; gap: 12px; align-items: flex-start;
-    padding: 10px 0; border-bottom: 1px dashed var(--border);
-    font-size: 13px; line-height: 1.7;
-  }
-  .plan-list li:last-child { border-bottom: none; }
-  .plan-list li::before {
-    content: "Day " counter(day);
-    flex-shrink: 0; width: 56px;
-    font-size: 11px; font-weight: 700; color: #fff;
-    background: var(--accent); border-radius: 999px;
-    padding: 3px 0; text-align: center;
-  }
-  .score-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-  .score-row { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--text-sub); }
-  .score-row .label { width: 116px; flex-shrink: 0; }
-  .score-row .track { flex: 1; height: 8px; background: var(--accent-light); border-radius: 999px; overflow: hidden; }
-  .score-row .fill { height: 100%; background: var(--accent); border-radius: 999px; }
-  .score-row .val { width: 28px; text-align: right; flex-shrink: 0; }
+  .done-card i { font-size: 34px; color: var(--accent); margin-bottom: 14px; }
+  .done-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .done-card p { font-size: 13px; color: var(--text-sub); line-height: 1.8; }
   .retry-btn {
     width: 100%; padding: 13px;
     font-size: 13px; font-weight: 600; font-family: inherit;
     background: var(--accent-light);
     border: 1.5px solid var(--accent);
     border-radius: var(--radius-sm); cursor: pointer; color: var(--accent-dark);
-    margin-top: 4px;
+    margin-top: 16px;
   }
   .retry-btn:hover { background: #e4defb; }
-  .tie-note {
-    font-size: 11px; color: var(--text-muted); text-align: center;
-    margin: -8px 0 18px;
-  }
   .lead-desc { font-size: 12px; color: var(--text-sub); line-height: 1.8; margin-bottom: 16px; }
   .lead-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
   .lead-field label { font-size: 12px; font-weight: 500; color: var(--text-sub); }
@@ -232,9 +195,10 @@
 
   <button class="diagnose-btn" id="diagnoseBtn" onclick="runDiagnosis()">
     <i class="fa-solid fa-wand-magic-sparkles"></i>
-    診断結果を見る
+    診断してメールで結果を受け取る
   </button>
   <div class="warn-msg" id="warnMsg">すべての設問に回答してから診断してください。</div>
+  <p style="font-size:11.5px;color:var(--text-muted);text-align:center;margin-top:8px;">※ 診断結果はこの画面には表示されません。ご入力いただいたメールアドレス宛にお送りします。</p>
 
   <div id="result"></div>
 
@@ -551,65 +515,23 @@ function runDiagnosis() {
   const scores = computeScores();
   const { typeKey, tieBroken } = resolveType(scores);
   lastResult = { typeKey, scores, tieBroken };
-  renderResult(typeKey, scores, tieBroken);
+  renderLeadForm();
 
   const resultEl = document.getElementById('result');
   resultEl.style.display = 'block';
   resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function renderResult(typeKey, scores, tieBroken) {
-  const t = TYPES[typeKey];
-  const maxScore = Math.max(...TYPE_ORDER.map(k => scores[k]));
-
-  const scoreBars = TYPE_ORDER.map(k => `
-    <div class="score-row">
-      <div class="label">${TYPES[k].type_name}</div>
-      <div class="track"><div class="fill" style="width:${maxScore ? (scores[k] / maxScore * 100) : 0}%"></div></div>
-      <div class="val">${scores[k]}</div>
-    </div>
-  `).join('');
-
+function renderLeadForm() {
   document.getElementById('result').innerHTML = `
-    <div class="result-hero">
-      <div class="result-label">診断結果</div>
-      <h2>${t.type_name}</h2>
-      <p>${t.tagline}</p>
-    </div>
-    ${tieBroken ? '<div class="tie-note"><i class="fa-solid fa-circle-info"></i> 複数タイプが同点だったため、Q7・Q8の回答を優先して判定しました</div>' : ''}
-
-    <div class="qcard">
-      <div class="result-section">
-        <h3><i class="fa-solid fa-magnifying-glass-chart"></i> 根本原因</h3>
-        <div class="body">${t.root_cause}</div>
-      </div>
-      <div class="result-section">
-        <h3><i class="fa-solid fa-star"></i> 強みの使いどころ</h3>
-        <div class="body">${t.strengths}</div>
-      </div>
-      <div class="result-section">
-        <h3><i class="fa-solid fa-triangle-exclamation"></i> つまずきやすい場面</h3>
-        <div class="body">${t.pitfalls}</div>
-      </div>
-      <div class="result-section">
-        <h3><i class="fa-solid fa-lightbulb"></i> 改善のコツ</h3>
-        <div class="body">${t.improvement_tips}</div>
-      </div>
-      <div class="result-section" style="margin-bottom:0;">
-        <h3><i class="fa-solid fa-calendar-check"></i> 7日間アクションプラン</h3>
-        <ul class="plan-list">
-          ${t.action_plan_7days.map(day => `<li>${day}</li>`).join('')}
-        </ul>
-      </div>
-    </div>
-
-    <div class="qcard">
-      <h3 style="font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:12px;"><i class="fa-solid fa-chart-simple"></i> 全タイプ スコア内訳</h3>
-      <div class="score-bars">${scoreBars}</div>
+    <div class="qcard done-card">
+      <i class="fa-solid fa-circle-check"></i>
+      <h2>診断が完了しました</h2>
+      <p>診断結果はこの画面には表示されません。<br>企業情報をご入力のうえ送信いただくと、診断結果をメールでお届けします。</p>
     </div>
 
     <div class="qcard" id="leadCard">
-      <h3 style="font-size:13.5px;font-weight:700;color:var(--accent-dark);margin-bottom:8px;"><i class="fa-solid fa-envelope"></i> この結果をメールで受け取る</h3>
+      <h3 style="font-size:13.5px;font-weight:700;color:var(--accent-dark);margin-bottom:8px;"><i class="fa-solid fa-envelope"></i> 結果を受け取るメールアドレス</h3>
       <p class="lead-desc">企業情報をご入力のうえ送信いただくと、診断結果をメールでお届けします。ご入力いただいたメールアドレスは、今後の本サービスに関するご案内にも利用させていただきます。</p>
 
       <div class="lead-field">
@@ -643,8 +565,17 @@ function renderResult(typeKey, scores, tieBroken) {
       </button>
       <div class="lead-msg" id="leadMsg"></div>
     </div>
+  `;
+}
 
-    <button class="retry-btn" onclick="location.reload()"><i class="fa-solid fa-rotate-left"></i> もう一度診断する</button>
+function renderThankYou() {
+  document.getElementById('result').innerHTML = `
+    <div class="qcard done-card">
+      <i class="fa-solid fa-paper-plane"></i>
+      <h2>送信しました</h2>
+      <p>ご入力いただいたメールアドレス宛に、診断結果をお送りします。<br>しばらくお待ちください。</p>
+      <button class="retry-btn" onclick="location.reload()"><i class="fa-solid fa-rotate-left"></i> もう一度診断する</button>
+    </div>
   `;
 }
 
@@ -709,7 +640,7 @@ function submitLead() {
   const btn = document.getElementById('leadSubmitBtn');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-check"></i> 送信しました';
-  showLeadMsg('ご入力ありがとうございます。ご入力いただいたメールアドレス宛に診断結果をお送りします。', 'success');
+  setTimeout(renderThankYou, 600);
 }
 
 function showLeadMsg(text, type) {
