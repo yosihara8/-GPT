@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>内面ブレーキ診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  :root {
+    --accent: #6c5ce7;
+    --accent-light: #efebfd;
+    --accent-dark: #4834d4;
+    --bg: #f8f7fd;
+    --card: #ffffff;
+    --border: #e2dcf9;
+    --text-main: #201a3a;
+    --text-sub: #6a6488;
+    --text-muted: #9891b5;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow-card: 0 2px 12px rgba(108,92,231,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+  a { color: var(--accent-dark); }
+  .topnav {
+    max-width: 860px; margin: 0 auto; padding: 14px 20px 0;
+    font-size: 12px;
+  }
+  .topnav a { color: var(--text-sub); text-decoration: none; }
+  .topnav a:hover { color: var(--accent-dark); }
+  .hero {
+    background: linear-gradient(135deg, #efebfd 0%, #ffffff 60%, #f3effe 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 24px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(108,92,231,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-icon {
+    width: 68px; height: 68px;
+    background: var(--accent);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 8px 24px rgba(108,92,231,0.30);
+  }
+  .hero-icon i { color: #fff; font-size: 32px; }
+  .hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+  .hero p { font-size: 13.5px; color: var(--text-sub); line-height: 1.8; max-width: 520px; margin: 0 auto 18px; }
+  .hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(108,92,231,0.10);
+    border: 1px solid rgba(108,92,231,0.25);
+    color: var(--accent-dark);
+    font-size: 11.5px; font-weight: 500;
+    padding: 5px 12px; border-radius: 999px;
+  }
+  .main { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+  .progress-wrap { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0 16px; }
+  .progress-bar { height: 6px; background: var(--accent-light); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), #a29bfe); transition: width 0.25s; }
+  .progress-text { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 6px; }
+  .qcard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .qcard.answered { border-color: var(--accent); }
+  .qnum {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent-dark);
+    font-size: 12px; font-weight: 700; margin-right: 8px;
+  }
+  .qtext { font-size: 14.5px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; }
+  .choice {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 11px 12px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    margin-bottom: 8px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 13px; line-height: 1.6; color: var(--text-main);
+  }
+  .choice:last-child { margin-bottom: 0; }
+  .choice:hover { border-color: var(--accent); background: var(--accent-light); }
+  .choice input { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; }
+  .choice.selected { border-color: var(--accent); background: var(--accent-light); font-weight: 500; }
+  .diagnose-btn {
+    width: 100%; padding: 16px;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    background: linear-gradient(90deg, var(--accent) 0%, #a29bfe 100%);
+    color: #fff; border: none; border-radius: var(--radius);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 6px 20px rgba(108,92,231,0.30);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 8px;
+  }
+  .diagnose-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(108,92,231,0.38); }
+  .diagnose-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .warn-msg { font-size: 12px; color: #e17055; text-align: center; margin-top: 10px; display: none; }
+  #result { display: none; margin-top: 8px; }
+  .result-hero {
+    background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+    border-radius: var(--radius);
+    padding: 30px 26px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(108,92,231,0.30);
+  }
+  .result-hero .result-label { font-size: 12px; opacity: 0.85; margin-bottom: 6px; letter-spacing: 0.05em; }
+  .result-hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .result-hero p { font-size: 13px; opacity: 0.92; }
+  .result-section { margin-bottom: 18px; }
+  .result-section h3 {
+    font-size: 13.5px; font-weight: 700; color: var(--accent-dark);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .result-section h3 i { font-size: 14px; }
+  .result-section .body { font-size: 13px; line-height: 1.85; color: var(--text-main); }
+  .plan-list { list-style: none; counter-reset: day; }
+  .plan-list li {
+    counter-increment: day;
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0; border-bottom: 1px dashed var(--border);
+    font-size: 13px; line-height: 1.7;
+  }
+  .plan-list li:last-child { border-bottom: none; }
+  .plan-list li::before {
+    content: "Day " counter(day);
+    flex-shrink: 0; width: 56px;
+    font-size: 11px; font-weight: 700; color: #fff;
+    background: var(--accent); border-radius: 999px;
+    padding: 3px 0; text-align: center;
+  }
+  .score-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .score-row { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--text-sub); }
+  .score-row .label { width: 116px; flex-shrink: 0; }
+  .score-row .track { flex: 1; height: 8px; background: var(--accent-light); border-radius: 999px; overflow: hidden; }
+  .score-row .fill { height: 100%; background: var(--accent); border-radius: 999px; }
+  .score-row .val { width: 28px; text-align: right; flex-shrink: 0; }
+  .retry-btn {
+    width: 100%; padding: 13px;
+    font-size: 13px; font-weight: 600; font-family: inherit;
+    background: var(--accent-light);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius-sm); cursor: pointer; color: var(--accent-dark);
+    margin-top: 4px;
+  }
+  .retry-btn:hover { background: #e4defb; }
+  .tie-note {
+    font-size: 11px; color: var(--text-muted); text-align: center;
+    margin: -8px 0 18px;
+  }
+  footer {
+    text-align: center; padding: 24px;
+    font-size: 11px; color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 20px; }
+    .qcard { padding: 18px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topnav"><a href="index.html"><i class="fa-solid fa-arrow-left"></i> LPプロンプトジェネレーターへ</a></div>
+
+<div class="hero">
+  <div class="hero-icon"><i class="fa-solid fa-brain"></i></div>
+  <h1>内面ブレーキ診断</h1>
+  <p>性格の分類ではありません。あなたの行動・判断・感情を止めている<br>「根本原因」を8つの質問から構造的に特定します。</p>
+  <div class="hero-badges">
+    <span class="badge"><i class="fa-solid fa-layer-group"></i> 4層構造分析</span>
+    <span class="badge"><i class="fa-solid fa-list-check"></i> 全8問</span>
+    <span class="badge"><i class="fa-solid fa-shapes"></i> 5タイプ判定</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 8 問回答済み</div>
+  </div>
+
+  <div id="questions"></div>
+
+  <button class="diagnose-btn" id="diagnoseBtn" onclick="runDiagnosis()">
+    <i class="fa-solid fa-wand-magic-sparkles"></i>
+    診断結果を見る
+  </button>
+  <div class="warn-msg" id="warnMsg">すべての設問に回答してから診断してください。</div>
+
+  <div id="result"></div>
+
+</div>
+
+<footer>
+  <i class="fa-solid fa-brain" style="color:var(--accent);margin-right:6px;"></i>
+  内面ブレーキ診断 &nbsp;|&nbsp; 行動・判断・感情のブレーキを構造的に特定するパーソナル診断ツール
+</footer>
+
+<script>
+/* ============================================================
+   診断データモデル
+   ============================================================ */
+const TYPE_ORDER = ['type_a', 'type_b', 'type_c', 'type_d', 'type_e'];
+
+const TYPES = {
+  type_a: {
+    id: 1,
+    type_name: '考えすぎ停滞型',
+    tagline: '考えるほど動けなくなる',
+    root_cause: '「間違った判断で傷つきたくない」という価値観と、失敗の可能性を過大評価する認知のクセが結びつき、思考が結論に到達する前に次のリスクを探し始めてしまいます。行動のクセとしては先延ばしという形で表れ、表面的には「決められない」「動けない」という悩みにつながっています。',
+    strengths: '物事を深く分析し、構造やリスクを見抜く力に長けています。判断材料が十分に揃った状態では、精度の高い計画と高い実行力を発揮できます。',
+    pitfalls: '情報を集めすぎて判断基準がかえって曖昧になる、締切直前まで意思決定を先延ばしにする、周囲から「慎重すぎる」「決められない人」と見られやすい、といった場面でつまずきが生じます。',
+    improvement_tips: '「考える時間」に上限を設けるタイムボックス思考を取り入れましょう。100%の情報が揃わなくても70%の確信で動く基準を持ち、思考ではなく行動によってしか得られない情報があると理解することが、ブレーキ解除の第一歩です。',
+    action_plan_7days: [
+      '今抱えている「決められないこと」を1つ紙に書き出す',
+      'その意思決定に「考える期限」を設定する(例:今日の18時まで)',
+      '期限までに出た結論で、実際に小さく行動してみる',
+      '行動した結果を振り返り、「考えていたリスクは実際に起きたか」を確認する',
+      '別の意思決定に対して、同様に24時間以内の期限を設ける',
+      '「70%の確信で動く」を意識して、判断に着手する',
+      '1週間の行動記録を振り返り、思考時間と行動時間の比率を確認する'
+    ]
+  },
+  type_b: {
+    id: 2,
+    type_name: '他人基準迷子型',
+    tagline: '自分の判断軸が弱く、周囲に引っ張られる',
+    root_cause: '自分の価値観よりも「他人にどう思われるか」を優先する認知のクセが根底にあり、過去に自分の意見を否定された経験などが、判断基準を他者に委ねる行動パターンを強化しています。表面的には「自信がない」「流されやすい」という悩みとして現れます。',
+    strengths: '高い協調性と、相手の立場を理解する共感力を持っています。周囲を巻き込みながら物事を進める調整力は、チームで動く場面で大きな強みになります。',
+    pitfalls: '会議や相談の場で最後に意見を求められると答えに詰まる、決めた後も他人の反応で判断を覆す、頑張っているのに「主体性がない」と評価されやすい、といった場面でつまずきが生じます。',
+    improvement_tips: '何かを決める前に「自分はどうしたいか」を一度言語化してから他人の意見を聞く習慣をつけましょう。他人の意見は「参考情報」であり「答え」ではないと捉え直し、小さな決定から自分で決めて自分で責任を持つ経験を積むことが重要です。',
+    action_plan_7days: [
+      '今日1つ、他人に確認せず自分だけで決める(ランチのメニュー等の小さなことでよい)',
+      '誰かに相談する前に、自分の意見を一文で書き出してから話す',
+      '会議や雑談で、最初に自分の意見を発言してみる',
+      '他人の意見を聞いた後、「それでも自分はどう思うか」を書き足す',
+      '一度決めたことを、他人の反応があっても変えずに1日過ごす',
+      '自分が大事にしている価値観を3つ書き出す',
+      '1週間で「自分で決めたこと」を振り返り、リストアップする'
+    ]
+  },
+  type_c: {
+    id: 3,
+    type_name: '完璧待ち型',
+    tagline: '準備が整わないと始められない',
+    root_cause: '「準備不足の状態で始めることは失敗である」という価値観の歪みと、完成度を実際より低く見積もる認知のクセにより、着手の条件が際限なく引き上げられてしまいます。行動のクセとしては先延ばしや過剰な準備という形で現れ、「続かない」「始められない」という悩みにつながっています。',
+    strengths: '高い品質基準と、細部まで配慮する丁寧さ、最後までやり抜く責任感を持っています。仕上がりの完成度において高い評価を得やすい特性です。',
+    pitfalls: '着手が遅れて機会を逃す、8割の完成度で十分な場面でも手を止められない、周囲から「仕事が遅い」「慎重すぎる」と見られやすい、といった場面でつまずきが生じます。',
+    improvement_tips: '「60点で提出し、フィードバックを受けて磨き上げる」という段階的な完成モデルに切り替えましょう。完璧の基準を自分ではなく相手や目的に合わせて設定し直し、小さく始めて後から修正する前提で着手することが有効です。',
+    action_plan_7days: [
+      '今取り組んでいるタスクの「合格ライン(60点)」を具体的に定義する',
+      '60点の状態のまま一度アウトプットを人に見せる、または提出する',
+      'もらったフィードバックをもとに修正する',
+      '準備に使っている時間を計測し、実行に使っている時間と比較する',
+      '「今日はここまで」と時間で区切ってタスクを終える練習をする',
+      '未完成のまま人に見せることへの抵抗感を1〜10で記録する',
+      '1週間の中で「完璧でなくても進んだこと」を振り返る'
+    ]
+  },
+  type_d: {
+    id: 4,
+    type_name: '感情圧縮型',
+    tagline: '本音やストレスをため込みやすい',
+    root_cause: '感情を表に出すことを「弱さ」や「迷惑」と捉える価値観と、自分の感情よりも周囲の空気を優先する認知のクセが組み合わさり、ストレスや本音を内側に溜め込む行動パターンが定着しています。表面的には「なぜかやる気が続かない」「突然限界がくる」という悩みとして現れます。',
+    strengths: '高い自己統制力を持ち、周囲を不安にさせない安定感があります。感情に流されず物事を進める冷静さは、混乱した場面ほど価値を発揮します。',
+    pitfalls: '我慢の限界まで不調のサインに気づけない、周囲は「大丈夫そう」と誤解し負荷が集中する、ストレスが溜まると急に体調やパフォーマンスに影響が出る、といった場面でつまずきが生じます。',
+    improvement_tips: '感情を「良い/悪い」で判断せず、まず事実として認識する習慣をつけましょう。信頼できる相手に本音を話す機会を意図的に作り、我慢するのではなく「小出しに表現する」ことを練習することがブレーキ解除につながります。',
+    action_plan_7days: [
+      '今日感じたストレスや本音を、誰にも見せない前提でノートに書き出す',
+      '書き出した感情に「疲れ」「不安」など名前をつける',
+      '信頼できる1人に、感じていることを短くてよいので話してみる',
+      '「無理」「疲れた」と言いたくなった場面を記録する',
+      '実際に1つ、小さな本音(例:「今日は早く帰りたい」)を口に出す',
+      '自分のストレスサインが体のどこに出るかを観察する',
+      '1週間の感情の記録を読み返し、我慢していた場面を振り返る'
+    ]
+  },
+  type_e: {
+    id: 5,
+    type_name: '使命未接続型',
+    tagline: '何のためにやるかが曖昧で続かない',
+    root_cause: '目の前のタスクと自分の価値観や強みとの間に接続が生まれておらず、「何のためにやっているか」が実感として持てない状態です。深層の土台にある強みや価値観が未活用のまま行動だけが求められることで、表面的には「続かない」「情熱が持てない」という悩みが生じています。',
+    strengths: '新しい可能性を見出す発想力と、意味を求める探究心を持っています。本質的に納得したことに対しては、非常に強い行動力を発揮できます。',
+    pitfalls: '目的が見えない作業では著しく集中力が落ちる、「やらされている」感覚から惰性で続けてしまう、途中で目的を見失いプロジェクトから離脱しやすい、といった場面でつまずきが生じます。',
+    improvement_tips: '目の前のタスクを「自分のどんな価値観・強みと結びつくか」に翻訳し直しましょう。長期的な目的を小さな行動目標に分解し、定期的に「これは誰のため・何のためか」を言語化する時間を持つことが継続の鍵になります。',
+    action_plan_7days: [
+      '今取り組んでいるタスクが「誰の役に立つか」を1つ書き出す',
+      '自分が大切にしたい価値観を3つ挙げる',
+      'タスクと前日挙げた価値観との接点を1つ見つける',
+      '「なぜこれをやるのか」を1分で人に説明できるように言語化する',
+      '過去にやりがいを感じた瞬間を1つ思い出し、共通点を探る',
+      '今日の作業の最初に、その日の目的を一文で書いてから始める',
+      '1週間の目的意識の変化を振り返り、来週の目的を1つ設定する'
+    ]
+  }
+};
+
+const QUESTIONS = [
+  {
+    id: 'Q1', weight: 1, priority_weight: false,
+    text: '何かを始める前、最も近い状態はどれですか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: 'あらゆる可能性やリスクを頭の中でシミュレーションし続けてしまう' },
+      { label: 'b', type: 'type_b', text: '周りの人がどう思うか、他の人ならどうするかが気になる' },
+      { label: 'c', type: 'type_c', text: '完璧な準備やタイミングが整うまで着手できない' },
+      { label: 'd', type: 'type_d', text: '不安や気乗りしない気持ちを抑え込み、とりあえず平静を装う' },
+      { label: 'e', type: 'type_e', text: 'そもそも「なぜやるのか」がはっきりせず、やる気が湧かない' }
+    ]
+  },
+  {
+    id: 'Q2', weight: 1, priority_weight: false,
+    text: '失敗しそうなとき、最初に起きる反応は何ですか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: '「なぜ失敗しそうなのか」の原因分析を延々と続けてしまう' },
+      { label: 'b', type: 'type_b', text: '周囲や上司にどう見られるかが真っ先に頭をよぎる' },
+      { label: 'c', type: 'type_c', text: '「今の状態では足りない」と感じ、やり直したくなる' },
+      { label: 'd', type: 'type_d', text: '表面上は平気なふりをして、内側で焦りやストレスを溜め込む' },
+      { label: 'e', type: 'type_e', text: '「そもそもこれをやる意味があるのか」と投げやりな気持ちになる' }
+    ]
+  },
+  {
+    id: 'Q3', weight: 1, priority_weight: false,
+    text: '人の意見を聞いたあと、自分の判断はどうなりますか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: '意見を材料にさらに考え込み、結論が出るまで時間がかかる' },
+      { label: 'b', type: 'type_b', text: '相手の意見に合わせて、自分の考えを変えてしまう' },
+      { label: 'c', type: 'type_c', text: '「もっと良いやり方があるのでは」と基準を上げてしまう' },
+      { label: 'd', type: 'type_d', text: '納得していなくても、表向きは同意してその場をやり過ごす' },
+      { label: 'e', type: 'type_e', text: '意見はもらうが、自分の軸がないのでどれも同じに見えてしまう' }
+    ]
+  },
+  {
+    id: 'Q4', weight: 1, priority_weight: false,
+    text: '期限が近いとき、あなたが最も取りやすい行動はどれですか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: '計画やタスクの整理ばかりに時間を使い、着手が遅れる' },
+      { label: 'b', type: 'type_b', text: '周囲の進み具合を見てから、自分のペースを決める' },
+      { label: 'c', type: 'type_c', text: 'クオリティにこだわり、細部を何度も直し続ける' },
+      { label: 'd', type: 'type_d', text: 'プレッシャーを一人で抱え込み、誰にも相談しない' },
+      { label: 'e', type: 'type_e', text: 'なんとなく作業はするが、集中力が続かず手が止まる' }
+    ]
+  },
+  {
+    id: 'Q5', weight: 1, priority_weight: false,
+    text: '強くストレスを感じたとき、表に出る反応は何ですか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: '頭の中で同じ考えがぐるぐる回り続け、他のことが手につかない' },
+      { label: 'b', type: 'type_b', text: '誰かに同意や安心をもらいたくなり、意見を求めて回る' },
+      { label: 'c', type: 'type_c', text: '「もっとちゃんとやらなければ」と自分を追い込む' },
+      { label: 'd', type: 'type_d', text: '表情や態度には出さず、一人で抱え込んで我慢する' },
+      { label: 'e', type: 'type_e', text: '何のために頑張っているのか分からなくなり、無気力になる' }
+    ]
+  },
+  {
+    id: 'Q6', weight: 1, priority_weight: false,
+    text: 'やる気が出ないとき、頭の中で何が起きていますか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: 'やるべき理由とやらなくてよい理由を天秤にかけ続けている' },
+      { label: 'b', type: 'type_b', text: '「他の人はどうしているんだろう」と比較してしまう' },
+      { label: 'c', type: 'type_c', text: '「中途半端にやるならやらない方がまし」と考えてしまう' },
+      { label: 'd', type: 'type_d', text: '本当はやりたくない気持ちを、無理やり抑え込んでいる' },
+      { label: 'e', type: 'type_e', text: 'この作業が何につながっているのか実感が持てない' }
+    ]
+  },
+  {
+    id: 'Q7', weight: 2, priority_weight: true,
+    text: '自分の強みを言葉にするとき、どれが一番近いですか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: '物事を深く分析し、リスクや構造を見抜く力' },
+      { label: 'b', type: 'type_b', text: '相手に合わせて場を調整し、周囲と協調する力' },
+      { label: 'c', type: 'type_c', text: '高い基準で仕上げまでやり切る質へのこだわり' },
+      { label: 'd', type: 'type_d', text: '感情を乱さず、安定して物事に向き合う力' },
+      { label: 'e', type: 'type_e', text: '発想力や新しい視点で物事を捉え直す力' }
+    ]
+  },
+  {
+    id: 'Q8', weight: 2, priority_weight: true,
+    text: '今の自分に一番足りないと思うものは何ですか。',
+    choices: [
+      { label: 'a', type: 'type_a', text: '考えすぎずに決めて動く「決断のスピード」' },
+      { label: 'b', type: 'type_b', text: '他人ではなく自分を基準にする「判断の軸」' },
+      { label: 'c', type: 'type_c', text: '完璧でなくても踏み出す「見切り発車の勇気」' },
+      { label: 'd', type: 'type_d', text: '我慢せず本音を出せる「感情の開放」' },
+      { label: 'e', type: 'type_e', text: '何のためにやるかという「目的とのつながり」' }
+    ]
+  }
+];
+
+/* ============================================================
+   レンダリング
+   ============================================================ */
+const answers = {};
+
+function renderQuestions() {
+  const wrap = document.getElementById('questions');
+  wrap.innerHTML = QUESTIONS.map((q, qi) => `
+    <div class="qcard" id="qcard-${q.id}">
+      <div class="qtext"><span class="qnum">${qi + 1}</span>${escapeHtml(q.text)}${q.priority_weight ? ' <i class="fa-solid fa-star" style="color:#fdcb6e;font-size:11px;margin-left:6px;" title="優先判定設問"></i>' : ''}</div>
+      ${q.choices.map(c => `
+        <label class="choice" id="choice-${q.id}-${c.label}">
+          <input type="radio" name="${q.id}" value="${c.label}" onchange="selectAnswer('${q.id}','${c.label}')" />
+          <span>${escapeHtml(c.text)}</span>
+        </label>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+}
+
+function selectAnswer(qId, label) {
+  answers[qId] = label;
+  document.querySelectorAll(`#qcard-${qId} .choice`).forEach(el => el.classList.remove('selected'));
+  document.getElementById(`choice-${qId}-${label}`).classList.add('selected');
+  document.getElementById(`qcard-${qId}`).classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(answers).length;
+  document.getElementById('progressFill').style.width = (answered / QUESTIONS.length * 100) + '%';
+  document.getElementById('progressText').textContent = `${answered} / ${QUESTIONS.length} 問回答済み`;
+}
+
+/* ============================================================
+   判定ロジック
+   ============================================================ */
+function computeScores() {
+  const scores = { type_a: 0, type_b: 0, type_c: 0, type_d: 0, type_e: 0 };
+  QUESTIONS.forEach(q => {
+    const chosenLabel = answers[q.id];
+    const choice = q.choices.find(c => c.label === chosenLabel);
+    if (choice) scores[choice.type] += q.weight;
+  });
+  return scores;
+}
+
+function resolveType(scores) {
+  const maxScore = Math.max(...TYPE_ORDER.map(t => scores[t]));
+  const topTypes = TYPE_ORDER.filter(t => scores[t] === maxScore);
+
+  if (topTypes.length === 1) {
+    return { typeKey: topTypes[0], tieBroken: false };
+  }
+
+  // 優先判定アルゴリズム: Q7・Q8(重み付け設問)の回答タイプを優先して一意に決定する
+  const q7Choice = QUESTIONS.find(q => q.id === 'Q7').choices.find(c => c.label === answers.Q7);
+  const q8Choice = QUESTIONS.find(q => q.id === 'Q8').choices.find(c => c.label === answers.Q8);
+  const q7Type = q7Choice ? q7Choice.type : null;
+  const q8Type = q8Choice ? q8Choice.type : null;
+
+  if (q7Type && q8Type && q7Type === q8Type && topTypes.includes(q7Type)) {
+    return { typeKey: q7Type, tieBroken: true };
+  }
+  if (q7Type && topTypes.includes(q7Type)) {
+    return { typeKey: q7Type, tieBroken: true };
+  }
+  if (q8Type && topTypes.includes(q8Type)) {
+    return { typeKey: q8Type, tieBroken: true };
+  }
+  // フォールバック: タイプ定義順で決定論的に一意化する
+  const fallback = topTypes.slice().sort((a, b) => TYPE_ORDER.indexOf(a) - TYPE_ORDER.indexOf(b))[0];
+  return { typeKey: fallback, tieBroken: true };
+}
+
+function runDiagnosis() {
+  if (Object.keys(answers).length < QUESTIONS.length) {
+    document.getElementById('warnMsg').style.display = 'block';
+    const firstUnanswered = QUESTIONS.find(q => !answers[q.id]);
+    if (firstUnanswered) {
+      document.getElementById(`qcard-${firstUnanswered.id}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+  document.getElementById('warnMsg').style.display = 'none';
+
+  const scores = computeScores();
+  const { typeKey, tieBroken } = resolveType(scores);
+  renderResult(typeKey, scores, tieBroken);
+
+  const resultEl = document.getElementById('result');
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderResult(typeKey, scores, tieBroken) {
+  const t = TYPES[typeKey];
+  const maxScore = Math.max(...TYPE_ORDER.map(k => scores[k]));
+
+  const scoreBars = TYPE_ORDER.map(k => `
+    <div class="score-row">
+      <div class="label">${TYPES[k].type_name}</div>
+      <div class="track"><div class="fill" style="width:${maxScore ? (scores[k] / maxScore * 100) : 0}%"></div></div>
+      <div class="val">${scores[k]}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('result').innerHTML = `
+    <div class="result-hero">
+      <div class="result-label">診断結果</div>
+      <h2>${t.type_name}</h2>
+      <p>${t.tagline}</p>
+    </div>
+    ${tieBroken ? '<div class="tie-note"><i class="fa-solid fa-circle-info"></i> 複数タイプが同点だったため、Q7・Q8の回答を優先して判定しました</div>' : ''}
+
+    <div class="qcard">
+      <div class="result-section">
+        <h3><i class="fa-solid fa-magnifying-glass-chart"></i> 根本原因</h3>
+        <div class="body">${t.root_cause}</div>
+      </div>
+      <div class="result-section">
+        <h3><i class="fa-solid fa-star"></i> 強みの使いどころ</h3>
+        <div class="body">${t.strengths}</div>
+      </div>
+      <div class="result-section">
+        <h3><i class="fa-solid fa-triangle-exclamation"></i> つまずきやすい場面</h3>
+        <div class="body">${t.pitfalls}</div>
+      </div>
+      <div class="result-section">
+        <h3><i class="fa-solid fa-lightbulb"></i> 改善のコツ</h3>
+        <div class="body">${t.improvement_tips}</div>
+      </div>
+      <div class="result-section" style="margin-bottom:0;">
+        <h3><i class="fa-solid fa-calendar-check"></i> 7日間アクションプラン</h3>
+        <ul class="plan-list">
+          ${t.action_plan_7days.map(day => `<li>${day}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <h3 style="font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:12px;"><i class="fa-solid fa-chart-simple"></i> 全タイプ スコア内訳</h3>
+      <div class="score-bars">${scoreBars}</div>
+    </div>
+
+    <button class="retry-btn" onclick="location.reload()"><i class="fa-solid fa-rotate-left"></i> もう一度診断する</button>
+  `;
+}
+
+renderQuestions();
+</script>
+</body>
+</html>
