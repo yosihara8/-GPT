@@ -174,6 +174,35 @@
     font-size: 11px; color: var(--text-muted); text-align: center;
     margin: -8px 0 18px;
   }
+  .lead-desc { font-size: 12px; color: var(--text-sub); line-height: 1.8; margin-bottom: 16px; }
+  .lead-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .lead-field label { font-size: 12px; font-weight: 500; color: var(--text-sub); }
+  .lead-field label .required { color: #e17055; margin-left: 2px; }
+  .lead-field input {
+    width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
+    color: var(--text-main); background: var(--bg);
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .lead-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,92,231,0.12); background: #fff; }
+  .consent-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 11.5px; color: var(--text-sub); line-height: 1.7;
+    margin: 6px 0 16px;
+  }
+  .consent-row input { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; }
+  .lead-submit-btn {
+    width: 100%; padding: 14px;
+    font-size: 14px; font-weight: 700; font-family: inherit;
+    background: linear-gradient(90deg, var(--accent) 0%, #a29bfe 100%);
+    color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .lead-submit-btn:hover { transform: translateY(-2px); }
+  .lead-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .lead-msg { font-size: 12px; margin-top: 10px; display: none; }
+  .lead-msg.success { color: #22a06b; }
+  .lead-msg.error { color: #e17055; }
   footer {
     text-align: center; padding: 24px;
     font-size: 11px; color: var(--text-muted);
@@ -415,9 +444,32 @@ const QUESTIONS = [
 ];
 
 /* ============================================================
+   Googleフォーム連携設定
+   ★ Googleフォーム作成後、下記3点を必ず差し替えてください。
+     詳しい手順は GOOGLE_FORM_SETUP.md を参照。
+   1. actionUrl … フォームの「事前入力したリンク」から取得したURLの
+      末尾を /viewform → /formResponse に変更したもの
+   2. fields    … 各設問の name="entry.XXXXXXXXX" を対応させる
+   ============================================================ */
+const GOOGLE_FORM_CONFIG = {
+  actionUrl: 'https://docs.google.com/forms/d/e/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/formResponse',
+  fields: {
+    company: 'entry.XXXXXXXXX',      // 会社名
+    department: 'entry.XXXXXXXXX',   // 部署名
+    contactName: 'entry.XXXXXXXXX',  // ご担当者名
+    email: 'entry.XXXXXXXXX',        // メールアドレス
+    phone: 'entry.XXXXXXXXX',        // 電話番号
+    consent: 'entry.XXXXXXXXX',      // 利用目的への同意
+    resultType: 'entry.XXXXXXXXX',   // 診断結果タイプ
+    resultBody: 'entry.XXXXXXXXX'    // 診断結果本文
+  }
+};
+
+/* ============================================================
    レンダリング
    ============================================================ */
 const answers = {};
+let lastResult = null;
 
 function renderQuestions() {
   const wrap = document.getElementById('questions');
@@ -506,6 +558,7 @@ function runDiagnosis() {
 
   const scores = computeScores();
   const { typeKey, tieBroken } = resolveType(scores);
+  lastResult = { typeKey, scores, tieBroken };
   renderResult(typeKey, scores, tieBroken);
 
   const resultEl = document.getElementById('result');
@@ -563,8 +616,146 @@ function renderResult(typeKey, scores, tieBroken) {
       <div class="score-bars">${scoreBars}</div>
     </div>
 
+    <div class="qcard" id="leadCard">
+      <h3 style="font-size:13.5px;font-weight:700;color:var(--accent-dark);margin-bottom:8px;"><i class="fa-solid fa-envelope"></i> この結果をメールで受け取る</h3>
+      <p class="lead-desc">企業情報をご入力のうえ送信いただくと、診断結果をメールでお届けします。ご入力いただいたメールアドレスは、今後の本サービスに関するご案内にも利用させていただきます。</p>
+
+      <div class="lead-field">
+        <label>会社名<span class="required">必須</span></label>
+        <input type="text" id="leadCompany" placeholder="株式会社サンプル" />
+      </div>
+      <div class="lead-field">
+        <label>部署名</label>
+        <input type="text" id="leadDepartment" placeholder="営業部" />
+      </div>
+      <div class="lead-field">
+        <label>ご担当者名</label>
+        <input type="text" id="leadContactName" placeholder="山田 太郎" />
+      </div>
+      <div class="lead-field">
+        <label>メールアドレス<span class="required">必須</span></label>
+        <input type="email" id="leadEmail" placeholder="taro.yamada@example.com" />
+      </div>
+      <div class="lead-field">
+        <label>電話番号</label>
+        <input type="tel" id="leadPhone" placeholder="03-1234-5678" />
+      </div>
+
+      <label class="consent-row">
+        <input type="checkbox" id="leadConsent" />
+        <span>入力したメールアドレス宛に、本診断結果および今後の本サービスに関するご案内(サービス情報)をお送りすることに同意します。<span class="required">必須</span></span>
+      </label>
+
+      <button class="lead-submit-btn" id="leadSubmitBtn" onclick="submitLead()">
+        <i class="fa-solid fa-paper-plane"></i> 送信する
+      </button>
+      <div class="lead-msg" id="leadMsg"></div>
+    </div>
+
     <button class="retry-btn" onclick="location.reload()"><i class="fa-solid fa-rotate-left"></i> もう一度診断する</button>
   `;
+}
+
+/* ============================================================
+   Googleフォームへの送信(企業情報リスト化 + メール配信トリガー)
+   ============================================================ */
+function buildResultBodyText(typeKey) {
+  const t = TYPES[typeKey];
+  return [
+    '■ 根本原因\n' + t.root_cause,
+    '■ 強みの使いどころ\n' + t.strengths,
+    '■ つまずきやすい場面\n' + t.pitfalls,
+    '■ 改善のコツ\n' + t.improvement_tips,
+    '■ 7日間アクションプラン\n' + t.action_plan_7days.map((d, i) => 'Day' + (i + 1) + ': ' + d).join('\n')
+  ].join('\n\n');
+}
+
+function isEmailValid(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function submitLead() {
+  const msgEl = document.getElementById('leadMsg');
+  const company = document.getElementById('leadCompany').value.trim();
+  const department = document.getElementById('leadDepartment').value.trim();
+  const contactName = document.getElementById('leadContactName').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  const phone = document.getElementById('leadPhone').value.trim();
+  const consent = document.getElementById('leadConsent').checked;
+
+  if (!company || !email || !consent) {
+    showLeadMsg('会社名・メールアドレスの入力と、利用目的への同意チェックが必要です。', 'error');
+    return;
+  }
+  if (!isEmailValid(email)) {
+    showLeadMsg('メールアドレスの形式が正しくありません。', 'error');
+    return;
+  }
+  if (!lastResult) {
+    showLeadMsg('診断結果が見つかりません。もう一度診断してください。', 'error');
+    return;
+  }
+  if (GOOGLE_FORM_CONFIG.actionUrl.indexOf('XXXX') !== -1) {
+    showLeadMsg('送信先が未設定です。GOOGLE_FORM_CONFIGにGoogleフォームの情報を設定してください。', 'error');
+    return;
+  }
+
+  const t = TYPES[lastResult.typeKey];
+  const payload = {
+    company: company,
+    department: department,
+    contactName: contactName,
+    email: email,
+    phone: phone,
+    consent: '同意する',
+    resultType: t.type_name,
+    resultBody: buildResultBodyText(lastResult.typeKey)
+  };
+
+  submitToGoogleForm(payload);
+
+  const btn = document.getElementById('leadSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> 送信しました';
+  showLeadMsg('ご入力ありがとうございます。ご入力いただいたメールアドレス宛に診断結果をお送りします。', 'success');
+}
+
+function showLeadMsg(text, type) {
+  const msgEl = document.getElementById('leadMsg');
+  msgEl.textContent = text;
+  msgEl.className = 'lead-msg ' + type;
+  msgEl.style.display = 'block';
+}
+
+function submitToGoogleForm(data) {
+  const iframeId = 'hidden_submit_frame';
+  let iframe = document.getElementById(iframeId);
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.name = iframeId;
+    iframe.id = iframeId;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+
+  const form = document.createElement('form');
+  form.action = GOOGLE_FORM_CONFIG.actionUrl;
+  form.method = 'POST';
+  form.target = iframeId;
+  form.style.display = 'none';
+
+  Object.keys(GOOGLE_FORM_CONFIG.fields).forEach(function (key) {
+    if (data[key] === undefined) return;
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = GOOGLE_FORM_CONFIG.fields[key];
+    input.value = data[key];
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(function () { form.remove(); }, 1500);
 }
 
 renderQuestions();
