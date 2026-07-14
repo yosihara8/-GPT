@@ -194,7 +194,7 @@
 <div class="hero">
   <div class="hero-icon"><i class="fa-solid fa-chart-simple"></i></div>
   <h1>パーソナル診断</h1>
-  <p>あなたの起業スタイル・経営スタイルを20の質問から診断します。<br>結果はこの画面には表示されず、メールでお届けします。</p>
+  <p>あなたの起業スタイル・経営スタイルを、行動の裏にある心理まで踏み込んで20の質問から診断します。<br>結果はこの画面には表示されず、メールでお届けします。</p>
   <div class="hero-badges">
     <span class="badge"><i class="fa-solid fa-rocket"></i> 新規起業・経営改善対応</span>
     <span class="badge"><i class="fa-solid fa-list-check"></i> 全20問</span>
@@ -208,13 +208,13 @@
     <div class="track-card" onclick="selectTrack('startup')">
       <div class="icon-wrap"><i class="fa-solid fa-seedling"></i></div>
       <h3>新規起業を検討・準備中の方</h3>
-      <p>これから起業する方向けの診断です。あなたに合った起業スタイルと、最初の一歩を明らかにします。</p>
+      <p>これから起業する方向けの診断です。何が起業を止めているのか、その根本心理まで明らかにします。</p>
       <div class="go">診断をはじめる <i class="fa-solid fa-arrow-right"></i></div>
     </div>
     <div class="track-card" onclick="selectTrack('manager')">
       <div class="icon-wrap"><i class="fa-solid fa-briefcase"></i></div>
       <h3>すでに経営されている方</h3>
-      <p>既存の経営者向けの診断です。今の経営課題がどこにあるかと、改善の優先順位を明らかにします。</p>
+      <p>既存の経営者向けの診断です。経営の打ち手がなぜ機能しないのか、その心理構造まで明らかにします。</p>
       <div class="go">診断をはじめる <i class="fa-solid fa-arrow-right"></i></div>
     </div>
   </div>
@@ -241,12 +241,12 @@
 
 <footer>
   <i class="fa-solid fa-chart-simple" style="color:var(--accent);margin-right:6px;"></i>
-  パーソナル診断 &nbsp;|&nbsp; 起業スタイル・経営スタイルを構造的に診断するパーソナル診断ツール
+  パーソナル診断 &nbsp;|&nbsp; 起業スタイル・経営スタイルを心理面から診断するパーソナル診断ツール
 </footer>
 
 <script>
 /* ============================================================
-   Googleフォーム連携設定(内面ブレーキ診断から引き継ぎ・変更不要)
+   Googleフォーム連携設定(変更不要・既存のentry IDのまま)
    ============================================================ */
 const GOOGLE_FORM_CONFIG = {
   actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfE5EXyfE-fs1VhkmGQJJKjmSN690wgleC_xnLv8SIh9s19iw/formResponse',
@@ -263,343 +263,327 @@ const GOOGLE_FORM_CONFIG = {
 };
 
 /* ============================================================
-   診断データモデル(2トラック x 20問 x 4タイプ)
+   診断データモデル(2トラック x 20問 x 4タイプ・心理的深層設計)
    ============================================================ */
 const TRACKS = {
   startup: {
     label: '新規起業向け診断',
-    typeOrder: ['explore', 'strength', 'verify', 'growth'],
+    typeOrder: ['wander', 'confidence', 'verify', 'defense'],
     types: {
-      explore: {
-        name: '探索型',
-        tagline: 'まだ何をするかを探している段階',
-        suited: [
-          '幅広く情報収集し、可能性を広げること',
-          '多様な人との対話からアイデアの種を見つけること',
-          '焦らず自分に合う方向性をじっくり見極めること'
-        ],
-        cautions: [
-          '情報収集ばかりで行動に移せないことがある',
-          '決断を先延ばしにして機会を逃しやすい',
-          '完璧な答えを探して疲弊しやすい'
-        ],
-        next_action: '気になる分野を3つに絞り、それぞれ経験者に1人ずつ話を聞いてみる'
+      wander: {
+        name: '迷走探索型',
+        tagline: '選択肢が多く見えすぎて、進む方向を絞れない',
+        root_psychology: '「間違った選択をして後戻りできなくなること」への恐れが強く、可能性を広げ続けることで意思決定そのものを先延ばしにしている。決めないことで、まだすべての可能性が残っている感覚を守っている。',
+        behavior_pattern: '情報収集や比較検討を延々と続け、複数の案を同時に抱えたまま、どれにも本格的に着手しない。相談する相手を増やすほど、かえって迷いが深くなる。',
+        business_impact: '起業のタイミングを逃し続け、市場や資金の状況が悪化してから動き出すことになりやすい。周囲からは「本気度が低い」と見られ、協力を得にくくなる。',
+        improvement: {
+          cognitive: '「決めないこと」自体が最大のリスクだと認識を切り替える。100点の選択肢を探すのをやめ、「今の情報で十分な選択」という基準に置き換える。',
+          behavioral: '選択肢を出す期間と、選ぶ期間を分けて区切る。1つの案に対して「試す期限」を必ず設ける。',
+          environmental: '相談相手を1人に絞り、複数の意見を同時に集めない環境をつくる。'
+        },
+        first_step: '今抱えている候補を3つまでに絞り、そのうち1つを今日中に選ぶ。'
       },
-      strength: {
-        name: '強み活用型',
-        tagline: '自分の得意分野・専門性を軸に事業を組み立てるタイプ',
-        suited: [
-          '自分の経験や専門知識を活かした事業設計',
-          '専門家としての信頼性の構築',
-          '既に持つスキルを収益化する仕組みづくり'
-        ],
-        cautions: [
-          '得意なことに固執し、市場ニーズとのズレに気づきにくい',
-          '自己流にこだわりすぎて視野が狭くなりやすい',
-          '得意分野の外への挑戦を避けがち'
-        ],
-        next_action: '自分の強みを3つ書き出し、それぞれがどんな顧客の悩みを解決できるか言語化する'
+      confidence: {
+        name: '自信保留型',
+        tagline: '自分に向いているかどうかの確信が持てず、動き出せない',
+        root_psychology: '「自分には力がない」と評価されることへの恐れが根底にあり、実力が証明されるまで本気を出さないことで、傷つく可能性を回避している。',
+        behavior_pattern: '資格取得や勉強を重ねる一方で、実際の行動(発信・提案・販売)は後回しにしがち。準備が整うまで人に見せない。',
+        business_impact: '実績づくりの機会を逃し続け、いつまでも「まだ準備中」の状態から抜け出せない。周囲に実力を証明する機会そのものが失われる。',
+        improvement: {
+          cognitive: '「準備が整ってから始める」のではなく、「始めながら実力がついていく」という順序に認識を変える。',
+          behavioral: '小さな実績を積む行動(無料モニター、小規模な提供など)を先に設計し、結果よりも行動量を評価基準にする。',
+          environmental: '否定されにくい安全な場(信頼できるコミュニティ等)で最初の一歩を試す環境を用意する。'
+        },
+        first_step: '今の実力のまま提供できる、最小限のサービスを1つ、身近な人に無料か低価格で試してもらう。'
       },
       verify: {
-        name: '実証型',
-        tagline: '小さく試して検証しながら進めるタイプ',
-        suited: [
-          '最小限の労力で仮説を検証すること',
-          '顧客の反応を見ながら素早く軌道修正すること',
-          '失敗を恐れず小さく試すこと'
-        ],
-        cautions: [
-          '目先の検証に集中しすぎて全体戦略を見失いやすい',
-          '小さな成功に満足し、スケールへの発想が弱くなりやすい',
-          '検証の繰り返しで軸がぶれることがある'
-        ],
-        next_action: '今のアイデアを1週間以内に作れる最小限の形にして、5人に見せてみる'
+        name: '検証未満型',
+        tagline: '頭の中で完成させようとし、実際の検証を後回しにする',
+        root_psychology: '「否定される・拒絶される」ことへの恐れがあり、外に出す前に完璧に仕上げることで、批判の余地をなくそうとしている。',
+        behavior_pattern: '顧客に見せる前の作り込みに時間をかけすぎ、フィードバックを得る前に方向性を固めてしまう。想定顧客との対話を避けがち。',
+        business_impact: '市場に出す頃には状況が変わっていたり、独りよがりな商品・サービスになりやすく、修正コストが大きくなる。',
+        improvement: {
+          cognitive: '「未完成のまま見せることは失敗ではなく、情報収集である」と捉え直す。',
+          behavioral: '完成度60%の時点で、必ず一度他者に見せるルールを作る。',
+          environmental: 'フィードバックをもらいやすい少人数のテスト対象者リストを事前に用意しておく。'
+        },
+        first_step: '今のアイデアを1枚の紙にまとめ、今週中に3人に見せて感想をもらう。'
       },
-      growth: {
-        name: '成長志向型',
-        tagline: '早い段階から拡大・成長を見据えるタイプ',
-        suited: [
-          '大きなビジョンを描き、周囲を巻き込むこと',
-          '仕組み化やチーム作りを見据えた設計',
-          '積極的な投資判断や意思決定'
-        ],
-        cautions: [
-          '基盤が整う前に拡大を急ぎ、無理が生じやすい',
-          '現場の細部への配慮が後回しになりやすい',
-          'スピード重視で検証不足のまま進めてしまうことがある'
-        ],
-        next_action: '事業計画の中で「今すぐ必要な拡大」と「後回しにできる拡大」を1つずつ分ける'
+      defense: {
+        name: '防衛強固型',
+        tagline: '周囲の評価やリスクを強く警戒し、守りの姿勢が先に立つ',
+        root_psychology: '過去に傷ついた経験や、失敗による評価の低下への恐れが強く、挑戦することよりも「傷つかないこと」を優先する防衛反応が働いている。',
+        behavior_pattern: 'リスクの高い決断を避け、周囲の反応を過度に気にして、本音の主張や大胆な提案を控えてしまう。',
+        business_impact: '差別化やチャレンジが必要な場面で無難な選択をしてしまい、事業としての伸びしろを自ら制限してしまう。',
+        improvement: {
+          cognitive: '「傷つくこと」と「失敗すること」を切り分け、失敗は経験値であり評価の低下ではないと認識を変える。',
+          behavioral: '小さなリスクを意図的に取る練習(小規模な挑戦)を習慣化する。',
+          environmental: '挑戦を否定しない、心理的安全性の高い相談相手やコミュニティを持つ。'
+        },
+        first_step: '「本当はやりたいが避けている小さな挑戦」を1つ書き出し、今週中に実行する。'
       }
     },
     questions: [
-      { text: '起業を考えるとき、最も強く感じるのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: 'まだ何をするか決めきれていない' },
-        { label: 'b', type: 'strength', text: '自分の得意分野で始めたい' },
-        { label: 'c', type: 'verify', text: 'すぐに売れる形を作りたい' },
-        { label: 'd', type: 'growth', text: '将来的に大きく伸ばしたい' } ] },
-      { text: '事業アイデアを考えるとき、重視するのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '自分の興味や情熱' },
-        { label: 'b', type: 'strength', text: '市場のニーズ' },
-        { label: 'c', type: 'verify', text: '早く検証できること' },
-        { label: 'd', type: 'growth', text: '成長の可能性' } ] },
-      { text: '起業準備で、いちばん不安なのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '何から始めるべきか分からない' },
-        { label: 'b', type: 'strength', text: '自分に向いているか分からない' },
-        { label: 'c', type: 'verify', text: 'お客様に本当に必要とされるか分からない' },
-        { label: 'd', type: 'growth', text: '資金や体制が足りるか不安' } ] },
-      { text: '事業の進め方として、最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: 'まず学びながら考えたい' },
-        { label: 'b', type: 'strength', text: '自分の強みを整理して決めたい' },
-        { label: 'c', type: 'verify', text: '小さく試してから決めたい' },
-        { label: 'd', type: 'growth', text: '計画を立てて一気に進めたい' } ] },
-      { text: '起業で実現したいことはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '自分らしく働くこと' },
-        { label: 'b', type: 'strength', text: '専門性を活かすこと' },
-        { label: 'c', type: 'verify', text: '早く収益化すること' },
-        { label: 'd', type: 'growth', text: '組織や事業を大きくすること' } ] },
-      { text: '事業アイデアの評価で、最も重要なのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: 'やりたい気持ち' },
-        { label: 'b', type: 'strength', text: 'できることとの一致' },
-        { label: 'c', type: 'verify', text: '顧客の反応' },
-        { label: 'd', type: 'growth', text: '収益性' } ] },
-      { text: '商品やサービスを作るとき、最も重視するのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '自分のこだわり' },
-        { label: 'b', type: 'strength', text: '顧客課題の解決' },
-        { label: 'c', type: 'verify', text: 'テストしやすさ' },
-        { label: 'd', type: 'growth', text: '拡張しやすさ' } ] },
-      { text: 'もし最初の反応が弱かった場合、どうしますか。', choices: [
-        { label: 'a', type: 'explore', text: 'もう少し学び直す' },
-        { label: 'b', type: 'strength', text: '表現や内容を調整する' },
-        { label: 'c', type: 'verify', text: 'すぐに改善して再検証する' },
-        { label: 'd', type: 'growth', text: '別案に切り替える' } ] },
-      { text: '起業スタイルとして近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: 'じっくり準備型' },
-        { label: 'b', type: 'strength', text: '得意分野活用型' },
-        { label: 'c', type: 'verify', text: '実験重視型' },
-        { label: 'd', type: 'growth', text: '拡大型' } ] },
-      { text: '独立後の働き方で理想に近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '一人で自由に進めたい' },
-        { label: 'b', type: 'strength', text: '専門家として信頼されたい' },
-        { label: 'c', type: 'verify', text: '小さく回して効率化したい' },
-        { label: 'd', type: 'growth', text: 'チームで成長させたい' } ] },
-      { text: '新しい事業を選ぶ基準として最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '自分が続けられるか' },
-        { label: 'b', type: 'strength', text: '自分の強みと合うか' },
-        { label: 'c', type: 'verify', text: '早く売れそうか' },
-        { label: 'd', type: 'growth', text: '大きく伸びるか' } ] },
-      { text: '事業の最初の形を作るとき、どれが近いですか。', choices: [
-        { label: 'a', type: 'explore', text: 'まず頭の中で整理したい' },
-        { label: 'b', type: 'strength', text: '自分の経験から作りたい' },
-        { label: 'c', type: 'verify', text: '最小限で試したい' },
-        { label: 'd', type: 'growth', text: '先に理想形を決めたい' } ] },
-      { text: '起業に必要な力として、今いちばん近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '発想力' },
-        { label: 'b', type: 'strength', text: '専門性' },
-        { label: 'c', type: 'verify', text: '検証力' },
-        { label: 'd', type: 'growth', text: '経営力' } ] },
-      { text: '相談相手として、最も必要なのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '考えを整理してくれる人' },
-        { label: 'b', type: 'strength', text: '強みを見つけてくれる人' },
-        { label: 'c', type: 'verify', text: '実行を後押しする人' },
-        { label: 'd', type: 'growth', text: '戦略を一緒に考える人' } ] },
-      { text: '事業の優先順位として、今最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '自分の方向性を決めること' },
-        { label: 'b', type: 'strength', text: '提供価値を明確にすること' },
-        { label: 'c', type: 'verify', text: '顧客検証を進めること' },
-        { label: 'd', type: 'growth', text: '売上化の仕組みを作ること' } ] },
-      { text: '起業の進め方として、最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: 'まず全体像を知りたい' },
-        { label: 'b', type: 'strength', text: 'まず自分に合う形を知りたい' },
-        { label: 'c', type: 'verify', text: 'まず試作品を出したい' },
-        { label: 'd', type: 'growth', text: 'まず市場性を見極めたい' } ] },
-      { text: 'あなたにとっての理想の起業はどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '自分のペースでできる' },
-        { label: 'b', type: 'strength', text: '自分の強みが活きる' },
-        { label: 'c', type: 'verify', text: '少ない資金で始められる' },
-        { label: 'd', type: 'growth', text: '拡大余地が大きい' } ] },
-      { text: '起業判断で、最後に背中を押す要素はどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '納得感' },
-        { label: 'b', type: 'strength', text: '適性' },
-        { label: 'c', type: 'verify', text: '顧客反応' },
-        { label: 'd', type: 'growth', text: '将来性' } ] },
-      { text: '事業を始める時点で、最も必要だと思うものはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '判断軸' },
-        { label: 'b', type: 'strength', text: '自分の強みの棚卸し' },
-        { label: 'c', type: 'verify', text: '小さな検証設計' },
-        { label: 'd', type: 'growth', text: '収益計画' } ] },
-      { text: '起業のタイプとして、最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'explore', text: '探索型' },
-        { label: 'b', type: 'strength', text: '強み活用型' },
-        { label: 'c', type: 'verify', text: '実証型' },
-        { label: 'd', type: 'growth', text: '成長志向型' } ] }
+      { text: '起業を考えるとき、最初に強く出る感情はどれですか。', choices: [
+        { label: 'a', type: 'wander', text: 'わくわくする' },
+        { label: 'b', type: 'confidence', text: '失敗が怖い' },
+        { label: 'c', type: 'verify', text: '何を選べばいいか迷う' },
+        { label: 'd', type: 'defense', text: '周囲の反応が気になる' } ] },
+      { text: '事業アイデアを考えるとき、どこで止まりやすいですか。', choices: [
+        { label: 'a', type: 'wander', text: 'アイデアは出るが絞れない' },
+        { label: 'b', type: 'confidence', text: '自分にできるか不安になる' },
+        { label: 'c', type: 'verify', text: '需要があるか確信できない' },
+        { label: 'd', type: 'defense', text: '始める責任の重さに引っかかる' } ] },
+      { text: '起業準備で先延ばしになりやすいのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '方向性を決めること' },
+        { label: 'b', type: 'confidence', text: '自分の強みを言語化すること' },
+        { label: 'c', type: 'verify', text: '顧客に聞くこと' },
+        { label: 'd', type: 'defense', text: 'お金をかけること' } ] },
+      { text: '新しい事業を思いついたとき、最初に気にするのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '面白いかどうか' },
+        { label: 'b', type: 'confidence', text: '自分に合っているか' },
+        { label: 'c', type: 'verify', text: '売れそうか' },
+        { label: 'd', type: 'defense', text: '続けられるか' } ] },
+      { text: '起業において、あなたが最も避けたい失敗はどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '何も決められないこと' },
+        { label: 'b', type: 'confidence', text: '向いていないことを選ぶこと' },
+        { label: 'c', type: 'verify', text: '誰にも必要とされないこと' },
+        { label: 'd', type: 'defense', text: '大きく傷つくこと' } ] },
+      { text: 'ひとつの事業に集中できない理由として近いのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '可能性が多く見える' },
+        { label: 'b', type: 'confidence', text: '自信が持てない' },
+        { label: 'c', type: 'verify', text: '反応が読めない' },
+        { label: 'd', type: 'defense', text: '完璧にしたい' } ] },
+      { text: '起業の相談をするとき、どんな相手に話しやすいですか。', choices: [
+        { label: 'a', type: 'wander', text: 'まとめてくれる人' },
+        { label: 'b', type: 'confidence', text: '背中を押してくれる人' },
+        { label: 'c', type: 'verify', text: '現実を見てくれる人' },
+        { label: 'd', type: 'defense', text: '厳しく指摘してくれる人' } ] },
+      { text: 'うまくいく起業家像を見たとき、自分はどう感じやすいですか。', choices: [
+        { label: 'a', type: 'wander', text: '比較して焦る' },
+        { label: 'b', type: 'confidence', text: '自分には無理だと思う' },
+        { label: 'c', type: 'verify', text: '参考にしたいと思う' },
+        { label: 'd', type: 'defense', text: '早く追いつきたいと思う' } ] },
+      { text: '起業の初期段階で、最も苦手なのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '方向を決めること' },
+        { label: 'b', type: 'confidence', text: '自分の価値を信じること' },
+        { label: 'c', type: 'verify', text: '顧客に試すこと' },
+        { label: 'd', type: 'defense', text: '不確実なまま進めること' } ] },
+      { text: '商品やサービスを形にするとき、何が一番引っかかりますか。', choices: [
+        { label: 'a', type: 'wander', text: '何を捨てるか決められない' },
+        { label: 'b', type: 'confidence', text: '自分の実力不足を感じる' },
+        { label: 'c', type: 'verify', text: '相手に響く自信がない' },
+        { label: 'd', type: 'defense', text: '失敗した時の痛みが怖い' } ] },
+      { text: '起業の情報を集めるとき、どんな状態になりやすいですか。', choices: [
+        { label: 'a', type: 'wander', text: '情報が増えるほど迷う' },
+        { label: 'b', type: 'confidence', text: '自分向きかを考えすぎる' },
+        { label: 'c', type: 'verify', text: '反応事例ばかり探す' },
+        { label: 'd', type: 'defense', text: '比較しすぎて動けない' } ] },
+      { text: 'もし最初の案がうまくいかなかったら、どうなりやすいですか。', choices: [
+        { label: 'a', type: 'wander', text: 'ほかの案に移る' },
+        { label: 'b', type: 'confidence', text: '自分を責める' },
+        { label: 'c', type: 'verify', text: '需要の見方を変える' },
+        { label: 'd', type: 'defense', text: 'しばらく止まる' } ] },
+      { text: '起業のために行動を起こすとき、最も必要なのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '判断基準' },
+        { label: 'b', type: 'confidence', text: '自信' },
+        { label: 'c', type: 'verify', text: '検証の型' },
+        { label: 'd', type: 'defense', text: '安心できる後ろ盾' } ] },
+      { text: '独立することへの本音に近いのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '自由になりたい' },
+        { label: 'b', type: 'confidence', text: '認められたい' },
+        { label: 'c', type: 'verify', text: '試したい' },
+        { label: 'd', type: 'defense', text: '失敗したくない' } ] },
+      { text: '起業の成功を考えたとき、最も強く反応するのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '期待感' },
+        { label: 'b', type: 'confidence', text: 'プレッシャー' },
+        { label: 'c', type: 'verify', text: 'まだ現実味がない感じ' },
+        { label: 'd', type: 'defense', text: '誰かに見られる不安' } ] },
+      { text: 'あなたが本当に欲しいのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '自分で決められること' },
+        { label: 'b', type: 'confidence', text: '自分の強みが活きること' },
+        { label: 'c', type: 'verify', text: '顧客に必要とされること' },
+        { label: 'd', type: 'defense', text: '安定した収益' } ] },
+      { text: '起業に関する決断をする前、頭の中で多いのはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '可能性の広がり' },
+        { label: 'b', type: 'confidence', text: '向き不向きの確認' },
+        { label: 'c', type: 'verify', text: '失敗の想像' },
+        { label: 'd', type: 'defense', text: '周囲との比較' } ] },
+      { text: '事業を始めるうえで、無意識に守っているものはどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '自由' },
+        { label: 'b', type: 'confidence', text: '自尊心' },
+        { label: 'c', type: 'verify', text: '安全' },
+        { label: 'd', type: 'defense', text: '評価' } ] },
+      { text: '起業に向いていると感じる瞬間はどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '新しい発想が出たとき' },
+        { label: 'b', type: 'confidence', text: '自分の経験が役立つとき' },
+        { label: 'c', type: 'verify', text: '相手の反応が取れたとき' },
+        { label: 'd', type: 'defense', text: '形にして前進できたとき' } ] },
+      { text: 'あなたにとって起業の一番の壁はどれですか。', choices: [
+        { label: 'a', type: 'wander', text: '迷い' },
+        { label: 'b', type: 'confidence', text: '自信不足' },
+        { label: 'c', type: 'verify', text: '検証不足' },
+        { label: 'd', type: 'defense', text: '恐れ' } ] }
     ]
   },
   manager: {
     label: '既存経営者向け診断',
-    typeOrder: ['direction', 'organization', 'sales', 'finance'],
+    typeOrder: ['direction_lost', 'org_exhaustion', 'sales_stagnation', 'finance_tension'],
     types: {
-      direction: {
-        name: '方向設計型',
-        tagline: '経営の方向性・戦略の再構築が必要な段階',
-        suited: [
-          '事業全体を俯瞰して整合性を見直すこと',
-          '中長期のビジョンを描き直すこと',
-          '経営の軸を明確に言語化すること'
-        ],
-        cautions: [
-          '方向性の検討に時間をかけすぎて実行が遅れやすい',
-          '現場との認識のズレに気づきにくい',
-          '大きな方針転換への抵抗を過小評価しやすい'
-        ],
-        next_action: '事業の「本当に大事にしたい軸」を1文で書き出し、幹部と共有する'
+      direction_lost: {
+        name: '方向喪失型',
+        tagline: '経営の軸が定まらず、判断のたびに迷いが生じる',
+        root_psychology: '「間違った方向に進んで会社を危険にさらすこと」への恐れが強く、明確な方針を打ち出すことを避けることで、責任の所在を曖昧にしている。',
+        behavior_pattern: '経営会議で方針が二転三転し、複数の施策を同時に走らせては優先順位をつけられない。決定を先延ばしにしがち。',
+        business_impact: '現場が方向性を見失い、意思決定のスピードが落ちる。競合の変化に対応しきれず、機会損失が積み重なる。',
+        improvement: {
+          cognitive: '「完璧な方針」を探すのをやめ、「今の情報で最善の仮説」を方針とする発想に変える。',
+          behavioral: '経営方針を1枚の紙に言語化し、定期的(月1回など)に見直すサイクルを作る。',
+          environmental: '方針決定を一人で抱えず、信頼できる相談相手(顧問・幹部)と定期的に壁打ちする場を持つ。'
+        },
+        first_step: '今の事業の「大事にしたい軸」を1文で書き出し、今週中に幹部に共有する。'
       },
-      organization: {
-        name: '組織整備型',
-        tagline: '人材・組織面の課題が経営のボトルネックになっている段階',
-        suited: [
-          '役割分担や権限委譲の仕組みづくり',
-          'チームの信頼関係の構築',
-          '現場が動きやすい体制づくり'
-        ],
-        cautions: [
-          '任せることへの不安から抱え込みすぎる',
-          '制度づくりに時間をかけすぎて実行が伴わないことがある',
-          '個人の頑張りに依存した組織運営になりやすい'
-        ],
-        next_action: '今自分が抱えている業務を1つ選び、誰かに任せる計画を立てる'
+      org_exhaustion: {
+        name: '組織疲弊型',
+        tagline: '人に任せることへの不安から、自分で抱え込みすぎている',
+        root_psychology: '「任せた結果、うまくいかないこと」への恐れがあり、自分がコントロールし続けることで安心を得ようとしている。',
+        behavior_pattern: '重要な業務を手放せず、細部まで自分でチェックしてしまう。結果として自分もメンバーも疲弊し、育成が進まない。',
+        business_impact: '経営者のキャパシティが事業成長の上限になり、組織が拡大できない。メンバーの主体性も育たず、離職につながりやすい。',
+        improvement: {
+          cognitive: '「任せる=手放す」ではなく「任せる=育てる」と捉え直す。',
+          behavioral: '完璧な結果を求めず、6〜7割の出来で任せて経験を積ませるルールを作る。',
+          environmental: '権限委譲の範囲と基準を明文化し、任せる前提の仕組みを整える。'
+        },
+        first_step: '今自分が抱えている業務を1つ選び、任せる相手と期限を今週中に決める。'
       },
-      sales: {
-        name: '営業推進型',
-        tagline: '売上・集客の強化が経営の優先課題になっている段階',
-        suited: [
-          '顧客への提案力・伝える力を磨くこと',
-          '販売チャネルや営業の仕組みの強化',
-          '現場の行動量を増やす仕組みづくり'
-        ],
-        cautions: [
-          '目先の売上に追われ、商品・サービスの磨き込みが後回しになりやすい',
-          '価格や価値の伝え方の見直しを怠りやすい',
-          '属人的な営業に依存しがち'
-        ],
-        next_action: '主力商品・サービスの「選ばれる理由」を1文で言語化し、営業資料に反映する'
+      sales_stagnation: {
+        name: '営業停滞型',
+        tagline: '拒絶や値下げ交渉への恐れから、提案が弱くなりやすい',
+        root_psychology: '「断られること」への恐れが強く、価格や提案を弱めることで拒絶される可能性そのものを減らそうとしている。',
+        behavior_pattern: '価格交渉に応じすぎる、強気の提案を避ける、フォローアップを後回しにする。結果として価格競争に巻き込まれやすい。',
+        business_impact: '適正な利益を確保できず、薄利多売の構造から抜け出せない。営業活動が消耗戦になり、疲弊が続く。',
+        improvement: {
+          cognitive: '「断られること」は人格の否定ではなく、条件が合わなかっただけだと認識を切り替える。',
+          behavioral: '価格や提案内容を交渉で下げる前に、必ず一度は理由を添えて主張する練習をする。',
+          environmental: '価格交渉になりやすい場面のトークスクリプトを事前に用意しておく。'
+        },
+        first_step: '主力商品・サービスの「選ばれる理由」を1文で言語化し、次の商談で実際に伝えてみる。'
       },
-      finance: {
-        name: '財務管理型',
-        tagline: '資金繰り・利益体質の改善が経営の優先課題になっている段階',
-        suited: [
-          '数字に基づいた経営判断',
-          'コスト構造や価格設定の見直し',
-          '資金計画・資金繰りの管理'
-        ],
-        cautions: [
-          '数字の管理に集中しすぎて、成長投資に慎重になりすぎることがある',
-          '短期的な資金繰りに気を取られ、中長期の投資判断が遅れやすい',
-          '現場のモチベーションより数字を優先しすぎることがある'
-        ],
-        next_action: '直近3ヶ月の資金繰り表を作り、資金がショートするタイミングがないか確認する'
+      finance_tension: {
+        name: '財務緊張型',
+        tagline: 'お金の不安に支配され、意思決定が縮こまりやすい',
+        root_psychology: '資金が尽きることへの根源的な不安があり、数字を直視することを避けることで、その不安と向き合わずに済ませようとしている。',
+        behavior_pattern: '資金繰りの確認を先延ばしにする一方で、漠然とした不安だけが続く。投資判断が過度に慎重になり、必要な先行投資も避けてしまう。',
+        business_impact: '数字を把握できていないことで判断が後手に回り、資金ショートのリスクに直前まで気づけない。成長機会にも投資できず、事業が縮小均衡に陥りやすい。',
+        improvement: {
+          cognitive: '「お金の不安」を漠然としたまま放置せず、具体的な数字として可視化することで初めて対処できると認識を変える。',
+          behavioral: '月次ではなく週次で資金繰りの数字を確認する習慣に変える。',
+          environmental: '固定費の高い構造を先に見直し、資金繰りの余白を作る仕組みを整える。'
+        },
+        first_step: '直近3ヶ月分の資金繰り表を作り、資金がショートするタイミングがないか今週中に確認する。'
       }
     },
     questions: [
-      { text: '今の経営で最も気になる課題はどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '方向性が曖昧' },
-        { label: 'b', type: 'organization', text: '人材や組織に課題' },
-        { label: 'c', type: 'sales', text: '売上が伸びにくい' },
-        { label: 'd', type: 'finance', text: '資金繰りが厳しい' } ] },
-      { text: '経営判断で、最も重視しているのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '全体の整合性' },
-        { label: 'b', type: 'organization', text: '現場の動きやすさ' },
-        { label: 'c', type: 'sales', text: '顧客反応' },
-        { label: 'd', type: 'finance', text: '数字の安定性' } ] },
-      { text: '現在の経営状態として近いのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '先を見直したい' },
-        { label: 'b', type: 'organization', text: '組織を整えたい' },
-        { label: 'c', type: 'sales', text: '営業を強化したい' },
-        { label: 'd', type: 'finance', text: '利益体質にしたい' } ] },
-      { text: '社内で今いちばん不足していると感じるのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '戦略' },
-        { label: 'b', type: 'organization', text: '人材' },
-        { label: 'c', type: 'sales', text: '集客' },
-        { label: 'd', type: 'finance', text: '資金' } ] },
-      { text: '商品・サービスの見直しで重要なのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '事業の軸' },
-        { label: 'b', type: 'organization', text: '現場運用' },
-        { label: 'c', type: 'sales', text: '顧客ニーズ' },
-        { label: 'd', type: 'finance', text: '利益率' } ] },
-      { text: '経営の意思決定で、最も悩むのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: 'どこに向かうか' },
-        { label: 'b', type: 'organization', text: '誰に任せるか' },
-        { label: 'c', type: 'sales', text: '何を売るか' },
-        { label: 'd', type: 'finance', text: 'どう回すか' } ] },
-      { text: '経営改善として最初にやりたいのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '現状整理' },
-        { label: 'b', type: 'organization', text: '組織整備' },
-        { label: 'c', type: 'sales', text: '営業強化' },
-        { label: 'd', type: 'finance', text: '資金計画の見直し' } ] },
-      { text: '売上が伸び悩んだとき、最初に考えるのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '戦略の再確認' },
-        { label: 'b', type: 'organization', text: '人員配置の見直し' },
-        { label: 'c', type: 'sales', text: '提案方法の改善' },
-        { label: 'd', type: 'finance', text: '価格やコストの調整' } ] },
-      { text: '組織について、今最も近い課題はどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '役割が曖昧' },
-        { label: 'b', type: 'organization', text: '任せ方が難しい' },
-        { label: 'c', type: 'sales', text: '行動量が足りない' },
-        { label: 'd', type: 'finance', text: '収益とのバランスが悪い' } ] },
-      { text: '顧客への提供価値として、今の状態はどれですか。', choices: [
-        { label: 'a', type: 'direction', text: 'まだ整理不足' },
-        { label: 'b', type: 'organization', text: '現場品質は高い' },
-        { label: 'c', type: 'sales', text: '伝え方に課題がある' },
-        { label: 'd', type: 'finance', text: '価格に見合う説明が必要' } ] },
-      { text: '資金面で最も気になるのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '今後の見通し' },
-        { label: 'b', type: 'organization', text: '投資配分' },
-        { label: 'c', type: 'sales', text: '回収スピード' },
-        { label: 'd', type: 'finance', text: '利益確保' } ] },
-      { text: '価格設定について、最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: 'まだ根拠が弱い' },
-        { label: 'b', type: 'organization', text: '原価に寄せている' },
-        { label: 'c', type: 'sales', text: '顧客価値で考えたい' },
-        { label: 'd', type: 'finance', text: '値上げの判断が難しい' } ] },
-      { text: '経営会議で多いテーマはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '方向修正' },
-        { label: 'b', type: 'organization', text: '人の問題' },
-        { label: 'c', type: 'sales', text: '営業施策' },
-        { label: 'd', type: 'finance', text: 'キャッシュ管理' } ] },
-      { text: '事業の成長を妨げているものはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '戦略不足' },
-        { label: 'b', type: 'organization', text: '組織疲れ' },
-        { label: 'c', type: 'sales', text: '集客不足' },
-        { label: 'd', type: 'finance', text: '資金制約' } ] },
-      { text: '改善施策を選ぶとき、優先するのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '全体最適' },
-        { label: 'b', type: 'organization', text: '現場実行性' },
-        { label: 'c', type: 'sales', text: '反応の良さ' },
-        { label: 'd', type: 'finance', text: '収益改善効果' } ] },
-      { text: '今の経営者としての自分に近いのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '方向を考える人' },
-        { label: 'b', type: 'organization', text: '人を支える人' },
-        { label: 'c', type: 'sales', text: '売上を作る人' },
-        { label: 'd', type: 'finance', text: '数字を守る人' } ] },
-      { text: '外部支援が必要だと感じるのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '経営整理' },
-        { label: 'b', type: 'organization', text: '組織運営' },
-        { label: 'c', type: 'sales', text: '販売強化' },
-        { label: 'd', type: 'finance', text: '財務改善' } ] },
-      { text: '経営診断で知りたいことはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '何がボトルネックか' },
-        { label: 'b', type: 'organization', text: 'どこを任せるべきか' },
-        { label: 'c', type: 'sales', text: 'どんな売り方が合うか' },
-        { label: 'd', type: 'finance', text: 'どの数字を優先すべきか' } ] },
-      { text: '現在の改善テーマとして最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '事業再設計' },
-        { label: 'b', type: 'organization', text: '組織再編' },
-        { label: 'c', type: 'sales', text: '売上拡大' },
-        { label: 'd', type: 'finance', text: '資金安定' } ] },
+      { text: '今の経営で最も強く感じていることはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '先が見えにくい' },
+        { label: 'b', type: 'org_exhaustion', text: '人が思うように動かない' },
+        { label: 'c', type: 'sales_stagnation', text: '売上が安定しない' },
+        { label: 'd', type: 'finance_tension', text: 'お金の不安が消えない' } ] },
+      { text: '経営判断をするとき、いちばん迷うのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: 'どこに向かうか' },
+        { label: 'b', type: 'org_exhaustion', text: '誰に任せるか' },
+        { label: 'c', type: 'sales_stagnation', text: '何を優先するか' },
+        { label: 'd', type: 'finance_tension', text: 'どこまでリスクを取るか' } ] },
+      { text: '改善策を考えても動きにくい理由として近いのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '方針が曖昧' },
+        { label: 'b', type: 'org_exhaustion', text: '現場が追いつかない' },
+        { label: 'c', type: 'sales_stagnation', text: '効果が読めない' },
+        { label: 'd', type: 'finance_tension', text: '失敗したくない' } ] },
+      { text: '経営課題を見たとき、最初に反応するのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '全体像をつかみたい' },
+        { label: 'b', type: 'org_exhaustion', text: '人の問題だと感じる' },
+        { label: 'c', type: 'sales_stagnation', text: 'もっと売上を作らないとと思う' },
+        { label: 'd', type: 'finance_tension', text: '資金面が気になる' } ] },
+      { text: '事業が伸び悩むとき、内心で起きやすいのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '何を変えるべきか分からない' },
+        { label: 'b', type: 'org_exhaustion', text: '人に任せる不安が出る' },
+        { label: 'c', type: 'sales_stagnation', text: '顧客への伝え方を疑う' },
+        { label: 'd', type: 'finance_tension', text: '数字を見るのが怖くなる' } ] },
+      { text: '社員やメンバーに対して、無意識に強く出やすいのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '指示が曖昧になる' },
+        { label: 'b', type: 'org_exhaustion', text: '細かく見すぎる' },
+        { label: 'c', type: 'sales_stagnation', text: '期待しすぎる' },
+        { label: 'd', type: 'finance_tension', text: '我慢しすぎる' } ] },
+      { text: '価格や利益の話になると、どの感覚が近いですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: 'まだ整理しきれていない' },
+        { label: 'b', type: 'org_exhaustion', text: '上げると反発が怖い' },
+        { label: 'c', type: 'sales_stagnation', text: '価値を伝えきれていない' },
+        { label: 'd', type: 'finance_tension', text: '先に売上を増やしたい' } ] },
+      { text: '売上が落ちたとき、最も先に起きる反応はどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '原因が見えない焦り' },
+        { label: 'b', type: 'org_exhaustion', text: '現場への不信感' },
+        { label: 'c', type: 'sales_stagnation', text: '集客への不安' },
+        { label: 'd', type: 'finance_tension', text: 'キャッシュへの恐れ' } ] },
+      { text: '経営をしていて、最も消耗しやすいのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '判断が多すぎること' },
+        { label: 'b', type: 'org_exhaustion', text: '人の問題に巻き込まれること' },
+        { label: 'c', type: 'sales_stagnation', text: '反応が薄いこと' },
+        { label: 'd', type: 'finance_tension', text: '数字のプレッシャー' } ] },
+      { text: '任せることに対して、どこで引っかかりますか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '誰に任せるか決めにくい' },
+        { label: 'b', type: 'org_exhaustion', text: '任せても基準が揃わない' },
+        { label: 'c', type: 'sales_stagnation', text: '任せた結果が怖い' },
+        { label: 'd', type: 'finance_tension', text: 'そもそも任せる余裕がない' } ] },
+      { text: '事業の方向転換を考えるとき、強く出る感情はどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '迷い' },
+        { label: 'b', type: 'org_exhaustion', text: '不安' },
+        { label: 'c', type: 'sales_stagnation', text: '期待' },
+        { label: 'd', type: 'finance_tension', text: '抵抗' } ] },
+      { text: '自社の課題を整理するとき、つい後回しにしやすいのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '戦略' },
+        { label: 'b', type: 'org_exhaustion', text: '組織' },
+        { label: 'c', type: 'sales_stagnation', text: '営業' },
+        { label: 'd', type: 'finance_tension', text: '財務' } ] },
+      { text: '経営上の相談をするとき、心の中で強いのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '整理してほしい' },
+        { label: 'b', type: 'org_exhaustion', text: '共感してほしい' },
+        { label: 'c', type: 'sales_stagnation', text: '実行を促してほしい' },
+        { label: 'd', type: 'finance_tension', text: '数字で見てほしい' } ] },
+      { text: '会社がうまく回らないとき、自分の中で起きやすいのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '何が正解か分からない感覚' },
+        { label: 'b', type: 'org_exhaustion', text: '自分だけが抱えている感覚' },
+        { label: 'c', type: 'sales_stagnation', text: '顧客に届いていない感覚' },
+        { label: 'd', type: 'finance_tension', text: '資金に追われている感覚' } ] },
+      { text: '経営者として、最も守ろうとしているものはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '事業の軸' },
+        { label: 'b', type: 'org_exhaustion', text: '人間関係' },
+        { label: 'c', type: 'sales_stagnation', text: '評判' },
+        { label: 'd', type: 'finance_tension', text: '安定' } ] },
+      { text: 'うまくいっている経営者を見ると、自分はどう反応しやすいですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '自分との差を感じる' },
+        { label: 'b', type: 'org_exhaustion', text: 'やり方を学びたくなる' },
+        { label: 'c', type: 'sales_stagnation', text: '焦ってしまう' },
+        { label: 'd', type: 'finance_tension', text: 'その人は特別だと思う' } ] },
+      { text: '改善の一歩を踏み出せない時、根っこに近いのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '方向が定まっていない' },
+        { label: 'b', type: 'org_exhaustion', text: '人に任せ切れない' },
+        { label: 'c', type: 'sales_stagnation', text: '顧客の反応が読めない' },
+        { label: 'd', type: 'finance_tension', text: 'お金が減るのが怖い' } ] },
+      { text: '経営で本当に困っていることを一言で言うなら、どれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '迷い' },
+        { label: 'b', type: 'org_exhaustion', text: '分断' },
+        { label: 'c', type: 'sales_stagnation', text: '停滞' },
+        { label: 'd', type: 'finance_tension', text: '不安' } ] },
+      { text: '今の経営で、もっとも改善したいのはどれですか。', choices: [
+        { label: 'a', type: 'direction_lost', text: '事業の設計' },
+        { label: 'b', type: 'org_exhaustion', text: '組織の動き' },
+        { label: 'c', type: 'sales_stagnation', text: '売り方' },
+        { label: 'd', type: 'finance_tension', text: '数字の安定' } ] },
       { text: '経営者タイプとして、最も近いのはどれですか。', choices: [
-        { label: 'a', type: 'direction', text: '方向設計型' },
-        { label: 'b', type: 'organization', text: '組織整備型' },
-        { label: 'c', type: 'sales', text: '営業推進型' },
-        { label: 'd', type: 'finance', text: '財務管理型' } ] }
+        { label: 'a', type: 'direction_lost', text: '方向喪失型' },
+        { label: 'b', type: 'org_exhaustion', text: '組織疲弊型' },
+        { label: 'c', type: 'sales_stagnation', text: '営業停滞型' },
+        { label: 'd', type: 'finance_tension', text: '財務緊張型' } ] }
     ]
   }
 };
@@ -760,6 +744,8 @@ function renderThankYou() {
 
 /* ============================================================
    メール本文(HTML)の生成
+   主タイプ/補助タイプ/根本心理/典型的な行動パターン/
+   事業への悪影響/本質的な改善策(心理・行動・環境)/最初の実行ステップ
    ============================================================ */
 function buildResultHtml(result) {
   const track = TRACKS[result.trackKey];
@@ -780,15 +766,21 @@ function buildResultHtml(result) {
       </div>`;
   }).join('');
 
-  const suitedHtml = primaryType.suited.map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('');
-  const cautionsHtml = primaryType.cautions.map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('');
+  function section(title, bodyHtml) {
+    return `
+  <div style="margin-top:18px;">
+    <div style="font-size:13px;font-weight:bold;color:#4834d4;margin-bottom:8px;">■ ${title}</div>
+    <div style="font-size:13px;line-height:1.8;">${bodyHtml}</div>
+  </div>`;
+  }
 
   return `
 <div style="font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;max-width:560px;margin:0 auto;color:#201a3a;">
   <div style="background:linear-gradient(135deg,#4834d4,#6c5ce7);color:#ffffff;padding:26px 22px;border-radius:14px;text-align:center;">
     <div style="font-size:12px;opacity:0.85;letter-spacing:0.05em;">${track.label}・診断結果</div>
-    <div style="font-size:24px;font-weight:bold;margin-top:10px;line-height:1.4;">あなたのタイプは<br>「${primaryType.name}」です</div>
-    <div style="font-size:12.5px;margin-top:10px;opacity:0.92;">2位：${secondaryType.name}</div>
+    <div style="font-size:24px;font-weight:bold;margin-top:10px;line-height:1.4;">主タイプ：${primaryType.name}</div>
+    <div style="font-size:13px;margin-top:6px;opacity:0.9;">${primaryType.tagline}</div>
+    <div style="font-size:12.5px;margin-top:12px;opacity:0.92;">補助タイプ：${secondaryType.name}</div>
   </div>
 
   <div style="margin-top:22px;">
@@ -796,19 +788,29 @@ function buildResultHtml(result) {
     ${barsHtml}
   </div>
 
-  <div style="margin-top:20px;">
-    <div style="font-size:13px;font-weight:bold;color:#4834d4;margin-bottom:8px;">■ 向いていること</div>
-    <ul style="font-size:13px;line-height:1.7;padding-left:20px;margin:0;">${suitedHtml}</ul>
-  </div>
+  ${section('根本心理', primaryType.root_psychology)}
+  ${section('典型的な行動パターン', primaryType.behavior_pattern)}
+  ${section('事業への悪影響', primaryType.business_impact)}
 
   <div style="margin-top:18px;">
-    <div style="font-size:13px;font-weight:bold;color:#4834d4;margin-bottom:8px;">■ 注意点</div>
-    <ul style="font-size:13px;line-height:1.7;padding-left:20px;margin:0;">${cautionsHtml}</ul>
+    <div style="font-size:13px;font-weight:bold;color:#4834d4;margin-bottom:10px;">■ 本質的な改善策</div>
+    <div style="background:#f8f7fd;border:1px solid #e2dcf9;border-radius:10px;padding:14px 16px;margin-bottom:8px;">
+      <div style="font-size:11.5px;font-weight:bold;color:#6c5ce7;margin-bottom:4px;">1. 心理面の修正</div>
+      <div style="font-size:13px;line-height:1.7;">${primaryType.improvement.cognitive}</div>
+    </div>
+    <div style="background:#f8f7fd;border:1px solid #e2dcf9;border-radius:10px;padding:14px 16px;margin-bottom:8px;">
+      <div style="font-size:11.5px;font-weight:bold;color:#6c5ce7;margin-bottom:4px;">2. 行動の習慣化</div>
+      <div style="font-size:13px;line-height:1.7;">${primaryType.improvement.behavioral}</div>
+    </div>
+    <div style="background:#f8f7fd;border:1px solid #e2dcf9;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:11.5px;font-weight:bold;color:#6c5ce7;margin-bottom:4px;">3. 環境や仕組みの変更</div>
+      <div style="font-size:13px;line-height:1.7;">${primaryType.improvement.environmental}</div>
+    </div>
   </div>
 
   <div style="margin-top:18px;background:#efebfd;padding:16px;border-radius:10px;">
-    <div style="font-size:12px;font-weight:bold;color:#4834d4;margin-bottom:6px;">■ 今すぐやること</div>
-    <div style="font-size:13.5px;line-height:1.7;">${primaryType.next_action}</div>
+    <div style="font-size:12px;font-weight:bold;color:#4834d4;margin-bottom:6px;">■ 最初の実行ステップ</div>
+    <div style="font-size:13.5px;line-height:1.7;">${primaryType.first_step}</div>
   </div>
 </div>`.trim();
 }
