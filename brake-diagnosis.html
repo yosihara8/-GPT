@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>内面ブレーキ診断</title>
+<title>パーソナル診断</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -68,6 +68,26 @@
     padding: 5px 12px; border-radius: 999px;
   }
   .main { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+  .track-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .track-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .track-card .icon-wrap {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--accent-light); color: var(--accent-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; margin-bottom: 12px;
+  }
+  .track-card h3 { font-size: 15.5px; font-weight: 700; margin-bottom: 6px; }
+  .track-card p { font-size: 12.5px; color: var(--text-sub); line-height: 1.7; }
+  .track-card .go { font-size: 12px; color: var(--accent-dark); font-weight: 600; margin-top: 12px; display: flex; align-items: center; gap: 6px; }
   .progress-wrap { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0 16px; }
   .progress-bar { height: 6px; background: var(--accent-light); border-radius: 999px; overflow: hidden; }
   .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), #a29bfe); transition: width 0.25s; }
@@ -85,7 +105,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     width: 26px; height: 26px; border-radius: 50%;
     background: var(--accent-light); color: var(--accent-dark);
-    font-size: 12px; font-weight: 700; margin-right: 8px;
+    font-size: 12px; font-weight: 700; margin-right: 8px; flex-shrink: 0;
   }
   .qtext { font-size: 14.5px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; }
   .choice {
@@ -114,11 +134,9 @@
   .diagnose-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(108,92,231,0.38); }
   .diagnose-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
   .warn-msg { font-size: 12px; color: #e17055; text-align: center; margin-top: 10px; display: none; }
+  #quizArea { display: none; }
   #result { display: none; margin-top: 8px; }
-  .done-card {
-    text-align: center;
-    padding: 8px 4px 4px;
-  }
+  .done-card { text-align: center; padding: 8px 4px 4px; }
   .done-card i { font-size: 34px; color: var(--accent); margin-bottom: 14px; }
   .done-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
   .done-card p { font-size: 13px; color: var(--text-sub); line-height: 1.8; }
@@ -167,245 +185,68 @@
   }
   @media (max-width: 640px) {
     .hero h1 { font-size: 20px; }
-    .qcard { padding: 18px 16px; }
+    .qcard, .track-card { padding: 18px 16px; }
   }
 </style>
 </head>
 <body>
 
 <div class="hero">
-  <div class="hero-icon"><i class="fa-solid fa-brain"></i></div>
-  <h1>内面ブレーキ診断</h1>
-  <p>性格の分類ではありません。あなたの行動・判断・感情を止めている<br>「根本原因」を8つの質問から構造的に特定します。</p>
+  <div class="hero-icon"><i class="fa-solid fa-chart-simple"></i></div>
+  <h1>パーソナル診断</h1>
+  <p>あなたの起業スタイル・経営スタイルを20の質問から診断します。<br>結果はこの画面には表示されず、メールでお届けします。</p>
   <div class="hero-badges">
-    <span class="badge"><i class="fa-solid fa-layer-group"></i> 4層構造分析</span>
-    <span class="badge"><i class="fa-solid fa-list-check"></i> 全8問</span>
-    <span class="badge"><i class="fa-solid fa-shapes"></i> 5タイプ判定</span>
+    <span class="badge"><i class="fa-solid fa-rocket"></i> 新規起業・経営改善対応</span>
+    <span class="badge"><i class="fa-solid fa-list-check"></i> 全20問</span>
+    <span class="badge"><i class="fa-solid fa-shapes"></i> 4タイプ判定</span>
   </div>
 </div>
 
 <div class="main">
 
-  <div class="progress-wrap">
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-text" id="progressText">0 / 8 問回答済み</div>
+  <div id="trackSelect">
+    <div class="track-card" onclick="selectTrack('startup')">
+      <div class="icon-wrap"><i class="fa-solid fa-seedling"></i></div>
+      <h3>新規起業を検討・準備中の方</h3>
+      <p>これから起業する方向けの診断です。あなたに合った起業スタイルと、最初の一歩を明らかにします。</p>
+      <div class="go">診断をはじめる <i class="fa-solid fa-arrow-right"></i></div>
+    </div>
+    <div class="track-card" onclick="selectTrack('manager')">
+      <div class="icon-wrap"><i class="fa-solid fa-briefcase"></i></div>
+      <h3>すでに経営されている方</h3>
+      <p>既存の経営者向けの診断です。今の経営課題がどこにあるかと、改善の優先順位を明らかにします。</p>
+      <div class="go">診断をはじめる <i class="fa-solid fa-arrow-right"></i></div>
+    </div>
   </div>
 
-  <div id="questions"></div>
+  <div id="quizArea">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0 / 20 問回答済み</div>
+    </div>
 
-  <button class="diagnose-btn" id="diagnoseBtn" onclick="runDiagnosis()">
-    <i class="fa-solid fa-wand-magic-sparkles"></i>
-    診断してメールで結果を受け取る
-  </button>
-  <div class="warn-msg" id="warnMsg">すべての設問に回答してから診断してください。</div>
-  <p style="font-size:11.5px;color:var(--text-muted);text-align:center;margin-top:8px;">※ 診断結果はこの画面には表示されません。ご入力いただいたメールアドレス宛にお送りします。</p>
+    <div id="questions"></div>
+
+    <button class="diagnose-btn" id="diagnoseBtn" onclick="runDiagnosis()">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      診断してメールで結果を受け取る
+    </button>
+    <div class="warn-msg" id="warnMsg">すべての設問に回答してから診断してください。</div>
+    <p style="font-size:11.5px;color:var(--text-muted);text-align:center;margin-top:8px;">※ 診断結果はこの画面には表示されません。ご入力いただいたメールアドレス宛にお送りします。</p>
+  </div>
 
   <div id="result"></div>
 
 </div>
 
 <footer>
-  <i class="fa-solid fa-brain" style="color:var(--accent);margin-right:6px;"></i>
-  内面ブレーキ診断 &nbsp;|&nbsp; 行動・判断・感情のブレーキを構造的に特定するパーソナル診断ツール
+  <i class="fa-solid fa-chart-simple" style="color:var(--accent);margin-right:6px;"></i>
+  パーソナル診断 &nbsp;|&nbsp; 起業スタイル・経営スタイルを構造的に診断するパーソナル診断ツール
 </footer>
 
 <script>
 /* ============================================================
-   診断データモデル
-   ============================================================ */
-const TYPE_ORDER = ['type_a', 'type_b', 'type_c', 'type_d', 'type_e'];
-
-const TYPES = {
-  type_a: {
-    id: 1,
-    type_name: '考えすぎ停滞型',
-    tagline: '考えるほど動けなくなる',
-    root_cause: '「間違った判断で傷つきたくない」という価値観と、失敗の可能性を過大評価する認知のクセが結びつき、思考が結論に到達する前に次のリスクを探し始めてしまいます。行動のクセとしては先延ばしという形で表れ、表面的には「決められない」「動けない」という悩みにつながっています。',
-    strengths: '物事を深く分析し、構造やリスクを見抜く力に長けています。判断材料が十分に揃った状態では、精度の高い計画と高い実行力を発揮できます。',
-    pitfalls: '情報を集めすぎて判断基準がかえって曖昧になる、締切直前まで意思決定を先延ばしにする、周囲から「慎重すぎる」「決められない人」と見られやすい、といった場面でつまずきが生じます。',
-    improvement_tips: '「考える時間」に上限を設けるタイムボックス思考を取り入れましょう。100%の情報が揃わなくても70%の確信で動く基準を持ち、思考ではなく行動によってしか得られない情報があると理解することが、ブレーキ解除の第一歩です。',
-    action_plan_7days: [
-      '今抱えている「決められないこと」を1つ紙に書き出す',
-      'その意思決定に「考える期限」を設定する(例:今日の18時まで)',
-      '期限までに出た結論で、実際に小さく行動してみる',
-      '行動した結果を振り返り、「考えていたリスクは実際に起きたか」を確認する',
-      '別の意思決定に対して、同様に24時間以内の期限を設ける',
-      '「70%の確信で動く」を意識して、判断に着手する',
-      '1週間の行動記録を振り返り、思考時間と行動時間の比率を確認する'
-    ]
-  },
-  type_b: {
-    id: 2,
-    type_name: '他人基準迷子型',
-    tagline: '自分の判断軸が弱く、周囲に引っ張られる',
-    root_cause: '自分の価値観よりも「他人にどう思われるか」を優先する認知のクセが根底にあり、過去に自分の意見を否定された経験などが、判断基準を他者に委ねる行動パターンを強化しています。表面的には「自信がない」「流されやすい」という悩みとして現れます。',
-    strengths: '高い協調性と、相手の立場を理解する共感力を持っています。周囲を巻き込みながら物事を進める調整力は、チームで動く場面で大きな強みになります。',
-    pitfalls: '会議や相談の場で最後に意見を求められると答えに詰まる、決めた後も他人の反応で判断を覆す、頑張っているのに「主体性がない」と評価されやすい、といった場面でつまずきが生じます。',
-    improvement_tips: '何かを決める前に「自分はどうしたいか」を一度言語化してから他人の意見を聞く習慣をつけましょう。他人の意見は「参考情報」であり「答え」ではないと捉え直し、小さな決定から自分で決めて自分で責任を持つ経験を積むことが重要です。',
-    action_plan_7days: [
-      '今日1つ、他人に確認せず自分だけで決める(ランチのメニュー等の小さなことでよい)',
-      '誰かに相談する前に、自分の意見を一文で書き出してから話す',
-      '会議や雑談で、最初に自分の意見を発言してみる',
-      '他人の意見を聞いた後、「それでも自分はどう思うか」を書き足す',
-      '一度決めたことを、他人の反応があっても変えずに1日過ごす',
-      '自分が大事にしている価値観を3つ書き出す',
-      '1週間で「自分で決めたこと」を振り返り、リストアップする'
-    ]
-  },
-  type_c: {
-    id: 3,
-    type_name: '完璧待ち型',
-    tagline: '準備が整わないと始められない',
-    root_cause: '「準備不足の状態で始めることは失敗である」という価値観の歪みと、完成度を実際より低く見積もる認知のクセにより、着手の条件が際限なく引き上げられてしまいます。行動のクセとしては先延ばしや過剰な準備という形で現れ、「続かない」「始められない」という悩みにつながっています。',
-    strengths: '高い品質基準と、細部まで配慮する丁寧さ、最後までやり抜く責任感を持っています。仕上がりの完成度において高い評価を得やすい特性です。',
-    pitfalls: '着手が遅れて機会を逃す、8割の完成度で十分な場面でも手を止められない、周囲から「仕事が遅い」「慎重すぎる」と見られやすい、といった場面でつまずきが生じます。',
-    improvement_tips: '「60点で提出し、フィードバックを受けて磨き上げる」という段階的な完成モデルに切り替えましょう。完璧の基準を自分ではなく相手や目的に合わせて設定し直し、小さく始めて後から修正する前提で着手することが有効です。',
-    action_plan_7days: [
-      '今取り組んでいるタスクの「合格ライン(60点)」を具体的に定義する',
-      '60点の状態のまま一度アウトプットを人に見せる、または提出する',
-      'もらったフィードバックをもとに修正する',
-      '準備に使っている時間を計測し、実行に使っている時間と比較する',
-      '「今日はここまで」と時間で区切ってタスクを終える練習をする',
-      '未完成のまま人に見せることへの抵抗感を1〜10で記録する',
-      '1週間の中で「完璧でなくても進んだこと」を振り返る'
-    ]
-  },
-  type_d: {
-    id: 4,
-    type_name: '感情圧縮型',
-    tagline: '本音やストレスをため込みやすい',
-    root_cause: '感情を表に出すことを「弱さ」や「迷惑」と捉える価値観と、自分の感情よりも周囲の空気を優先する認知のクセが組み合わさり、ストレスや本音を内側に溜め込む行動パターンが定着しています。表面的には「なぜかやる気が続かない」「突然限界がくる」という悩みとして現れます。',
-    strengths: '高い自己統制力を持ち、周囲を不安にさせない安定感があります。感情に流されず物事を進める冷静さは、混乱した場面ほど価値を発揮します。',
-    pitfalls: '我慢の限界まで不調のサインに気づけない、周囲は「大丈夫そう」と誤解し負荷が集中する、ストレスが溜まると急に体調やパフォーマンスに影響が出る、といった場面でつまずきが生じます。',
-    improvement_tips: '感情を「良い/悪い」で判断せず、まず事実として認識する習慣をつけましょう。信頼できる相手に本音を話す機会を意図的に作り、我慢するのではなく「小出しに表現する」ことを練習することがブレーキ解除につながります。',
-    action_plan_7days: [
-      '今日感じたストレスや本音を、誰にも見せない前提でノートに書き出す',
-      '書き出した感情に「疲れ」「不安」など名前をつける',
-      '信頼できる1人に、感じていることを短くてよいので話してみる',
-      '「無理」「疲れた」と言いたくなった場面を記録する',
-      '実際に1つ、小さな本音(例:「今日は早く帰りたい」)を口に出す',
-      '自分のストレスサインが体のどこに出るかを観察する',
-      '1週間の感情の記録を読み返し、我慢していた場面を振り返る'
-    ]
-  },
-  type_e: {
-    id: 5,
-    type_name: '使命未接続型',
-    tagline: '何のためにやるかが曖昧で続かない',
-    root_cause: '目の前のタスクと自分の価値観や強みとの間に接続が生まれておらず、「何のためにやっているか」が実感として持てない状態です。深層の土台にある強みや価値観が未活用のまま行動だけが求められることで、表面的には「続かない」「情熱が持てない」という悩みが生じています。',
-    strengths: '新しい可能性を見出す発想力と、意味を求める探究心を持っています。本質的に納得したことに対しては、非常に強い行動力を発揮できます。',
-    pitfalls: '目的が見えない作業では著しく集中力が落ちる、「やらされている」感覚から惰性で続けてしまう、途中で目的を見失いプロジェクトから離脱しやすい、といった場面でつまずきが生じます。',
-    improvement_tips: '目の前のタスクを「自分のどんな価値観・強みと結びつくか」に翻訳し直しましょう。長期的な目的を小さな行動目標に分解し、定期的に「これは誰のため・何のためか」を言語化する時間を持つことが継続の鍵になります。',
-    action_plan_7days: [
-      '今取り組んでいるタスクが「誰の役に立つか」を1つ書き出す',
-      '自分が大切にしたい価値観を3つ挙げる',
-      'タスクと前日挙げた価値観との接点を1つ見つける',
-      '「なぜこれをやるのか」を1分で人に説明できるように言語化する',
-      '過去にやりがいを感じた瞬間を1つ思い出し、共通点を探る',
-      '今日の作業の最初に、その日の目的を一文で書いてから始める',
-      '1週間の目的意識の変化を振り返り、来週の目的を1つ設定する'
-    ]
-  }
-};
-
-const QUESTIONS = [
-  {
-    id: 'Q1', weight: 1, priority_weight: false,
-    text: '何かを始める前、最も近い状態はどれですか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: 'あらゆる可能性やリスクを頭の中でシミュレーションし続けてしまう' },
-      { label: 'b', type: 'type_b', text: '周りの人がどう思うか、他の人ならどうするかが気になる' },
-      { label: 'c', type: 'type_c', text: '完璧な準備やタイミングが整うまで着手できない' },
-      { label: 'd', type: 'type_d', text: '不安や気乗りしない気持ちを抑え込み、とりあえず平静を装う' },
-      { label: 'e', type: 'type_e', text: 'そもそも「なぜやるのか」がはっきりせず、やる気が湧かない' }
-    ]
-  },
-  {
-    id: 'Q2', weight: 1, priority_weight: false,
-    text: '失敗しそうなとき、最初に起きる反応は何ですか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: '「なぜ失敗しそうなのか」の原因分析を延々と続けてしまう' },
-      { label: 'b', type: 'type_b', text: '周囲や上司にどう見られるかが真っ先に頭をよぎる' },
-      { label: 'c', type: 'type_c', text: '「今の状態では足りない」と感じ、やり直したくなる' },
-      { label: 'd', type: 'type_d', text: '表面上は平気なふりをして、内側で焦りやストレスを溜め込む' },
-      { label: 'e', type: 'type_e', text: '「そもそもこれをやる意味があるのか」と投げやりな気持ちになる' }
-    ]
-  },
-  {
-    id: 'Q3', weight: 1, priority_weight: false,
-    text: '人の意見を聞いたあと、自分の判断はどうなりますか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: '意見を材料にさらに考え込み、結論が出るまで時間がかかる' },
-      { label: 'b', type: 'type_b', text: '相手の意見に合わせて、自分の考えを変えてしまう' },
-      { label: 'c', type: 'type_c', text: '「もっと良いやり方があるのでは」と基準を上げてしまう' },
-      { label: 'd', type: 'type_d', text: '納得していなくても、表向きは同意してその場をやり過ごす' },
-      { label: 'e', type: 'type_e', text: '意見はもらうが、自分の軸がないのでどれも同じに見えてしまう' }
-    ]
-  },
-  {
-    id: 'Q4', weight: 1, priority_weight: false,
-    text: '期限が近いとき、あなたが最も取りやすい行動はどれですか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: '計画やタスクの整理ばかりに時間を使い、着手が遅れる' },
-      { label: 'b', type: 'type_b', text: '周囲の進み具合を見てから、自分のペースを決める' },
-      { label: 'c', type: 'type_c', text: 'クオリティにこだわり、細部を何度も直し続ける' },
-      { label: 'd', type: 'type_d', text: 'プレッシャーを一人で抱え込み、誰にも相談しない' },
-      { label: 'e', type: 'type_e', text: 'なんとなく作業はするが、集中力が続かず手が止まる' }
-    ]
-  },
-  {
-    id: 'Q5', weight: 1, priority_weight: false,
-    text: '強くストレスを感じたとき、表に出る反応は何ですか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: '頭の中で同じ考えがぐるぐる回り続け、他のことが手につかない' },
-      { label: 'b', type: 'type_b', text: '誰かに同意や安心をもらいたくなり、意見を求めて回る' },
-      { label: 'c', type: 'type_c', text: '「もっとちゃんとやらなければ」と自分を追い込む' },
-      { label: 'd', type: 'type_d', text: '表情や態度には出さず、一人で抱え込んで我慢する' },
-      { label: 'e', type: 'type_e', text: '何のために頑張っているのか分からなくなり、無気力になる' }
-    ]
-  },
-  {
-    id: 'Q6', weight: 1, priority_weight: false,
-    text: 'やる気が出ないとき、頭の中で何が起きていますか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: 'やるべき理由とやらなくてよい理由を天秤にかけ続けている' },
-      { label: 'b', type: 'type_b', text: '「他の人はどうしているんだろう」と比較してしまう' },
-      { label: 'c', type: 'type_c', text: '「中途半端にやるならやらない方がまし」と考えてしまう' },
-      { label: 'd', type: 'type_d', text: '本当はやりたくない気持ちを、無理やり抑え込んでいる' },
-      { label: 'e', type: 'type_e', text: 'この作業が何につながっているのか実感が持てない' }
-    ]
-  },
-  {
-    id: 'Q7', weight: 2, priority_weight: true,
-    text: '自分の強みを言葉にするとき、どれが一番近いですか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: '物事を深く分析し、リスクや構造を見抜く力' },
-      { label: 'b', type: 'type_b', text: '相手に合わせて場を調整し、周囲と協調する力' },
-      { label: 'c', type: 'type_c', text: '高い基準で仕上げまでやり切る質へのこだわり' },
-      { label: 'd', type: 'type_d', text: '感情を乱さず、安定して物事に向き合う力' },
-      { label: 'e', type: 'type_e', text: '発想力や新しい視点で物事を捉え直す力' }
-    ]
-  },
-  {
-    id: 'Q8', weight: 2, priority_weight: true,
-    text: '今の自分に一番足りないと思うものは何ですか。',
-    choices: [
-      { label: 'a', type: 'type_a', text: '考えすぎずに決めて動く「決断のスピード」' },
-      { label: 'b', type: 'type_b', text: '他人ではなく自分を基準にする「判断の軸」' },
-      { label: 'c', type: 'type_c', text: '完璧でなくても踏み出す「見切り発車の勇気」' },
-      { label: 'd', type: 'type_d', text: '我慢せず本音を出せる「感情の開放」' },
-      { label: 'e', type: 'type_e', text: '何のためにやるかという「目的とのつながり」' }
-    ]
-  }
-];
-
-/* ============================================================
-   Googleフォーム連携設定
-   ★ Googleフォーム作成後、下記3点を必ず差し替えてください。
-     詳しい手順は GOOGLE_FORM_SETUP.md を参照。
-   1. actionUrl … フォームの「事前入力したリンク」から取得したURLの
-      末尾を /viewform → /formResponse に変更したもの
-   2. fields    … 各設問の name="entry.XXXXXXXXX" を対応させる
+   Googleフォーム連携設定(内面ブレーキ診断から引き継ぎ・変更不要)
    ============================================================ */
 const GOOGLE_FORM_CONFIG = {
   actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfE5EXyfE-fs1VhkmGQJJKjmSN690wgleC_xnLv8SIh9s19iw/formResponse',
@@ -417,104 +258,442 @@ const GOOGLE_FORM_CONFIG = {
     phone: 'entry.822234092',        // 電話番号
     consent: 'entry.751439414',      // 利用目的への同意
     resultType: 'entry.1239582968',  // 診断結果タイプ
-    resultBody: 'entry.1170312161'   // 診断結果本文
+    resultBody: 'entry.1170312161'   // 診断結果本文(HTML)
   }
 };
 
 /* ============================================================
-   レンダリング
+   診断データモデル(2トラック x 20問 x 4タイプ)
    ============================================================ */
+const TRACKS = {
+  startup: {
+    label: '新規起業向け診断',
+    typeOrder: ['explore', 'strength', 'verify', 'growth'],
+    types: {
+      explore: {
+        name: '探索型',
+        tagline: 'まだ何をするかを探している段階',
+        suited: [
+          '幅広く情報収集し、可能性を広げること',
+          '多様な人との対話からアイデアの種を見つけること',
+          '焦らず自分に合う方向性をじっくり見極めること'
+        ],
+        cautions: [
+          '情報収集ばかりで行動に移せないことがある',
+          '決断を先延ばしにして機会を逃しやすい',
+          '完璧な答えを探して疲弊しやすい'
+        ],
+        next_action: '気になる分野を3つに絞り、それぞれ経験者に1人ずつ話を聞いてみる'
+      },
+      strength: {
+        name: '強み活用型',
+        tagline: '自分の得意分野・専門性を軸に事業を組み立てるタイプ',
+        suited: [
+          '自分の経験や専門知識を活かした事業設計',
+          '専門家としての信頼性の構築',
+          '既に持つスキルを収益化する仕組みづくり'
+        ],
+        cautions: [
+          '得意なことに固執し、市場ニーズとのズレに気づきにくい',
+          '自己流にこだわりすぎて視野が狭くなりやすい',
+          '得意分野の外への挑戦を避けがち'
+        ],
+        next_action: '自分の強みを3つ書き出し、それぞれがどんな顧客の悩みを解決できるか言語化する'
+      },
+      verify: {
+        name: '実証型',
+        tagline: '小さく試して検証しながら進めるタイプ',
+        suited: [
+          '最小限の労力で仮説を検証すること',
+          '顧客の反応を見ながら素早く軌道修正すること',
+          '失敗を恐れず小さく試すこと'
+        ],
+        cautions: [
+          '目先の検証に集中しすぎて全体戦略を見失いやすい',
+          '小さな成功に満足し、スケールへの発想が弱くなりやすい',
+          '検証の繰り返しで軸がぶれることがある'
+        ],
+        next_action: '今のアイデアを1週間以内に作れる最小限の形にして、5人に見せてみる'
+      },
+      growth: {
+        name: '成長志向型',
+        tagline: '早い段階から拡大・成長を見据えるタイプ',
+        suited: [
+          '大きなビジョンを描き、周囲を巻き込むこと',
+          '仕組み化やチーム作りを見据えた設計',
+          '積極的な投資判断や意思決定'
+        ],
+        cautions: [
+          '基盤が整う前に拡大を急ぎ、無理が生じやすい',
+          '現場の細部への配慮が後回しになりやすい',
+          'スピード重視で検証不足のまま進めてしまうことがある'
+        ],
+        next_action: '事業計画の中で「今すぐ必要な拡大」と「後回しにできる拡大」を1つずつ分ける'
+      }
+    },
+    questions: [
+      { text: '起業を考えるとき、最も強く感じるのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: 'まだ何をするか決めきれていない' },
+        { label: 'b', type: 'strength', text: '自分の得意分野で始めたい' },
+        { label: 'c', type: 'verify', text: 'すぐに売れる形を作りたい' },
+        { label: 'd', type: 'growth', text: '将来的に大きく伸ばしたい' } ] },
+      { text: '事業アイデアを考えるとき、重視するのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '自分の興味や情熱' },
+        { label: 'b', type: 'strength', text: '市場のニーズ' },
+        { label: 'c', type: 'verify', text: '早く検証できること' },
+        { label: 'd', type: 'growth', text: '成長の可能性' } ] },
+      { text: '起業準備で、いちばん不安なのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '何から始めるべきか分からない' },
+        { label: 'b', type: 'strength', text: '自分に向いているか分からない' },
+        { label: 'c', type: 'verify', text: 'お客様に本当に必要とされるか分からない' },
+        { label: 'd', type: 'growth', text: '資金や体制が足りるか不安' } ] },
+      { text: '事業の進め方として、最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: 'まず学びながら考えたい' },
+        { label: 'b', type: 'strength', text: '自分の強みを整理して決めたい' },
+        { label: 'c', type: 'verify', text: '小さく試してから決めたい' },
+        { label: 'd', type: 'growth', text: '計画を立てて一気に進めたい' } ] },
+      { text: '起業で実現したいことはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '自分らしく働くこと' },
+        { label: 'b', type: 'strength', text: '専門性を活かすこと' },
+        { label: 'c', type: 'verify', text: '早く収益化すること' },
+        { label: 'd', type: 'growth', text: '組織や事業を大きくすること' } ] },
+      { text: '事業アイデアの評価で、最も重要なのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: 'やりたい気持ち' },
+        { label: 'b', type: 'strength', text: 'できることとの一致' },
+        { label: 'c', type: 'verify', text: '顧客の反応' },
+        { label: 'd', type: 'growth', text: '収益性' } ] },
+      { text: '商品やサービスを作るとき、最も重視するのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '自分のこだわり' },
+        { label: 'b', type: 'strength', text: '顧客課題の解決' },
+        { label: 'c', type: 'verify', text: 'テストしやすさ' },
+        { label: 'd', type: 'growth', text: '拡張しやすさ' } ] },
+      { text: 'もし最初の反応が弱かった場合、どうしますか。', choices: [
+        { label: 'a', type: 'explore', text: 'もう少し学び直す' },
+        { label: 'b', type: 'strength', text: '表現や内容を調整する' },
+        { label: 'c', type: 'verify', text: 'すぐに改善して再検証する' },
+        { label: 'd', type: 'growth', text: '別案に切り替える' } ] },
+      { text: '起業スタイルとして近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: 'じっくり準備型' },
+        { label: 'b', type: 'strength', text: '得意分野活用型' },
+        { label: 'c', type: 'verify', text: '実験重視型' },
+        { label: 'd', type: 'growth', text: '拡大型' } ] },
+      { text: '独立後の働き方で理想に近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '一人で自由に進めたい' },
+        { label: 'b', type: 'strength', text: '専門家として信頼されたい' },
+        { label: 'c', type: 'verify', text: '小さく回して効率化したい' },
+        { label: 'd', type: 'growth', text: 'チームで成長させたい' } ] },
+      { text: '新しい事業を選ぶ基準として最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '自分が続けられるか' },
+        { label: 'b', type: 'strength', text: '自分の強みと合うか' },
+        { label: 'c', type: 'verify', text: '早く売れそうか' },
+        { label: 'd', type: 'growth', text: '大きく伸びるか' } ] },
+      { text: '事業の最初の形を作るとき、どれが近いですか。', choices: [
+        { label: 'a', type: 'explore', text: 'まず頭の中で整理したい' },
+        { label: 'b', type: 'strength', text: '自分の経験から作りたい' },
+        { label: 'c', type: 'verify', text: '最小限で試したい' },
+        { label: 'd', type: 'growth', text: '先に理想形を決めたい' } ] },
+      { text: '起業に必要な力として、今いちばん近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '発想力' },
+        { label: 'b', type: 'strength', text: '専門性' },
+        { label: 'c', type: 'verify', text: '検証力' },
+        { label: 'd', type: 'growth', text: '経営力' } ] },
+      { text: '相談相手として、最も必要なのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '考えを整理してくれる人' },
+        { label: 'b', type: 'strength', text: '強みを見つけてくれる人' },
+        { label: 'c', type: 'verify', text: '実行を後押しする人' },
+        { label: 'd', type: 'growth', text: '戦略を一緒に考える人' } ] },
+      { text: '事業の優先順位として、今最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '自分の方向性を決めること' },
+        { label: 'b', type: 'strength', text: '提供価値を明確にすること' },
+        { label: 'c', type: 'verify', text: '顧客検証を進めること' },
+        { label: 'd', type: 'growth', text: '売上化の仕組みを作ること' } ] },
+      { text: '起業の進め方として、最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: 'まず全体像を知りたい' },
+        { label: 'b', type: 'strength', text: 'まず自分に合う形を知りたい' },
+        { label: 'c', type: 'verify', text: 'まず試作品を出したい' },
+        { label: 'd', type: 'growth', text: 'まず市場性を見極めたい' } ] },
+      { text: 'あなたにとっての理想の起業はどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '自分のペースでできる' },
+        { label: 'b', type: 'strength', text: '自分の強みが活きる' },
+        { label: 'c', type: 'verify', text: '少ない資金で始められる' },
+        { label: 'd', type: 'growth', text: '拡大余地が大きい' } ] },
+      { text: '起業判断で、最後に背中を押す要素はどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '納得感' },
+        { label: 'b', type: 'strength', text: '適性' },
+        { label: 'c', type: 'verify', text: '顧客反応' },
+        { label: 'd', type: 'growth', text: '将来性' } ] },
+      { text: '事業を始める時点で、最も必要だと思うものはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '判断軸' },
+        { label: 'b', type: 'strength', text: '自分の強みの棚卸し' },
+        { label: 'c', type: 'verify', text: '小さな検証設計' },
+        { label: 'd', type: 'growth', text: '収益計画' } ] },
+      { text: '起業のタイプとして、最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'explore', text: '探索型' },
+        { label: 'b', type: 'strength', text: '強み活用型' },
+        { label: 'c', type: 'verify', text: '実証型' },
+        { label: 'd', type: 'growth', text: '成長志向型' } ] }
+    ]
+  },
+  manager: {
+    label: '既存経営者向け診断',
+    typeOrder: ['direction', 'organization', 'sales', 'finance'],
+    types: {
+      direction: {
+        name: '方向設計型',
+        tagline: '経営の方向性・戦略の再構築が必要な段階',
+        suited: [
+          '事業全体を俯瞰して整合性を見直すこと',
+          '中長期のビジョンを描き直すこと',
+          '経営の軸を明確に言語化すること'
+        ],
+        cautions: [
+          '方向性の検討に時間をかけすぎて実行が遅れやすい',
+          '現場との認識のズレに気づきにくい',
+          '大きな方針転換への抵抗を過小評価しやすい'
+        ],
+        next_action: '事業の「本当に大事にしたい軸」を1文で書き出し、幹部と共有する'
+      },
+      organization: {
+        name: '組織整備型',
+        tagline: '人材・組織面の課題が経営のボトルネックになっている段階',
+        suited: [
+          '役割分担や権限委譲の仕組みづくり',
+          'チームの信頼関係の構築',
+          '現場が動きやすい体制づくり'
+        ],
+        cautions: [
+          '任せることへの不安から抱え込みすぎる',
+          '制度づくりに時間をかけすぎて実行が伴わないことがある',
+          '個人の頑張りに依存した組織運営になりやすい'
+        ],
+        next_action: '今自分が抱えている業務を1つ選び、誰かに任せる計画を立てる'
+      },
+      sales: {
+        name: '営業推進型',
+        tagline: '売上・集客の強化が経営の優先課題になっている段階',
+        suited: [
+          '顧客への提案力・伝える力を磨くこと',
+          '販売チャネルや営業の仕組みの強化',
+          '現場の行動量を増やす仕組みづくり'
+        ],
+        cautions: [
+          '目先の売上に追われ、商品・サービスの磨き込みが後回しになりやすい',
+          '価格や価値の伝え方の見直しを怠りやすい',
+          '属人的な営業に依存しがち'
+        ],
+        next_action: '主力商品・サービスの「選ばれる理由」を1文で言語化し、営業資料に反映する'
+      },
+      finance: {
+        name: '財務管理型',
+        tagline: '資金繰り・利益体質の改善が経営の優先課題になっている段階',
+        suited: [
+          '数字に基づいた経営判断',
+          'コスト構造や価格設定の見直し',
+          '資金計画・資金繰りの管理'
+        ],
+        cautions: [
+          '数字の管理に集中しすぎて、成長投資に慎重になりすぎることがある',
+          '短期的な資金繰りに気を取られ、中長期の投資判断が遅れやすい',
+          '現場のモチベーションより数字を優先しすぎることがある'
+        ],
+        next_action: '直近3ヶ月の資金繰り表を作り、資金がショートするタイミングがないか確認する'
+      }
+    },
+    questions: [
+      { text: '今の経営で最も気になる課題はどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '方向性が曖昧' },
+        { label: 'b', type: 'organization', text: '人材や組織に課題' },
+        { label: 'c', type: 'sales', text: '売上が伸びにくい' },
+        { label: 'd', type: 'finance', text: '資金繰りが厳しい' } ] },
+      { text: '経営判断で、最も重視しているのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '全体の整合性' },
+        { label: 'b', type: 'organization', text: '現場の動きやすさ' },
+        { label: 'c', type: 'sales', text: '顧客反応' },
+        { label: 'd', type: 'finance', text: '数字の安定性' } ] },
+      { text: '現在の経営状態として近いのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '先を見直したい' },
+        { label: 'b', type: 'organization', text: '組織を整えたい' },
+        { label: 'c', type: 'sales', text: '営業を強化したい' },
+        { label: 'd', type: 'finance', text: '利益体質にしたい' } ] },
+      { text: '社内で今いちばん不足していると感じるのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '戦略' },
+        { label: 'b', type: 'organization', text: '人材' },
+        { label: 'c', type: 'sales', text: '集客' },
+        { label: 'd', type: 'finance', text: '資金' } ] },
+      { text: '商品・サービスの見直しで重要なのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '事業の軸' },
+        { label: 'b', type: 'organization', text: '現場運用' },
+        { label: 'c', type: 'sales', text: '顧客ニーズ' },
+        { label: 'd', type: 'finance', text: '利益率' } ] },
+      { text: '経営の意思決定で、最も悩むのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: 'どこに向かうか' },
+        { label: 'b', type: 'organization', text: '誰に任せるか' },
+        { label: 'c', type: 'sales', text: '何を売るか' },
+        { label: 'd', type: 'finance', text: 'どう回すか' } ] },
+      { text: '経営改善として最初にやりたいのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '現状整理' },
+        { label: 'b', type: 'organization', text: '組織整備' },
+        { label: 'c', type: 'sales', text: '営業強化' },
+        { label: 'd', type: 'finance', text: '資金計画の見直し' } ] },
+      { text: '売上が伸び悩んだとき、最初に考えるのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '戦略の再確認' },
+        { label: 'b', type: 'organization', text: '人員配置の見直し' },
+        { label: 'c', type: 'sales', text: '提案方法の改善' },
+        { label: 'd', type: 'finance', text: '価格やコストの調整' } ] },
+      { text: '組織について、今最も近い課題はどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '役割が曖昧' },
+        { label: 'b', type: 'organization', text: '任せ方が難しい' },
+        { label: 'c', type: 'sales', text: '行動量が足りない' },
+        { label: 'd', type: 'finance', text: '収益とのバランスが悪い' } ] },
+      { text: '顧客への提供価値として、今の状態はどれですか。', choices: [
+        { label: 'a', type: 'direction', text: 'まだ整理不足' },
+        { label: 'b', type: 'organization', text: '現場品質は高い' },
+        { label: 'c', type: 'sales', text: '伝え方に課題がある' },
+        { label: 'd', type: 'finance', text: '価格に見合う説明が必要' } ] },
+      { text: '資金面で最も気になるのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '今後の見通し' },
+        { label: 'b', type: 'organization', text: '投資配分' },
+        { label: 'c', type: 'sales', text: '回収スピード' },
+        { label: 'd', type: 'finance', text: '利益確保' } ] },
+      { text: '価格設定について、最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: 'まだ根拠が弱い' },
+        { label: 'b', type: 'organization', text: '原価に寄せている' },
+        { label: 'c', type: 'sales', text: '顧客価値で考えたい' },
+        { label: 'd', type: 'finance', text: '値上げの判断が難しい' } ] },
+      { text: '経営会議で多いテーマはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '方向修正' },
+        { label: 'b', type: 'organization', text: '人の問題' },
+        { label: 'c', type: 'sales', text: '営業施策' },
+        { label: 'd', type: 'finance', text: 'キャッシュ管理' } ] },
+      { text: '事業の成長を妨げているものはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '戦略不足' },
+        { label: 'b', type: 'organization', text: '組織疲れ' },
+        { label: 'c', type: 'sales', text: '集客不足' },
+        { label: 'd', type: 'finance', text: '資金制約' } ] },
+      { text: '改善施策を選ぶとき、優先するのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '全体最適' },
+        { label: 'b', type: 'organization', text: '現場実行性' },
+        { label: 'c', type: 'sales', text: '反応の良さ' },
+        { label: 'd', type: 'finance', text: '収益改善効果' } ] },
+      { text: '今の経営者としての自分に近いのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '方向を考える人' },
+        { label: 'b', type: 'organization', text: '人を支える人' },
+        { label: 'c', type: 'sales', text: '売上を作る人' },
+        { label: 'd', type: 'finance', text: '数字を守る人' } ] },
+      { text: '外部支援が必要だと感じるのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '経営整理' },
+        { label: 'b', type: 'organization', text: '組織運営' },
+        { label: 'c', type: 'sales', text: '販売強化' },
+        { label: 'd', type: 'finance', text: '財務改善' } ] },
+      { text: '経営診断で知りたいことはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '何がボトルネックか' },
+        { label: 'b', type: 'organization', text: 'どこを任せるべきか' },
+        { label: 'c', type: 'sales', text: 'どんな売り方が合うか' },
+        { label: 'd', type: 'finance', text: 'どの数字を優先すべきか' } ] },
+      { text: '現在の改善テーマとして最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '事業再設計' },
+        { label: 'b', type: 'organization', text: '組織再編' },
+        { label: 'c', type: 'sales', text: '売上拡大' },
+        { label: 'd', type: 'finance', text: '資金安定' } ] },
+      { text: '経営者タイプとして、最も近いのはどれですか。', choices: [
+        { label: 'a', type: 'direction', text: '方向設計型' },
+        { label: 'b', type: 'organization', text: '組織整備型' },
+        { label: 'c', type: 'sales', text: '営業推進型' },
+        { label: 'd', type: 'finance', text: '財務管理型' } ] }
+    ]
+  }
+};
+
+/* ============================================================
+   状態管理・レンダリング
+   ============================================================ */
+let currentTrackKey = null;
 const answers = {};
 let lastResult = null;
 
+function selectTrack(trackKey) {
+  currentTrackKey = trackKey;
+  document.getElementById('trackSelect').style.display = 'none';
+  document.getElementById('quizArea').style.display = 'block';
+  renderQuestions();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function renderQuestions() {
+  const track = TRACKS[currentTrackKey];
   const wrap = document.getElementById('questions');
-  wrap.innerHTML = QUESTIONS.map((q, qi) => `
-    <div class="qcard" id="qcard-${q.id}">
-      <div class="qtext"><span class="qnum">${qi + 1}</span>${escapeHtml(q.text)}${q.priority_weight ? ' <i class="fa-solid fa-star" style="color:#fdcb6e;font-size:11px;margin-left:6px;" title="優先判定設問"></i>' : ''}</div>
+  wrap.innerHTML = track.questions.map((q, qi) => `
+    <div class="qcard" id="qcard-${qi}">
+      <div class="qtext"><span class="qnum">${qi + 1}</span>${escapeHtml(q.text)}</div>
       ${q.choices.map(c => `
-        <label class="choice" id="choice-${q.id}-${c.label}">
-          <input type="radio" name="${q.id}" value="${c.label}" onchange="selectAnswer('${q.id}','${c.label}')" />
+        <label class="choice" id="choice-${qi}-${c.label}">
+          <input type="radio" name="q${qi}" value="${c.label}" onchange="selectAnswer(${qi},'${c.label}')" />
           <span>${escapeHtml(c.text)}</span>
         </label>
       `).join('')}
     </div>
   `).join('');
+  document.getElementById('progressText').textContent = `0 / ${track.questions.length} 問回答済み`;
 }
 
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
 }
 
-function selectAnswer(qId, label) {
-  answers[qId] = label;
-  document.querySelectorAll(`#qcard-${qId} .choice`).forEach(el => el.classList.remove('selected'));
-  document.getElementById(`choice-${qId}-${label}`).classList.add('selected');
-  document.getElementById(`qcard-${qId}`).classList.add('answered');
+function selectAnswer(qi, label) {
+  answers[qi] = label;
+  document.querySelectorAll(`#qcard-${qi} .choice`).forEach(el => el.classList.remove('selected'));
+  document.getElementById(`choice-${qi}-${label}`).classList.add('selected');
+  document.getElementById(`qcard-${qi}`).classList.add('answered');
   updateProgress();
 }
 
 function updateProgress() {
+  const track = TRACKS[currentTrackKey];
   const answered = Object.keys(answers).length;
-  document.getElementById('progressFill').style.width = (answered / QUESTIONS.length * 100) + '%';
-  document.getElementById('progressText').textContent = `${answered} / ${QUESTIONS.length} 問回答済み`;
+  document.getElementById('progressFill').style.width = (answered / track.questions.length * 100) + '%';
+  document.getElementById('progressText').textContent = `${answered} / ${track.questions.length} 問回答済み`;
 }
 
 /* ============================================================
    判定ロジック
    ============================================================ */
 function computeScores() {
-  const scores = { type_a: 0, type_b: 0, type_c: 0, type_d: 0, type_e: 0 };
-  QUESTIONS.forEach(q => {
-    const chosenLabel = answers[q.id];
+  const track = TRACKS[currentTrackKey];
+  const scores = {};
+  track.typeOrder.forEach(t => { scores[t] = 0; });
+  track.questions.forEach((q, qi) => {
+    const chosenLabel = answers[qi];
     const choice = q.choices.find(c => c.label === chosenLabel);
-    if (choice) scores[choice.type] += q.weight;
+    if (choice) scores[choice.type] += 1;
   });
   return scores;
 }
 
-function resolveType(scores) {
-  const maxScore = Math.max(...TYPE_ORDER.map(t => scores[t]));
-  const topTypes = TYPE_ORDER.filter(t => scores[t] === maxScore);
-
-  if (topTypes.length === 1) {
-    return { typeKey: topTypes[0], tieBroken: false };
-  }
-
-  // 優先判定アルゴリズム: Q7・Q8(重み付け設問)の回答タイプを優先して一意に決定する
-  const q7Choice = QUESTIONS.find(q => q.id === 'Q7').choices.find(c => c.label === answers.Q7);
-  const q8Choice = QUESTIONS.find(q => q.id === 'Q8').choices.find(c => c.label === answers.Q8);
-  const q7Type = q7Choice ? q7Choice.type : null;
-  const q8Type = q8Choice ? q8Choice.type : null;
-
-  if (q7Type && q8Type && q7Type === q8Type && topTypes.includes(q7Type)) {
-    return { typeKey: q7Type, tieBroken: true };
-  }
-  if (q7Type && topTypes.includes(q7Type)) {
-    return { typeKey: q7Type, tieBroken: true };
-  }
-  if (q8Type && topTypes.includes(q8Type)) {
-    return { typeKey: q8Type, tieBroken: true };
-  }
-  // フォールバック: タイプ定義順で決定論的に一意化する
-  const fallback = topTypes.slice().sort((a, b) => TYPE_ORDER.indexOf(a) - TYPE_ORDER.indexOf(b))[0];
-  return { typeKey: fallback, tieBroken: true };
+function resolvePrimarySecondary(scores) {
+  const track = TRACKS[currentTrackKey];
+  const sorted = track.typeOrder.slice().sort((a, b) => {
+    if (scores[b] !== scores[a]) return scores[b] - scores[a];
+    return track.typeOrder.indexOf(a) - track.typeOrder.indexOf(b);
+  });
+  return { primary: sorted[0], secondary: sorted[1] };
 }
 
 function runDiagnosis() {
-  if (Object.keys(answers).length < QUESTIONS.length) {
+  const track = TRACKS[currentTrackKey];
+  if (Object.keys(answers).length < track.questions.length) {
     document.getElementById('warnMsg').style.display = 'block';
-    const firstUnanswered = QUESTIONS.find(q => !answers[q.id]);
-    if (firstUnanswered) {
-      document.getElementById(`qcard-${firstUnanswered.id}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const firstUnanswered = track.questions.findIndex((q, qi) => !answers[qi]);
+    if (firstUnanswered !== -1) {
+      document.getElementById(`qcard-${firstUnanswered}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     return;
   }
   document.getElementById('warnMsg').style.display = 'none';
 
   const scores = computeScores();
-  const { typeKey, tieBroken } = resolveType(scores);
-  lastResult = { typeKey, scores, tieBroken };
+  const { primary, secondary } = resolvePrimarySecondary(scores);
+  lastResult = { trackKey: currentTrackKey, scores, primary, secondary };
   renderLeadForm();
 
   const resultEl = document.getElementById('result');
@@ -580,25 +759,68 @@ function renderThankYou() {
 }
 
 /* ============================================================
-   Googleフォームへの送信(企業情報リスト化 + メール配信トリガー)
+   メール本文(HTML)の生成
    ============================================================ */
-function buildResultBodyText(typeKey) {
-  const t = TYPES[typeKey];
-  return [
-    '■ 根本原因\n' + t.root_cause,
-    '■ 強みの使いどころ\n' + t.strengths,
-    '■ つまずきやすい場面\n' + t.pitfalls,
-    '■ 改善のコツ\n' + t.improvement_tips,
-    '■ 7日間アクションプラン\n' + t.action_plan_7days.map((d, i) => 'Day' + (i + 1) + ': ' + d).join('\n')
-  ].join('\n\n');
+function buildResultHtml(result) {
+  const track = TRACKS[result.trackKey];
+  const primaryType = track.types[result.primary];
+  const secondaryType = track.types[result.secondary];
+  const maxScore = track.questions.length;
+
+  const barsHtml = track.typeOrder.map(t => {
+    const t2 = track.types[t];
+    const score = result.scores[t];
+    const pct = Math.round((score / maxScore) * 100);
+    return `
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;color:#333;margin-bottom:4px;">${t2.name}（${score}/${maxScore}）</div>
+        <div style="background:#eee;border-radius:6px;height:10px;overflow:hidden;">
+          <div style="background:#6c5ce7;width:${pct}%;height:10px;border-radius:6px;"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const suitedHtml = primaryType.suited.map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('');
+  const cautionsHtml = primaryType.cautions.map(s => `<li style="margin-bottom:4px;">${s}</li>`).join('');
+
+  return `
+<div style="font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;max-width:560px;margin:0 auto;color:#201a3a;">
+  <div style="background:linear-gradient(135deg,#4834d4,#6c5ce7);color:#ffffff;padding:26px 22px;border-radius:14px;text-align:center;">
+    <div style="font-size:12px;opacity:0.85;letter-spacing:0.05em;">${track.label}・診断結果</div>
+    <div style="font-size:24px;font-weight:bold;margin-top:10px;line-height:1.4;">あなたのタイプは<br>「${primaryType.name}」です</div>
+    <div style="font-size:12.5px;margin-top:10px;opacity:0.92;">2位：${secondaryType.name}</div>
+  </div>
+
+  <div style="margin-top:22px;">
+    <div style="font-size:13px;font-weight:bold;color:#4834d4;margin-bottom:10px;">■ タイプ別スコア</div>
+    ${barsHtml}
+  </div>
+
+  <div style="margin-top:20px;">
+    <div style="font-size:13px;font-weight:bold;color:#4834d4;margin-bottom:8px;">■ 向いていること</div>
+    <ul style="font-size:13px;line-height:1.7;padding-left:20px;margin:0;">${suitedHtml}</ul>
+  </div>
+
+  <div style="margin-top:18px;">
+    <div style="font-size:13px;font-weight:bold;color:#4834d4;margin-bottom:8px;">■ 注意点</div>
+    <ul style="font-size:13px;line-height:1.7;padding-left:20px;margin:0;">${cautionsHtml}</ul>
+  </div>
+
+  <div style="margin-top:18px;background:#efebfd;padding:16px;border-radius:10px;">
+    <div style="font-size:12px;font-weight:bold;color:#4834d4;margin-bottom:6px;">■ 今すぐやること</div>
+    <div style="font-size:13.5px;line-height:1.7;">${primaryType.next_action}</div>
+  </div>
+</div>`.trim();
 }
 
+/* ============================================================
+   Googleフォームへの送信(企業情報リスト化 + メール配信トリガー)
+   ============================================================ */
 function isEmailValid(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function submitLead() {
-  const msgEl = document.getElementById('leadMsg');
   const company = document.getElementById('leadCompany').value.trim();
   const department = document.getElementById('leadDepartment').value.trim();
   const contactName = document.getElementById('leadContactName').value.trim();
@@ -623,7 +845,8 @@ function submitLead() {
     return;
   }
 
-  const t = TYPES[lastResult.typeKey];
+  const track = TRACKS[lastResult.trackKey];
+  const primaryType = track.types[lastResult.primary];
   const payload = {
     company: company,
     department: department,
@@ -631,8 +854,8 @@ function submitLead() {
     email: email,
     phone: phone,
     consent: '同意する',
-    resultType: t.type_name,
-    resultBody: buildResultBodyText(lastResult.typeKey)
+    resultType: primaryType.name,
+    resultBody: buildResultHtml(lastResult)
   };
 
   submitToGoogleForm(payload);
@@ -680,8 +903,6 @@ function submitToGoogleForm(data) {
   form.submit();
   setTimeout(function () { form.remove(); }, 1500);
 }
-
-renderQuestions();
 </script>
 </body>
 </html>
