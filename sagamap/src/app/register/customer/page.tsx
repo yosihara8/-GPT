@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
+import { useGoogleSignInAvailable } from "@/hooks/useGoogleSignIn";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CATEGORIES } from "@/lib/config";
 import { api } from "@/lib/fetcher";
@@ -23,6 +24,7 @@ function CustomerRegisterForm() {
   const [interests, setInterests] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const googleAvailable = useGoogleSignInAvailable();
 
   useEffect(() => {
     if (!ref) return;
@@ -86,9 +88,11 @@ function CustomerRegisterForm() {
         <button disabled={loading} className="btn-primary w-full">
           {loading ? "登録中…" : "無料で登録する"}
         </button>
-        <button type="button" onClick={() => signIn("google", { callbackUrl: "/dashboard/customer" })} className="btn-outline w-full">
-          Google で登録
-        </button>
+        {googleAvailable && (
+          <button type="button" onClick={() => signIn("google", { callbackUrl: "/dashboard/customer" })} className="btn-outline w-full">
+            Google で登録
+          </button>
+        )}
       </form>
       <p className="mt-4 text-center text-sm text-slate-600">
         登録済みの方は <Link className="text-saga-600 underline" href="/login">ログイン</Link>

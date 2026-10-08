@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
+import { useGoogleSignInAvailable } from "@/hooks/useGoogleSignIn";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
@@ -19,6 +20,7 @@ function LoginForm() {
   const [role, setRole] = useState<"customer" | "business">(params.get("role") === "business" ? "business" : "customer");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const googleAvailable = useGoogleSignInAvailable();
   const callbackUrl = safeCallback(params.get("callbackUrl"), role);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -64,7 +66,7 @@ function LoginForm() {
         <button disabled={loading} className="btn-primary w-full">
           {loading ? "ログイン中…" : "ログイン"}
         </button>
-        {role === "customer" && (
+        {role === "customer" && googleAvailable && (
           <button type="button" onClick={() => signIn("google", { callbackUrl })} className="btn-outline w-full">
             Google でログイン
           </button>
