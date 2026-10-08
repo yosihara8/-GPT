@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:init": "psql \"$DATABASE_URL\" -f db/schema.sql && psql \"$DATABASE_URL\" -f db/seed.sql",
+    "db:init": "SEED_DEMO_DATA=true node scripts/migrate.mjs",
     "vercel-build": "node scripts/migrate.mjs && next build",
     "db:migrate": "node scripts/migrate.mjs"
   },
