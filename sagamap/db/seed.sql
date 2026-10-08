@@ -1,4 +1,4 @@
--- SagaMap サンプルデータ（座標は佐賀県内の概略位置。ダミーです）
+-- SagaMap デモデータ（架空の店舗・アカウント。SEED_DEMO_DATA=true のときだけ投入）
 -- デモアカウントのパスワードはすべて "password123"
 
 INSERT INTO business_owners (id, name, email, password_hash, plan, monthly_price) VALUES
@@ -88,15 +88,3 @@ INSERT INTO usage_history (customer_id, business_id, viewed_at, coupon_used) VAL
   (7, 3, now() - interval '2 days', false),
   (8, 13, now() - interval '1 days', true),
   (8, 16, now() - interval '1 days', false);
-
-INSERT INTO tourist_spots (name, description, lat, lng) VALUES
-  ('佐賀城本丸歴史館', '佐賀藩の歴史を伝える復元御殿', 33.2470, 130.3005),
-  ('佐賀県庁 SAGA360', '展望ホールから佐賀平野を一望', 33.2494, 130.2988),
-  ('佐賀バルーンミュージアム', '熱気球の体験型ミュージアム', 33.2560, 130.3020),
-  ('徴古館', '鍋島家ゆかりの美術品', 33.2475, 130.2958),
-  ('佐賀駅', '観光の起点', 33.2643, 130.2970),
-  ('嬉野温泉 シーボルトの湯', '日本三大美肌の湯', 33.1010, 129.9970),
-  ('有田 トンバイ塀のある裏通り', '窯元の町並み', 33.1890, 129.8830),
-  ('唐津城', '舞鶴城とも呼ばれる海辺の城', 33.4560, 129.9760),
-  ('武雄温泉楼門', '辰野金吾設計の朱塗りの楼門', 33.1940, 130.0180),
-  ('祐徳稲荷神社', '日本三大稲荷の一つ', 33.0650, 130.0860);

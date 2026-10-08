@@ -18,14 +18,26 @@ try {
   await client.query(await readFile(new URL("../db/schema.sql", import.meta.url), "utf8"));
   console.log("[migrate] schema.sql を適用しました");
 
-  // DB が空ならデモデータを投入（本番運用では SEED_DEMO_DATA=false を設定）
-  if (process.env.SEED_DEMO_DATA !== "false") {
+  // 観光名所（実在の場所）は空なら投入
+  const spots = await client.query("SELECT count(*)::int AS n FROM tourist_spots");
+  if (spots.rows[0].n === 0) {
+    await client.query(await readFile(new URL("../db/spots.sql", import.meta.url), "utf8"));
+    console.log("[migrate] 観光名所（spots.sql）を投入しました");
+  }
+
+  if (process.env.SEED_DEMO_DATA === "true") {
+    // 動作確認用: DB が空なら架空の店舗・デモアカウントを投入
     const { rows } = await client.query("SELECT count(*)::int AS n FROM business_owners");
     if (rows[0].n === 0) {
       await client.query(await readFile(new URL("../db/seed.sql", import.meta.url), "utf8"));
       console.log("[migrate] デモデータ（seed.sql）を投入しました");
-    } else {
-      console.log("[migrate] データが既にあるため、デモデータの投入はスキップしました");
+    }
+  } else {
+    // 本番: デモデータ（@example.com のアカウントとその店舗・クーポン・広告）を削除
+    const owners = await client.query("DELETE FROM business_owners WHERE email LIKE '%@example.com'");
+    const customers = await client.query("DELETE FROM customers WHERE email LIKE '%@example.com'");
+    if (owners.rowCount || customers.rowCount) {
+      console.log(`[migrate] デモデータを削除しました（事業主 ${owners.rowCount} 件・顧客 ${customers.rowCount} 件）`);
     }
   }
 } finally {
