@@ -1,0 +1,41 @@
+{
+  "name": "sagamap",
+  "version": "0.1.0",
+  "private": true,
+  "description": "佐賀の個人事業主とお客さんを結ぶ、地理空間 AI 観光マップ",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:init": "psql \"$DATABASE_URL\" -f db/schema.sql && psql \"$DATABASE_URL\" -f db/seed.sql"
+  },
+  "dependencies": {
+    "@googlemaps/js-api-loader": "1.16.8",
+    "bcryptjs": "2.4.3",
+    "next": "14.2.35",
+    "next-auth": "4.24.11",
+    "pg": "8.13.1",
+    "qrcode.react": "4.1.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "resend": "4.0.1",
+    "stripe": "17.4.0",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/google.maps": "3.58.1",
+    "@types/node": "20.17.6",
+    "@types/pg": "8.11.10",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "autoprefixer": "10.4.20",
+    "eslint": "8.57.1",
+    "eslint-config-next": "14.2.35",
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.6.3"
+  }
+}
