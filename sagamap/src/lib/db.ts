@@ -1,10 +1,11 @@
 import { Pool, type QueryResultRow } from "pg";
+import { DATABASE_URL } from "./config";
 
 const globalForPg = globalThis as unknown as { pgPool?: Pool };
 
 export const pool =
   globalForPg.pgPool ??
-  new Pool({ connectionString: process.env.DATABASE_URL, max: 10 });
+  new Pool({ connectionString: DATABASE_URL, max: 10 });
 
 if (process.env.NODE_ENV !== "production") globalForPg.pgPool = pool;
 

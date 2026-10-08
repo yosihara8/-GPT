@@ -32,7 +32,18 @@ export function referralUrl(businessId: number) {
 }
 
 /**
+ * DB 接続文字列。Vercel の Neon 連携は接続時の接頭辞（STORAGE など）によって
+ * 変数名が変わるため、よく使われる名前を順に探す。
+ */
+export const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.STORAGE_URL ||
+  process.env.STORAGE_DATABASE_URL ||
+  process.env.STORAGE_POSTGRES_URL;
+
+/**
  * セッション署名用の秘密値。NEXTAUTH_SECRET が未設定なら、
  * 外部に公開されない DATABASE_URL（Vercel + Neon で自動設定）を代わりに使う。
  */
-export const AUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.DATABASE_URL;
+export const AUTH_SECRET = process.env.NEXTAUTH_SECRET || DATABASE_URL;

@@ -3,7 +3,10 @@
 import { readFile } from "node:fs/promises";
 import pg from "pg";
 
-const url = process.env.DATABASE_URL;
+const env = process.env;
+// Vercel の Neon 連携は接頭辞によって変数名が変わるため、よく使われる名前を順に探す
+const url =
+  env.DATABASE_URL || env.POSTGRES_URL || env.STORAGE_URL || env.STORAGE_DATABASE_URL || env.STORAGE_POSTGRES_URL;
 if (!url) {
   console.warn("[migrate] DATABASE_URL が未設定のため、DB の初期化をスキップしました");
   process.exit(0);
