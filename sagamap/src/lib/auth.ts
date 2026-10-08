@@ -6,8 +6,9 @@ import { cookies } from "next/headers";
 import { queryOne } from "./db";
 import { recordReferral } from "./referral";
 import { AUTH_SECRET } from "./config";
+import { clientIp, rateLimit, resetRateLimit, tooManyRequestsMessage } from "./rate-limit";
 
-export type Role = "business" | "customer";
+export type Role = "business" | "customer" | "admin";
 
 // Vercel 上で NEXTAUTH_URL が未設定なら本番ドメインを使う
 if (!process.env.NEXTAUTH_URL && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
@@ -22,18 +23,31 @@ const providers: NextAuthOptions["providers"] = [
       password: { label: "パスワード", type: "password" },
       role: { label: "種別", type: "text" },
     },
-    async authorize(credentials) {
+    async authorize(credentials, req) {
       const email = credentials?.email?.trim().toLowerCase();
       const password = credentials?.password;
-      const role = credentials?.role === "business" ? "business" : "customer";
+      const role: Role =
+        credentials?.role === "business" ? "business" : credentials?.role === "admin" ? "admin" : "customer";
       if (!email || !password) return null;
 
-      const table = role === "business" ? "business_owners" : "customers";
+      // 総当たり攻撃対策: 同じアカウントへは 15 分に 10 回、同じ接続元からは 15 分に 50 回まで
+      const accountKey = `login:${role}:${email}`;
+      const ip = clientIp(req?.headers);
+      for (const [key, limit] of [
+        [accountKey, 10],
+        [`login-ip:${ip}`, 50],
+      ] as const) {
+        const rl = await rateLimit(key, limit, 15 * 60);
+        if (!rl.ok) throw new Error(tooManyRequestsMessage(rl.retryAfter));
+      }
+
+      const table = { business: "business_owners", customer: "customers", admin: "admins" }[role];
       const row = await queryOne<{ id: number; name: string; email: string; password_hash: string | null }>(
         `SELECT id, name, email, password_hash FROM ${table} WHERE email = $1`,
         [email],
       );
       if (!row?.password_hash || !(await bcrypt.compare(password, row.password_hash))) return null;
+      await resetRateLimit(accountKey);
       return { id: String(row.id), name: row.name, email: row.email, role };
     },
   }),
@@ -51,7 +65,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
 export const authOptions: NextAuthOptions = {
   secret: AUTH_SECRET,
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 7 * 24 * 60 * 60 },
   pages: { signIn: "/login" },
   providers,
   callbacks: {

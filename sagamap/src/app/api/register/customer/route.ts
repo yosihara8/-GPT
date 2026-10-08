@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp, rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { queryOne } from "@/lib/db";
@@ -9,6 +10,9 @@ import { recordReferral } from "@/lib/referral";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  // 同じ接続元からの大量登録を防ぐ（1 時間に 10 件まで）
+  const rl = await rateLimit(`register:${clientIp(req.headers)}`, 10, 60 * 60);
+  if (!rl.ok) return NextResponse.json({ error: tooManyRequestsMessage(rl.retryAfter) }, { status: 429 });
   const body = await parseBody(req, customerRegisterSchema);
   if (!body.ok) return body.response;
   const d = body.data;

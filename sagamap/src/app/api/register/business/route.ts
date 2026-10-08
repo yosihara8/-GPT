@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp, rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
 import { pool } from "@/lib/db";
 import { parseBody, isUniqueViolation } from "@/lib/http";
@@ -9,6 +10,9 @@ export const dynamic = "force-dynamic";
 
 /** 事業主登録（無料プラン）: アカウントと 1 店舗目を同時に作成 */
 export async function POST(req: Request) {
+  // 同じ接続元からの大量登録を防ぐ（1 時間に 10 件まで）
+  const rl = await rateLimit(`register:${clientIp(req.headers)}`, 10, 60 * 60);
+  if (!rl.ok) return NextResponse.json({ error: tooManyRequestsMessage(rl.retryAfter) }, { status: 429 });
   const body = await parseBody(req, businessRegisterSchema);
   if (!body.ok) return body.response;
   const d = body.data;
