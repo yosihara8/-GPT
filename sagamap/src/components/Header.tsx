@@ -6,7 +6,8 @@ import { signOut, useSession } from "next-auth/react";
 export default function Header() {
   const { data } = useSession();
   const user = data?.user;
-  const dashboard = user?.role === "business" ? "/dashboard/business" : "/dashboard/customer";
+  const dashboard =
+    user?.role === "admin" ? "/admin" : user?.role === "business" ? "/dashboard/business" : "/dashboard/customer";
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur">

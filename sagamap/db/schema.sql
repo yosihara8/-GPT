@@ -117,3 +117,29 @@ CREATE TABLE IF NOT EXISTS tourist_spots (
   lat          DOUBLE PRECISION NOT NULL,
   lng          DOUBLE PRECISION NOT NULL
 );
+
+-- 運営者（管理画面 /admin）
+CREATE TABLE IF NOT EXISTS admins (
+  id             SERIAL PRIMARY KEY,
+  name           TEXT NOT NULL,
+  email          TEXT NOT NULL UNIQUE,
+  password_hash  TEXT NOT NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 運営者の操作記録（削除・プラン変更など）
+CREATE TABLE IF NOT EXISTS admin_audit_logs (
+  id          BIGSERIAL PRIMARY KEY,
+  admin_id    INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+  action      TEXT NOT NULL,
+  target      TEXT NOT NULL,
+  detail      TEXT NOT NULL DEFAULT '',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 試行回数の制限（ログイン・登録の総当たり攻撃対策）
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key           TEXT PRIMARY KEY,
+  count         INTEGER NOT NULL DEFAULT 0,
+  window_start  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

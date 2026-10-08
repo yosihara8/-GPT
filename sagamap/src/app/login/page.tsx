@@ -35,7 +35,9 @@ function LoginForm() {
       redirect: false,
     });
     setLoading(false);
-    if (res?.error) setError("メールアドレスまたはパスワードが正しくありません");
+    if (res?.error) {
+      setError(res.error === "CredentialsSignin" ? "メールアドレスまたはパスワードが正しくありません" : res.error);
+    }
     else router.push(callbackUrl);
   }
 
