@@ -16,6 +16,7 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "1.16.8",
     "bcryptjs": "2.4.3",
+    "leaflet": "1.9.4",
     "next": "14.2.35",
     "next-auth": "4.24.11",
     "pg": "8.13.1",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@types/bcryptjs": "2.4.6",
     "@types/google.maps": "3.58.1",
+    "@types/leaflet": "1.9.14",
     "@types/node": "20.17.6",
     "@types/pg": "8.11.10",
     "@types/react": "18.3.12",

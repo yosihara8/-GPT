@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 import { haversineMeters } from "@/lib/geo";
 import { SAGA_CENTER, COUPON_HIGHLIGHT_RADIUS_M } from "@/lib/config";
@@ -21,7 +22,7 @@ export type HeatPoint = { lat: number; lng: number; weight: number };
 export type RouteLeg = { from: string; to: string; distance: string; duration: string };
 export type RouteSummary = { legs: RouteLeg[]; totalMeters: number; totalSeconds: number; mode: "WALKING" | "DRIVING" };
 
-type Props = {
+export type MapViewProps = {
   shops: MapShop[];
   me?: { lat: number; lng: number } | null;
   /** 赤ピンにする範囲（m）。既定 500m */
@@ -56,7 +57,7 @@ export function isHighlighted(shop: MapShop, me: { lat: number; lng: number } | 
   return Boolean(me && hasCoupon && haversineMeters(me, shop) <= radius);
 }
 
-export default function MapView({
+function GoogleMapView({
   shops,
   me,
   highlightRadius = COUPON_HIGHLIGHT_RADIUS_M,
@@ -68,7 +69,7 @@ export default function MapView({
   onSelectShop,
   selectedId,
   className = "h-[62vh]",
-}: Props) {
+}: MapViewProps) {
   const { ready, error } = useGoogleMaps();
   const divRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -279,7 +280,7 @@ export default function MapView({
   );
 }
 
-function MapLegend() {
+export function MapLegend() {
   return (
     <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 px-3 py-2 text-xs text-slate-700 shadow">
       <div className="flex items-center gap-1.5">
@@ -296,4 +297,15 @@ function MapLegend() {
       </div>
     </div>
   );
+}
+
+// Google Maps の API キーが無い環境では、キー不要の OpenStreetMap（Leaflet）で表示する
+const LeafletMapView = dynamic(() => import("./LeafletMapView"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full animate-pulse bg-slate-100" />,
+});
+
+export default function MapView(props: MapViewProps) {
+  if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) return <LeafletMapView {...props} />;
+  return <GoogleMapView {...props} />;
 }
