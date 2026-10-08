@@ -40,9 +40,9 @@ Docker を使わない場合は、PostGIS 入りの PostgreSQL を用意して `
 ## Vercel で公開する
 
 1. Vercel で GitHub リポジトリを Import し、**Root Directory を `sagamap`** にします。
-2. Environment Variables に `NEXTAUTH_SECRET`、`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`、`GOOGLE_MAPS_SERVER_KEY`（デモデータを入れる場合は `SEED_DEMO_DATA=true`）を設定します。
+2. Environment Variables に `NEXTAUTH_SECRET`、`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`、`GOOGLE_MAPS_SERVER_KEY`を設定します。
 3. Storage → Neon（Postgres）でデータベースを作成してプロジェクトに接続すると、`DATABASE_URL` が自動で設定されます。
-4. デプロイ時に `vercel-build`（`scripts/migrate.mjs`）がスキーマを自動で適用します。
+4. デプロイ時に `vercel-build`（`scripts/migrate.mjs`）がスキーマを自動で適用し、DB が空ならデモデータも投入します（`SEED_DEMO_DATA=false` で無効化）。
 5. Google の「ブラウザ用キー」のウェブサイト制限に、Vercel のドメイン（例: `https://sagamap.vercel.app/*`）を追加します。
 
 `NEXT_PUBLIC_APP_URL` と `NEXTAUTH_URL` は未設定でも、Vercel の本番ドメインが自動で使われます。独自ドメイン（sagamap.jp）を追加すると、そちらに切り替わります。週 1 回のメール通知は `vercel.json` の Cron（毎週月曜 9:00 JST）で実行されます。

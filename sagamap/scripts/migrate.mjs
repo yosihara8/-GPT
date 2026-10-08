@@ -15,7 +15,8 @@ try {
   await client.query(await readFile(new URL("../db/schema.sql", import.meta.url), "utf8"));
   console.log("[migrate] schema.sql を適用しました");
 
-  if (process.env.SEED_DEMO_DATA === "true") {
+  // DB が空ならデモデータを投入（本番運用では SEED_DEMO_DATA=false を設定）
+  if (process.env.SEED_DEMO_DATA !== "false") {
     const { rows } = await client.query("SELECT count(*)::int AS n FROM business_owners");
     if (rows[0].n === 0) {
       await client.query(await readFile(new URL("../db/seed.sql", import.meta.url), "utf8"));
