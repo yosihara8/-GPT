@@ -1,0 +1,47 @@
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { pool } from "@/lib/db";
+import { parseBody, isUniqueViolation } from "@/lib/http";
+import { businessRegisterSchema } from "@/lib/schemas";
+import { geocodeAddress } from "@/lib/geocode";
+
+export const dynamic = "force-dynamic";
+
+/** 事業主登録（無料プラン）: アカウントと 1 店舗目を同時に作成 */
+export async function POST(req: Request) {
+  const body = await parseBody(req, businessRegisterSchema);
+  if (!body.ok) return body.response;
+  const d = body.data;
+
+  const pos = d.lat != null && d.lng != null ? { lat: d.lat, lng: d.lng } : await geocodeAddress(d.address);
+  if (!pos) {
+    return NextResponse.json(
+      { error: "住所から位置を特定できませんでした。地図上で店舗の位置を指定してください", needsLocation: true },
+      { status: 422 },
+    );
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const owner = await client.query<{ id: number }>(
+      "INSERT INTO business_owners (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
+      [d.name, d.email, await bcrypt.hash(d.password, 10)],
+    );
+    const biz = await client.query<{ id: number }>(
+      `INSERT INTO businesses (owner_id, name, address, lat, lng, category, service_description, contact, price_level)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+      [owner.rows[0].id, d.name, d.address, pos.lat, pos.lng, d.category, d.serviceDescription, d.contact, d.priceLevel],
+    );
+    await client.query("COMMIT");
+    return NextResponse.json({ ownerId: owner.rows[0].id, businessId: biz.rows[0].id }, { status: 201 });
+  } catch (e) {
+    await client.query("ROLLBACK");
+    if (isUniqueViolation(e)) {
+      return NextResponse.json({ error: "このメールアドレスは既に登録されています" }, { status: 409 });
+    }
+    throw e;
+  } finally {
+    client.release();
+  }
+}

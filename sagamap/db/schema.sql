@@ -1,0 +1,119 @@
+-- SagaMap データベーススキーマ（PostgreSQL 14+ / PostGIS 3+）
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- 事業主アカウント（ログイン・プラン・決済情報）
+CREATE TABLE IF NOT EXISTS business_owners (
+  id                      SERIAL PRIMARY KEY,
+  name                    TEXT NOT NULL,
+  email                   TEXT NOT NULL UNIQUE,
+  password_hash           TEXT NOT NULL,
+  plan                    TEXT NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'premium')),
+  monthly_price           INTEGER NOT NULL DEFAULT 3980,
+  stripe_customer_id      TEXT,
+  stripe_subscription_id  TEXT,
+  created_at              TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 店舗（無料プランは 1 店舗まで。is_premium は所有者のプランと同期）
+CREATE TABLE IF NOT EXISTS businesses (
+  id                   SERIAL PRIMARY KEY,
+  owner_id             INTEGER NOT NULL REFERENCES business_owners(id) ON DELETE CASCADE,
+  name                 TEXT NOT NULL,
+  address              TEXT NOT NULL,
+  lat                  DOUBLE PRECISION NOT NULL,
+  lng                  DOUBLE PRECISION NOT NULL,
+  location             GEOGRAPHY(Point, 4326)
+                         GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)::geography) STORED,
+  category             TEXT NOT NULL,
+  service_description  TEXT NOT NULL DEFAULT '',
+  contact              TEXT NOT NULL DEFAULT '',
+  price_level          SMALLINT NOT NULL DEFAULT 2 CHECK (price_level BETWEEN 1 AND 3),
+  crowd_level          SMALLINT NOT NULL DEFAULT 3 CHECK (crowd_level BETWEEN 1 AND 5),
+  is_premium           BOOLEAN NOT NULL DEFAULT false,
+  instagram_url        TEXT,
+  twitter_url          TEXT,
+  view_count           INTEGER NOT NULL DEFAULT 0,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS businesses_location_gix ON businesses USING GIST (location);
+CREATE INDEX IF NOT EXISTS businesses_owner_idx ON businesses (owner_id);
+
+-- 顧客
+CREATE TABLE IF NOT EXISTS customers (
+  id                 SERIAL PRIMARY KEY,
+  name               TEXT NOT NULL,
+  email              TEXT NOT NULL UNIQUE,
+  password_hash      TEXT,                       -- Google ログインのみの場合は NULL
+  interests          TEXT[] NOT NULL DEFAULT '{}',
+  notify_enabled     BOOLEAN NOT NULL DEFAULT true,
+  unsubscribe_token  TEXT NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'),
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- クーポン
+CREATE TABLE IF NOT EXISTS coupons (
+  id             SERIAL PRIMARY KEY,
+  business_id    INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  title          TEXT NOT NULL,
+  discount_rate  SMALLINT NOT NULL CHECK (discount_rate BETWEEN 1 AND 100),
+  conditions     TEXT NOT NULL DEFAULT '',
+  expires_at     TIMESTAMPTZ NOT NULL,
+  is_active      BOOLEAN NOT NULL DEFAULT true,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS coupons_business_idx ON coupons (business_id);
+
+-- 紹介（1 顧客は 1 店舗からのみ紹介扱い。created_at = 登録日）
+CREATE TABLE IF NOT EXISTS referrals (
+  id           SERIAL PRIMARY KEY,
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  customer_id  INTEGER NOT NULL UNIQUE REFERENCES customers(id) ON DELETE CASCADE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS referrals_business_idx ON referrals (business_id);
+
+-- 利用履歴（閲覧・クーポン利用。AI 推薦の学習データ）
+CREATE TABLE IF NOT EXISTS usage_history (
+  id           BIGSERIAL PRIMARY KEY,
+  customer_id  INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  coupon_id    INTEGER REFERENCES coupons(id) ON DELETE SET NULL,
+  viewed_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  coupon_used  BOOLEAN NOT NULL DEFAULT false
+);
+CREATE INDEX IF NOT EXISTS usage_history_customer_idx ON usage_history (customer_id, viewed_at DESC);
+CREATE INDEX IF NOT EXISTS usage_history_business_idx ON usage_history (business_id);
+
+-- 広告（有料プラン：地図上バナー）
+CREATE TABLE IF NOT EXISTS ads (
+  id           SERIAL PRIMARY KEY,
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  headline     TEXT NOT NULL,
+  body         TEXT NOT NULL DEFAULT '',
+  starts_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ends_at      TIMESTAMPTZ NOT NULL,
+  is_active    BOOLEAN NOT NULL DEFAULT true,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 顧客への通知（週 1 回のダイジェストで作成）
+CREATE TABLE IF NOT EXISTS notifications (
+  id           BIGSERIAL PRIMARY KEY,
+  customer_id  INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  title        TEXT NOT NULL,
+  body         TEXT NOT NULL,
+  link         TEXT,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  read_at      TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS notifications_customer_idx ON notifications (customer_id, created_at DESC);
+
+-- 観光名所（ルート提案・距離計算用）
+CREATE TABLE IF NOT EXISTS tourist_spots (
+  id           SERIAL PRIMARY KEY,
+  name         TEXT NOT NULL,
+  description  TEXT NOT NULL DEFAULT '',
+  lat          DOUBLE PRECISION NOT NULL,
+  lng          DOUBLE PRECISION NOT NULL
+);
