@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { useGoogleMaps } from "@/hooks/useGoogleMaps";
+import { hasGoogleMapsKey, useGoogleMaps } from "@/hooks/useGoogleMaps";
 import { haversineMeters } from "@/lib/geo";
 import { SAGA_CENTER, COUPON_HIGHLIGHT_RADIUS_M } from "@/lib/config";
 
@@ -299,13 +299,14 @@ export function MapLegend() {
   );
 }
 
-// Google Maps の API キーが無い環境では、キー不要の OpenStreetMap（Leaflet）で表示する
+// Google Maps の API キーが無い・使えない環境では、キー不要の OpenStreetMap（Leaflet）で表示する
 const LeafletMapView = dynamic(() => import("./LeafletMapView"), {
   ssr: false,
   loading: () => <div className="h-full w-full animate-pulse bg-slate-100" />,
 });
 
 export default function MapView(props: MapViewProps) {
-  if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) return <LeafletMapView {...props} />;
+  const { error } = useGoogleMaps();
+  if (!hasGoogleMapsKey || error) return <LeafletMapView {...props} />;
   return <GoogleMapView {...props} />;
 }
