@@ -8,6 +8,11 @@ import { recordReferral } from "./referral";
 
 export type Role = "business" | "customer";
 
+// Vercel 上で NEXTAUTH_URL が未設定なら本番ドメインを使う
+if (!process.env.NEXTAUTH_URL && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+  process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+}
+
 const providers: NextAuthOptions["providers"] = [
   CredentialsProvider({
     name: "メールアドレス",
