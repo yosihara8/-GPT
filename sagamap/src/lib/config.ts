@@ -30,3 +30,9 @@ export const PRICE_LEVEL_LABELS: Record<number, string> = { 1: "¥", 2: "¥¥", 
 export function referralUrl(businessId: number) {
   return `${APP_URL}/ref?biz_id=${businessId}`;
 }
+
+/**
+ * セッション署名用の秘密値。NEXTAUTH_SECRET が未設定なら、
+ * 外部に公開されない DATABASE_URL（Vercel + Neon で自動設定）を代わりに使う。
+ */
+export const AUTH_SECRET = process.env.NEXTAUTH_SECRET || process.env.DATABASE_URL;

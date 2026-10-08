@@ -1,5 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { AUTH_SECRET } from "@/lib/config";
 
 /** 会員登録必須ページ（地図トップ `/` は未登録でも閲覧可） */
 export default withAuth(
@@ -17,6 +18,7 @@ export default withAuth(
   {
     callbacks: { authorized: ({ token }) => Boolean(token) },
     pages: { signIn: "/login" },
+    secret: AUTH_SECRET,
   },
 );
 
