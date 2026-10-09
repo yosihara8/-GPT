@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         body: d.body || "地図でお店をチェックしてみてください。",
         link: `/dashboard/customer?shop=${d.businessId}`,
       })
-    : { notified: 0, emailed: 0 };
+    : { notified: 0 };
   return NextResponse.json({ ad, ...announced }, { status: 201 });
 }
 
