@@ -59,11 +59,17 @@ export async function recommendForCustomer(customerId: number, here: LatLng | nu
     priceSum += h.price_level * w;
     priceWeight += w;
   }
+  // お気に入りの店舗の業種は、強い好みとして扱う
+  const favs = await query<{ business_id: number; category: string }>(
+    "SELECT f.business_id, b.category FROM favorites f JOIN businesses b ON b.id = f.business_id WHERE f.customer_id = $1",
+    [customerId],
+  );
+  for (const f of favs) catPref.set(f.category, (catPref.get(f.category) ?? 0) + 4);
   const catMax = Math.max(1e-9, ...catPref.values());
   const avgPrice = priceWeight > 0 ? priceSum / priceWeight : null;
 
   // 2) 協調フィルタリング（アイテム共起）
-  const seen = [...new Set(history.map((h) => h.business_id))];
+  const seen = [...new Set([...history.map((h) => h.business_id), ...favs.map((f) => f.business_id)])];
   const cfRows = seen.length
     ? await query<{ business_id: number; users: string }>(
         `SELECT h2.business_id, count(DISTINCT h2.customer_id) AS users

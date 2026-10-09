@@ -20,7 +20,14 @@ export type MapSpot = { id: number; name: string; lat: number; lng: number };
 export type HeatPoint = { lat: number; lng: number; weight: number };
 
 export type RouteLeg = { from: string; to: string; distance: string; duration: string };
-export type RouteSummary = { legs: RouteLeg[]; totalMeters: number; totalSeconds: number; mode: "WALKING" | "DRIVING" };
+export type RouteSummary = {
+  legs: RouteLeg[];
+  totalMeters: number;
+  totalSeconds: number;
+  mode: "WALKING" | "DRIVING";
+  /** 道順が取れず直線で概算した場合 true */
+  estimated?: boolean;
+};
 
 export type MapViewProps = {
   shops: MapShop[];
@@ -35,6 +42,8 @@ export type MapViewProps = {
   heatmap?: HeatPoint[] | null;
   /** 観光名所を巡るルート（選択順。Directions API で最適化） */
   routeStops?: MapSpot[] | null;
+  /** ルートの移動手段（OpenStreetMap 地図のとき） */
+  routeMode?: "foot" | "car";
   onRoute?: (summary: RouteSummary | null, error?: string) => void;
   onSelectShop?: (id: number) => void;
   selectedId?: number | null;

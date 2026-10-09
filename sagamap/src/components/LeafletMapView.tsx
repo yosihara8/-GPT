@@ -3,10 +3,11 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef } from "react";
-import { MapLegend, isHighlighted, type MapSpot, type MapViewProps } from "./MapView";
-import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER, WALK_METERS_PER_MIN, categoryEmoji } from "@/lib/config";
-import { formatDistance, haversineMeters, type LatLng } from "@/lib/geo";
+import { MapLegend, isHighlighted, type MapViewProps } from "./MapView";
+import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER, categoryEmoji } from "@/lib/config";
+import { formatDistance, type LatLng } from "@/lib/geo";
 import { escapeHtml } from "@/lib/escape";
+import type { RouteResult } from "@/lib/routing";
 
 const COLORS = { coupon: "#e5484d", shop: "#3b82f6", spot: "#d97706", me: "#2563eb", route: "#1f8a7a" };
 
@@ -23,6 +24,7 @@ export default function LeafletMapView({
   spots = [],
   heatmap,
   routeStops,
+  routeMode = "foot",
   onRoute,
   onSelectShop,
   selectedId,
@@ -47,9 +49,10 @@ export default function LeafletMapView({
     if (!divRef.current || mapRef.current) return;
     const map = L.map(divRef.current, { zoomControl: false }).setView(me ?? SAGA_CENTER, 15);
     L.control.zoom({ position: "topright" }).addTo(map);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    // 国土地理院の標準地図（日本語表記・はっきりした配色・商用利用可）
+    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">地理院タイル</a>',
     }).addTo(map);
     mapRef.current = map;
     return () => {
@@ -65,7 +68,17 @@ export default function LeafletMapView({
     if (!mapRef.current || !me) return;
     const g = layer("me");
     if (searchRadius) {
-      L.circle(me, { radius: searchRadius, color: COLORS.me, weight: 1, opacity: 0.6, fillOpacity: 0.06, interactive: false }).addTo(g);
+      const circle = L.circle(me, {
+        radius: searchRadius,
+        color: COLORS.me,
+        weight: 2,
+        opacity: 0.8,
+        dashArray: "6 6",
+        fillOpacity: 0.05,
+        interactive: false,
+      }).addTo(g);
+      // 選んだ範囲が画面に収まるように表示を合わせる
+      mapRef.current.fitBounds(circle.getBounds(), { padding: [16, 16] });
     }
     if (meAccuracy && meAccuracy > 15) {
       L.circle(me, { radius: meAccuracy, stroke: false, fillColor: COLORS.me, fillOpacity: 0.12, interactive: false }).addTo(g);
@@ -73,7 +86,7 @@ export default function LeafletMapView({
     L.circleMarker(me, { radius: 8, color: "#fff", weight: 3, fillColor: COLORS.me, fillOpacity: 1 })
       .bindTooltip(meAccuracy ? `現在地（誤差 約${meAccuracy}m）` : "現在地")
       .addTo(g);
-    mapRef.current.panTo(me);
+    if (!searchRadius) mapRef.current.panTo(me);
   }, [me, meAccuracy, searchRadius]);
 
   // 店舗ピン（500m 以内のクーポン店舗 = 赤 / 通常 = 青）
@@ -128,43 +141,66 @@ export default function LeafletMapView({
     }
   }, [heatmap]);
 
-  // 観光名所ルート（近い順に巡る概算ルート）
+  // ルート（道に沿った道順。巡る順番も自動で最適化）
   useEffect(() => {
     if (!mapRef.current) return;
     const g = layer("route");
     if (!routeStops?.length) return;
-    const origin: LatLng & { name?: string } = me ?? routeStops[0];
-    const rest = me ? [...routeStops] : routeStops.slice(1);
-    const order: (LatLng & { name?: string })[] = [origin];
-    while (rest.length) {
-      const last = order[order.length - 1];
-      rest.sort((a, b) => haversineMeters(last, a) - haversineMeters(last, b));
-      order.push(rest.shift()!);
-    }
-    if (order.length < 2) return;
-    L.polyline(order, { color: COLORS.route, weight: 5, opacity: 0.85, dashArray: "8 6" }).addTo(g);
+    const stops: (LatLng & { name: string })[] = me ? [{ ...me, name: "現在地" }, ...routeStops] : [...routeStops];
+    if (stops.length < 2) return;
+    let cancelled = false;
 
-    // 道のりは直線距離の約 1.25 倍として概算
-    const legs = order.slice(1).map((to, i) => {
-      const from = order[i];
-      const meters = haversineMeters(from, to) * 1.25;
-      return { meters, from: i === 0 && me ? "現在地" : (from as MapSpot).name, to: (to as MapSpot).name };
-    });
-    const totalMeters = legs.reduce((s, l) => s + l.meters, 0);
-    const walking = totalMeters < 4000;
-    const speed = walking ? WALK_METERS_PER_MIN : 500; // 車は約 30km/h
-    onRouteRef.current?.({
-      mode: walking ? "WALKING" : "DRIVING",
-      totalMeters,
-      totalSeconds: (totalMeters / speed) * 60,
-      legs: legs.map((l) => ({
-        from: l.from,
-        to: l.to,
-        distance: `約${formatDistance(l.meters)}`,
-        duration: `約${Math.max(1, Math.round(l.meters / speed))}分`,
-      })),
-    });
-  }, [routeStops, me]);
+    fetch("/api/route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: routeMode, points: stops.map(({ lat, lng }) => ({ lat, lng })) }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "ルートを取得できませんでした");
+        return data as RouteResult;
+      })
+      .then((r) => {
+        if (cancelled || !mapRef.current) return;
+        const line = L.polyline(r.geometry, {
+          color: COLORS.route,
+          weight: 6,
+          opacity: 0.9,
+          dashArray: r.estimated ? "8 8" : undefined,
+        }).addTo(g);
+        // 立ち寄る順番の番号
+        r.order.slice(1).forEach((idx, n) => {
+          L.marker(stops[idx], {
+            icon: L.divIcon({
+              className: "",
+              iconSize: [24, 24],
+              iconAnchor: [12, 34],
+              html: `<div style="width:24px;height:24px;border-radius:9999px;background:${COLORS.route};color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">${n + 1}</div>`,
+            }),
+            interactive: false,
+          }).addTo(g);
+        });
+        mapRef.current.fitBounds(line.getBounds(), { padding: [30, 30] });
+        const walking = r.mode === "foot";
+        onRouteRef.current?.({
+          mode: walking ? "WALKING" : "DRIVING",
+          estimated: r.estimated,
+          totalMeters: r.distance,
+          totalSeconds: r.duration,
+          legs: r.legs.map((l, n) => ({
+            from: stops[r.order[n]].name,
+            to: stops[r.order[n + 1]].name,
+            distance: `${r.estimated ? "約" : ""}${formatDistance(l.distance)}`,
+            duration: `${r.estimated ? "約" : ""}${Math.max(1, Math.round(l.duration / 60))}分`,
+          })),
+        });
+      })
+      .catch((e: Error) => !cancelled && onRouteRef.current?.(null, e.message));
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeStops, routeMode]);
 
   return (
     <div className={`relative ${className}`}>

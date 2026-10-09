@@ -68,3 +68,8 @@ body {
 .leaflet-top {
   top: 64px;
 }
+
+/* 地図の色をはっきりさせる */
+.leaflet-tile-pane {
+  filter: saturate(1.35) contrast(1.08);
+}

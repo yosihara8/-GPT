@@ -188,3 +188,11 @@ CREATE TABLE IF NOT EXISTS job_runs (
   result      TEXT NOT NULL DEFAULT '',
   PRIMARY KEY (job, period)
 );
+
+-- お気に入りの店舗（お客さま）
+CREATE TABLE IF NOT EXISTS favorites (
+  customer_id  INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (customer_id, business_id)
+);
