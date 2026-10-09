@@ -5,6 +5,9 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapShop } from "@/components/MapView";
 import HourlyChart from "@/components/HourlyChart";
+import PhotoUploader from "@/components/PhotoUploader";
+import PasswordChangeForm from "@/components/PasswordChangeForm";
+import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import { api } from "@/lib/fetcher";
 import { CATEGORIES, PRICE_STANDARD } from "@/lib/config";
 
@@ -22,6 +25,8 @@ type Store = {
   crowd_level: number;
   instagram_url: string | null;
   twitter_url: string | null;
+  has_photo: boolean;
+  photo_version: number | null;
 };
 type Stats = {
   stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number }[];
@@ -73,6 +78,7 @@ function BusinessDashboard() {
 
   return (
     <main className="mx-auto max-w-4xl space-y-4 p-4">
+      <VerifyEmailBanner />
       {params.get("welcome") && (
         <p className="rounded-lg bg-saga-50 px-4 py-3 text-sm text-saga-700">ご登録ありがとうございます！店舗が地図に掲載されました。</p>
       )}
@@ -175,9 +181,12 @@ function BusinessDashboard() {
         )}
       </section>
 
+      {store && <PhotoUploader key={`photo-${store.id}`} shop={store} onChanged={load} />}
       {store && <StoreEditor key={store.id} store={store} premium={premium} onSaved={load} />}
 
       {premium && <AddStore onAdded={load} />}
+
+      <PasswordChangeForm />
     </main>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PRICE_LEVEL_LABELS } from "@/lib/config";
+import { PRICE_LEVEL_LABELS, categoryEmoji } from "@/lib/config";
 
 export type RecCard = {
   id: number;
@@ -121,8 +121,11 @@ function Card({
     <div
       {...handlers}
       style={style}
-      className={`absolute inset-0 touch-none rounded-2xl border border-slate-200 bg-white p-5 shadow-lg ${className}`}
+      className={`absolute inset-0 touch-none overflow-hidden rounded-3xl border-4 border-white bg-gradient-to-br from-white via-white to-sun-100 p-5 shadow-pop ${className}`}
     >
+      <span className="pointer-events-none absolute -bottom-4 -right-2 text-8xl opacity-20" aria-hidden>
+        {categoryEmoji(card.category)}
+      </span>
       {badge && (
         <span
           className={`absolute right-4 top-4 rotate-12 rounded border-2 px-2 py-0.5 text-sm font-bold ${
@@ -132,10 +135,10 @@ function Card({
           {badge === "like" ? "行きたい" : "スキップ"}
         </span>
       )}
-      <p className="text-xs font-medium text-saga-600">
-        {card.category}　{PRICE_LEVEL_LABELS[card.price_level]}
+      <p className="text-xs font-bold text-saga-600">
+        {categoryEmoji(card.category)} {card.category}　{PRICE_LEVEL_LABELS[card.price_level]}
       </p>
-      <h3 className="mt-1 text-xl font-bold text-slate-900">{card.name}</h3>
+      <h3 className="mt-1 text-2xl font-extrabold text-slate-900">{card.name}</h3>
       <p className="mt-2 line-clamp-2 text-sm text-slate-600">{card.service_description}</p>
       {card.best_discount && (
         <p className="mt-3 inline-block rounded-full bg-red-50 px-3 py-1 text-sm font-bold text-coupon">

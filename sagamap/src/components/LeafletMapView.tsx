@@ -4,8 +4,9 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef } from "react";
 import { MapLegend, isHighlighted, type MapSpot, type MapViewProps } from "./MapView";
-import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER, WALK_METERS_PER_MIN } from "@/lib/config";
+import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER, WALK_METERS_PER_MIN, categoryEmoji } from "@/lib/config";
 import { formatDistance, haversineMeters, type LatLng } from "@/lib/geo";
+import { escapeHtml } from "@/lib/escape";
 
 const COLORS = { coupon: "#e5484d", shop: "#3b82f6", spot: "#d97706", me: "#2563eb", route: "#1f8a7a" };
 
@@ -76,14 +77,16 @@ export default function LeafletMapView({
     for (const shop of shops) {
       const red = isHighlighted(shop, me, highlightRadius);
       const selected = shop.id === selectedId;
-      L.circleMarker(shop, {
-        radius: selected ? 12 : red ? 10 : 7,
-        color: "#fff",
-        weight: 2,
-        fillColor: red ? COLORS.coupon : COLORS.shop,
-        fillOpacity: 1,
-      })
-        .bindTooltip(`${shop.name}（${shop.category}）${red ? " クーポンあり" : ""}`)
+      const size = selected ? 46 : red ? 40 : 34;
+      const icon = L.divIcon({
+        className: "",
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size],
+        tooltipAnchor: [0, -size],
+        html: `<div class="sm-pin" style="width:${size}px;height:${size}px;background:${red ? COLORS.coupon : COLORS.shop}"><span style="font-size:${Math.round(size * 0.45)}px">${escapeHtml(categoryEmoji(shop.category))}</span></div>`,
+      });
+      L.marker(shop, { icon, zIndexOffset: selected ? 1000 : red ? 500 : 0, keyboard: true, title: shop.name })
+        .bindTooltip(escapeHtml(`${shop.name}（${shop.category}）${red ? " 🎟️クーポンあり" : ""}`))
         .on("click", () => onSelectRef.current?.(shop.id))
         .addTo(g);
     }
@@ -94,7 +97,13 @@ export default function LeafletMapView({
     if (!mapRef.current) return;
     const g = layer("spots");
     for (const s of spots) {
-      L.circleMarker(s, { radius: 6, color: "#fff", weight: 1.5, fillColor: COLORS.spot, fillOpacity: 1 }).bindTooltip(s.name).addTo(g);
+      const icon = L.divIcon({
+        className: "",
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        html: `<div style="width:28px;height:28px;border-radius:9999px;background:${COLORS.spot};border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px">⭐</div>`,
+      });
+      L.marker(s, { icon, title: s.name }).bindTooltip(escapeHtml(`⭐ ${s.name}`)).addTo(g);
     }
   }, [spots]);
 

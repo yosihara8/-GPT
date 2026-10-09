@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { APP_URL } from "@/lib/config";
 import { sendMail } from "@/lib/mail";
+import { escapeHtml } from "@/lib/escape";
 
 export const dynamic = "force-dynamic";
 
@@ -65,8 +66,4 @@ export async function GET(req: Request) {
     }
   }
   return NextResponse.json({ sent, coupons: coupons.length });
-}
-
-function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]!);
 }

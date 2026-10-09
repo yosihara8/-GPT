@@ -4,6 +4,7 @@ import { pool, queryOne } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { auditLog } from "@/lib/audit";
 import { requireApiUser } from "@/lib/session";
+import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     await client.query("ROLLBACK");
+    await logServerError("admin/plan", e);
     throw e;
   } finally {
     client.release();

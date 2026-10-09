@@ -12,3 +12,5 @@ export async function sendMail(to: string, subject: string, html: string) {
   if (error) throw new Error(error.message);
   return { dryRun: false as const };
 }
+
+export const mailEnabled = () => Boolean(process.env.RESEND_API_KEY);

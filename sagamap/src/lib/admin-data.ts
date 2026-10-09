@@ -1,6 +1,6 @@
 import { query } from "./db";
 
-export const ADMIN_LIST_TYPES = ["owners", "stores", "customers", "logs"] as const;
+export const ADMIN_LIST_TYPES = ["owners", "stores", "customers", "logs", "errors"] as const;
 export type AdminListType = (typeof ADMIN_LIST_TYPES)[number];
 
 /** LIKE 検索用に % と _ をエスケープ */
@@ -33,6 +33,10 @@ const SQL: Record<AdminListType, string> = {
            FROM admin_audit_logs l LEFT JOIN admins a ON a.id = l.admin_id
           WHERE $1 = '' OR l.action ILIKE $2 OR l.target ILIKE $2 OR l.detail ILIKE $2
           ORDER BY l.created_at DESC LIMIT $3`,
+  errors: `SELECT id, created_at, source, message, url, user_agent
+             FROM error_logs
+            WHERE $1 = '' OR message ILIKE $2 OR url ILIKE $2
+            ORDER BY created_at DESC LIMIT $3`,
 };
 
 export function adminList(type: AdminListType, q: string, limit = 500) {
@@ -45,6 +49,7 @@ export const CSV_COLUMNS: Record<AdminListType, [key: string, label: string][]> 
   stores: [["id", "ID"], ["name", "店舗名"], ["category", "業種"], ["address", "住所"], ["contact", "連絡先"], ["owner_email", "事業者メール"], ["is_premium", "有料"], ["active_coupons", "配信中クーポン"], ["view_count", "閲覧数"], ["created_at", "登録日時"]],
   customers: [["id", "ID"], ["name", "名前"], ["email", "メールアドレス"], ["interests", "興味のある業種"], ["notify_enabled", "メール通知"], ["referred_by", "紹介元"], ["created_at", "登録日時"]],
   logs: [["id", "ID"], ["created_at", "日時"], ["admin_email", "運営者"], ["action", "操作"], ["target", "対象"], ["detail", "詳細"]],
+  errors: [["id", "ID"], ["created_at", "日時"], ["source", "発生場所"], ["message", "内容"], ["url", "URL"], ["user_agent", "ブラウザ"]],
 };
 
 /** CSV の 1 セル。表計算ソフトで数式として実行されないよう先頭の = + - @ を無効化する */

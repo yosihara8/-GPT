@@ -14,7 +14,8 @@ export async function GET(_req: Request, { params }: Ctx) {
   const id = Number(params.id);
   const biz = await queryOne(
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
-            is_premium, instagram_url, twitter_url
+            is_premium, instagram_url, twitter_url,
+            photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM photo_updated_at)::bigint AS photo_version
        FROM businesses WHERE id = $1`,
     [id],
   );

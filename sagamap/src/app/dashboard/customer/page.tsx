@@ -5,11 +5,12 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapSpot, type RouteSummary } from "@/components/MapView";
 import AdBanner from "@/components/AdBanner";
+import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import SwipeCards, { type RecCard } from "@/components/SwipeCards";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useDistanceMatrix } from "@/hooks/useDistanceMatrix";
 import { api } from "@/lib/fetcher";
-import { CATEGORIES, PRICE_LEVEL_LABELS, WALK_10MIN_RADIUS_M } from "@/lib/config";
+import { CATEGORIES, PRICE_LEVEL_LABELS, WALK_10MIN_RADIUS_M, categoryEmoji } from "@/lib/config";
 import { formatDistance } from "@/lib/geo";
 
 type NearbyShop = {
@@ -193,6 +194,9 @@ function CustomerDashboard() {
         </div>
       )}
 
+      <div className="px-4 pt-3 empty:hidden">
+        <VerifyEmailBanner />
+      </div>
       {isFallback && (
         <p className="bg-amber-50 px-4 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>
       )}
@@ -218,7 +222,7 @@ function CustomerDashboard() {
             onClick={() => setTab(t)}
             className={`shrink-0 border-b-2 px-3 py-3 text-sm ${tab === t ? "border-saga-600 font-semibold text-saga-700" : "border-transparent text-slate-500"}`}
           >
-            {t}
+            {{ 近く: "📍", おすすめ: "✨", クーポン: "🎟️", ルート: "🗺️", お知らせ: "🔔" }[t]} {t}
             {t === "お知らせ" && unread > 0 && <span className="ml-1 rounded-full bg-coupon px-1.5 text-[10px] text-white">{unread}</span>}
           </button>
         ))}
@@ -249,7 +253,12 @@ function CustomerDashboard() {
               {nearby.map((s) => (
                 <li key={s.id}>
                   <button onClick={() => setSelectedId(s.id)} className="card flex w-full items-center gap-3 text-left">
-                    <span className={`h-3 w-3 shrink-0 rounded-full ${s.highlight ? "bg-coupon" : "bg-shop"}`} />
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg ring-4 ${s.highlight ? "bg-coral-50 ring-coupon/40" : "bg-saga-50 ring-shop/30"}`}
+                      aria-hidden
+                    >
+                      {categoryEmoji(s.category)}
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold">{s.name}</span>
                       <span className="text-xs text-slate-500">
@@ -273,7 +282,7 @@ function CustomerDashboard() {
 
         {tab === "おすすめ" && (
           <div>
-            <h2 className="mb-1 font-bold">あなたへのおすすめ</h2>
+            <h2 className="mb-1 text-lg font-extrabold">✨ あなたへのおすすめ</h2>
             <p className="mb-4 text-xs text-slate-500">閲覧・クーポン利用の履歴、現在地、混雑度から AI が選びました。</p>
             <SwipeCards
               cards={recs}

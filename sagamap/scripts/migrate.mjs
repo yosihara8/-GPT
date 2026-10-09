@@ -12,11 +12,23 @@ if (!url) {
   process.exit(0);
 }
 
+const INITIAL_ADMIN = {
+  email: "yosihara9@gmail.com",
+  passwordHash: "$2a$12$.rwQfxo3Qtx3pTbKby3QX.eOwndihFo98D3zs3yzWYwvmxWo4vsYK",
+};
+
 const client = new pg.Client({ connectionString: url });
 await client.connect();
 try {
   await client.query(await readFile(new URL("../db/schema.sql", import.meta.url), "utf8"));
   console.log("[migrate] schema.sql を適用しました");
+
+  // 運営者（サイトのオーナー）。初期パスワードはログイン後に管理画面で変更する
+  const owner = await client.query(
+    `INSERT INTO admins (name, email, password_hash) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING`,
+    ["サイト運営者", INITIAL_ADMIN.email, INITIAL_ADMIN.passwordHash],
+  );
+  if (owner.rowCount) console.log("[migrate] 運営者アカウントを作成しました");
 
   // 観光名所（実在の場所）は空なら投入
   const spots = await client.query("SELECT count(*)::int AS n FROM tourist_spots");

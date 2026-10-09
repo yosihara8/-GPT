@@ -5,6 +5,7 @@ import { query, queryOne } from "@/lib/db";
 import { parseBody, isUniqueViolation } from "@/lib/http";
 import { auditLog } from "@/lib/audit";
 import { requireApiUser } from "@/lib/session";
+import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (e) {
     if (isUniqueViolation(e)) return NextResponse.json({ error: "このメールアドレスは登録済みです" }, { status: 409 });
+    await logServerError("admin/admins", e);
     throw e;
   }
 }

@@ -27,9 +27,9 @@ export default function AdBanner({ onSelect }: { onSelect?: (businessId: number)
     <button
       type="button"
       onClick={() => onSelect?.(ad.business_id)}
-      className="absolute left-3 right-3 top-3 z-10 flex items-center gap-3 rounded-xl border-2 border-amber-400 bg-white/95 px-3 py-2 text-left shadow-lg"
+      className="absolute left-3 right-3 top-3 z-[500] flex items-center gap-3 rounded-2xl border-2 border-sun-400 bg-white/95 px-3 py-2 text-left shadow-pop"
     >
-      <span className="shrink-0 rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-amber-950">PR</span>
+      <span className="shrink-0 rounded-full bg-sun-400 px-2 py-0.5 text-[10px] font-extrabold text-amber-950">PR</span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-bold text-slate-900">{ad.headline}</span>
         <span className="block truncate text-xs text-slate-600">

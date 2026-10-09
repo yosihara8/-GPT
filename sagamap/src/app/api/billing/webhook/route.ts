@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { pool } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
 import { applyReferralDiscountIfEligible } from "@/lib/referral";
+import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,7 @@ async function setPlan(
     await client.query("COMMIT");
   } catch (e) {
     await client.query("ROLLBACK");
+    await logServerError("billing/webhook", e);
     throw e;
   } finally {
     client.release();
