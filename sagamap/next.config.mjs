@@ -10,7 +10,7 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://maps.googleapis.com https://maps.gstatic.com`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.ggpht.com https://*.googleusercontent.com",
+  "img-src 'self' data: blob: https://cyberjapandata.gsi.go.jp https://*.tile.openstreetmap.org https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.ggpht.com https://*.googleusercontent.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self' https://maps.googleapis.com https://*.googleapis.com",
   "frame-src 'none'",

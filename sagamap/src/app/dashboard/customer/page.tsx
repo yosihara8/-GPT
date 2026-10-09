@@ -11,8 +11,8 @@ import SwipeCards, { type RecCard } from "@/components/SwipeCards";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useDistanceMatrix } from "@/hooks/useDistanceMatrix";
 import { api } from "@/lib/fetcher";
-import { CATEGORIES, PRICE_LEVEL_LABELS, WALK_10MIN_RADIUS_M, categoryEmoji } from "@/lib/config";
-import { formatDistance } from "@/lib/geo";
+import { CATEGORIES, PRICE_LEVEL_LABELS, categoryEmoji } from "@/lib/config";
+import { estimateWalkMinutes, formatDistance, haversineMeters } from "@/lib/geo";
 
 type NearbyShop = {
   id: number;
@@ -45,11 +45,15 @@ type Detail = {
 type Notification = { id: number; title: string; body: string; link: string | null; created_at: string; read_at: string | null };
 
 const RANGES = [
-  { label: "500m", value: 500 },
-  { label: "徒歩10分", value: WALK_10MIN_RADIUS_M },
   { label: "3km", value: 3000 },
+  { label: "5km", value: 5000 },
+  { label: "8km", value: 8000 },
 ];
-const TABS = ["近く", "おすすめ", "クーポン", "ルート", "お知らせ"] as const;
+const TABS = ["近く", "お気に入り", "おすすめ", "クーポン", "ルート", "お知らせ"] as const;
+const TAB_ICONS: Record<string, string> = { 近く: "📍", お気に入り: "❤️", おすすめ: "✨", クーポン: "🎟️", ルート: "🗺️", お知らせ: "🔔" };
+
+type Favorite = { id: number; name: string; address: string; lat: number; lng: number; category: string; price_level: number; best_discount: number | null };
+type Stop = MapSpot & { key: string };
 type Tab = (typeof TABS)[number];
 
 export default function CustomerDashboardPage() {
@@ -64,7 +68,7 @@ function CustomerDashboard() {
   const params = useSearchParams();
   const { position, accuracy, isFallback, status, locate } = useGeolocation();
   const [tab, setTab] = useState<Tab>("近く");
-  const [radius, setRadius] = useState(WALK_10MIN_RADIUS_M);
+  const [radius, setRadius] = useState(3000);
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [nearby, setNearby] = useState<NearbyShop[]>([]);
@@ -73,8 +77,11 @@ function CustomerDashboard() {
   const [recs, setRecs] = useState<RecCard[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [spots, setSpots] = useState<MapSpot[]>([]);
-  const [routeIds, setRouteIds] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [routeKeys, setRouteKeys] = useState<string[]>([]);
+  const [routeMode, setRouteMode] = useState<"foot" | "car">("foot");
   const [routeStops, setRouteStops] = useState<MapSpot[] | null>(null);
+  const [routeLoading, setRouteLoading] = useState(false);
   const [route, setRoute] = useState<RouteSummary | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
   const [flow, setFlow] = useState<HeatPoint[] | null>(null);
@@ -116,10 +123,47 @@ function CustomerDashboard() {
   }, [position]);
   useEffect(loadRecs, [loadRecs]);
 
+  const loadFavorites = useCallback(
+    () => api<{ favorites: Favorite[] }>("/api/favorites").then((d) => setFavorites(d.favorites)),
+    [],
+  );
+  const favIds = useMemo(() => new Set(favorites.map((f) => f.id)), [favorites]);
+  async function toggleFavorite(id: number) {
+    if (favIds.has(id)) await api(`/api/favorites?businessId=${id}`, { method: "DELETE" });
+    else await api("/api/favorites", { method: "POST", body: JSON.stringify({ businessId: id }) });
+    loadFavorites();
+  }
+
+  // ルートの行き先候補（お気に入り・近くのお店・観光名所）
+  const stopGroups = useMemo(() => {
+    const dist = (p: { lat: number; lng: number }) => (position ? haversineMeters(position, p) : 0);
+    const shop = (b: { id: number; name: string; lat: number; lng: number }): Stop => ({ ...b, key: `shop-${b.id}` });
+    const byDist = <T extends { lat: number; lng: number }>(xs: T[]) => [...xs].sort((a, b) => dist(a) - dist(b));
+    return [
+      { title: "❤️ お気に入り", items: byDist(favorites).map(shop) },
+      { title: "📍 近くのお店", items: nearby.filter((n) => !favIds.has(n.id)).slice(0, 10).map(shop) },
+      { title: "⭐ 観光名所", items: byDist(spots).map((s) => ({ ...s, key: `spot-${s.id}` })) },
+    ];
+  }, [favorites, favIds, nearby, spots, position]);
+  const allStops = useMemo(() => new Map(stopGroups.flatMap((g) => g.items).map((s) => [s.key, s])), [stopGroups]);
+
+  function showRoute(keys: string[]) {
+    const stops = keys.map((k) => allStops.get(k)).filter(Boolean) as Stop[];
+    if (stops.length === 0) return;
+    setRouteKeys(keys);
+    setRoute(null);
+    setRouteError(null);
+    setRouteLoading(true);
+    setRouteStops(stops);
+    setTab("ルート");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   useEffect(() => {
+    loadFavorites();
     api<{ spots: MapSpot[] }>("/api/spots").then((d) => setSpots(d.spots));
     api<{ notifications: Notification[] }>("/api/notifications").then((d) => setNotifications(d.notifications));
-  }, []);
+  }, [loadFavorites]);
 
   // 店舗詳細（閲覧履歴として記録され、AI 推薦に反映される）
   useEffect(() => {
@@ -155,9 +199,6 @@ function CustomerDashboard() {
   }
 
   const unread = notifications.filter((n) => !n.read_at).length;
-  const sortedSpots = [...spots].sort(
-    (a, b) => (travel[`spot-${a.id}`]?.seconds ?? Infinity) - (travel[`spot-${b.id}`]?.seconds ?? Infinity),
-  );
 
   return (
     <main className="mx-auto max-w-3xl">
@@ -171,9 +212,11 @@ function CustomerDashboard() {
           spots={spots}
           heatmap={flow}
           routeStops={routeStops}
+          routeMode={routeMode}
           onRoute={(r, err) => {
             setRoute(r);
             setRouteError(err ?? null);
+            setRouteLoading(false);
           }}
           selectedId={selectedId}
           onSelectShop={setSelectedId}
@@ -215,6 +258,9 @@ function CustomerDashboard() {
           travel={travel[detail.business.id]?.duration}
           onClose={() => setSelectedId(null)}
           onRedeemCoupon={redeemCoupon}
+          isFavorite={favIds.has(detail.business.id)}
+          onToggleFavorite={() => toggleFavorite(detail.business.id)}
+          onRouteHere={() => showRoute([`shop-${detail.business.id}`])}
         />
       )}
 
@@ -225,7 +271,8 @@ function CustomerDashboard() {
             onClick={() => setTab(t)}
             className={`shrink-0 border-b-2 px-3 py-3 text-sm ${tab === t ? "border-saga-600 font-semibold text-saga-700" : "border-transparent text-slate-500"}`}
           >
-            {{ 近く: "📍", おすすめ: "✨", クーポン: "🎟️", ルート: "🗺️", お知らせ: "🔔" }[t]} {t}
+            {TAB_ICONS[t]} {t}
+            {t === "お気に入り" && favorites.length > 0 && <span className="ml-1 text-xs text-slate-400">{favorites.length}</span>}
             {t === "お知らせ" && unread > 0 && <span className="ml-1 rounded-full bg-coupon px-1.5 text-[10px] text-white">{unread}</span>}
           </button>
         ))}
@@ -283,6 +330,41 @@ function CustomerDashboard() {
           </>
         )}
 
+        {tab === "お気に入り" && (
+          <div className="space-y-2">
+            {favorites.length === 0 && (
+              <p className="card text-sm text-slate-600">
+                まだお気に入りがありません。地図のピンやお店の一覧から、気になるお店の「🤍 お気に入り」を押して登録しましょう。
+              </p>
+            )}
+            {favorites.map((f) => {
+              const m = position ? haversineMeters(position, f) : null;
+              return (
+                <div key={f.id} className="card flex items-center gap-3">
+                  <button onClick={() => setSelectedId(f.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-coral-50 text-lg" aria-hidden>
+                      {categoryEmoji(f.category)}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate font-bold">{f.name}</span>
+                      <span className="block text-xs text-slate-500">
+                        {m != null && `${formatDistance(m)}・徒歩約${estimateWalkMinutes(m)}分`}
+                        {f.best_discount && <b className="ml-1 text-coupon">{f.best_discount}%OFF</b>}
+                      </span>
+                    </span>
+                  </button>
+                  <button onClick={() => showRoute([`shop-${f.id}`])} className="btn-primary shrink-0 px-3 py-1.5">
+                    道順
+                  </button>
+                  <button onClick={() => toggleFavorite(f.id)} aria-label="お気に入りから外す" className="shrink-0 text-xl">
+                    ❤️
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {tab === "おすすめ" && (
           <div>
             <h2 className="mb-1 text-lg font-extrabold">✨ あなたへのおすすめ</h2>
@@ -317,59 +399,41 @@ function CustomerDashboard() {
         )}
 
         {tab === "ルート" && (
-          <div className="space-y-3">
-            <p className="text-sm text-slate-600">行きたい観光名所を選ぶと、現在地から最適な順番で回るルートを提案します。</p>
-            <ul className="space-y-2">
-              {sortedSpots.map((s) => (
-                <li key={s.id}>
-                  <label className="card flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="h-5 w-5 accent-saga-600"
-                      checked={routeIds.includes(s.id)}
-                      onChange={() => setRouteIds((ids) => (ids.includes(s.id) ? ids.filter((x) => x !== s.id) : [...ids, s.id]))}
-                    />
-                    <span className="flex-1 font-medium">{s.name}</span>
-                    <span className="text-xs text-slate-500">
-                      {travel[`spot-${s.id}`]?.distance}
-                      {travel[`spot-${s.id}`] && ` / ${travel[`spot-${s.id}`].duration}`}
-                    </span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <div className="flex gap-2">
-              <button
-                disabled={routeIds.length === 0}
-                onClick={() => setRouteStops(spots.filter((s) => routeIds.includes(s.id)))}
-                className="btn-primary flex-1"
-              >
-                ルートを提案
-              </button>
-              {routeStops && (
-                <button
-                  onClick={() => {
-                    setRouteStops(null);
-                    setRoute(null);
-                  }}
-                  className="btn-outline"
-                >
-                  クリア
-                </button>
-              )}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm text-slate-600">行き先を選ぶと、現在地から<b>道に沿った</b>最適な順番のルートを表示します。</p>
+              <div className="flex shrink-0 rounded-full bg-slate-100 p-1 text-sm font-bold">
+                {(["foot", "car"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => {
+                      setRouteMode(m);
+                      if (routeStops) setRouteLoading(true);
+                    }}
+                    className={`rounded-full px-3 py-1 ${routeMode === m ? "bg-white text-saga-700 shadow" : "text-slate-500"}`}
+                  >
+                    {m === "foot" ? "🚶 徒歩" : "🚗 車"}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {routeLoading && <p className="text-sm font-bold text-saga-600">🗺️ ルートを計算しています…</p>}
             {routeError && <p className="text-sm text-red-600">{routeError}</p>}
             {route && (
-              <div className="card">
-                <p className="font-semibold">
-                  {route.mode === "WALKING" ? "徒歩" : "車"}で合計 {formatDistance(route.totalMeters)}・約{" "}
-                  {Math.round(route.totalSeconds / 60)} 分
+              <div className="card border-2 border-tea-500">
+                <p className="text-lg font-extrabold">
+                  {route.mode === "WALKING" ? "🚶 徒歩" : "🚗 車"}で {formatDistance(route.totalMeters)}・約 {Math.max(1, Math.round(route.totalSeconds / 60))} 分
                 </p>
-                <ol className="mt-2 space-y-1 text-sm">
+                {route.estimated && (
+                  <p className="text-xs text-amber-700">道順を取得できなかったため、直線距離からの目安を表示しています。</p>
+                )}
+                <ol className="mt-2 space-y-1.5 text-sm">
                   {route.legs.map((l, i) => (
                     <li key={i} className="flex justify-between gap-2">
                       <span>
-                        {i + 1}. {l.from} → {l.to}
+                        <b className="mr-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-tea-500 text-xs text-white">{i + 1}</b>
+                        {l.from} → {l.to}
                       </span>
                       <span className="shrink-0 text-slate-500">
                         {l.distance} / {l.duration}
@@ -377,8 +441,60 @@ function CustomerDashboard() {
                     </li>
                   ))}
                 </ol>
+                <div className="mt-3 flex gap-2">
+                  <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="btn-outline flex-1">
+                    地図で見る
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRouteStops(null);
+                      setRoute(null);
+                      setRouteKeys([]);
+                    }}
+                    className="btn-outline"
+                  >
+                    クリア
+                  </button>
+                </div>
+                <p className="mt-2 text-[10px] text-slate-400">道順：© OpenStreetMap contributors / FOSSGIS（OSRM）</p>
               </div>
             )}
+
+            {stopGroups.map((g) =>
+              g.items.length === 0 ? null : (
+                <section key={g.title}>
+                  <h3 className="mb-2 text-sm font-extrabold text-slate-700">{g.title}</h3>
+                  <ul className="space-y-2">
+                    {g.items.map((s) => {
+                      const m = position ? haversineMeters(position, s) : null;
+                      const checked = routeKeys.includes(s.key);
+                      return (
+                        <li key={s.key}>
+                          <label className={`card flex items-center gap-3 py-3 ${checked ? "ring-2 ring-saga-500" : ""}`}>
+                            <input
+                              type="checkbox"
+                              className="h-5 w-5 accent-saga-600"
+                              checked={checked}
+                              onChange={() =>
+                                setRouteKeys((ks) => (ks.includes(s.key) ? ks.filter((k) => k !== s.key) : [...ks, s.key].slice(0, 9)))
+                              }
+                            />
+                            <span className="flex-1 font-bold">{s.name}</span>
+                            {m != null && <span className="shrink-0 text-xs text-slate-500">{formatDistance(m)}</span>}
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ),
+            )}
+
+            <div className="sticky bottom-3 z-10">
+              <button disabled={routeKeys.length === 0} onClick={() => showRoute(routeKeys)} className="btn-primary w-full py-3 text-base">
+                {routeKeys.length ? `${routeKeys.length} か所を回るルートを表示` : "行き先を選んでください"}
+              </button>
+            </div>
           </div>
         )}
 
@@ -445,7 +561,7 @@ function Filters(props: {
             <option key={c}>{c}</option>
           ))}
         </select>
-        <select value={props.price} onChange={(e) => props.setPrice(e.target.value)} className="input w-32 py-1.5 text-sm">
+        <select value={props.price} onChange={(e) => props.setPrice(e.target.value)} className="input w-40 py-1.5 text-sm">
           <option value="">価格帯</option>
           <option value="1">¥〜1,000</option>
           <option value="2">¥1,000〜3,000</option>
@@ -461,11 +577,17 @@ function ShopDetail({
   travel,
   onClose,
   onRedeemCoupon,
+  isFavorite,
+  onToggleFavorite,
+  onRouteHere,
 }: {
   detail: Detail;
   travel?: string;
   onClose: () => void;
   onRedeemCoupon: (id: number) => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+  onRouteHere: () => void;
 }) {
   const b = detail.business;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}&travelmode=walking`;
@@ -488,9 +610,17 @@ function ShopDetail({
         {travel && `・${travel}`}
         {b.contact && `・${b.contact}`}
       </p>
+      <div className="mt-3 flex gap-2">
+        <button onClick={onRouteHere} className="btn-primary flex-1">
+          🗺️ ここへの道順
+        </button>
+        <button onClick={onToggleFavorite} className={`btn-outline ${isFavorite ? "border-coral-400 text-coupon" : ""}`}>
+          {isFavorite ? "❤️ お気に入り" : "🤍 お気に入り"}
+        </button>
+      </div>
       <div className="mt-2 flex flex-wrap gap-3 text-sm">
         <a href={directions} target="_blank" rel="noreferrer" className="text-saga-600 underline">
-          Google マップで道順
+          Google マップで開く
         </a>
         {b.instagram_url && (
           <a href={b.instagram_url} target="_blank" rel="noreferrer" className="text-saga-600 underline">

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const here = parseLatLng(sp);
   if (!here) return NextResponse.json({ error: "lat と lng を指定してください" }, { status: 400 });
 
-  const radius = Math.min(Math.max(Number(sp.get("radius") ?? COUPON_HIGHLIGHT_RADIUS_M) || 500, 50), 5000);
+  const radius = Math.min(Math.max(Number(sp.get("radius") ?? COUPON_HIGHLIGHT_RADIUS_M) || 500, 50), 10000);
   const values: unknown[] = [here.lng, here.lat, radius];
   const where = ["ST_DWithin(b.location, me.geog, $3)"];
   if (sp.get("category")) {
