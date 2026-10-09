@@ -51,6 +51,7 @@ export const couponCreateSchema = z.object({
   discountRate: z.coerce.number().int().min(1, "割引率は 1〜100% です").max(100, "割引率は 1〜100% です"),
   conditions: z.string().trim().max(300).default(""),
   expiresAt: z.coerce.date().refine((d) => d.getTime() > Date.now(), "有効期限は未来の日時にしてください"),
+  notify: z.boolean().default(true),
 });
 
 export const adCreateSchema = z.object({
@@ -58,4 +59,5 @@ export const adCreateSchema = z.object({
   headline: z.string().trim().min(1, "見出しは必須です").max(60),
   body: z.string().trim().max(120).default(""),
   days: z.coerce.number().int().min(1).max(90).default(30),
+  notify: z.boolean().default(true),
 });

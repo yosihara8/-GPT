@@ -10,7 +10,7 @@ const rows: [string, string][] = [
   ["所在地", OPERATOR.address],
   ["電話番号", OPERATOR.phone],
   ["メールアドレス", OPERATOR.email],
-  ["販売価格", `事業者向け有料プラン 月額 ${PRICE_STANDARD.toLocaleString()} 円【要確認：税込／税抜】（紹介 ${REFERRAL_GOAL} 名達成時は月額 ${PRICE_DISCOUNT.toLocaleString()} 円）`],
+  ["販売価格", `事業者向け有料プラン 月額 ${PRICE_STANDARD.toLocaleString()} 円（税込）（紹介 ${REFERRAL_GOAL} 名達成時は月額 ${PRICE_DISCOUNT.toLocaleString()} 円・税込）`],
   ["商品代金以外の必要料金", "インターネット接続料金・通信料金はお客さまのご負担となります"],
   ["支払方法", "クレジットカード（Visa / Mastercard / JCB / American Express 等）、Apple Pay、Google Pay"],
   ["支払時期", "お申し込み時に初回分を決済し、以降は毎月の更新日に自動で決済されます"],

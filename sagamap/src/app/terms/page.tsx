@@ -27,10 +27,10 @@ export default function TermsPage() {
       <ol>
         <li>事業者の無料プランでは、1 店舗の掲載と基本情報の表示を利用できます。</li>
         <li>
-          有料プランの料金は月額 {PRICE_STANDARD.toLocaleString()} 円【要確認：税込／税抜】とし、クレジットカード等により毎月前払いで支払うものとします。
+          有料プランの料金は月額 {PRICE_STANDARD.toLocaleString()} 円（税込）とし、クレジットカード等により毎月前払いで支払うものとします。
         </li>
         <li>
-          事業者の紹介リンクから顧客が {REFERRAL_GOAL} 名以上登録した場合、翌請求分から月額 {PRICE_DISCOUNT.toLocaleString()} 円に変更します。
+          事業者の紹介リンクから顧客が {REFERRAL_GOAL} 名以上登録した場合、翌請求分から月額 {PRICE_DISCOUNT.toLocaleString()} 円（税込）に変更します。
         </li>
         <li>事業者はいつでも解約でき、解約後は次回更新日以降の請求が停止します。支払済みの料金は、法令に定める場合を除き返金しません。</li>
       </ol>

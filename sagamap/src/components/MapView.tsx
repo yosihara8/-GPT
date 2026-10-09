@@ -25,6 +25,8 @@ export type RouteSummary = { legs: RouteLeg[]; totalMeters: number; totalSeconds
 export type MapViewProps = {
   shops: MapShop[];
   me?: { lat: number; lng: number } | null;
+  /** 現在地の誤差（m）。地図に薄い円で表示する */
+  meAccuracy?: number | null;
   /** 赤ピンにする範囲（m）。既定 500m */
   highlightRadius?: number;
   /** 検索範囲の円（m）。徒歩 10 分 = 800m など */

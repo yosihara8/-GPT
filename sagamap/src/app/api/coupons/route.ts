@@ -3,6 +3,7 @@ import { query } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { couponCreateSchema } from "@/lib/schemas";
 import { parseLatLng } from "@/lib/geo";
+import { announceToCustomers } from "@/lib/announce";
 import { getOwnerPlan, ownsBusiness, premiumRequired, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -81,5 +82,14 @@ export async function POST(req: Request) {
      VALUES ($1, $2, $3, $4, $5) RETURNING *`,
     [d.businessId, d.title, d.discountRate, d.conditions, d.expiresAt],
   );
-  return NextResponse.json({ coupon: row }, { status: 201 });
+  const announced = d.notify
+    ? await announceToCustomers({
+        businessId: d.businessId,
+        kind: "coupon",
+        title: `${d.title}（${d.discountRate}% OFF）`,
+        body: `${d.conditions ? `${d.conditions}・` : ""}${d.expiresAt.toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })} まで有効`,
+        link: `/dashboard/customer/coupons/${row.id}`,
+      })
+    : { notified: 0, emailed: 0 };
+  return NextResponse.json({ coupon: row, ...announced }, { status: 201 });
 }
