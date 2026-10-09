@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "db:init": "SEED_DEMO_DATA=true node scripts/migrate.mjs",
     "vercel-build": "node scripts/migrate.mjs && next build",
-    "db:migrate": "node scripts/migrate.mjs"
+    "db:migrate": "node scripts/migrate.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "1.16.8",
@@ -40,6 +41,7 @@
     "eslint-config-next": "14.2.35",
     "postcss": "8.4.49",
     "tailwindcss": "3.4.17",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "vitest": "2.1.8"
   }
 }

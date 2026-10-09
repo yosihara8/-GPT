@@ -65,6 +65,11 @@ function LoginForm() {
           <input id="password" name="password" type="password" required autoComplete="current-password" className="input" />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
+        <p className="text-right text-xs">
+          <Link href="/forgot-password" className="font-bold text-saga-600 underline">
+            パスワードを忘れた方
+          </Link>
+        </p>
         <button disabled={loading} className="btn-primary w-full">
           {loading ? "ログイン中…" : "ログイン"}
         </button>

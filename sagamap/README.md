@@ -53,6 +53,22 @@ Docker を使わない場合は、PostGIS 入りの PostgreSQL を用意して `
 2. 以降は `/admin/login` からログインします。
 3. できること: 登録数・見込み月額売上の概要、事業者・店舗・顧客の一覧と検索、CSV 書き出し（Excel 対応）、迷惑な登録の削除、事業者プランの手動変更、操作記録、運営者の追加。
 
+## アカウント機能
+
+- パスワード再設定（`/forgot-password` → メールのリンク → `/reset-password`）。メール未設定時は、運営者が管理画面で「再設定リンク」を発行して本人に伝える
+- メールアドレスの確認（登録時に確認メールを送信。`/verify-email`）
+- ログイン中のパスワード変更（事業者ダッシュボード・顧客の利用履歴ページ・管理画面）
+- 店舗写真のアップロード（ブラウザで 1200px の JPEG に縮小して DB に保存）
+- 規約ページ：`/terms`、`/privacy`、`/tokushoho`（運営者情報は `src/lib/config.ts` の `OPERATOR` に記入）
+
+## テスト
+
+```bash
+npm test          # 単体テスト（vitest）
+```
+
+GitHub Actions（`.github/workflows/sagamap-ci.yml`）で、Lint・型チェック・テスト・ビルド・DB マイグレーションを自動実行します。
+
 ## セキュリティ対策
 
 - パスワードは bcrypt でハッシュ化（運営者は 12 文字以上）

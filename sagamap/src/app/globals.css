@@ -6,35 +6,65 @@
   color-scheme: light;
 }
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-cream text-slate-800 antialiased;
+  background-image:
+    radial-gradient(circle at 10% 0%, rgba(255, 107, 74, 0.08), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(59, 108, 240, 0.08), transparent 45%);
+  background-attachment: fixed;
 }
 
 @layer components {
   .input {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base outline-none focus:border-saga-500 focus:ring-2 focus:ring-saga-100;
+    @apply w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2.5 text-base outline-none transition focus:border-saga-500 focus:ring-4 focus:ring-saga-100;
   }
   .label {
-    @apply mb-1 block text-sm font-medium text-slate-700;
+    @apply mb-1 block text-sm font-bold text-slate-700;
   }
   .btn {
-    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold transition active:translate-y-px disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-saga-600 text-white hover:bg-saga-700;
+    @apply btn bg-gradient-to-r from-coral-500 to-sun-500 text-white shadow-md shadow-coral-500/30 hover:brightness-105;
   }
   .btn-outline {
-    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+    @apply btn border-2 border-saga-100 bg-white text-saga-700 hover:border-saga-300;
   }
   .card {
-    @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-sm;
+    @apply rounded-3xl border border-white bg-white/90 p-4 shadow-pop backdrop-blur;
   }
   .chip {
-    @apply shrink-0 rounded-full border px-3 py-1 text-sm;
+    @apply shrink-0 rounded-full border-2 px-3 py-1 text-sm font-bold transition;
   }
   .chip-on {
     @apply chip border-saga-600 bg-saga-600 text-white;
   }
   .chip-off {
-    @apply chip border-slate-300 bg-white text-slate-700;
+    @apply chip border-slate-200 bg-white text-slate-600 hover:border-saga-300;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float {
+    animation: none;
+  }
+}
+
+/* 地図のピン（Leaflet） */
+.sm-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 3px solid #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+.sm-pin > span {
+  transform: rotate(45deg);
+  line-height: 1;
+}
+
+/* 地図上部の広告バナーとズームボタンが重ならないようにする */
+.leaflet-top {
+  top: 64px;
 }

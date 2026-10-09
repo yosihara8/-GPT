@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/fetcher";
+import PasswordChangeForm from "@/components/PasswordChangeForm";
 
 type Stats = {
   customers: number;
@@ -22,17 +23,20 @@ const TABS = [
   { key: "stores", label: "店舗" },
   { key: "customers", label: "顧客" },
   { key: "logs", label: "操作記録" },
-  { key: "admins", label: "運営者" },
+  { key: "errors", label: "エラー" },
+  { key: "admins", label: "運営者・設定" },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
-type ListKey = "owners" | "stores" | "customers" | "logs";
+type ListKey = "owners" | "stores" | "customers" | "logs" | "errors";
 
 const COLUMNS: Record<ListKey, [key: string, label: string][]> = {
   owners: [["name", "名前"], ["email", "メール"], ["plan", "プラン"], ["monthly_price", "月額"], ["store_count", "店舗"], ["referral_count", "紹介"], ["created_at", "登録日"]],
   stores: [["name", "店舗名"], ["category", "業種"], ["address", "住所"], ["owner_email", "事業者"], ["is_premium", "有料"], ["active_coupons", "クーポン"], ["view_count", "閲覧"], ["created_at", "登録日"]],
   customers: [["name", "名前"], ["email", "メール"], ["interests", "興味"], ["referred_by", "紹介元"], ["notify_enabled", "通知"], ["created_at", "登録日"]],
   logs: [["created_at", "日時"], ["admin_email", "運営者"], ["action", "操作"], ["target", "対象"], ["detail", "詳細"]],
+  errors: [["created_at", "日時"], ["source", "発生場所"], ["message", "内容"], ["url", "URL"]],
 };
+const READ_ONLY: ListKey[] = ["logs", "errors"];
 
 /** 運営者専用の管理画面 */
 export default function AdminPage() {
@@ -111,6 +115,19 @@ function List({ type }: { type: ListKey }) {
     }
   }
 
+  async function resetLink(row: Row) {
+    try {
+      const d = await api<{ url: string; email: string }>("/api/admin/reset-link", {
+        method: "POST",
+        body: JSON.stringify({ type, id: row.id }),
+      });
+      await navigator.clipboard?.writeText(d.url).catch(() => undefined);
+      setMessage(`${d.email} さん用のパスワード再設定リンク（24 時間有効・コピー済み）：${d.url}`);
+    } catch (e) {
+      setMessage((e as Error).message);
+    }
+  }
+
   async function changePlan(row: Row) {
     const next = row.plan === "premium" ? "free" : "premium";
     const text = next === "premium" ? "有料プランに変更" : "無料プランに戻す";
@@ -139,7 +156,7 @@ function List({ type }: { type: ListKey }) {
           CSV で書き出し
         </a>
       </form>
-      {message && <p className="rounded-lg bg-saga-50 px-3 py-2 text-sm text-saga-700">{message}</p>}
+      {message && <p className="break-all rounded-2xl bg-saga-50 px-3 py-2 text-sm font-bold text-saga-700">{message}</p>}
       {rows === null ? (
         <p className="text-sm text-slate-500">読み込み中…</p>
       ) : rows.length === 0 ? (
@@ -154,7 +171,7 @@ function List({ type }: { type: ListKey }) {
                     {label}
                   </th>
                 ))}
-                {type !== "logs" && <th className="px-3 py-2 font-medium">操作</th>}
+                {!READ_ONLY.includes(type) && <th className="px-3 py-2 font-medium">操作</th>}
               </tr>
             </thead>
             <tbody>
@@ -165,8 +182,13 @@ function List({ type }: { type: ListKey }) {
                       {format(key, r[key])}
                     </td>
                   ))}
-                  {type !== "logs" && (
+                  {!READ_ONLY.includes(type) && (
                     <td className="whitespace-nowrap px-3 py-2">
+                      {(type === "owners" || type === "customers") && (
+                        <button onClick={() => resetLink(r)} className="mr-3 text-saga-600 underline">
+                          再設定リンク
+                        </button>
+                      )}
                       {type === "owners" && (
                         <button onClick={() => changePlan(r)} className="mr-3 text-saga-600 underline">
                           {r.plan === "premium" ? "無料にする" : "有料にする"}
@@ -220,6 +242,16 @@ function Admins() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
+      <PasswordChangeForm minLength={12} />
+      <section className="card space-y-2">
+        <h2 className="font-extrabold">💾 データのバックアップ</h2>
+        <p className="text-sm text-slate-600">
+          全データを JSON ファイルで保存します。月に 1 回程度の保存をおすすめします（パスワードと写真は含みません）。
+        </p>
+        <a href="/api/admin/backup" className="btn-primary w-full">
+          バックアップをダウンロード
+        </a>
+      </section>
       <ul className="card divide-y">
         {admins.map((a) => (
           <li key={a.id} className="py-2 text-sm">

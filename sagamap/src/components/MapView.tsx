@@ -282,17 +282,17 @@ function GoogleMapView({
 
 export function MapLegend() {
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg bg-white/90 px-3 py-2 text-xs text-slate-700 shadow">
+    <div className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-2xl bg-white/90 px-3 py-2 text-xs font-bold text-slate-700 shadow-pop">
       <div className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-full bg-coupon" />
+        <span className="inline-block h-3 w-3 rounded-full bg-coupon" />
         500m 以内のクーポン店
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-full bg-shop" />
-        店舗
+        <span className="inline-block h-3 w-3 rounded-full bg-shop" />
+        お店
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-full bg-amber-600" />
+        <span className="inline-block h-3 w-3 rounded-full bg-amber-600" />
         観光名所
       </div>
     </div>

@@ -5,6 +5,8 @@ import { pool } from "@/lib/db";
 import { parseBody, isUniqueViolation } from "@/lib/http";
 import { businessRegisterSchema } from "@/lib/schemas";
 import { geocodeAddress } from "@/lib/geocode";
+import { sendVerificationMail } from "@/lib/account-mail";
+import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
 
@@ -38,12 +40,16 @@ export async function POST(req: Request) {
       [owner.rows[0].id, d.name, d.address, pos.lat, pos.lng, d.category, d.serviceDescription, d.contact, d.priceLevel],
     );
     await client.query("COMMIT");
+    await sendVerificationMail("business", owner.rows[0].id, d.email, d.name).catch((e) =>
+      logServerError("register/business:verify-mail", e),
+    );
     return NextResponse.json({ ownerId: owner.rows[0].id, businessId: biz.rows[0].id }, { status: 201 });
   } catch (e) {
     await client.query("ROLLBACK");
     if (isUniqueViolation(e)) {
       return NextResponse.json({ error: "このメールアドレスは既に登録されています" }, { status: 409 });
     }
+    await logServerError("register/business", e);
     throw e;
   } finally {
     client.release();

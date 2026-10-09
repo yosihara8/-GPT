@@ -25,6 +25,31 @@ export const CATEGORIES = [
   "その他",
 ] as const;
 
+/** 業種ごとのアイコン（地図のピン・カードに表示） */
+export const CATEGORY_EMOJI: Record<string, string> = {
+  飲食: "🍜",
+  カフェ: "☕",
+  スイーツ: "🍡",
+  バー: "🍺",
+  雑貨: "🎁",
+  "アート・工芸": "🏺",
+  宿泊: "🏨",
+  "体験・アクティビティ": "🚲",
+  "美容・健康": "💆",
+  その他: "📍",
+};
+export const categoryEmoji = (c: string) => CATEGORY_EMOJI[c] ?? "📍";
+
+/** 運営者情報（利用規約・特定商取引法に基づく表記で使用。公開前に記入してください） */
+export const OPERATOR = {
+  serviceName: "SagaMap（サガマップ）",
+  name: "【要記入：運営者の氏名または屋号】",
+  representative: "【要記入：代表者名】",
+  address: "【要記入：所在地（請求があれば遅滞なく開示する旨の記載も可）】",
+  phone: "【要記入：電話番号（請求があれば遅滞なく開示する旨の記載も可）】",
+  email: "【要記入：お問い合わせ用メールアドレス】",
+};
+
 export const PRICE_LEVEL_LABELS: Record<number, string> = { 1: "¥", 2: "¥¥", 3: "¥¥¥" };
 
 export function referralUrl(businessId: number) {

@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const rows = await query(
     `SELECT b.id, b.name, b.address, b.lat, b.lng, b.category, b.service_description, b.price_level, b.is_premium,
+            b.photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM b.photo_updated_at)::bigint AS photo_version,
             EXISTS (SELECT 1 FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS has_coupon
        FROM businesses b ORDER BY b.id`,
   );

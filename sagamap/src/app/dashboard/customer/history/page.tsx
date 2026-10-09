@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/fetcher";
+import PasswordChangeForm from "@/components/PasswordChangeForm";
 
 type Row = {
   id: number;
@@ -30,7 +31,7 @@ export default function HistoryPage() {
       <Link href="/dashboard/customer" className="text-sm text-saga-600">
         ← 地図に戻る
       </Link>
-      <h1 className="mt-2 text-xl font-bold">利用履歴</h1>
+      <h1 className="mt-2 text-xl font-extrabold">🧾 利用履歴</h1>
       <p className="text-xs text-slate-500">閲覧・クーポン利用の履歴をもとに、AI がおすすめを学習します。</p>
       <div className="mt-3 flex gap-2">
         <button onClick={() => setFilter("all")} className={filter === "all" ? "chip-on" : "chip-off"}>
@@ -65,6 +66,9 @@ export default function HistoryPage() {
           ))}
         </ul>
       )}
+      <div className="mt-6">
+        <PasswordChangeForm />
+      </div>
     </main>
   );
 }

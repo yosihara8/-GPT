@@ -84,6 +84,10 @@ function CustomerRegisterForm() {
             ))}
           </div>
         </fieldset>
+        <p className="text-xs text-slate-500">
+          登録すると、<Link href="/terms" className="underline">利用規約</Link>と
+          <Link href="/privacy" className="underline">プライバシーポリシー</Link>に同意したものとみなします。
+        </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button disabled={loading} className="btn-primary w-full">
           {loading ? "登録中…" : "無料で登録する"}

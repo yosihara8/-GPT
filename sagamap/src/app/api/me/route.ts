@@ -14,7 +14,8 @@ export async function GET() {
   );
   const stores = await query(
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
-            instagram_url, twitter_url
+            instagram_url, twitter_url,
+            photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM photo_updated_at)::bigint AS photo_version
        FROM businesses WHERE owner_id = $1 ORDER BY id`,
     [auth.user.id],
   );

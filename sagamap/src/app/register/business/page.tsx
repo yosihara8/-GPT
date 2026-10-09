@@ -84,6 +84,10 @@ export default function BusinessRegisterPage() {
         <Field label="連絡先（電話番号など）" name="contact" />
         <Field label="メールアドレス" name="email" type="email" required autoComplete="email" />
         <Field label="パスワード（8 文字以上）" name="password" type="password" required minLength={8} autoComplete="new-password" />
+        <p className="text-xs text-slate-500">
+          登録すると、<Link href="/terms" className="underline">利用規約</Link>と
+          <Link href="/privacy" className="underline">プライバシーポリシー</Link>に同意したものとみなします。
+        </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button disabled={loading} className="btn-primary w-full">
           {loading ? "登録中…" : "無料で登録する"}

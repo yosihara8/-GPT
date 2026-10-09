@@ -143,3 +143,35 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   count         INTEGER NOT NULL DEFAULT 0,
   window_start  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- メール確認・パスワード再設定用のトークン（トークン本体はハッシュで保存）
+CREATE TABLE IF NOT EXISTS auth_tokens (
+  id          BIGSERIAL PRIMARY KEY,
+  token_hash  TEXT NOT NULL UNIQUE,
+  purpose     TEXT NOT NULL CHECK (purpose IN ('reset_password', 'verify_email')),
+  role        TEXT NOT NULL CHECK (role IN ('business', 'customer', 'admin')),
+  user_id     INTEGER NOT NULL,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  used_at     TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- メールアドレスの確認日時
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ;
+
+-- 店舗写真（縮小した JPEG を保存）
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS photo BYTEA;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS photo_type TEXT;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS photo_updated_at TIMESTAMPTZ;
+
+-- エラーの記録（運営者が管理画面で確認）
+CREATE TABLE IF NOT EXISTS error_logs (
+  id          BIGSERIAL PRIMARY KEY,
+  source      TEXT NOT NULL,
+  message     TEXT NOT NULL,
+  stack       TEXT,
+  url         TEXT,
+  user_agent  TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
