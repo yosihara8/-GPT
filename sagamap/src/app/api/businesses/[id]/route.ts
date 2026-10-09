@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { query, queryOne } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { storeUpdateSchema } from "@/lib/schemas";
-import { geocodeAddress } from "@/lib/geocode";
+import { ADDRESS_NOT_FOUND, geocodeAddress } from "@/lib/geocode";
 import { getOwnerPlan, getSessionUser, ownsBusiness, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -68,10 +68,18 @@ export async function PATCH(req: Request, { params }: Ctx) {
       return NextResponse.json({ error: "SNS 連携は有料プランの機能です", upgradeUrl: "/upgrade" }, { status: 402 });
     }
   }
-  // 住所だけ変わった場合は再ジオコーディング
-  if (d.address && (d.lat == null || d.lng == null)) {
-    const pos = await geocodeAddress(String(d.address));
-    if (pos) Object.assign(d, pos);
+  // 住所が変わったときは、住所から位置を調べ直す（見つからなければ入力し直してもらう）
+  let matched: string | undefined;
+  delete d.lat;
+  delete d.lng;
+  if (d.address) {
+    const current = await queryOne<{ address: string }>("SELECT address FROM businesses WHERE id = $1", [id]);
+    if (current?.address !== d.address) {
+      const pos = await geocodeAddress(String(d.address));
+      if (!pos) return NextResponse.json({ error: ADDRESS_NOT_FOUND, field: "address" }, { status: 422 });
+      Object.assign(d, { lat: pos.lat, lng: pos.lng });
+      matched = pos.matched;
+    }
   }
 
   const sets: string[] = [];
@@ -84,7 +92,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (sets.length === 0) return NextResponse.json({ error: "更新する項目がありません" }, { status: 400 });
   values.push(id);
   await query(`UPDATE businesses SET ${sets.join(", ")} WHERE id = $${values.length}`, values);
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, matched });
 }
 
 export async function DELETE(_req: Request, { params }: Ctx) {

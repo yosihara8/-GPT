@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { pool } from "@/lib/db";
 import { parseBody, isUniqueViolation } from "@/lib/http";
 import { businessRegisterSchema } from "@/lib/schemas";
-import { geocodeAddress } from "@/lib/geocode";
+import { ADDRESS_NOT_FOUND, geocodeAddress } from "@/lib/geocode";
 import { sendVerificationMail } from "@/lib/account-mail";
 import { logServerError } from "@/lib/server-error";
 
@@ -19,13 +19,8 @@ export async function POST(req: Request) {
   if (!body.ok) return body.response;
   const d = body.data;
 
-  const pos = d.lat != null && d.lng != null ? { lat: d.lat, lng: d.lng } : await geocodeAddress(d.address);
-  if (!pos) {
-    return NextResponse.json(
-      { error: "住所から位置を特定できませんでした。地図上で店舗の位置を指定してください", needsLocation: true },
-      { status: 422 },
-    );
-  }
+  const pos = await geocodeAddress(d.address);
+  if (!pos) return NextResponse.json({ error: ADDRESS_NOT_FOUND, field: "address" }, { status: 422 });
 
   const client = await pool.connect();
   try {
@@ -43,7 +38,7 @@ export async function POST(req: Request) {
     await sendVerificationMail("business", owner.rows[0].id, d.email, d.name).catch((e) =>
       logServerError("register/business:verify-mail", e),
     );
-    return NextResponse.json({ ownerId: owner.rows[0].id, businessId: biz.rows[0].id }, { status: 201 });
+    return NextResponse.json({ ownerId: owner.rows[0].id, businessId: biz.rows[0].id, matched: pos.matched }, { status: 201 });
   } catch (e) {
     await client.query("ROLLBACK");
     if (isUniqueViolation(e)) {

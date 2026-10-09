@@ -1,22 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { CATEGORIES } from "@/lib/config";
+import { CATEGORIES, PRICE_OPTIONS } from "@/lib/config";
 import { api, ApiError } from "@/lib/fetcher";
 
 export default function BusinessRegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [needsLocation, setNeedsLocation] = useState(false);
+  const [addressError, setAddressError] = useState<string | null>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setAddressError(null);
     const f = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
     try {
       await api("/api/register/business", {
@@ -30,14 +32,20 @@ export default function BusinessRegisterPage() {
           priceLevel: f.priceLevel,
           email: f.email,
           password: f.password,
-          ...(f.lat && f.lng ? { lat: f.lat, lng: f.lng } : {}),
         }),
       });
       await signIn("credentials", { email: f.email, password: f.password, role: "business", redirect: false });
       router.push("/dashboard/business?welcome=1");
     } catch (err) {
-      setError((err as Error).message);
-      if (err instanceof ApiError && err.data.needsLocation) setNeedsLocation(true);
+      if (err instanceof ApiError && err.data.field === "address") {
+        // 住所から場所が見つからないときは、住所を入力し直してもらう
+        setAddressError(err.message);
+        addressRef.current?.focus();
+        addressRef.current?.select();
+        addressRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        setError((err as Error).message);
+      }
     } finally {
       setLoading(false);
     }
@@ -51,16 +59,24 @@ export default function BusinessRegisterPage() {
       </p>
       <form onSubmit={onSubmit} className="card mt-4 space-y-4">
         <Field label="店舗名" name="name" required />
-        <Field label="住所" name="address" required placeholder="佐賀県佐賀市駅前中央1丁目…" />
-        {needsLocation && (
-          <div className="grid grid-cols-2 gap-3 rounded-lg bg-amber-50 p-3">
-            <p className="col-span-2 text-xs text-amber-800">
-              住所から位置を特定できませんでした。Google マップで店舗を右クリックして表示される緯度・経度を入力してください。
-            </p>
-            <Field label="緯度" name="lat" required inputMode="decimal" placeholder="33.2643" />
-            <Field label="経度" name="lng" required inputMode="decimal" placeholder="130.2970" />
-          </div>
-        )}
+        <div>
+          <label className="label" htmlFor="address">住所</label>
+          <input
+            id="address"
+            name="address"
+            ref={addressRef}
+            required
+            placeholder="佐賀県佐賀市駅前中央1丁目4-17"
+            aria-invalid={Boolean(addressError)}
+            onChange={() => setAddressError(null)}
+            className={`input ${addressError ? "border-coupon ring-4 ring-coral-100" : ""}`}
+          />
+          {addressError ? (
+            <p className="mt-1 text-sm font-bold text-coupon">⚠️ {addressError}</p>
+          ) : (
+            <p className="mt-1 text-xs text-slate-500">都道府県から番地まで入力すると、地図に自動でお店の場所が表示されます。</p>
+          )}
+        </div>
         <div>
           <label className="label" htmlFor="category">業種</label>
           <select id="category" name="category" required className="input">
@@ -76,9 +92,11 @@ export default function BusinessRegisterPage() {
         <div>
           <label className="label" htmlFor="priceLevel">価格帯</label>
           <select id="priceLevel" name="priceLevel" defaultValue="2" className="input">
-            <option value="1">¥（〜1,000 円）</option>
-            <option value="2">¥¥（1,000〜3,000 円）</option>
-            <option value="3">¥¥¥（3,000 円〜）</option>
+            {PRICE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </div>
         <Field label="連絡先（電話番号など）" name="contact" />
