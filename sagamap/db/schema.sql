@@ -196,3 +196,22 @@ CREATE TABLE IF NOT EXISTS favorites (
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (customer_id, business_id)
 );
+
+-- 地図を開いた場所と時刻（匿名。誰の記録かは保存しない。約 100m 単位に丸めて保存）
+CREATE TABLE IF NOT EXISTS location_pings (
+  id          BIGSERIAL PRIMARY KEY,
+  lat         DOUBLE PRECISION NOT NULL,
+  lng         DOUBLE PRECISION NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS location_pings_created_idx ON location_pings (created_at);
+
+-- 紹介割引の月次判定の記録（前月の紹介人数と、当月の料金）
+CREATE TABLE IF NOT EXISTS referral_monthly_results (
+  owner_id       INTEGER NOT NULL REFERENCES business_owners(id) ON DELETE CASCADE,
+  month          DATE NOT NULL,          -- 紹介を数えた月（1 日）
+  referral_count INTEGER NOT NULL,
+  achieved       BOOLEAN NOT NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (owner_id, month)
+);

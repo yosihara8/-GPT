@@ -3,11 +3,24 @@ import { query } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { adCreateSchema } from "@/lib/schemas";
 import { announceToCustomers } from "@/lib/announce";
+import { queryOne } from "@/lib/db";
+import { ADS_PER_MONTH } from "@/lib/config";
 import { getOwnerPlan, getSessionUser, ownsBusiness, premiumRequired, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-/** 地図上バナー広告。事業主は自分の広告一覧、それ以外は配信中の広告 */
+/** 今月（日本時間の 1 日〜末日）に出稿した回数 */
+async function adsThisMonth(ownerId: number) {
+  const row = await queryOne<{ n: number }>(
+    `SELECT count(*)::int AS n FROM ads a JOIN businesses b ON b.id = a.business_id
+      WHERE b.owner_id = $1
+        AND date_trunc('month', a.created_at AT TIME ZONE 'Asia/Tokyo') = date_trunc('month', now() AT TIME ZONE 'Asia/Tokyo')`,
+    [ownerId],
+  );
+  return row?.n ?? 0;
+}
+
+/** 地図上バナー広告。事業主は自分の広告一覧と今月の残り回数、それ以外は配信中の広告 */
 export async function GET() {
   const user = await getSessionUser();
   if (user?.role === "business") {
@@ -16,7 +29,8 @@ export async function GET() {
         WHERE b.owner_id = $1 ORDER BY a.created_at DESC`,
       [user.id],
     );
-    return NextResponse.json({ ads: rows });
+    const used = await adsThisMonth(user.id);
+    return NextResponse.json({ ads: rows, limit: ADS_PER_MONTH, used, remaining: Math.max(0, ADS_PER_MONTH - used) });
   }
   const rows = await query(
     `SELECT a.id, a.headline, a.body, b.id AS business_id, b.name AS business_name, b.lat, b.lng
@@ -32,6 +46,12 @@ export async function POST(req: Request) {
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   if ((await getOwnerPlan(auth.user.id))?.plan !== "premium") return premiumRequired();
+  if ((await adsThisMonth(auth.user.id)) >= ADS_PER_MONTH) {
+    return NextResponse.json(
+      { error: `広告の出稿は月 ${ADS_PER_MONTH} 回までです。来月 1 日から再び出稿できます` },
+      { status: 429 },
+    );
+  }
   const body = await parseBody(req, adCreateSchema);
   if (!body.ok) return body.response;
   const d = body.data;

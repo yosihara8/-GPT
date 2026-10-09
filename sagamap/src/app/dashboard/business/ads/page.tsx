@@ -19,9 +19,17 @@ export default function AdsPage() {
 function Ads() {
   const stores = useMyStores();
   const [ads, setAds] = useState<Ad[]>([]);
+  const [quota, setQuota] = useState<{ limit: number; used: number; remaining: number } | null>(null);
   const [preview, setPreview] = useState({ headline: "", body: "" });
   const [msg, setMsg] = useState<string | null>(null);
-  const load = useCallback(() => api<{ ads: Ad[] }>("/api/ads").then((d) => setAds(d.ads)), []);
+  const load = useCallback(
+    () =>
+      api<{ ads: Ad[]; limit: number; used: number; remaining: number }>("/api/ads").then((d) => {
+        setAds(d.ads);
+        setQuota({ limit: d.limit, used: d.used, remaining: d.remaining });
+      }),
+    [],
+  );
   useEffect(() => {
     load();
   }, [load]);
@@ -51,6 +59,19 @@ function Ads() {
 
   return (
     <div className="space-y-4">
+      {quota && (
+        <div className={`card flex items-center justify-between ${quota.remaining === 0 ? "border-4 border-sun-400" : ""}`}>
+          <div>
+            <p className="font-extrabold">📣 広告出稿は月 {quota.limit} 回まで</p>
+            <p className="text-xs text-slate-500">毎月 1 日〜末日で数えます。翌月 1 日に回数がリセットされます。</p>
+          </div>
+          <p className="shrink-0 text-right">
+            <span className="text-xs text-slate-500">今月の残り</span>
+            <br />
+            <b className="text-2xl">{quota.remaining}</b> / {quota.limit} 回
+          </p>
+        </div>
+      )}
       <div>
         <p className="mb-1 text-xs text-slate-500">プレビュー（地図上部に表示されます）</p>
         <div className="flex items-center gap-3 rounded-xl border-2 border-amber-400 bg-white px-3 py-2 shadow">
@@ -82,7 +103,9 @@ function Ads() {
         </div>
         <NotifyCheckbox />
         {msg && <p className="text-sm font-bold text-tea-700">{msg}</p>}
-        <button className="btn-primary w-full">出稿する</button>
+        <button disabled={quota?.remaining === 0} className="btn-primary w-full">
+          {quota?.remaining === 0 ? "今月の出稿回数を使い切りました" : "出稿する"}
+        </button>
       </form>
 
       <ul className="space-y-2">

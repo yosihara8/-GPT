@@ -3,6 +3,8 @@ export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:300
 export const PRICE_STANDARD = 3980;
 export const PRICE_DISCOUNT = 2980;
 export const REFERRAL_GOAL = 10;
+/** 広告出稿の上限（1 か月あたり。毎月 1 日〜末日） */
+export const ADS_PER_MONTH = 2;
 
 /** 徒歩速度（m/分）。不動産表示の基準 80m/分 に合わせる */
 export const WALK_METERS_PER_MIN = 80;

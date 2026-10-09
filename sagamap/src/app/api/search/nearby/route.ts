@@ -3,6 +3,8 @@ import { query } from "@/lib/db";
 import { estimateWalkMinutes, parseLatLng } from "@/lib/geo";
 import { COUPON_HIGHLIGHT_RADIUS_M } from "@/lib/config";
 import { requireApiUser } from "@/lib/session";
+import { recordLocationPing } from "@/lib/flows";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,8 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const here = parseLatLng(sp);
   if (!here) return NextResponse.json({ error: "lat と lng を指定してください" }, { status: 400 });
+  // 人の流れの実測（匿名。同じ人からは 10 分に 1 回だけ記録）
+  if ((await rateLimit(`ping-user:${auth.user.id}`, 1, 10 * 60)).ok) await recordLocationPing(here.lat, here.lng);
 
   const radius = Math.min(Math.max(Number(sp.get("radius") ?? COUPON_HIGHLIGHT_RADIUS_M) || 500, 50), 10000);
   const values: unknown[] = [here.lng, here.lat, radius];
