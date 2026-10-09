@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { query, queryOne } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { storeCreateSchema } from "@/lib/schemas";
-import { geocodeAddress } from "@/lib/geocode";
+import { ADDRESS_NOT_FOUND, geocodeAddress } from "@/lib/geocode";
 import { getOwnerPlan, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -36,14 +36,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const pos = d.lat != null && d.lng != null ? { lat: d.lat, lng: d.lng } : await geocodeAddress(d.address);
-  if (!pos) {
-    return NextResponse.json({ error: "住所から位置を特定できませんでした", needsLocation: true }, { status: 422 });
-  }
+  const pos = await geocodeAddress(d.address);
+  if (!pos) return NextResponse.json({ error: ADDRESS_NOT_FOUND, field: "address" }, { status: 422 });
   const row = await queryOne<{ id: number }>(
     `INSERT INTO businesses (owner_id, name, address, lat, lng, category, service_description, contact, price_level, is_premium)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
     [ownerId, d.name, d.address, pos.lat, pos.lng, d.category, d.serviceDescription, d.contact, d.priceLevel, plan?.plan === "premium"],
   );
-  return NextResponse.json({ id: row!.id }, { status: 201 });
+  return NextResponse.json({ id: row!.id, matched: pos.matched }, { status: 201 });
 }

@@ -9,7 +9,7 @@ import PhotoUploader from "@/components/PhotoUploader";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import { api } from "@/lib/fetcher";
-import { CATEGORIES, PRICE_STANDARD } from "@/lib/config";
+import { CATEGORIES, PRICE_OPTIONS, PRICE_STANDARD } from "@/lib/config";
 
 type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; monthly_price: number };
 type Store = {
@@ -227,18 +227,13 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
       priceLevel: f.priceLevel,
       crowdLevel: f.crowdLevel,
     };
-    // 住所を変えた場合は緯度経度を送らず、サーバー側で再ジオコーディングする
-    if (f.address === store.address) {
-      body.lat = f.lat;
-      body.lng = f.lng;
-    }
     if (premium) {
       body.instagramUrl = f.instagramUrl;
       body.twitterUrl = f.twitterUrl;
     }
     try {
-      await api(`/api/businesses/${store.id}`, { method: "PATCH", body: JSON.stringify(body) });
-      setMsg("保存しました");
+      const res = await api<{ matched?: string }>(`/api/businesses/${store.id}`, { method: "PATCH", body: JSON.stringify(body) });
+      setMsg(res.matched ? `保存しました。地図の場所を「${res.matched}」に更新しました` : "保存しました");
       onSaved();
     } catch (err) {
       setMsg((err as Error).message);
@@ -260,9 +255,10 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
             ))}
           </select>
         </div>
-        <Input label="住所" name="address" defaultValue={store.address} required className="sm:col-span-2" />
-        <Input label="緯度" name="lat" defaultValue={String(store.lat)} inputMode="decimal" />
-        <Input label="経度" name="lng" defaultValue={String(store.lng)} inputMode="decimal" />
+        <div className="sm:col-span-2">
+          <Input label="住所" name="address" defaultValue={store.address} required />
+          <p className="mt-1 text-xs text-slate-500">住所を変更すると、地図の場所も自動で更新されます。</p>
+        </div>
         <div className="sm:col-span-2">
           <label className="label">サービス内容</label>
           <textarea name="serviceDescription" defaultValue={store.service_description} rows={3} className="input" />
@@ -272,9 +268,11 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
           <div>
             <label className="label">価格帯</label>
             <select name="priceLevel" defaultValue={store.price_level} className="input">
-              <option value="1">¥</option>
-              <option value="2">¥¥</option>
-              <option value="3">¥¥¥</option>
+              {PRICE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -328,7 +326,6 @@ function AddStore({ onAdded }: { onAdded: () => void }) {
           category: f.category,
           serviceDescription: f.serviceDescription,
           contact: f.contact,
-          ...(f.lat && f.lng ? { lat: f.lat, lng: f.lng } : {}),
         }),
       });
       setOpen(false);
@@ -341,11 +338,7 @@ function AddStore({ onAdded }: { onAdded: () => void }) {
     <form onSubmit={onSubmit} className="card space-y-3">
       <h2 className="font-bold">店舗を追加</h2>
       <Input label="店舗名" name="name" required />
-      <Input label="住所" name="address" required />
-      <div className="grid grid-cols-2 gap-2">
-        <Input label="緯度（任意）" name="lat" inputMode="decimal" />
-        <Input label="経度（任意）" name="lng" inputMode="decimal" />
-      </div>
+      <Input label="住所" name="address" required placeholder="佐賀県佐賀市駅前中央1丁目4-17" />
       <div>
         <label className="label">業種</label>
         <select name="category" className="input">

@@ -447,9 +447,9 @@ function Filters(props: {
         </select>
         <select value={props.price} onChange={(e) => props.setPrice(e.target.value)} className="input w-32 py-1.5 text-sm">
           <option value="">価格帯</option>
-          <option value="1">¥</option>
-          <option value="2">¥¥</option>
-          <option value="3">¥¥¥</option>
+          <option value="1">¥〜1,000</option>
+          <option value="2">¥1,000〜3,000</option>
+          <option value="3">¥3,000〜</option>
         </select>
       </div>
     </div>

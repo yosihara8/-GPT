@@ -50,7 +50,13 @@ export const OPERATOR = {
   email: "ai.prompt.biz@gmail.com",
 };
 
-export const PRICE_LEVEL_LABELS: Record<number, string> = { 1: "¥", 2: "¥¥", 3: "¥¥¥" };
+/** 価格帯（1 人あたりの目安） */
+export const PRICE_LEVEL_LABELS: Record<number, string> = { 1: "¥〜1,000", 2: "¥1,000〜3,000", 3: "¥3,000〜" };
+export const PRICE_OPTIONS = [
+  { value: "1", label: "¥〜1,000（1 人あたり）" },
+  { value: "2", label: "¥1,000〜3,000（1 人あたり）" },
+  { value: "3", label: "¥3,000〜（1 人あたり）" },
+];
 
 export function referralUrl(businessId: number) {
   return `${APP_URL}/ref?biz_id=${businessId}`;
