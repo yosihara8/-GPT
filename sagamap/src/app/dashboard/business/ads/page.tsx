@@ -31,11 +31,11 @@ function Ads() {
     const form = e.currentTarget;
     try {
       const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
-      const res = await api<{ notified: number; emailed: number }>("/api/ads", {
+      const res = await api<{ notified: number }>("/api/ads", {
         method: "POST",
         body: JSON.stringify({ ...f, notify: f.notify === "on" }),
       });
-      setMsg(`広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人にお知らせしました（メール ${res.emailed} 通）` : ""}`);
+      setMsg(`広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週月曜にまとめて届きます）` : ""}`);
       form.reset();
       setPreview({ headline: "", body: "" });
       load();

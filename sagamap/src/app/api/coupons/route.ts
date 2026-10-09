@@ -90,6 +90,6 @@ export async function POST(req: Request) {
         body: `${d.conditions ? `${d.conditions}・` : ""}${d.expiresAt.toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })} まで有効`,
         link: `/dashboard/customer/coupons/${row.id}`,
       })
-    : { notified: 0, emailed: 0 };
+    : { notified: 0 };
   return NextResponse.json({ coupon: row, ...announced }, { status: 201 });
 }

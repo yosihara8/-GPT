@@ -179,3 +179,12 @@ CREATE TABLE IF NOT EXISTS error_logs (
 -- お知らせの種類（weekly = 週 1 回のまとめ、coupon / ad = 事業者の発信時の自動お知らせ）
 ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'weekly';
 CREATE INDEX IF NOT EXISTS notifications_kind_idx ON notifications (customer_id, kind, created_at DESC);
+
+-- 定期処理の実行記録（週 1 回のメールを二重に送らないため）
+CREATE TABLE IF NOT EXISTS job_runs (
+  job         TEXT NOT NULL,
+  period      TEXT NOT NULL,
+  ran_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  result      TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (job, period)
+);

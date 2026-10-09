@@ -40,11 +40,11 @@ function Coupons() {
     const form = e.currentTarget;
     const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
     try {
-      const res = await api<{ notified: number; emailed: number }>("/api/coupons", {
+      const res = await api<{ notified: number }>("/api/coupons", {
         method: "POST",
         body: JSON.stringify({ ...f, notify: f.notify === "on", expiresAt: `${f.expiresAt}T23:59:59+09:00` }),
       });
-      setMsg(`クーポンを発行しました。${res.notified ? `興味のありそうなお客さま ${res.notified} 人にお知らせしました（メール ${res.emailed} 通）` : ""}`);
+      setMsg(`クーポンを発行しました。${res.notified ? `興味のありそうなお客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週月曜にまとめて届きます）` : ""}`);
       form.reset();
       load();
     } catch (err) {
