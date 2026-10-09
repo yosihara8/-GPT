@@ -22,6 +22,7 @@ export const storeFields = {
 
 export const businessRegisterSchema = z.object({
   ...storeFields,
+  inviteCode: z.string().trim().max(40).optional(),
   email: z.string().trim().toLowerCase().email("メールアドレスの形式が正しくありません"),
   password: z.string().min(8, "パスワードは 8 文字以上にしてください").max(128),
 });

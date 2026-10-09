@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { api } from "@/lib/fetcher";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
+import { QRCodeSVG } from "qrcode.react";
 
 type Stats = {
   customers: number;
@@ -24,6 +25,7 @@ const TABS = [
   { key: "stores", label: "店舗" },
   { key: "customers", label: "顧客" },
   { key: "logs", label: "操作記録" },
+  { key: "invites", label: "🎁 特別招待" },
   { key: "errors", label: "エラー" },
   { key: "admins", label: "運営者・設定" },
 ] as const;
@@ -58,7 +60,8 @@ export default function AdminPage() {
       </nav>
       {tab === "overview" && <Overview />}
       {tab === "admins" && <Admins />}
-      {tab !== "overview" && tab !== "admins" && <List key={tab} type={tab} />}
+      {tab === "invites" && <Invites />}
+      {tab !== "overview" && tab !== "admins" && tab !== "invites" && <List key={tab} type={tab} />}
     </main>
   );
 }
@@ -145,10 +148,10 @@ function List({ type }: { type: ListKey }) {
     }
   }
 
-  async function changePlan(row: Row) {
-    const next = row.plan === "premium" ? "free" : "premium";
-    const text = next === "premium" ? "有料プランに変更" : "無料プランに戻す";
-    if (!confirm(`「${row.email}」を${text}しますか？（Stripe の請求は変わりません）`)) return;
+  async function changePlan(row: Row, next: string) {
+    if (next === row.plan) return;
+    const text = { free: "無料プランに変更", premium: "有料プランに変更", special: "特別プラン（有料機能を無料）に変更" }[next];
+    if (!confirm(`「${row.email}」を${text}しますか？（Stripe の請求は変わりません）`)) return load(q);
     try {
       await api(`/api/admin/owners/${row.id}`, { method: "PATCH", body: JSON.stringify({ plan: next }) });
       setMessage(`「${row.email}」を${text}しました`);
@@ -212,9 +215,16 @@ function List({ type }: { type: ListKey }) {
                         </>
                       )}
                       {type === "owners" && (
-                        <button onClick={() => changePlan(r)} className="mr-3 text-saga-600 underline">
-                          {r.plan === "premium" ? "無料にする" : "有料にする"}
-                        </button>
+                        <select
+                          value={String(r.plan)}
+                          onChange={(e) => changePlan(r, e.target.value)}
+                          className="mr-3 rounded-lg border px-1 py-0.5 text-xs"
+                          aria-label="プランの変更"
+                        >
+                          <option value="free">無料</option>
+                          <option value="premium">有料</option>
+                          <option value="special">特別（無料）</option>
+                        </select>
                       )}
                       <button onClick={() => remove(r)} className="text-red-600 underline">
                         削除
@@ -235,7 +245,10 @@ function List({ type }: { type: ListKey }) {
 function format(key: string, v: Row[string]) {
   if (v == null || v === "") return <span className="text-slate-400">—</span>;
   if (typeof v === "boolean") return v ? "◯" : "—";
-  if (key === "plan") return v === "premium" ? <b className="text-saga-700">有料</b> : "無料";
+  if (key === "plan") {
+    if (v === "special") return <b className="text-coral-600">🎁 特別</b>;
+    return v === "premium" ? <b className="text-saga-700">有料</b> : "無料";
+  }
   if (key === "monthly_price") return `${Number(v).toLocaleString()} 円`;
   if (key === "created_at") return new Date(String(v)).toLocaleString("ja-JP", { dateStyle: "short", timeStyle: "short" });
   return String(v);
@@ -289,6 +302,120 @@ function Admins() {
         {message && <p className="text-sm text-saga-700">{message}</p>}
         <button className="btn-primary w-full">追加する</button>
       </form>
+    </div>
+  );
+}
+
+type Invite = {
+  id: number;
+  code: string;
+  label: string;
+  max_uses: number;
+  used_count: number;
+  expires_at: string | null;
+  is_active: boolean;
+  usable: boolean;
+  used_by: string;
+  url: string;
+};
+
+/** 特別招待リンク（運営の紹介者は有料プランを無料で利用できる） */
+function Invites() {
+  const [invites, setInvites] = useState<Invite[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+  const [copied, setCopied] = useState<number | null>(null);
+  const load = useCallback(() => api<{ invites: Invite[] }>("/api/admin/invites").then((d) => setInvites(d.invites)), []);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    try {
+      await api("/api/admin/invites", { method: "POST", body: JSON.stringify(Object.fromEntries(new FormData(form))) });
+      setMessage("特別招待リンクを発行しました。下の一覧からコピーして、紹介したい事業者に送ってください。");
+      form.reset();
+      load();
+    } catch (err) {
+      setMessage((err as Error).message);
+    }
+  }
+
+  async function stop(id: number) {
+    if (!confirm("この招待リンクを停止しますか？（登録済みの事業者の特別プランはそのままです）")) return;
+    await api(`/api/admin/invites?id=${id}`, { method: "PATCH" });
+    load();
+  }
+
+  return (
+    <div className="space-y-4">
+      <section className="card space-y-3">
+        <h2 className="text-lg font-extrabold">🎁 特別招待リンクの発行</h2>
+        <p className="text-sm text-slate-600">
+          運営から紹介する事業者に送るリンクです。このリンクから事業主登録すると、<b>有料プランのすべての機能を無料</b>で使えます（お支払い不要）。
+        </p>
+        <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-4">
+          <input name="label" placeholder="メモ（例：〇〇商店街の紹介）" className="input sm:col-span-2" maxLength={60} />
+          <select name="maxUses" defaultValue="1" className="input" aria-label="使える人数">
+            {[1, 3, 5, 10, 30].map((n) => (
+              <option key={n} value={n}>
+                {n} 人まで
+              </option>
+            ))}
+          </select>
+          <select name="days" defaultValue="30" className="input" aria-label="有効期限">
+            {[7, 30, 90, 365].map((n) => (
+              <option key={n} value={n}>
+                {n} 日間有効
+              </option>
+            ))}
+          </select>
+          <button className="btn-primary sm:col-span-4">招待リンクを発行する</button>
+        </form>
+        {message && <p className="rounded-2xl bg-tea-50 px-3 py-2 text-sm font-bold text-tea-700">{message}</p>}
+      </section>
+
+      {invites.length === 0 && <p className="text-sm text-slate-500">まだ招待リンクはありません。</p>}
+      {invites.map((i) => (
+        <section key={i.id} className={`card flex flex-col gap-4 sm:flex-row ${i.usable ? "" : "opacity-60"}`}>
+          <div className="self-center rounded-2xl border bg-white p-2">
+            <QRCodeSVG value={i.url} size={110} marginSize={1} />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1 text-sm">
+            <p className="font-extrabold">
+              {i.label || "（メモなし）"}
+              <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${i.usable ? "bg-tea-50 text-tea-700" : "bg-slate-100 text-slate-500"}`}>
+                {i.usable ? "利用できます" : "利用不可"}
+              </span>
+            </p>
+            <p className="break-all rounded-xl bg-slate-50 px-3 py-2 font-mono text-xs">{i.url}</p>
+            <p className="text-xs text-slate-500">
+              利用 {i.used_count} / {i.max_uses} 人
+              {i.expires_at && `・${new Date(i.expires_at).toLocaleDateString("ja-JP")} まで`}
+              {!i.is_active && "・停止済み"}
+            </p>
+            {i.used_by && <p className="text-xs text-slate-500">登録した事業者：{i.used_by}</p>}
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={async () => {
+                  await navigator.clipboard?.writeText(i.url).catch(() => undefined);
+                  setCopied(i.id);
+                  setTimeout(() => setCopied(null), 2000);
+                }}
+                className="btn-primary px-4 py-1.5"
+              >
+                {copied === i.id ? "コピーしました" : "リンクをコピー"}
+              </button>
+              {i.is_active && (
+                <button onClick={() => stop(i.id)} className="btn-outline px-4 py-1.5">
+                  停止
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

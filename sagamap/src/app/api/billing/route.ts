@@ -20,8 +20,12 @@ export async function POST() {
     plan: string;
     monthly_price: number;
     stripe_customer_id: string | null;
-  }>("SELECT id, email, plan, monthly_price, stripe_customer_id FROM business_owners WHERE id = $1", [auth.user.id]);
+    complimentary: boolean;
+  }>("SELECT id, email, plan, monthly_price, stripe_customer_id, complimentary FROM business_owners WHERE id = $1", [auth.user.id]);
   if (!owner) return NextResponse.json({ error: "アカウントが見つかりません" }, { status: 404 });
+  if (owner.complimentary) {
+    return NextResponse.json({ error: "特別プランのため、お支払いの手続きは不要です" }, { status: 400 });
+  }
 
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: "決済（Stripe）が未設定です。管理者にお問い合わせください" }, { status: 503 });

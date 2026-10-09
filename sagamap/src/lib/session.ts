@@ -35,8 +35,13 @@ export async function requirePageUser(role: Role, callbackUrl: string) {
 }
 
 export async function getOwnerPlan(ownerId: number) {
-  return queryOne<{ plan: "free" | "premium"; monthly_price: number; stripe_subscription_id: string | null }>(
-    "SELECT plan, monthly_price, stripe_subscription_id FROM business_owners WHERE id = $1",
+  return queryOne<{
+    plan: "free" | "premium";
+    monthly_price: number;
+    stripe_subscription_id: string | null;
+    complimentary: boolean;
+  }>(
+    "SELECT plan, monthly_price, stripe_subscription_id, complimentary FROM business_owners WHERE id = $1",
     [ownerId],
   );
 }

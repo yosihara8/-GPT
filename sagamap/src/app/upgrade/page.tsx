@@ -26,13 +26,15 @@ export default function UpgradePage() {
 function Upgrade() {
   const params = useSearchParams();
   const [plan, setPlan] = useState<"free" | "premium" | null>(null);
+  const [special, setSpecial] = useState(false);
   const [price, setPrice] = useState(PRICE_STANDARD);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api<{ owner: { plan: "free" | "premium"; monthly_price: number } }>("/api/me").then((d) => {
+    api<{ owner: { plan: "free" | "premium"; monthly_price: number; complimentary?: boolean } }>("/api/me").then((d) => {
       setPlan(d.owner.plan);
+      setSpecial(Boolean(d.owner.complimentary));
       setPrice(d.owner.monthly_price);
     });
   }, []);
@@ -72,7 +74,12 @@ function Upgrade() {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {plan && (
+      {special && (
+        <p className="rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">
+          🎁 特別招待により、有料プランのすべての機能を無料でご利用いただけます。お支払いの手続きは不要です。
+        </p>
+      )}
+      {plan && !special && (
         <button onClick={checkout} disabled={loading} className="btn-primary w-full py-3 text-base">
           {loading
             ? "Stripe に移動中…"

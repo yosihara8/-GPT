@@ -9,7 +9,7 @@ export async function GET() {
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const owner = await queryOne(
-    "SELECT id, name, email, plan, monthly_price, created_at FROM business_owners WHERE id = $1",
+    "SELECT id, name, email, plan, monthly_price, complimentary, created_at FROM business_owners WHERE id = $1",
     [auth.user.id],
   );
   const stores = await query(

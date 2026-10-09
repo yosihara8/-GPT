@@ -11,7 +11,7 @@ import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import { api } from "@/lib/fetcher";
 import { CATEGORIES, PRICE_OPTIONS, PRICE_STANDARD } from "@/lib/config";
 
-type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; monthly_price: number };
+type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number };
 type Store = {
   id: number;
   name: string;
@@ -126,15 +126,17 @@ function BusinessDashboard() {
           />
           <PlanCard
             current={premium}
-            title="有料プラン"
-            price={`月額 ${(premium ? owner!.monthly_price : PRICE_STANDARD).toLocaleString()} 円（税込）`}
+            title={owner?.complimentary ? "有料プラン（🎁 特別招待）" : "有料プラン"}
+            price={owner?.complimentary ? "0 円（特別招待・お支払い不要）" : `月額 ${(premium ? owner!.monthly_price : PRICE_STANDARD).toLocaleString()} 円（税込）`}
             tone="coral"
             features={["クーポン発行", "広告出稿（月 2 回まで）", "SNS 連携（Instagram・X）", "紹介割引（月 10 名で翌月 2,980 円）", "複数店舗の登録"]}
           />
         </div>
-        <Link href="/upgrade" className={premium ? "btn-outline w-full" : "btn-primary w-full"}>
-          {premium ? "プラン・お支払いの管理" : "有料プランにアップグレードする"}
-        </Link>
+        {!owner?.complimentary && (
+          <Link href="/upgrade" className={premium ? "btn-outline w-full" : "btn-primary w-full"}>
+            {premium ? "プラン・お支払いの管理" : "有料プランにアップグレードする"}
+          </Link>
+        )}
       </section>
 
       {/* 基本統計 */}
