@@ -4,6 +4,7 @@ import { APP_URL } from "@/lib/config";
 import { escapeHtml } from "@/lib/escape";
 import { mailEnabled, sendMailBatch, type MailMessage } from "@/lib/mail";
 import { logServerError } from "@/lib/server-error";
+import { isCronRequest } from "@/lib/cron";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -45,11 +46,7 @@ function weekKey(d = new Date()) {
  * Vercel Cron が呼び出す。CRON_SECRET を設定している場合は Authorization: Bearer で認証する。
  */
 export async function GET(req: Request) {
-  const secret = process.env.CRON_SECRET;
-  const authorized = secret
-    ? req.headers.get("authorization") === `Bearer ${secret}`
-    : (req.headers.get("user-agent") ?? "").startsWith("vercel-cron");
-  if (!authorized) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!isCronRequest(req)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   // 同じ週に 2 回送らない（手動の再実行や不正な呼び出しへの対策）
   const period = weekKey();

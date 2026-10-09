@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import MapView, { isHighlighted, type MapShop, type MapSpot } from "@/components/MapView";
 import AdBanner from "@/components/AdBanner";
@@ -26,6 +26,16 @@ export default function HomePage() {
     fetch("/api/businesses").then((r) => r.json()).then((d) => setShops(d.businesses ?? []));
     fetch("/api/spots").then((r) => r.json()).then((d) => setSpots(d.spots ?? []));
   }, []);
+
+  // 人の流れの実測のため、地図を開いた場所を匿名で記録（約 100m 単位）
+  const pinged = useRef(false);
+  useEffect(() => {
+    if (pinged.current || status !== "ok" || !position || (accuracy ?? Infinity) > 300) return;
+    pinged.current = true;
+    fetch("/api/ping", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(position) }).catch(
+      () => undefined,
+    );
+  }, [status, position, accuracy]);
 
   const visible = useMemo(() => (category ? shops.filter((s) => s.category === category) : shops), [shops, category]);
   const nearbyCoupons = useMemo(

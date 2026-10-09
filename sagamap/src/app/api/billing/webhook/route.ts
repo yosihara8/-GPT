@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { pool } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
-import { applyReferralDiscountIfEligible } from "@/lib/referral";
 import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
@@ -30,8 +29,6 @@ export async function POST(req: Request) {
           customerId: String(s.customer),
           subscriptionId: String(s.subscription),
         });
-        // 有料化前に紹介 10 名を達成していた場合も割引を適用
-        await applyReferralDiscountIfEligible(ownerId);
       }
       break;
     }

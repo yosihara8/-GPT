@@ -9,9 +9,9 @@ import { PRICE_DISCOUNT, PRICE_STANDARD, REFERRAL_GOAL } from "@/lib/config";
 const FREE = ["店舗登録（1 店舗）", "地図への掲載・基本情報表示", "閲覧数・クーポン利用数の統計", "時間帯別の集客分析"];
 const PREMIUM = [
   "クーポン発行（割引率・有効期限・利用条件）",
-  "広告出稿（地図上のバナー枠）",
+  "広告出稿（地図上のバナー枠・月 2 回まで）",
   "SNS 連携（Instagram・X）",
-  `紹介割引（${REFERRAL_GOAL} 名紹介で月額 ${PRICE_DISCOUNT.toLocaleString()} 円）`,
+  `紹介割引（毎月 1 日〜末日に ${REFERRAL_GOAL} 名紹介で、翌月 ${PRICE_DISCOUNT.toLocaleString()} 円）`,
   "複数店舗の登録",
 ];
 
@@ -63,8 +63,8 @@ function Upgrade() {
         <PlanCard title="無料プラン" price="0 円" items={FREE} current={plan === "free"} />
         <PlanCard
           title="有料プラン"
-          price={`月額 ${price.toLocaleString()} 円`}
-          note={price === PRICE_DISCOUNT ? "紹介割引適用中" : `${REFERRAL_GOAL} 名紹介で月額 ${PRICE_DISCOUNT.toLocaleString()} 円`}
+          price={`月額 ${price.toLocaleString()} 円（税込）`}
+          note={price === PRICE_DISCOUNT ? "紹介割引適用中" : `月 ${REFERRAL_GOAL} 名の紹介で翌月 ${PRICE_DISCOUNT.toLocaleString()} 円`}
           items={PREMIUM}
           current={plan === "premium"}
           highlight

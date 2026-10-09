@@ -30,8 +30,17 @@ type Store = {
 };
 type Stats = {
   stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number }[];
-  insights: { businessId: number; area: string; hourly: number[]; peakHours: number[]; advice: string }[];
+  insights: {
+    businessId: number;
+    area: string;
+    hourly: number[];
+    peakHours: number[];
+    advice: string;
+    total: number;
+    collecting: boolean;
+  }[];
   areaRanking: { area: string; value: number }[][];
+  days: number;
 };
 
 export default function BusinessDashboardPage() {
@@ -104,23 +113,29 @@ function BusinessDashboard() {
         )}
       </div>
 
-      {/* プラン */}
-      <div className={`card flex flex-wrap items-center justify-between gap-3 ${premium ? "" : "border-amber-300 bg-amber-50"}`}>
-        <div>
-          <p className="text-sm text-slate-600">現在のプラン</p>
-          <p className="text-lg font-bold">
-            {premium ? `有料プラン（月額 ${owner!.monthly_price.toLocaleString()} 円）` : "無料プラン"}
-          </p>
-          {!premium && (
-            <p className="text-sm text-slate-600">
-              月額 {PRICE_STANDARD.toLocaleString()} 円でクーポン発行・広告出稿・SNS 連携・紹介割引が使えます。
-            </p>
-          )}
+      {/* プラン（無料・有料を並べて、ご利用中のプランを強調） */}
+      <section className="space-y-3">
+        <h2 className="font-extrabold">現在のプラン</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <PlanCard
+            current={!premium}
+            title="無料プラン"
+            price="0 円"
+            tone="tea"
+            features={["店舗の掲載（1 店舗）", "店舗写真・基本情報の表示", "閲覧数・クーポン利用数の確認", "いつ・どこで集客すべきかの分析"]}
+          />
+          <PlanCard
+            current={premium}
+            title="有料プラン"
+            price={`月額 ${(premium ? owner!.monthly_price : PRICE_STANDARD).toLocaleString()} 円（税込）`}
+            tone="coral"
+            features={["クーポン発行", "広告出稿（月 2 回まで）", "SNS 連携（Instagram・X）", "紹介割引（月 10 名で翌月 2,980 円）", "複数店舗の登録"]}
+          />
         </div>
-        <Link href="/upgrade" className={premium ? "btn-outline" : "btn-primary"}>
-          {premium ? "プラン・お支払い管理" : "有料プランにアップグレード"}
+        <Link href="/upgrade" className={premium ? "btn-outline w-full" : "btn-primary w-full"}>
+          {premium ? "プラン・お支払いの管理" : "有料プランにアップグレードする"}
         </Link>
-      </div>
+      </section>
 
       {/* 基本統計 */}
       <div className="grid grid-cols-3 gap-3">
@@ -132,7 +147,7 @@ function BusinessDashboard() {
       {/* 有料機能 */}
       <div className="grid grid-cols-3 gap-3">
         <FeatureLink href="/dashboard/business/coupons" label="クーポン発行" locked={!premium} />
-        <FeatureLink href="/dashboard/business/ads" label="広告出稿" locked={!premium} />
+        <FeatureLink href="/dashboard/business/ads" label="広告出稿（月2回）" locked={!premium} />
         <FeatureLink href="/dashboard/business/referrals" label="紹介プログラム" locked={!premium} />
       </div>
 
@@ -142,7 +157,7 @@ function BusinessDashboard() {
         {insight && (
           <>
             <HourlyChart
-              title={`${insight.area}の時間帯別の観光客（ダミーデータ）`}
+              title={`${insight.area}・お店の周辺 1km の時間帯別の利用者数（実測・直近 ${stats?.days ?? 30} 日）`}
               values={insight.hourly}
               peakHours={insight.peakHours}
               selectedHour={heatMode === "flow" ? hour : undefined}
@@ -151,12 +166,18 @@ function BusinessDashboard() {
                 setHour(h);
               }}
             />
-            <p className="rounded-lg bg-saga-50 px-3 py-2 text-sm text-saga-900">{insight.advice}</p>
+            <p className={`rounded-2xl px-3 py-2 text-sm ${insight.collecting ? "bg-sun-100 text-amber-900" : "bg-saga-50 text-saga-900"}`}>
+              {insight.collecting ? "📊 " : "💡 "}
+              {insight.advice}
+            </p>
+            <p className="text-xs text-slate-500">
+              ※ SagaMap の利用者が地図を開いた場所・時刻（匿名）と、お店のページの閲覧数を集計した実測値です。
+            </p>
           </>
         )}
         <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => setHeatMode("flow")} className={heatMode === "flow" ? "chip-on" : "chip-off"}>
-            観光客の流れ
+            利用者の流れ（実測）
           </button>
           <button onClick={() => setHeatMode("density")} className={heatMode === "density" ? "chip-on" : "chip-off"}>
             事業主の密度
@@ -172,9 +193,10 @@ function BusinessDashboard() {
         {heatMode === "flow" && stats && (
           <p className="text-sm text-slate-600">
             {hour}時台に人が多いエリア：
+            {stats.areaRanking[hour].length === 0 && <span className="ml-1">まだデータがありません</span>}
             {stats.areaRanking[hour].map((a, i) => (
               <span key={a.area} className="ml-1 font-medium text-slate-900">
-                {i + 1}. {a.area}
+                {i + 1}. {a.area}（{a.value} 件）
               </span>
             ))}
           </p>
@@ -188,6 +210,27 @@ function BusinessDashboard() {
 
       <PasswordChangeForm />
     </main>
+  );
+}
+
+function PlanCard(props: { current: boolean; title: string; price: string; features: string[]; tone: "tea" | "coral" }) {
+  const ring = props.tone === "coral" ? "border-coral-500" : "border-tea-500";
+  const badge = props.tone === "coral" ? "bg-coral-500" : "bg-tea-500";
+  return (
+    <div className={`card relative border-4 ${props.current ? ring : "border-transparent opacity-60"}`}>
+      {props.current && (
+        <span className={`absolute -top-3 left-4 rounded-full px-3 py-0.5 text-xs font-extrabold text-white ${badge}`}>✓ ご利用中</span>
+      )}
+      <p className="mt-1 text-lg font-extrabold">{props.title}</p>
+      <p className="text-2xl font-black">{props.price}</p>
+      <ul className="mt-2 space-y-1 text-sm">
+        {props.features.map((f) => (
+          <li key={f}>
+            {props.current ? "✅" : props.tone === "coral" ? "🔒" : "・"} {f}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

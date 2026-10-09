@@ -171,7 +171,7 @@ function CustomerDashboard() {
     api<Detail>(`/api/businesses/${selectedId}`).then(setDetail);
   }, [selectedId]);
 
-  // 時間帯別の観光客の流れ
+  // 時間帯別の利用者の流れ（実測）
   useEffect(() => {
     if (!flow) return;
     api<{ points: HeatPoint[] }>(`/api/heatmap?type=flow&hour=${flowHour}`).then((d) => setFlow(d.points));
@@ -234,7 +234,7 @@ function CustomerDashboard() {
 
       {flow && (
         <div className="flex items-center gap-3 border-b bg-white px-4 py-2 text-sm">
-          <span className="shrink-0 text-slate-600">{flowHour}時台の観光客の流れ</span>
+          <span className="shrink-0 text-slate-600">{flowHour}時台の利用者の流れ（実測）</span>
           <input type="range" min={0} max={23} value={flowHour} onChange={(e) => setFlowHour(Number(e.target.value))} className="w-full accent-saga-600" />
         </div>
       )}

@@ -1,6 +1,6 @@
 import { query, queryOne } from "./db";
 import { haversineMeters, estimateWalkMinutes, type LatLng } from "./geo";
-import { crowdFactorAt, jstHour } from "./flows";
+import { jstHour } from "./flows";
 
 /**
  * 簡易 AI 推薦エンジン（ハイブリッド型）
@@ -92,7 +92,18 @@ export async function recommendForCustomer(customerId: number, here: LatLng | nu
        FROM businesses b`,
   );
 
+  // 混雑の実測: 今の時間帯に、各店舗がどれだけ見られているか（直近 60 日）
   const hour = jstHour();
+  const busyRows = await query<{ business_id: number; n: number }>(
+    `SELECT business_id, count(*)::int AS n FROM usage_history
+      WHERE viewed_at > now() - interval '60 days'
+        AND EXTRACT(HOUR FROM viewed_at AT TIME ZONE 'Asia/Tokyo')::int = $1
+      GROUP BY business_id`,
+    [hour],
+  );
+  const busy = new Map(busyRows.map((r) => [r.business_id, r.n]));
+  const busyMax = Math.max(0, ...busy.values());
+  const crowdFactor = (id: number) => (busyMax === 0 ? 0.5 : (busy.get(id) ?? 0) / busyMax);
   const results: Recommendation[] = candidates.map((b) => {
     const reasons: string[] = [];
     const sCat = (catPref.get(b.category) ?? 0) / catMax;
@@ -112,7 +123,7 @@ export async function recommendForCustomer(customerId: number, here: LatLng | nu
     }
 
     // 混雑度: 店舗の基本混雑度 × 時間帯の人流
-    const crowdNow = (b.crowd_level / 5) * (0.5 + crowdFactorAt(b.lat, b.lng, hour));
+    const crowdNow = (b.crowd_level / 5) * (0.5 + crowdFactor(b.id));
     const sCrowd = Math.max(0, 1 - crowdNow);
     if (sCrowd > 0.6) reasons.push("今は空いていそう");
 
