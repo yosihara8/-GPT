@@ -7,6 +7,7 @@ import { queryOne } from "./db";
 import { recordReferral } from "./referral";
 import { AUTH_SECRET } from "./config";
 import { clientIp, rateLimit, resetRateLimit, tooManyRequestsMessage } from "./rate-limit";
+import { consumeToken } from "./tokens";
 
 export type Role = "business" | "customer" | "admin";
 
@@ -22,8 +23,21 @@ const providers: NextAuthOptions["providers"] = [
       email: { label: "メールアドレス", type: "email" },
       password: { label: "パスワード", type: "password" },
       role: { label: "種別", type: "text" },
+      impersonate: { label: "代理ログイン", type: "text" },
     },
     async authorize(credentials, req) {
+      // 管理者の代理ログイン（管理画面で発行した 1 回限り・2 分間有効のトークン）
+      if (credentials?.impersonate) {
+        const target = await consumeToken("impersonate", credentials.impersonate);
+        if (!target || target.role === "admin") return null;
+        const table = target.role === "business" ? "business_owners" : "customers";
+        const row = await queryOne<{ id: number; name: string; email: string }>(
+          `SELECT id, name, email FROM ${table} WHERE id = $1`,
+          [target.user_id],
+        );
+        return row ? { id: String(row.id), name: row.name, email: row.email, role: target.role, impersonated: true } : null;
+      }
+
       const email = credentials?.email?.trim().toLowerCase();
       const password = credentials?.password;
       const role: Role =
@@ -94,12 +108,14 @@ export const authOptions: NextAuthOptions = {
       } else if (user) {
         token.uid = Number(user.id);
         token.role = (user as { role?: Role }).role ?? "customer";
+        token.impersonated = Boolean((user as { impersonated?: boolean }).impersonated);
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.uid as number;
       session.user.role = token.role as Role;
+      session.user.impersonated = Boolean(token.impersonated);
       return session;
     },
   },

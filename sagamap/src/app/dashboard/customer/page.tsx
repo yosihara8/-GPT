@@ -165,10 +165,15 @@ function CustomerDashboard() {
     api<{ notifications: Notification[] }>("/api/notifications").then((d) => setNotifications(d.notifications));
   }, [loadFavorites]);
 
-  // 店舗詳細（閲覧履歴として記録され、AI 推薦に反映される）
+  // 店舗詳細（閲覧履歴として記録され、AI 推薦に反映される）。開いたら詳細の位置までスクロール
   useEffect(() => {
     if (!selectedId) return setDetail(null);
-    api<Detail>(`/api/businesses/${selectedId}`).then(setDetail);
+    api<Detail>(`/api/businesses/${selectedId}`).then((d) => {
+      setDetail(d);
+      requestAnimationFrame(() =>
+        document.getElementById("shop-detail")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    });
   }, [selectedId]);
 
   // 時間帯別の利用者の流れ（実測）
@@ -372,7 +377,7 @@ function CustomerDashboard() {
             <SwipeCards
               cards={recs}
               onSwipe={(card, liked) => liked && setSelectedId(card.id)}
-              onOpen={(card) => setSelectedId(card.id)}
+              onOpen={(card) => (card.id === selectedId ? document.getElementById("shop-detail")?.scrollIntoView({ behavior: "smooth" }) : setSelectedId(card.id))}
             />
           </div>
         )}
@@ -592,7 +597,7 @@ function ShopDetail({
   const b = detail.business;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}&travelmode=walking`;
   return (
-    <div className="border-b bg-white p-4">
+    <div id="shop-detail" className="scroll-mt-16 border-b bg-white p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-xs text-saga-600">

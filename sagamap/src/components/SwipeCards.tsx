@@ -29,7 +29,8 @@ export default function SwipeCards({ cards, onSwipe, onOpen }: Props) {
   const [index, setIndex] = useState(0);
   const [dx, setDx] = useState(0);
   const [leaving, setLeaving] = useState<0 | 1 | -1>(0);
-  const start = useRef<number | null>(null);
+  /** 触れ始めた位置と、横スワイプ中か（縦に動かしたときは画面のスクロールに任せる） */
+  const start = useRef<{ x: number; y: number; mode: "undecided" | "swipe" | "scroll" } | null>(null);
 
   const card = cards[index];
   const next = cards[index + 1];
@@ -69,16 +70,35 @@ export default function SwipeCards({ cards, onSwipe, onOpen }: Props) {
           }}
           badge={dx > 40 ? "like" : dx < -40 ? "nope" : null}
           onPointerDown={(e) => {
-            start.current = e.clientX;
-            (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+            start.current = { x: e.clientX, y: e.clientY, mode: "undecided" };
           }}
-          onPointerMove={(e) => start.current !== null && setDx(e.clientX - start.current)}
+          onPointerMove={(e) => {
+            const st = start.current;
+            if (!st || st.mode === "scroll") return;
+            const mx = e.clientX - st.x;
+            const my = e.clientY - st.y;
+            if (st.mode === "undecided" && Math.hypot(mx, my) > 8) {
+              // 縦方向の動きなら画面のスクロール、横方向ならスワイプ
+              st.mode = Math.abs(my) > Math.abs(mx) ? "scroll" : "swipe";
+              if (st.mode === "swipe") (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+            }
+            if (st.mode === "swipe") setDx(mx);
+          }}
           onPointerUp={() => {
+            const st = start.current;
             start.current = null;
-            if (dx > THRESHOLD) finish(1);
-            else if (dx < -THRESHOLD) finish(-1);
-            else if (Math.abs(dx) < 5) onOpen?.(card);
-            else setDx(0);
+            if (st?.mode === "swipe") {
+              if (dx > THRESHOLD) finish(1);
+              else if (dx < -THRESHOLD) finish(-1);
+              else setDx(0);
+            } else if (st?.mode === "undecided") {
+              onOpen?.(card); // タップで詳細を開く
+            }
+          }}
+          onPointerCancel={() => {
+            // ブラウザが縦スクロールを始めたとき
+            start.current = null;
+            setDx(0);
           }}
         />
       </div>
@@ -99,7 +119,7 @@ export default function SwipeCards({ cards, onSwipe, onOpen }: Props) {
         </button>
       </div>
       <p className="mt-2 text-center text-xs text-slate-500">
-        {index + 1} / {cards.length}　右スワイプで「行きたい」、左でスキップ
+        {index + 1} / {cards.length}　タップで詳しく見る・右スワイプで「行きたい」・左でスキップ
       </p>
     </div>
   );
@@ -121,7 +141,7 @@ function Card({
     <div
       {...handlers}
       style={style}
-      className={`absolute inset-0 touch-none overflow-hidden rounded-3xl border-4 border-white bg-gradient-to-br from-white via-white to-sun-100 p-5 shadow-pop ${className}`}
+      className={`absolute inset-0 cursor-grab touch-pan-y overflow-hidden rounded-3xl border-4 border-white bg-gradient-to-br from-white via-white to-sun-100 p-5 shadow-pop ${className}`}
     >
       <span className="pointer-events-none absolute -bottom-4 -right-2 text-8xl opacity-20" aria-hidden>
         {categoryEmoji(card.category)}

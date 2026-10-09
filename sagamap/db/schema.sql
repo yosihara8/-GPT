@@ -215,3 +215,8 @@ CREATE TABLE IF NOT EXISTS referral_monthly_results (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (owner_id, month)
 );
+
+-- 管理者の代理ログイン用トークンを許可
+ALTER TABLE auth_tokens DROP CONSTRAINT IF EXISTS auth_tokens_purpose_check;
+ALTER TABLE auth_tokens ADD CONSTRAINT auth_tokens_purpose_check
+  CHECK (purpose IN ('reset_password', 'verify_email', 'impersonate'));
