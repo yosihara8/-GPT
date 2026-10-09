@@ -52,7 +52,8 @@ export const referralsLastMonth = (ownerId: number) => countInMonth(ownerId, -1)
  */
 export async function applyMonthlyReferralPricing() {
   const owners = await query<{ id: number; monthly_price: number; stripe_subscription_id: string | null }>(
-    "SELECT id, monthly_price, stripe_subscription_id FROM business_owners",
+    // 特別プラン（無料）の事業者は料金の判定をしない
+    "SELECT id, monthly_price, stripe_subscription_id FROM business_owners WHERE NOT complimentary",
   );
   let discounted = 0;
   let changed = 0;

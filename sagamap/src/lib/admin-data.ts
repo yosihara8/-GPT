@@ -9,7 +9,8 @@ function likePattern(q: string) {
 }
 
 const SQL: Record<AdminListType, string> = {
-  owners: `SELECT o.id, o.name, o.email, o.plan, o.monthly_price, o.created_at,
+  owners: `SELECT o.id, o.name, o.email,
+                  CASE WHEN o.complimentary THEN 'special' ELSE o.plan END AS plan, o.monthly_price, o.created_at,
                   count(DISTINCT b.id)::int AS store_count, count(DISTINCT r.id)::int AS referral_count
              FROM business_owners o
              LEFT JOIN businesses b ON b.owner_id = o.id

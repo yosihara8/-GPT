@@ -25,20 +25,36 @@ export async function POST(req: Request) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    // 特別招待コードがあれば、有料プランを無料（月額 0 円）で使える特別プランにする
+    let invite: { id: number } | null = null;
+    if (d.inviteCode) {
+      const r = await client.query<{ id: number }>(
+        `UPDATE invite_codes SET used_count = used_count + 1
+          WHERE code = $1 AND is_active AND used_count < max_uses AND (expires_at IS NULL OR expires_at > now())
+          RETURNING id`,
+        [d.inviteCode.toUpperCase()],
+      );
+      invite = r.rows[0] ?? null;
+      if (!invite) {
+        await client.query("ROLLBACK");
+        return NextResponse.json({ error: "招待リンクが無効か、有効期限が切れています。運営者にお問い合わせください" }, { status: 400 });
+      }
+    }
     const owner = await client.query<{ id: number }>(
-      "INSERT INTO business_owners (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id",
-      [d.name, d.email, await bcrypt.hash(d.password, 10)],
+      `INSERT INTO business_owners (name, email, password_hash, plan, complimentary, monthly_price, invite_code_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [d.name, d.email, await bcrypt.hash(d.password, 10), invite ? "premium" : "free", Boolean(invite), invite ? 0 : 3980, invite?.id ?? null],
     );
     const biz = await client.query<{ id: number }>(
-      `INSERT INTO businesses (owner_id, name, address, lat, lng, category, service_description, contact, price_level)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-      [owner.rows[0].id, d.name, d.address, pos.lat, pos.lng, d.category, d.serviceDescription, d.contact, d.priceLevel],
+      `INSERT INTO businesses (owner_id, name, address, lat, lng, category, service_description, contact, price_level, is_premium)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+      [owner.rows[0].id, d.name, d.address, pos.lat, pos.lng, d.category, d.serviceDescription, d.contact, d.priceLevel, Boolean(invite)],
     );
     await client.query("COMMIT");
     await sendVerificationMail("business", owner.rows[0].id, d.email, d.name).catch((e) =>
       logServerError("register/business:verify-mail", e),
     );
-    return NextResponse.json({ ownerId: owner.rows[0].id, businessId: biz.rows[0].id, matched: pos.matched }, { status: 201 });
+    return NextResponse.json({ ownerId: owner.rows[0].id, businessId: biz.rows[0].id, matched: pos.matched, special: Boolean(invite) }, { status: 201 });
   } catch (e) {
     await client.query("ROLLBACK");
     if (isUniqueViolation(e)) {

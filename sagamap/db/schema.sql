@@ -220,3 +220,20 @@ CREATE TABLE IF NOT EXISTS referral_monthly_results (
 ALTER TABLE auth_tokens DROP CONSTRAINT IF EXISTS auth_tokens_purpose_check;
 ALTER TABLE auth_tokens ADD CONSTRAINT auth_tokens_purpose_check
   CHECK (purpose IN ('reset_password', 'verify_email', 'impersonate'));
+
+-- 特別招待コード（運営者の紹介者は有料プランを無料で利用できる）
+CREATE TABLE IF NOT EXISTS invite_codes (
+  id          SERIAL PRIMARY KEY,
+  code        TEXT NOT NULL UNIQUE,
+  label       TEXT NOT NULL DEFAULT '',
+  max_uses    INTEGER NOT NULL DEFAULT 1 CHECK (max_uses > 0),
+  used_count  INTEGER NOT NULL DEFAULT 0,
+  expires_at  TIMESTAMPTZ,
+  is_active   BOOLEAN NOT NULL DEFAULT true,
+  created_by  INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 特別プラン（有料機能を無料で利用。Stripe の請求なし）
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS complimentary BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS invite_code_id INTEGER REFERENCES invite_codes(id) ON DELETE SET NULL;

@@ -33,7 +33,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
   return NextResponse.json({ ok: true });
 }
 
-const planSchema = z.object({ plan: z.enum(["free", "premium"]) });
+const planSchema = z.object({ plan: z.enum(["free", "premium", "special"]) });
 
 /** 事業者のプランを手動で変更（Stripe を使わない請求書払いなどの場合） */
 export async function PATCH(req: Request, { params }: Ctx) {
@@ -47,15 +47,21 @@ export async function PATCH(req: Request, { params }: Ctx) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    // special = 特別プラン（有料機能を無料で利用。月額 0 円・Stripe の請求なし）
+    const special = body.data.plan === "special";
+    const plan = body.data.plan === "free" ? "free" : "premium";
     const res = await client.query<{ email: string }>(
-      "UPDATE business_owners SET plan = $1 WHERE id = $2 RETURNING email",
-      [body.data.plan, id],
+      `UPDATE business_owners
+          SET plan = $1, complimentary = $2,
+              monthly_price = CASE WHEN $2 THEN 0 WHEN monthly_price = 0 THEN 3980 ELSE monthly_price END
+        WHERE id = $3 RETURNING email`,
+      [plan, special, id],
     );
     if (res.rowCount === 0) {
       await client.query("ROLLBACK");
       return NextResponse.json({ error: "見つかりません" }, { status: 404 });
     }
-    await client.query("UPDATE businesses SET is_premium = $1 WHERE owner_id = $2", [body.data.plan === "premium", id]);
+    await client.query("UPDATE businesses SET is_premium = $1 WHERE owner_id = $2", [plan === "premium", id]);
     await client.query("COMMIT");
     await auditLog(auth.user.id, "プランを変更", `owners#${id}`, `${res.rows[0].email} → ${body.data.plan}`);
     return NextResponse.json({ ok: true });
