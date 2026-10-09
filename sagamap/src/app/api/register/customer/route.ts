@@ -22,8 +22,8 @@ export async function POST(req: Request) {
   let customer: { id: number } | null;
   try {
     customer = await queryOne<{ id: number }>(
-      "INSERT INTO customers (name, email, password_hash, interests) VALUES ($1, $2, $3, $4) RETURNING id",
-      [d.name, d.email, await bcrypt.hash(d.password, 10), d.interests],
+      "INSERT INTO customers (name, email, password_hash, interests, notify_enabled) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+      [d.name, d.email, await bcrypt.hash(d.password, 10), d.interests, d.notifyEnabled],
     );
   } catch (e) {
     if (isUniqueViolation(e)) {

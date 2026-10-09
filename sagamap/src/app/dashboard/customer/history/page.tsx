@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/fetcher";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
+import NotifySetting from "@/components/NotifySetting";
 
 type Row = {
   id: number;
@@ -66,7 +67,8 @@ export default function HistoryPage() {
           ))}
         </ul>
       )}
-      <div className="mt-6">
+      <div className="mt-6 space-y-4">
+        <NotifySetting />
         <PasswordChangeForm />
       </div>
     </main>

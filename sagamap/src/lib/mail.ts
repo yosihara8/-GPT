@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 
+import { OPERATOR } from "./config";
+
 const from = process.env.MAIL_FROM ?? "SagaMap <noreply@sagamap.jp>";
+/** 返信はお問い合わせ窓口に届くようにする */
+const replyTo = OPERATOR.email;
 
 export async function sendMail(to: string, subject: string, html: string) {
   if (!process.env.RESEND_API_KEY) {
@@ -8,7 +12,7 @@ export async function sendMail(to: string, subject: string, html: string) {
     return { dryRun: true as const };
   }
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const { error } = await resend.emails.send({ from, to, subject, html });
+  const { error } = await resend.emails.send({ from, to, subject, html, replyTo });
   if (error) throw new Error(error.message);
   return { dryRun: false as const };
 }
@@ -25,7 +29,7 @@ export async function sendMailBatch(messages: MailMessage[]) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   let sent = 0;
   for (let i = 0; i < messages.length; i += 100) {
-    const chunk = messages.slice(i, i + 100).map((m) => ({ from, ...m }));
+    const chunk = messages.slice(i, i + 100).map((m) => ({ from, replyTo, ...m }));
     const { error } = await resend.batch.send(chunk);
     if (error) throw new Error(error.message);
     sent += chunk.length;

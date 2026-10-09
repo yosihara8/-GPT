@@ -47,7 +47,7 @@ export const OPERATOR = {
   representative: "請求があった場合には、遅滞なく電子メールにて開示いたします",
   address: "請求があった場合には、遅滞なく電子メールにて開示いたします",
   phone: "請求があった場合には、遅滞なく電子メールにて開示いたします",
-  email: "【要記入：お問い合わせ用メールアドレス（開示請求の受付先として必須）】",
+  email: "ai.prompt.biz@gmail.com",
 };
 
 export const PRICE_LEVEL_LABELS: Record<number, string> = { 1: "¥", 2: "¥¥", 3: "¥¥¥" };

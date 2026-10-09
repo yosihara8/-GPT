@@ -230,7 +230,7 @@ function CustomerDashboard() {
           </button>
         ))}
         <Link href="/dashboard/customer/history" className="ml-auto shrink-0 px-3 py-3 text-sm text-slate-500">
-          履歴
+          履歴・設定
         </Link>
       </nav>
 
@@ -385,7 +385,7 @@ function CustomerDashboard() {
         {tab === "お知らせ" && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-500">新着クーポン・イベント情報を週 1 回メールでもお届けします。</p>
+              <p className="text-xs text-slate-500">新着クーポン・お店のお知らせを毎週金曜日にメールでもお届けします（設定は「履歴・設定」ページ）。</p>
               {unread > 0 && (
                 <button
                   className="text-xs text-saga-600 underline"

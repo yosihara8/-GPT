@@ -35,7 +35,7 @@ function Ads() {
         method: "POST",
         body: JSON.stringify({ ...f, notify: f.notify === "on" }),
       });
-      setMsg(`広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週月曜にまとめて届きます）` : ""}`);
+      setMsg(`広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}`);
       form.reset();
       setPreview({ headline: "", body: "" });
       load();

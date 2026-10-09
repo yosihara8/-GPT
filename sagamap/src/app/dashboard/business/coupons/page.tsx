@@ -44,7 +44,7 @@ function Coupons() {
         method: "POST",
         body: JSON.stringify({ ...f, notify: f.notify === "on", expiresAt: `${f.expiresAt}T23:59:59+09:00` }),
       });
-      setMsg(`クーポンを発行しました。${res.notified ? `興味のありそうなお客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週月曜にまとめて届きます）` : ""}`);
+      setMsg(`クーポンを発行しました。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}`);
       form.reset();
       load();
     } catch (err) {
