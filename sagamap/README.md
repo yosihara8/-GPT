@@ -45,7 +45,7 @@ Docker を使わない場合は、PostGIS 入りの PostgreSQL を用意して `
 4. デプロイ時に `vercel-build`（`scripts/migrate.mjs`）がスキーマを自動で適用し、観光名所を投入します。架空の店舗・デモアカウントは `SEED_DEMO_DATA=true` のときだけ投入され、それ以外では削除されます。
 5. Google の「ブラウザ用キー」のウェブサイト制限に、Vercel のドメイン（例: `https://sagamap.vercel.app/*`）を追加します。
 
-`NEXT_PUBLIC_APP_URL` と `NEXTAUTH_URL` は未設定でも、Vercel の本番ドメインが自動で使われます。独自ドメイン（sagamap.jp）を追加すると、そちらに切り替わります。週 1 回のメール通知は `vercel.json` の Cron（毎週月曜 9:00 JST）で実行されます。
+`NEXT_PUBLIC_APP_URL` と `NEXTAUTH_URL` は未設定でも、Vercel の本番ドメインが自動で使われます。独自ドメイン（sagamap.jp）を追加すると、そちらに切り替わります。週 1 回のメール通知は `vercel.json` の Cron（毎週金曜 9:00 JST）で実行されます。
 
 ## 運営者管理画面（/admin）
 

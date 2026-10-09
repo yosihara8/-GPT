@@ -3,7 +3,6 @@ import { query, queryOne } from "./db";
 /** 1 人のお客さまが受け取る自動お知らせは 24 時間に 3 件まで（送りすぎ防止） */
 const DAILY_LIMIT = 3;
 
-const MAX_RECIPIENTS = 1000;
 
 type Announcement = {
   businessId: number;
@@ -14,13 +13,13 @@ type Announcement = {
 };
 
 /**
- * 事業者がクーポン・広告を出したときの自動お知らせ。
- * 対象: お知らせを希望し、かつ「その業種に興味がある」「その店を見た・使った」「その店の紹介で登録した」お客さま。
+ * 事業者がクーポン・広告を出したときの自動お知らせ（アプリ内）。
+ * 対象: すべてのお客さま（1 人あたり 24 時間に 3 件まで）。
  * アプリ内のお知らせはすぐに届け、メールは週 1 回のまとめで送る。
  */
 export async function announceToCustomers(a: Announcement) {
-  const biz = await queryOne<{ name: string; category: string }>(
-    `SELECT b.name, b.category FROM businesses b WHERE b.id = $1`,
+  const biz = await queryOne<{ name: string }>(
+    `SELECT b.name FROM businesses b WHERE b.id = $1`,
     [a.businessId],
   );
   if (!biz) return { notified: 0 };
@@ -28,15 +27,10 @@ export async function announceToCustomers(a: Announcement) {
   const recipients = await query<{ id: number }>(
     `SELECT c.id
        FROM customers c
-      WHERE c.notify_enabled
-        AND ($2 = ANY(c.interests)
-             OR EXISTS (SELECT 1 FROM usage_history h WHERE h.customer_id = c.id AND h.business_id = $1)
-             OR EXISTS (SELECT 1 FROM referrals r WHERE r.customer_id = c.id AND r.business_id = $1))
-        AND (SELECT count(*) FROM notifications n
-              WHERE n.customer_id = c.id AND n.kind IN ('coupon', 'ad') AND n.created_at > now() - interval '24 hours') < $3
-      ORDER BY c.id
-      LIMIT $4`,
-    [a.businessId, biz.category, DAILY_LIMIT, MAX_RECIPIENTS],
+      WHERE (SELECT count(*) FROM notifications n
+              WHERE n.customer_id = c.id AND n.kind IN ('coupon', 'ad') AND n.created_at > now() - interval '24 hours') < $1
+      ORDER BY c.id`,
+    [DAILY_LIMIT],
   );
   if (recipients.length === 0) return { notified: 0 };
 
@@ -47,6 +41,6 @@ export async function announceToCustomers(a: Announcement) {
     [recipients.map((r) => r.id), title, a.body, a.link, a.kind],
   );
 
-  // メールは毎週月曜の「週 1 回のまとめ」で送る（/api/cron/weekly-digest）
+  // メールは毎週金曜の「週 1 回のまとめ」で送る（/api/cron/weekly-digest）
   return { notified: recipients.length };
 }

@@ -43,6 +43,7 @@ export const customerRegisterSchema = z.object({
   password: z.string().min(8, "パスワードは 8 文字以上にしてください").max(128),
   interests: z.array(z.enum(CATEGORIES)).default([]),
   ref: z.coerce.number().int().positive().optional(),
+  notifyEnabled: z.boolean().default(true),
 });
 
 export const couponCreateSchema = z.object({

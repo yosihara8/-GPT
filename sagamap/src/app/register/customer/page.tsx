@@ -41,7 +41,14 @@ function CustomerRegisterForm() {
     try {
       await api("/api/register/customer", {
         method: "POST",
-        body: JSON.stringify({ name: f.name, email: f.email, password: f.password, interests, ref }),
+        body: JSON.stringify({
+          name: f.name,
+          email: f.email,
+          password: f.password,
+          interests,
+          ref,
+          notifyEnabled: f.notifyEnabled === "on",
+        }),
       });
       await signIn("credentials", { email: f.email, password: f.password, role: "customer", redirect: false });
       router.push("/dashboard/customer");
@@ -84,6 +91,14 @@ function CustomerRegisterForm() {
             ))}
           </div>
         </fieldset>
+        <label className="flex items-start gap-2 rounded-2xl bg-saga-50 p-3 text-sm">
+          <input type="checkbox" name="notifyEnabled" defaultChecked className="mt-0.5 h-5 w-5 accent-saga-600" />
+          <span>
+            <b>📧 お得なお知らせメールを受け取る</b>
+            <br />
+            <span className="text-xs text-slate-600">毎週金曜日に、新着クーポン・お店のお知らせをまとめてお届けします。いつでも配信停止できます。</span>
+          </span>
+        </label>
         <p className="text-xs text-slate-500">
           登録すると、<Link href="/terms" className="underline">利用規約</Link>と
           <Link href="/privacy" className="underline">プライバシーポリシー</Link>に同意したものとみなします。

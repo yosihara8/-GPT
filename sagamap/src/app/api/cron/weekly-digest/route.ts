@@ -38,8 +38,9 @@ function weekKey(d = new Date()) {
 }
 
 /**
- * 週 1 回（毎週月曜 9:00 JST）の「今週の新着クーポン・広告」まとめメール。
- *  - お客さま: 興味のある業種・見た店・紹介元の店のお知らせを優先して、1 人 1 通にまとめる
+ * 週 1 回（毎週金曜 9:00 JST）の「今週の新着クーポン・広告」まとめメール。
+ *  - お客さま: すべてのお客さま（配信停止中の方を除く）に、今週の新着をすべて 1 通にまとめて送る。
+ *    興味のある業種・見た店・紹介元の店のお知らせは「あなたへのおすすめ」として先頭に載せる
  *  - 事業者: 自分のクーポン・広告が何人に届いたかの報告を 1 通
  * Vercel Cron が呼び出す。CRON_SECRET を設定している場合は Authorization: Bearer で認証する。
  */
@@ -95,11 +96,11 @@ async function runDigest() {
 
   for (const c of customers) {
     const isRelevant = (i: Item) => c.interests.includes(i.category) || c.related.includes(i.business_id);
-    const relevant = items.filter(isRelevant).slice(0, 6);
-    const others = items.filter((i) => !isRelevant(i)).slice(0, 4);
+    const relevant = items.filter(isRelevant).slice(0, 30);
+    const others = items.filter((i) => !isRelevant(i)).slice(0, 30 - relevant.length);
     if (relevant.length + others.length === 0) continue;
 
-    for (const i of relevant) {
+    for (const i of [...relevant, ...others]) {
       const r = reachByOwner.get(i.owner_id) ?? { email: i.owner_email, name: i.owner_name, titles: new Set(), people: 0 };
       r.titles.add(i.title);
       r.people++;
@@ -131,7 +132,7 @@ async function runDigest() {
       html: `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
         <p style="font-size:20px;font-weight:bold">🎈 SagaMap</p>
         <p>${escapeHtml(r.name)} 様</p>
-        <p>今週の新着まとめメールで、次のお知らせを <b>${r.people} 人</b>の興味のありそうなお客さまにお届けしました。</p>
+        <p>今週の新着まとめメールで、次のお知らせを <b>${r.people} 人</b>のお客さまにお届けしました。</p>
         <ul>${[...r.titles].map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
         <p><a href="${APP_URL}/dashboard/business">ダッシュボードで閲覧数を見る</a></p></div>`,
     });
