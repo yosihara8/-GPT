@@ -11,6 +11,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/60 bg-white/80 backdrop-blur">
+      {user?.impersonated && (
+        <div className="flex items-center justify-center gap-3 bg-slate-900 px-4 py-1.5 text-xs font-bold text-white">
+          👀 管理者として「{user.email}」の画面を表示中
+          <button
+            onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            className="rounded-full bg-white px-3 py-0.5 text-slate-900"
+          >
+            管理画面に戻る
+          </button>
+        </div>
+      )}
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="group flex items-center gap-2">
           <span className="text-2xl transition group-hover:-translate-y-0.5" aria-hidden>

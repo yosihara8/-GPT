@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { query, queryOne } from "./db";
 import type { Role } from "./auth";
 
-export type TokenPurpose = "reset_password" | "verify_email";
+export type TokenPurpose = "reset_password" | "verify_email" | "impersonate";
 
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 

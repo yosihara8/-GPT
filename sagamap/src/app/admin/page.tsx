@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { signIn } from "next-auth/react";
 import { api } from "@/lib/fetcher";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 
@@ -115,6 +116,22 @@ function List({ type }: { type: ListKey }) {
     }
   }
 
+  async function viewAs(row: Row) {
+    const who = type === "owners" ? "事業主" : "お客さま";
+    if (!confirm(`「${row.email}」の${who}画面を表示します。\n管理画面に戻るときは、もう一度管理者としてログインしてください。`)) return;
+    try {
+      const d = await api<{ token: string; role: string; redirect: string }>("/api/admin/impersonate", {
+        method: "POST",
+        body: JSON.stringify({ type, id: row.id }),
+      });
+      const res = await signIn("credentials", { impersonate: d.token, role: d.role, redirect: false });
+      if (res?.error) throw new Error("画面を表示できませんでした");
+      window.location.href = d.redirect;
+    } catch (e) {
+      setMessage((e as Error).message);
+    }
+  }
+
   async function resetLink(row: Row) {
     try {
       const d = await api<{ url: string; email: string }>("/api/admin/reset-link", {
@@ -185,9 +202,14 @@ function List({ type }: { type: ListKey }) {
                   {!READ_ONLY.includes(type) && (
                     <td className="whitespace-nowrap px-3 py-2">
                       {(type === "owners" || type === "customers") && (
-                        <button onClick={() => resetLink(r)} className="mr-3 text-saga-600 underline">
-                          再設定リンク
-                        </button>
+                        <>
+                          <button onClick={() => viewAs(r)} className="mr-3 font-bold text-coral-600 underline">
+                            画面を見る
+                          </button>
+                          <button onClick={() => resetLink(r)} className="mr-3 text-saga-600 underline">
+                            再設定リンク
+                          </button>
+                        </>
                       )}
                       {type === "owners" && (
                         <button onClick={() => changePlan(r)} className="mr-3 text-saga-600 underline">

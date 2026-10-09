@@ -122,10 +122,10 @@ export default function HomePage() {
                 <p className="mt-2 inline-block rounded-full bg-coral-50 px-3 py-1 text-sm font-extrabold text-coupon">🎟️ クーポン配信中</p>
               )}
               <Link
-                href={isCustomer ? `/dashboard/customer?shop=${selected.id}` : "/register/customer"}
+                href={isCustomer ? `/dashboard/customer?shop=${selected.id}` : `/shops/${selected.id}`}
                 className="btn-primary mt-3 w-full"
               >
-                {isCustomer ? "クーポン・徒歩ルートを見る" : "無料登録してクーポンを見る"}
+                {isCustomer ? "クーポン・道順を見る" : "店舗情報を確認する"}
               </Link>
             </div>
           </div>
