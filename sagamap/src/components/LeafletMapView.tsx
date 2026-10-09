@@ -17,6 +17,7 @@ const COLORS = { coupon: "#e5484d", shop: "#3b82f6", spot: "#d97706", me: "#2563
 export default function LeafletMapView({
   shops,
   me,
+  meAccuracy,
   highlightRadius = COUPON_HIGHLIGHT_RADIUS_M,
   searchRadius,
   spots = [],
@@ -66,9 +67,14 @@ export default function LeafletMapView({
     if (searchRadius) {
       L.circle(me, { radius: searchRadius, color: COLORS.me, weight: 1, opacity: 0.6, fillOpacity: 0.06, interactive: false }).addTo(g);
     }
-    L.circleMarker(me, { radius: 8, color: "#fff", weight: 3, fillColor: COLORS.me, fillOpacity: 1 }).bindTooltip("現在地").addTo(g);
+    if (meAccuracy && meAccuracy > 15) {
+      L.circle(me, { radius: meAccuracy, stroke: false, fillColor: COLORS.me, fillOpacity: 0.12, interactive: false }).addTo(g);
+    }
+    L.circleMarker(me, { radius: 8, color: "#fff", weight: 3, fillColor: COLORS.me, fillOpacity: 1 })
+      .bindTooltip(meAccuracy ? `現在地（誤差 約${meAccuracy}m）` : "現在地")
+      .addTo(g);
     mapRef.current.panTo(me);
-  }, [me, searchRadius]);
+  }, [me, meAccuracy, searchRadius]);
 
   // 店舗ピン（500m 以内のクーポン店舗 = 赤 / 通常 = 青）
   useEffect(() => {

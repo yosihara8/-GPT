@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PremiumGate from "@/components/PremiumGate";
 import StoreSelect, { useMyStores } from "@/components/StoreSelect";
+import NotifyCheckbox from "@/components/NotifyCheckbox";
 import { api } from "@/lib/fetcher";
 
 type Ad = { id: number; headline: string; body: string; ends_at: string; is_active: boolean; business_name: string };
@@ -29,8 +30,12 @@ function Ads() {
     e.preventDefault();
     const form = e.currentTarget;
     try {
-      await api("/api/ads", { method: "POST", body: JSON.stringify(Object.fromEntries(new FormData(form))) });
-      setMsg("広告を出稿しました。地図上部のバナー枠に表示されます。");
+      const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
+      const res = await api<{ notified: number; emailed: number }>("/api/ads", {
+        method: "POST",
+        body: JSON.stringify({ ...f, notify: f.notify === "on" }),
+      });
+      setMsg(`広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人にお知らせしました（メール ${res.emailed} 通）` : ""}`);
       form.reset();
       setPreview({ headline: "", body: "" });
       load();
@@ -75,7 +80,8 @@ function Ads() {
             <option value="30">30 日間</option>
           </select>
         </div>
-        {msg && <p className="text-sm text-saga-700">{msg}</p>}
+        <NotifyCheckbox />
+        {msg && <p className="text-sm font-bold text-tea-700">{msg}</p>}
         <button className="btn-primary w-full">出稿する</button>
       </form>
 

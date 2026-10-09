@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapSpot, type RouteSummary } from "@/components/MapView";
 import AdBanner from "@/components/AdBanner";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
+import LocationAccuracy from "@/components/LocationAccuracy";
 import SwipeCards, { type RecCard } from "@/components/SwipeCards";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useDistanceMatrix } from "@/hooks/useDistanceMatrix";
@@ -61,7 +62,7 @@ export default function CustomerDashboardPage() {
 
 function CustomerDashboard() {
   const params = useSearchParams();
-  const { position, isFallback, locate } = useGeolocation();
+  const { position, accuracy, isFallback, status, locate } = useGeolocation();
   const [tab, setTab] = useState<Tab>("近く");
   const [radius, setRadius] = useState(WALK_10MIN_RADIUS_M);
   const [category, setCategory] = useState("");
@@ -165,6 +166,7 @@ function CustomerDashboard() {
         <MapView
           shops={nearby}
           me={position}
+          meAccuracy={accuracy}
           searchRadius={radius}
           spots={spots}
           heatmap={flow}
@@ -194,8 +196,9 @@ function CustomerDashboard() {
         </div>
       )}
 
-      <div className="px-4 pt-3 empty:hidden">
+      <div className="space-y-2 px-4 pt-3 empty:hidden">
         <VerifyEmailBanner />
+        <LocationAccuracy status={status} accuracy={accuracy} />
       </div>
       {isFallback && (
         <p className="bg-amber-50 px-4 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import MapView, { isHighlighted, type MapShop, type MapSpot } from "@/components/MapView";
 import AdBanner from "@/components/AdBanner";
 import ShopPhoto from "@/components/ShopPhoto";
+import LocationAccuracy from "@/components/LocationAccuracy";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CATEGORIES, COUPON_HIGHLIGHT_RADIUS_M, categoryEmoji } from "@/lib/config";
 import { formatDistance, haversineMeters } from "@/lib/geo";
@@ -15,7 +16,7 @@ type Shop = MapShop & { address: string; service_description: string; has_photo?
 /** トップ: 店舗一覧の地図（会員登録なしで閲覧できる集客の入り口） */
 export default function HomePage() {
   const { data: session } = useSession();
-  const { position, isFallback, locate } = useGeolocation();
+  const { position, accuracy, isFallback, status, locate } = useGeolocation();
   const [shops, setShops] = useState<Shop[]>([]);
   const [spots, setSpots] = useState<MapSpot[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -74,6 +75,7 @@ export default function HomePage() {
         <MapView
           shops={visible}
           me={position}
+          meAccuracy={accuracy}
           spots={spots}
           searchRadius={COUPON_HIGHLIGHT_RADIUS_M}
           selectedId={selectedId}
@@ -86,6 +88,7 @@ export default function HomePage() {
       </div>
 
       <section className="space-y-4 p-4">
+        <LocationAccuracy status={status} accuracy={accuracy} />
         {isFallback && (
           <p className="rounded-2xl bg-sun-100 px-4 py-2 text-xs font-bold text-amber-800">
             位置情報が取得できなかったため、佐賀駅を現在地として表示しています。

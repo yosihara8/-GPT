@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { adCreateSchema } from "@/lib/schemas";
+import { announceToCustomers } from "@/lib/announce";
 import { getOwnerPlan, getSessionUser, ownsBusiness, premiumRequired, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,16 @@ export async function POST(req: Request) {
      VALUES ($1, $2, $3, now() + make_interval(days => $4)) RETURNING *`,
     [d.businessId, d.headline, d.body, d.days],
   );
-  return NextResponse.json({ ad }, { status: 201 });
+  const announced = d.notify
+    ? await announceToCustomers({
+        businessId: d.businessId,
+        kind: "ad",
+        title: d.headline,
+        body: d.body || "地図でお店をチェックしてみてください。",
+        link: `/dashboard/customer?shop=${d.businessId}`,
+      })
+    : { notified: 0, emailed: 0 };
+  return NextResponse.json({ ad, ...announced }, { status: 201 });
 }
 
 /** 広告の停止: DELETE /api/ads?id= */

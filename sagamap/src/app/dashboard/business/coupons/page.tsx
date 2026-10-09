@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PremiumGate from "@/components/PremiumGate";
 import StoreSelect, { useMyStores } from "@/components/StoreSelect";
+import NotifyCheckbox from "@/components/NotifyCheckbox";
 import { api } from "@/lib/fetcher";
 
 type Coupon = {
@@ -39,11 +40,11 @@ function Coupons() {
     const form = e.currentTarget;
     const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
     try {
-      await api("/api/coupons", {
+      const res = await api<{ notified: number; emailed: number }>("/api/coupons", {
         method: "POST",
-        body: JSON.stringify({ ...f, expiresAt: `${f.expiresAt}T23:59:59+09:00` }),
+        body: JSON.stringify({ ...f, notify: f.notify === "on", expiresAt: `${f.expiresAt}T23:59:59+09:00` }),
       });
-      setMsg("クーポンを発行しました");
+      setMsg(`クーポンを発行しました。${res.notified ? `興味のありそうなお客さま ${res.notified} 人にお知らせしました（メール ${res.emailed} 通）` : ""}`);
       form.reset();
       load();
     } catch (err) {
@@ -73,7 +74,8 @@ function Coupons() {
           <label className="label">利用条件</label>
           <input name="conditions" className="input" placeholder="平日 11:00-14:00、1 会計 1 回まで" />
         </div>
-        {msg && <p className="text-sm text-saga-700">{msg}</p>}
+        <NotifyCheckbox />
+        {msg && <p className="text-sm font-bold text-tea-700">{msg}</p>}
         <button className="btn-primary w-full">発行する</button>
       </form>
 

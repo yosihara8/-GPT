@@ -43,11 +43,11 @@ export const categoryEmoji = (c: string) => CATEGORY_EMOJI[c] ?? "📍";
 /** 運営者情報（利用規約・特定商取引法に基づく表記で使用。公開前に記入してください） */
 export const OPERATOR = {
   serviceName: "SagaMap（サガマップ）",
-  name: "【要記入：運営者の氏名または屋号】",
-  representative: "【要記入：代表者名】",
-  address: "【要記入：所在地（請求があれば遅滞なく開示する旨の記載も可）】",
-  phone: "【要記入：電話番号（請求があれば遅滞なく開示する旨の記載も可）】",
-  email: "【要記入：お問い合わせ用メールアドレス】",
+  name: "JapanAI研修",
+  representative: "請求があった場合には、遅滞なく電子メールにて開示いたします",
+  address: "請求があった場合には、遅滞なく電子メールにて開示いたします",
+  phone: "請求があった場合には、遅滞なく電子メールにて開示いたします",
+  email: "【要記入：お問い合わせ用メールアドレス（開示請求の受付先として必須）】",
 };
 
 export const PRICE_LEVEL_LABELS: Record<number, string> = { 1: "¥", 2: "¥¥", 3: "¥¥¥" };
