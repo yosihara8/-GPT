@@ -27,6 +27,8 @@ export type RouteSummary = {
   mode: "WALKING" | "DRIVING";
   /** 道順が取れず直線で概算した場合 true */
   estimated?: boolean;
+  /** 道順データの提供元（OpenStreetMap のときは出典表示が必要） */
+  provider?: "osm" | "google";
 };
 
 export type MapViewProps = {
@@ -262,6 +264,7 @@ function GoogleMapView({
         const name = (p: unknown) => (p === me ? "現在地" : (p as MapSpot).name);
         onRouteRef.current?.({
           mode: mode === google.maps.TravelMode.WALKING ? "WALKING" : "DRIVING",
+          provider: "google",
           totalMeters: route.legs.reduce((s, l) => s + (l.distance?.value ?? 0), 0),
           totalSeconds: route.legs.reduce((s, l) => s + (l.duration?.value ?? 0), 0),
           legs: route.legs.map((l, i) => ({

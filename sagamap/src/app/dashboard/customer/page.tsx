@@ -446,6 +446,14 @@ function CustomerDashboard() {
                     </li>
                   ))}
                 </ol>
+                {route.provider === "osm" && (
+                  <p className="mt-2 text-[11px] text-slate-400">
+                    道順データ ©{" "}
+                    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
+                      OpenStreetMap contributors
+                    </a>
+                  </p>
+                )}
                 <div className="mt-3 flex gap-2">
                   <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="btn-outline flex-1">
                     地図で見る

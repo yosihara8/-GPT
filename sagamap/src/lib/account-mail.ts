@@ -1,13 +1,13 @@
 import { APP_URL } from "./config";
 import { escapeHtml } from "./escape";
-import { sendMail } from "./mail";
+import { mailFooter, sendMail } from "./mail";
 import { createToken } from "./tokens";
 import type { Role } from "./auth";
 
 const layout = (title: string, body: string) =>
   `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
      <p style="font-size:20px;font-weight:bold">🎈 SagaMap</p><h2>${escapeHtml(title)}</h2>${body}
-     <p style="color:#888;font-size:12px">このメールに心当たりがない場合は、破棄してください。</p></div>`;
+     <p style="color:#888;font-size:12px">このメールに心当たりがない場合は、破棄してください。</p>${mailFooter()}</div>`;
 
 export async function sendVerificationMail(role: Role, userId: number, email: string, name: string) {
   const token = await createToken("verify_email", role, userId, 7 * 24 * 60);
