@@ -42,13 +42,22 @@ export const CATEGORY_EMOJI: Record<string, string> = {
 };
 export const categoryEmoji = (c: string) => CATEGORY_EMOJI[c] ?? "📍";
 
-/** 運営者情報（利用規約・特定商取引法に基づく表記で使用。公開前に記入してください） */
+const DISCLOSE_ON_REQUEST = "請求があった場合には、遅滞なく電子メールにて開示いたします";
+
+/**
+ * 運営者の所在地（環境変数 OPERATOR_ADDRESS。バーチャルオフィスの住所でも可）。
+ * 広告を含むメール（特定電子メール法）では「請求があれば開示」の省略が使えないため、
+ * メール末尾と特定商取引法に基づく表記にこの住所を表示する。
+ */
+export const OPERATOR_ADDRESS = process.env.OPERATOR_ADDRESS?.trim() || null;
+
+/** 運営者情報（利用規約・特定商取引法に基づく表記で使用） */
 export const OPERATOR = {
   serviceName: "SagaMap（サガマップ）",
   name: "JapanAI研修",
-  representative: "請求があった場合には、遅滞なく電子メールにて開示いたします",
-  address: "請求があった場合には、遅滞なく電子メールにて開示いたします",
-  phone: "請求があった場合には、遅滞なく電子メールにて開示いたします",
+  representative: DISCLOSE_ON_REQUEST,
+  address: OPERATOR_ADDRESS ?? DISCLOSE_ON_REQUEST,
+  phone: DISCLOSE_ON_REQUEST,
   email: "ai.prompt.biz@gmail.com",
 };
 

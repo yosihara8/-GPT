@@ -1,10 +1,28 @@
 import { Resend } from "resend";
 
-import { OPERATOR } from "./config";
+import { APP_URL, OPERATOR, OPERATOR_ADDRESS } from "./config";
+import { escapeHtml } from "./escape";
 
 const from = process.env.MAIL_FROM ?? "SagaMap <noreply@sagamap.jp>";
 /** 返信はお問い合わせ窓口に届くようにする */
 const replyTo = OPERATOR.email;
+
+/**
+ * メール末尾の送信者情報（特定電子メール法の表示義務：送信者名・住所・問い合わせ先・配信停止）。
+ * 住所が未設定のときは特定商取引法に基づく表記へのリンクを出す。
+ */
+export function mailFooter(unsubscribeUrl?: string) {
+  const address = OPERATOR_ADDRESS
+    ? escapeHtml(OPERATOR_ADDRESS)
+    : `<a href="${APP_URL}/tokushoho" style="color:#888">特定商取引法に基づく表記</a>をご覧ください`;
+  return `<hr style="border:none;border-top:1px solid #eee;margin:20px 0 10px">
+    <p style="color:#888;font-size:12px;line-height:1.7">
+      送信者：${escapeHtml(OPERATOR.name)}（${escapeHtml(OPERATOR.serviceName)}）<br>
+      住所：${address}<br>
+      お問い合わせ：<a href="mailto:${OPERATOR.email}" style="color:#888">${OPERATOR.email}</a>
+      ${unsubscribeUrl ? `<br><a href="${unsubscribeUrl}" style="color:#888">お知らせメールの配信停止はこちら</a>` : ""}
+    </p>`;
+}
 
 export async function sendMail(to: string, subject: string, html: string) {
   if (!process.env.RESEND_API_KEY) {

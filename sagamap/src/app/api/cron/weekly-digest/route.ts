@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { query, queryOne } from "@/lib/db";
 import { APP_URL } from "@/lib/config";
 import { escapeHtml } from "@/lib/escape";
-import { mailEnabled, sendMailBatch, type MailMessage } from "@/lib/mail";
+import { mailEnabled, mailFooter, sendMailBatch, type MailMessage } from "@/lib/mail";
 import { logServerError } from "@/lib/server-error";
 import { isCronRequest } from "@/lib/cron";
 
@@ -131,7 +131,7 @@ async function runDigest() {
         <p>${escapeHtml(r.name)} 様</p>
         <p>今週の新着まとめメールで、次のお知らせを <b>${r.people} 人</b>のお客さまにお届けしました。</p>
         <ul>${[...r.titles].map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
-        <p><a href="${APP_URL}/dashboard/business">ダッシュボードで閲覧数を見る</a></p></div>`,
+        <p><a href="${APP_URL}/dashboard/business">ダッシュボードで閲覧数を見る</a></p>${mailFooter()}</div>`,
     });
   }
 
@@ -150,5 +150,5 @@ function customerMail(c: Customer, relevant: Item[], others: Item[]) {
     ${relevant.length ? `<h3>✨ あなたへのおすすめ</h3><ul style="padding-left:18px">${relevant.map(li).join("")}</ul>` : ""}
     ${others.length ? `<h3>📍 そのほかの新着</h3><ul style="padding-left:18px">${others.map(li).join("")}</ul>` : ""}
     <p><a href="${APP_URL}/dashboard/customer" style="background:#ff6b4a;color:#fff;padding:10px 20px;border-radius:9999px;text-decoration:none">地図で近くのお店を見る</a></p>
-    <p style="color:#888;font-size:12px"><a href="${APP_URL}/unsubscribe?token=${c.unsubscribe_token}">お知らせメールの配信停止</a></p></div>`;
+    ${mailFooter(`${APP_URL}/unsubscribe?token=${c.unsubscribe_token}`)}</div>`;
 }
