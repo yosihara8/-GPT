@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>個人情報漏えい等 対応手順書（SagaMap）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Noto Sans JP", sans-serif; color: #1f2937; font-size: 10.5pt; line-height: 1.75; margin: 0; }
+  h1 { font-size: 21pt; font-weight: 900; margin: 0 0 4px; color: #0f5f55; }
+  h2 { font-size: 13.5pt; margin: 22px 0 8px; padding: 4px 10px; background: #e6f4f1; border-left: 6px solid #1f8a7a; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 14px 0 4px; break-after: avoid; }
+  p { margin: 4px 0; }
+  ul, ol { margin: 4px 0; padding-left: 1.4em; }
+  li { margin: 2px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 9.5pt; break-inside: avoid; }
+  th, td { border: 1px solid #cbd5e1; padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: #f1f5f9; }
+  .meta { color: #64748b; font-size: 9pt; }
+  .box { border: 2px solid #dc2626; background: #fef2f2; border-radius: 8px; padding: 10px 14px; margin: 10px 0; break-inside: avoid; }
+  .box h3 { margin-top: 0; color: #b91c1c; }
+  .note { border: 1px solid #f59e0b; background: #fffbeb; border-radius: 8px; padding: 8px 12px; margin: 8px 0; font-size: 9.5pt; break-inside: avoid; }
+  .step { display: grid; grid-template-columns: 92px 1fr; gap: 0; border: 1px solid #cbd5e1; border-radius: 8px; margin: 8px 0; overflow: hidden; break-inside: avoid; }
+  .step .when { background: #1f8a7a; color: #fff; font-weight: 700; padding: 8px; text-align: center; font-size: 9.5pt; display: flex; align-items: center; justify-content: center; }
+  .step .what { padding: 8px 12px; }
+  .step .what b.t { font-size: 11pt; }
+  .check li { list-style: none; margin-left: -1.2em; }
+  .check li::before { content: "☐ "; }
+  .mail { border: 1px dashed #64748b; padding: 10px 14px; border-radius: 6px; background: #f8fafc; font-size: 9.5pt; white-space: pre-wrap; break-inside: avoid; }
+  .page-break { break-before: page; }
+  .small { font-size: 9pt; color: #475569; }
+</style>
+</head>
+<body>
+
+<h1>個人情報漏えい等 対応手順書</h1>
+<p class="meta">対象サービス：SagaMap（サガマップ）　運営者：JapanAI研修　作成日：2026年10月10日　版：第1版</p>
+
+<div class="box">
+  <h3>🚨 漏えいに気づいたら、まずこの 5 つ</h3>
+  <ol>
+    <li><b>慌ててデータやログを消さない</b>（原因調査と報告に必要です）</li>
+    <li><b>被害の拡大を止める</b>：パスワード・鍵を変更し、必要ならサイトを一時停止（→ 手順 2）</li>
+    <li><b>メモを取り始める</b>：気づいた日時・内容・行ったことを時刻つきで記録（→ 様式 8）</li>
+    <li><b>3〜5 日以内</b>に、個人情報保護委員会へ「速報」を出すか判断する（→ 手順 4）</li>
+    <li>迷ったら<b>報告する側</b>に倒す。判断に迷う点は委員会の相談窓口や弁護士に相談する</li>
+  </ol>
+</div>
+
+<h2>1. 目的と対象</h2>
+<p>本手順書は、SagaMap で取り扱う個人情報について、漏えい・滅失・毀損（以下「漏えい等」）が発生した、またはそのおそれがある場合に、被害を最小限にし、個人情報保護法に基づく報告と本人への通知を確実に行うための手順を定めます。</p>
+<table>
+  <tr><th style="width:28%">SagaMap で扱う主な個人情報</th><th>保管場所</th></tr>
+  <tr><td>お客さま：氏名、メールアドレス、パスワード（ハッシュ化）、興味のある業種、利用履歴、お気に入り</td><td rowspan="3">データベース（Neon・アメリカ）<br>サーバー（Vercel・アメリカ）</td></tr>
+  <tr><td>事業者：氏名、メールアドレス、パスワード（ハッシュ化）、店舗情報、Stripe の顧客 ID</td></tr>
+  <tr><td>位置情報：約 100m 単位に丸めた匿名の記録（個人とは結びつかない形）</td></tr>
+  <tr><td>カード情報</td><td><b>運営者は保持していません</b>（Stripe が直接管理）</td></tr>
+  <tr><td>月次バックアップ（メール添付）</td><td>運営者のメールボックス・ダウンロード先の端末</td></tr>
+</table>
+
+<h2>2. 連絡先一覧</h2>
+<table>
+  <tr><th style="width:30%">相手</th><th>連絡先・方法</th><th style="width:28%">いつ使う</th></tr>
+  <tr><td>対応責任者（運営者）</td><td>JapanAI研修　ai.prompt.biz@gmail.com</td><td>すべての判断・報告</td></tr>
+  <tr><td>個人情報保護委員会<br>（漏えい等報告）</td><td>委員会ウェブサイトの「漏えい等報告フォーム」から電子提出<br>https://www.ppc.go.jp/personalinfo/legal/leakAction/</td><td>速報（3〜5 日以内）・確報</td></tr>
+  <tr><td>個人情報保護委員会<br>（相談ダイヤル）</td><td>個人情報保護法相談ダイヤル　03-6457-9849</td><td>報告が必要か迷ったとき</td></tr>
+  <tr><td>佐賀県警察<br>サイバー犯罪相談窓口</td><td>警察相談専用電話 #9110 ／ 佐賀県警察ウェブサイトのサイバー犯罪相談窓口</td><td>不正アクセス・脅迫など犯罪の疑い</td></tr>
+  <tr><td>IPA 情報セキュリティ安心相談窓口</td><td>03-5978-7509</td><td>技術的な対処の相談</td></tr>
+  <tr><td>Vercel／Neon／Stripe／Resend</td><td>各サービスの管理画面のサポート窓口</td><td>サーバー側の調査・ログの提供依頼</td></tr>
+  <tr><td>弁護士（任意）</td><td>（顧問・相談先を決めたら記入）</td><td>本人対応・公表の判断</td></tr>
+</table>
+
+<h2>3. 報告・通知が「義務」になるケース</h2>
+<p>次のいずれかに当たる漏えい等（おそれを含む）は、<b>個人情報保護委員会への報告と本人への通知が義務</b>です（個人情報保護法 第26条、施行規則 第7条）。</p>
+<table>
+  <tr><th style="width:6%">①</th><td><b>要配慮個人情報</b>（病歴・犯罪歴など）の漏えい</td><td class="small">SagaMap では原則取得していません</td></tr>
+  <tr><th>②</th><td><b>財産的被害</b>が生じるおそれ（クレジットカード番号・ネットバンキングの ID など）</td><td class="small">カード情報は保持していないため通常は対象外</td></tr>
+  <tr><th>③</th><td><b>不正な目的</b>による漏えい（不正アクセス、ウイルス、内部不正、盗難など）</td><td class="small"><b>件数に関係なく対象。SagaMap で最も起こりやすいケース</b></td></tr>
+  <tr><th>④</th><td><b>1,000 人を超える</b>本人の情報の漏えい</td><td class="small">誤送信・設定ミスでも対象</td></tr>
+</table>
+<div class="note">
+  <b>報告の期限</b>　速報：漏えいを知った時から<b>おおむね 3〜5 日以内</b>　／　確報：<b>30 日以内</b>（③ 不正目的の場合は <b>60 日以内</b>）<br>
+  <b>報告が義務でない場合</b>（例：数名へのメール誤送信で、すぐ回収・削除を確認できた）も、本手順に沿って記録を残し、本人へのおわびと説明を行います。
+</div>
+
+<h2>4. 対応の流れ</h2>
+
+<div class="step"><div class="when">発見<br>0 時間</div><div class="what">
+  <b class="t">① 発見・第一報</b>
+  <ul>
+    <li>きっかけの例：管理画面の「エラー」「操作記録」に見覚えのない操作／利用者からの連絡／各サービスからのセキュリティ通知／身に覚えのないログイン通知</li>
+    <li>気づいた日時、内容、情報源をすぐ記録する（様式 8）。<b>この時点が「知った時」＝ 期限の起点</b></li>
+  </ul>
+</div></div>
+
+<div class="step"><div class="when">〜1 時間</div><div class="what">
+  <b class="t">② 被害拡大の防止（初動）</b>
+  <ul class="check">
+    <li>Vercel：怪しいデプロイがあれば以前の正常なデプロイに戻す（Deployments → Promote）。必要ならプロジェクトを一時停止</li>
+    <li>Neon：データベースのパスワードをリセットし、新しい接続文字列を Vercel の環境変数に設定</li>
+    <li>Vercel の環境変数 <code>NEXTAUTH_SECRET</code> を新しい値に変更（全員が強制ログアウトされる）</li>
+    <li><code>CRON_SECRET</code>・<code>RESEND_API_KEY</code>・<code>STRIPE_SECRET_KEY</code>（Stripe ではキーのロール）を再発行</li>
+    <li>運営者アカウント（管理画面・Vercel・Neon・GitHub・Stripe・Google）のパスワード変更と二段階認証の確認。不要なアクセストークンを削除</li>
+    <li>メール誤送信の場合：送信先に削除を依頼し、削除したことの返信をもらう</li>
+  </ul>
+</div></div>
+
+<div class="step"><div class="when">〜24 時間</div><div class="what">
+  <b class="t">③ 証拠の保全と事実の調査</b>
+  <ul>
+    <li><b>保全</b>：Vercel のログ（Logs）、管理画面の「操作記録」「エラー」、Neon の操作履歴を画面保存・書き出しする。月次バックアップのファイルも保管</li>
+    <li><b>調べること</b>：何が（項目）／何人分／誰の（お客さま・事業者）／いつから・いつまで／どこから（原因・経路）／二次被害の有無</li>
+    <li>必要なら Neon の「時点復元（Point-in-time restore）」で漏えい前の状態を確認する</li>
+  </ul>
+</div></div>
+
+<div class="step"><div class="when">3〜5 日以内</div><div class="what">
+  <b class="t">④ 報告の判断と速報</b>
+  <ul>
+    <li>手順 3 の ①〜④ に当たるか判断する。<b>「おそれ」の段階でも対象</b>。迷う場合は委員会の相談ダイヤルへ</li>
+    <li>対象なら、委員会の「漏えい等報告フォーム」で<b>速報</b>を提出（その時点で分かっている範囲で可）</li>
+    <li>犯罪の疑いがあれば警察（#9110・サイバー犯罪相談窓口）に相談</li>
+  </ul>
+</div></div>
+
+<div class="step"><div class="when">速やかに</div><div class="what">
+  <b class="t">⑤ 本人への通知</b>
+  <ul>
+    <li>漏えいした本人にメールで通知する（文例は手順 6）。連絡がつかない人が多い場合は、サイトのお知らせで公表して代替する</li>
+    <li>パスワードの漏えいのおそれがあれば、パスワードの再設定をお願いする</li>
+    <li>問い合わせ窓口（ai.prompt.biz@gmail.com）での対応を準備する</li>
+  </ul>
+</div></div>
+
+<div class="step"><div class="when">30 日以内<br>（不正目的<br>60 日以内）</div><div class="what">
+  <b class="t">⑥ 確報と再発防止</b>
+  <ul>
+    <li>調査結果をまとめ、委員会へ<b>確報</b>を提出（速報と同じフォーム）</li>
+    <li>原因に応じた再発防止策を実施し、本手順書・プライバシーポリシーを見直す</li>
+    <li>対応記録（様式 8）は <b>3 年以上</b>保管する</li>
+  </ul>
+</div></div>
+
+<h2>5. 報告する項目（速報・確報）</h2>
+<table>
+  <tr><th style="width:4%">1</th><td>概要（いつ・何が起きたか）</td><th style="width:4%">6</th><td>原因</td></tr>
+  <tr><th>2</th><td>漏えい等した個人データの項目</td><th>7</th><td>二次被害またはそのおそれの有無と内容</td></tr>
+  <tr><th>3</th><td>漏えい等した本人の数</td><th>8</th><td>本人への対応の実施状況</td></tr>
+  <tr><th>4</th><td>発生した日・発覚した日</td><th>9</th><td>公表の実施状況</td></tr>
+  <tr><th>5</th><td>発覚の経緯</td><th>10</th><td>再発防止のための措置</td></tr>
+</table>
+<p class="small">速報の時点で分からない項目は「調査中」とし、確報で埋めます。</p>
+
+<h2>6. 本人へのお知らせメール（文例）</h2>
+<div class="mail">件名：【SagaMap】お客さま情報の漏えい（のおそれ）に関するお詫びとお知らせ
+
+〇〇 様
+
+SagaMap をご利用いただきありがとうございます。運営者の JapanAI研修です。
+このたび、〇月〇日に、SagaMap に登録されたお客さまの情報が外部に漏えいした（またはそのおそれがある）ことが判明しました。ご迷惑とご心配をおかけし、心よりお詫び申し上げます。
+
+■ 漏えいした（おそれのある）情報
+　氏名、メールアドレス（パスワードは暗号化して保存しており、そのままでは読み取れません）
+■ 発生日・判明日
+　〇月〇日ごろ／〇月〇日
+■ 原因
+　〇〇（調査中の場合は「現在調査中です。判明しだいお知らせします」）
+■ 現在の対応
+　不正なアクセスを遮断し、個人情報保護委員会へ報告しました。
+■ お客さまへのお願い
+　念のため、パスワードの再設定をお願いします（ログイン画面の「パスワードを忘れた方」から）。
+　他のサービスで同じパスワードをお使いの場合は、そちらも変更してください。
+　SagaMap を名乗る不審なメールにはご注意ください。
+
+■ お問い合わせ
+　JapanAI研修　ai.prompt.biz@gmail.com
+
+再発防止に努めてまいります。誠に申し訳ございませんでした。</div>
+
+<h2>7. 平時の備え（予防）</h2>
+<ul class="check">
+  <li>Vercel・Neon・GitHub・Stripe・Resend・Google のすべてで<b>二段階認証</b>を有効にする</li>
+  <li>管理画面の初期パスワードを変更済みにしておく。パスワードを使い回さない</li>
+  <li>API キー・トークンをチャットやメールに貼らない（貼った場合はすぐ削除・再発行）</li>
+  <li>毎月 1 日に届く<b>自動バックアップ</b>は、ダウンロード後に安全な場所へ保管し、メールは削除する（個人情報を含むため）</li>
+  <li>管理画面の「エラー」「操作記録」を月 1 回確認する</li>
+  <li>本手順書を年 1 回見直し、連絡先が最新か確認する</li>
+</ul>
+
+<h2>8. 対応記録（様式）</h2>
+<table>
+  <tr><th style="width:22%">日時</th><th style="width:22%">対応者</th><th>内容（気づいたこと・行ったこと・連絡した相手）</th></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+  <tr><td style="height:26px"></td><td></td><td></td></tr>
+</table>
+<p class="small">※ 本手順書は一般的な内容をまとめたものです。法令の改正や個別の事案については、個人情報保護委員会の最新の案内や専門家（弁護士等）の助言を確認してください。</p>
+
+</body>
+</html>

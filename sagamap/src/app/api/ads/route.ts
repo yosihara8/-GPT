@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { blockedMessage, checkAd } from "@/lib/content-check";
 import { query } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { adCreateSchema } from "@/lib/schemas";
@@ -58,10 +59,13 @@ export async function POST(req: Request) {
   if (!(await ownsBusiness(auth.user.id, d.businessId))) {
     return NextResponse.json({ error: "店舗が見つかりません" }, { status: 404 });
   }
+  // 景品表示法などの観点で自動チェック（NG は掲載不可、要注意は運営者が後で確認）
+  const check = checkAd({ headline: d.headline, body: d.body });
+  if (check.blocked.length) return NextResponse.json({ error: blockedMessage(check), reasons: check.blocked }, { status: 400 });
   const [ad] = await query(
-    `INSERT INTO ads (business_id, headline, body, ends_at)
-     VALUES ($1, $2, $3, now() + make_interval(days => $4)) RETURNING *`,
-    [d.businessId, d.headline, d.body, d.days],
+    `INSERT INTO ads (business_id, headline, body, ends_at, review_flags)
+     VALUES ($1, $2, $3, now() + make_interval(days => $4), $5) RETURNING *`,
+    [d.businessId, d.headline, d.body, d.days, check.warnings],
   );
   const announced = d.notify
     ? await announceToCustomers({
@@ -72,7 +76,7 @@ export async function POST(req: Request) {
         link: `/dashboard/customer?shop=${d.businessId}`,
       })
     : { notified: 0 };
-  return NextResponse.json({ ad, ...announced }, { status: 201 });
+  return NextResponse.json({ ad, warnings: check.warnings, ...announced }, { status: 201 });
 }
 
 /** 広告の停止: DELETE /api/ads?id= */

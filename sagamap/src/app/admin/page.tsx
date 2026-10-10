@@ -26,6 +26,7 @@ const TABS = [
   { key: "customers", label: "顧客" },
   { key: "logs", label: "操作記録" },
   { key: "invites", label: "🎁 特別招待" },
+  { key: "reviews", label: "🛡️ 掲載チェック" },
   { key: "errors", label: "エラー" },
   { key: "admins", label: "運営者・設定" },
 ] as const;
@@ -61,7 +62,8 @@ export default function AdminPage() {
       {tab === "overview" && <Overview />}
       {tab === "admins" && <Admins />}
       {tab === "invites" && <Invites />}
-      {tab !== "overview" && tab !== "admins" && tab !== "invites" && <List key={tab} type={tab} />}
+      {tab === "reviews" && <Reviews />}
+      {tab !== "overview" && tab !== "admins" && tab !== "invites" && tab !== "reviews" && <List key={tab} type={tab} />}
     </main>
   );
 }
@@ -413,6 +415,68 @@ function Invites() {
                 </button>
               )}
             </div>
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+type ReviewItem = {
+  type: "coupon" | "ad";
+  id: number;
+  text: string;
+  business_name: string;
+  owner_email: string;
+  review_flags: string[];
+  created_at: string;
+};
+
+/** クーポン・広告の自動チェックで「要確認」になったものを確認する */
+function Reviews() {
+  const [items, setItems] = useState<ReviewItem[] | null>(null);
+  const load = useCallback(() => api<{ items: ReviewItem[] }>("/api/admin/reviews").then((d) => setItems(d.items)), []);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function decide(item: ReviewItem, action: "approve" | "stop") {
+    if (action === "stop" && !confirm("この掲載を停止しますか？")) return;
+    await api("/api/admin/reviews", { method: "PATCH", body: JSON.stringify({ type: item.type, id: item.id, action }) });
+    load();
+  }
+
+  return (
+    <div className="space-y-4">
+      <section className="card space-y-2 text-sm text-slate-600">
+        <h2 className="text-lg font-extrabold text-slate-900">🛡️ 掲載チェック（景品表示法・医薬品医療機器等法）</h2>
+        <p>
+          クーポン・広告は登録時と毎日 0:10 に自動でチェックしています。「日本一」「最安」「No.1」、効能の断定、割引率の食い違いなど<b>掲載できない表現は自動で停止</b>し、事業者にメールで知らせます。
+        </p>
+        <p>二重価格・期間限定・「無料」など、事実なら問題ない表現はここに表示されます。内容を確認して「問題なし」か「停止」を選んでください。</p>
+      </section>
+      {items === null && <p className="text-sm text-slate-500">読み込み中…</p>}
+      {items?.length === 0 && <p className="card text-sm font-bold text-tea-700">✅ 確認待ちはありません。</p>}
+      {items?.map((i) => (
+        <section key={`${i.type}-${i.id}`} className="card space-y-2 text-sm">
+          <p className="font-extrabold">
+            <span className="mr-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs">{i.type === "coupon" ? "🎟️ クーポン" : "📣 広告"}</span>
+            {i.business_name}
+            <span className="ml-2 text-xs font-normal text-slate-500">{i.owner_email}</span>
+          </p>
+          <p className="rounded-xl bg-slate-50 px-3 py-2">{i.text}</p>
+          <ul className="list-disc space-y-0.5 pl-5 text-xs text-amber-800">
+            {i.review_flags.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+          <div className="flex gap-2">
+            <button onClick={() => decide(i, "approve")} className="btn-primary px-4 py-1.5">
+              問題なし
+            </button>
+            <button onClick={() => decide(i, "stop")} className="btn-outline px-4 py-1.5">
+              停止する
+            </button>
           </div>
         </section>
       ))}

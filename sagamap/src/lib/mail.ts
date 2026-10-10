@@ -24,13 +24,15 @@ export function mailFooter(unsubscribeUrl?: string) {
     </p>`;
 }
 
-export async function sendMail(to: string, subject: string, html: string) {
+export type MailAttachment = { filename: string; content: Buffer };
+
+export async function sendMail(to: string, subject: string, html: string, attachments?: MailAttachment[]) {
   if (!process.env.RESEND_API_KEY) {
-    console.info(`[mail:dry-run] to=${to} subject=${subject}`);
+    console.info(`[mail:dry-run] to=${to} subject=${subject}${attachments?.length ? ` attachments=${attachments.map((a) => a.filename).join(",")}` : ""}`);
     return { dryRun: true as const };
   }
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const { error } = await resend.emails.send({ from, to, subject, html, replyTo });
+  const { error } = await resend.emails.send({ from, to, subject, html, replyTo, attachments });
   if (error) throw new Error(error.message);
   return { dryRun: false as const };
 }

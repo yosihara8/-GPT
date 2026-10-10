@@ -27,3 +27,21 @@ export async function releaseJob(job: string, period: string) {
 export function jstMonth(d = new Date()) {
   return new Date(d.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 7);
 }
+
+/** 日本時間の日付（例: 2026-10-01） */
+export function jstDate(d = new Date()) {
+  return new Date(d.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+/** 期間ごとに 1 回だけ実行する（失敗したら次回に再実行） */
+export async function runOnce<T>(job: string, period: string, fn: () => Promise<T>) {
+  if (!(await claimJob(job, period))) return { skipped: true as const };
+  try {
+    const result = await fn();
+    await finishJob(job, period, result);
+    return result;
+  } catch (e) {
+    await releaseJob(job, period);
+    throw e;
+  }
+}
