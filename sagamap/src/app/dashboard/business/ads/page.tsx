@@ -22,6 +22,7 @@ function Ads() {
   const [quota, setQuota] = useState<{ limit: number; used: number; remaining: number } | null>(null);
   const [preview, setPreview] = useState({ headline: "", body: "" });
   const [msg, setMsg] = useState<string | null>(null);
+  const [msgIsError, setMsgIsError] = useState(false);
   const load = useCallback(
     () =>
       api<{ ads: Ad[]; limit: number; used: number; remaining: number }>("/api/ads").then((d) => {
@@ -39,15 +40,20 @@ function Ads() {
     const form = e.currentTarget;
     try {
       const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
-      const res = await api<{ notified: number }>("/api/ads", {
+      const res = await api<{ notified: number; warnings?: string[] }>("/api/ads", {
         method: "POST",
         body: JSON.stringify({ ...f, notify: f.notify === "on" }),
       });
-      setMsg(`広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}`);
+      setMsgIsError(false);
+      setMsg(
+        `広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}` +
+          (res.warnings?.length ? `\n\n⚠️ 次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
+      );
       form.reset();
       setPreview({ headline: "", body: "" });
       load();
     } catch (err) {
+      setMsgIsError(true);
       setMsg((err as Error).message);
     }
   }
@@ -102,7 +108,10 @@ function Ads() {
           </select>
         </div>
         <NotifyCheckbox />
-        {msg && <p className="text-sm font-bold text-tea-700">{msg}</p>}
+        {msg && <p className={`whitespace-pre-line text-sm font-bold ${msgIsError ? "text-red-600" : "text-tea-700"}`}>{msg}</p>}
+        <p className="text-xs text-slate-500">
+          「日本一」「最安」「No.1」など根拠を示せない表現や、効能をうたう表現は自動チェックで掲載できません（景品表示法・医薬品医療機器等法）。
+        </p>
         <button disabled={quota?.remaining === 0} className="btn-primary w-full">
           {quota?.remaining === 0 ? "今月の出稿回数を使い切りました" : "出稿する"}
         </button>

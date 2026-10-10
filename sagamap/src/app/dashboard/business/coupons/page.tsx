@@ -28,6 +28,7 @@ function Coupons() {
   const stores = useMyStores();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
+  const [msgIsError, setMsgIsError] = useState(false);
   const load = useCallback(() => api<{ coupons: Coupon[] }>("/api/coupons").then((d) => setCoupons(d.coupons)), []);
   useEffect(() => {
     load();
@@ -40,14 +41,19 @@ function Coupons() {
     const form = e.currentTarget;
     const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
     try {
-      const res = await api<{ notified: number }>("/api/coupons", {
+      const res = await api<{ notified: number; warnings?: string[] }>("/api/coupons", {
         method: "POST",
         body: JSON.stringify({ ...f, notify: f.notify === "on", expiresAt: `${f.expiresAt}T23:59:59+09:00` }),
       });
-      setMsg(`クーポンを発行しました。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}`);
+      setMsgIsError(false);
+      setMsg(
+        `クーポンを発行しました。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}` +
+          (res.warnings?.length ? `\n\n⚠️ 次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
+      );
       form.reset();
       load();
     } catch (err) {
+      setMsgIsError(true);
       setMsg((err as Error).message);
     }
   }
@@ -75,7 +81,10 @@ function Coupons() {
           <input name="conditions" className="input" placeholder="平日 11:00-14:00、1 会計 1 回まで" />
         </div>
         <NotifyCheckbox />
-        {msg && <p className="text-sm font-bold text-tea-700">{msg}</p>}
+        {msg && <p className={`whitespace-pre-line text-sm font-bold ${msgIsError ? "text-red-600" : "text-tea-700"}`}>{msg}</p>}
+        <p className="text-xs text-slate-500">
+          「日本一」「最安」「No.1」など根拠を示せない表現や、効能をうたう表現は自動チェックで掲載できません（景品表示法・医薬品医療機器等法）。
+        </p>
         <button className="btn-primary w-full">発行する</button>
       </form>
 

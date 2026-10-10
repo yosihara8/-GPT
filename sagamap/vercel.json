@@ -10,7 +10,7 @@
       "schedule": "0 0 * * 5"
     },
     {
-      "path": "/api/cron/monthly-referrals",
+      "path": "/api/cron/daily",
       "schedule": "10 15 * * *"
     }
   ]

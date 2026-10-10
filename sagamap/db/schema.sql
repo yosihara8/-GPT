@@ -237,3 +237,9 @@ CREATE TABLE IF NOT EXISTS invite_codes (
 -- 特別プラン（有料機能を無料で利用。Stripe の請求なし）
 ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS complimentary BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS invite_code_id INTEGER REFERENCES invite_codes(id) ON DELETE SET NULL;
+
+-- クーポン・広告の自動チェック（要確認の理由。空なら問題なし。運営者が確認すると reviewed_at が入る）
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS review_flags TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+ALTER TABLE ads ADD COLUMN IF NOT EXISTS review_flags TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE ads ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;

@@ -4,6 +4,7 @@ import { parseBody } from "@/lib/http";
 import { couponCreateSchema } from "@/lib/schemas";
 import { parseLatLng } from "@/lib/geo";
 import { announceToCustomers } from "@/lib/announce";
+import { blockedMessage, checkCoupon } from "@/lib/content-check";
 import { getOwnerPlan, ownsBusiness, premiumRequired, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -77,10 +78,13 @@ export async function POST(req: Request) {
   if (!(await ownsBusiness(auth.user.id, d.businessId))) {
     return NextResponse.json({ error: "店舗が見つかりません" }, { status: 404 });
   }
+  // 景品表示法などの観点で自動チェック（NG は掲載不可、要注意は運営者が後で確認）
+  const check = checkCoupon({ title: d.title, conditions: d.conditions, discount_rate: d.discountRate });
+  if (check.blocked.length) return NextResponse.json({ error: blockedMessage(check), reasons: check.blocked }, { status: 400 });
   const [row] = await query(
-    `INSERT INTO coupons (business_id, title, discount_rate, conditions, expires_at)
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [d.businessId, d.title, d.discountRate, d.conditions, d.expiresAt],
+    `INSERT INTO coupons (business_id, title, discount_rate, conditions, expires_at, review_flags)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [d.businessId, d.title, d.discountRate, d.conditions, d.expiresAt, check.warnings],
   );
   const announced = d.notify
     ? await announceToCustomers({
@@ -91,5 +95,5 @@ export async function POST(req: Request) {
         link: `/dashboard/customer/coupons/${row.id}`,
       })
     : { notified: 0 };
-  return NextResponse.json({ coupon: row, ...announced }, { status: 201 });
+  return NextResponse.json({ coupon: row, warnings: check.warnings, ...announced }, { status: 201 });
 }

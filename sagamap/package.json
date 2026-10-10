@@ -17,6 +17,7 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "1.16.8",
     "bcryptjs": "2.4.3",
+    "exceljs": "4.4.0",
     "leaflet": "1.9.4",
     "next": "14.2.35",
     "next-auth": "4.24.11",
