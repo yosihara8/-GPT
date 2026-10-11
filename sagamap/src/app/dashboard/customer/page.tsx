@@ -5,6 +5,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapSpot, type RouteSummary } from "@/components/MapView";
 import AdBanner, { AdDetail, type Ad } from "@/components/AdBanner";
+import RouteBox from "@/components/RouteBox";
 import { scrollToElement } from "@/lib/scroll";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import LocationAccuracy from "@/components/LocationAccuracy";
@@ -112,6 +113,8 @@ function CustomerDashboard() {
   const [routeLoading, setRouteLoading] = useState(false);
   const [route, setRoute] = useState<RouteSummary | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
+  // お店の詳細から「経路を表示」したとき（別のお店を選ぶと、そのお店への経路に切り替わる）
+  const [routeHere, setRouteHere] = useState(false);
   const [flow, setFlow] = useState<HeatPoint[] | null>(null);
   const [flowHour, setFlowHour] = useState(() => new Date().getHours());
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -183,6 +186,7 @@ function CustomerDashboard() {
     setRouteError(null);
     setRouteLoading(true);
     setRouteStops(stops);
+    setRouteHere(false);
     setTab("ルート");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -198,6 +202,15 @@ function CustomerDashboard() {
     if (!selectedId) return setDetail(null);
     api<Detail>(`/api/businesses/${selectedId}`).then(setDetail);
   }, [selectedId]);
+  // 「経路を表示」中に別のお店を選んだら、そのお店への経路に切り替える
+  useEffect(() => {
+    if (!routeHere || !detail) return;
+    const b = detail.business;
+    setRoute(null);
+    setRouteError(null);
+    setRouteLoading(true);
+    setRouteStops([{ id: b.id, name: b.name, lat: b.lat, lng: b.lng }]);
+  }, [routeHere, detail]);
   // 詳細が表示されたら（画面に描かれた後で）その位置まで移動する
   useEffect(() => {
     if (!detail) return;
@@ -236,7 +249,7 @@ function CustomerDashboard() {
 
   return (
     <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
-      <div className="relative h-[58dvh] min-h-[360px] lg:order-2 lg:h-full lg:flex-1">
+      <div className="sticky top-14 z-20 h-[45dvh] min-h-[300px] lg:relative lg:top-0 lg:order-2 lg:h-full lg:flex-1">
         <AdBanner onSelect={(id, ad) => openShop(id, ad)} />
         <MapView
           shops={nearby}
@@ -273,9 +286,8 @@ function CustomerDashboard() {
 
       <div
         id="customer-panel"
-        className="relative z-10 -mt-4 rounded-t-2xl bg-white shadow-[0_-4px_24px_rgba(16,24,40,0.10)] lg:order-1 lg:mt-0 lg:w-[440px] lg:shrink-0 lg:overflow-y-auto lg:rounded-none lg:border-r lg:border-slate-200 lg:shadow-none"
+        className="relative z-10 bg-white lg:order-1 lg:w-[440px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-slate-200"
       >
-      <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-slate-300 lg:hidden" aria-hidden />
 
       {flow && (
         <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-2.5 text-sm">
@@ -309,11 +321,33 @@ function CustomerDashboard() {
           onRedeemCoupon={redeemCoupon}
           isFavorite={favIds.has(detail.business.id)}
           onToggleFavorite={() => toggleFavorite(detail.business.id)}
-          onRouteHere={() => showRoute([`shop-${detail.business.id}`])}
+          routeOn={routeHere}
+          route={route}
+          routeLoading={routeLoading}
+          routeError={routeError}
+          routeMode={routeMode}
+          onRouteMode={(m) => {
+            setRouteMode(m);
+            setRouteLoading(true);
+          }}
+          onRouteHere={() => {
+            const b = detail.business;
+            setRouteHere(true);
+            setRouteKeys([]);
+            setRoute(null);
+            setRouteError(null);
+            setRouteLoading(true);
+            setRouteStops([{ id: b.id, name: b.name, lat: b.lat, lng: b.lng }]);
+          }}
+          onRouteClear={() => {
+            setRouteHere(false);
+            setRouteStops(null);
+            setRoute(null);
+          }}
         />
       )}
 
-      <nav className="sticky top-14 z-20 mt-1 flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 lg:top-0">
+      <nav className="sticky top-[calc(3.5rem+45dvh)] z-10 mt-1 flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 lg:top-0">
         {TABS.map((t) => {
           const Icon = TAB_ICONS[t];
           return (
@@ -654,6 +688,13 @@ function ShopDetail({
   isFavorite,
   onToggleFavorite,
   onRouteHere,
+  routeOn,
+  route,
+  routeLoading,
+  routeError,
+  routeMode,
+  onRouteMode,
+  onRouteClear,
 }: {
   detail: Detail;
   ad: Ad | null;
@@ -663,11 +704,18 @@ function ShopDetail({
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onRouteHere: () => void;
+  routeOn: boolean;
+  route: RouteSummary | null;
+  routeLoading: boolean;
+  routeError: string | null;
+  routeMode: "foot" | "car";
+  onRouteMode: (m: "foot" | "car") => void;
+  onRouteClear: () => void;
 }) {
   const b = detail.business;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}&travelmode=walking`;
   return (
-    <div id="shop-detail" className="scroll-mt-16 border-b border-slate-100 bg-white p-4">
+    <div id="shop-detail" className="border-b border-slate-100 bg-white p-4 [scroll-margin-top:calc(3.5rem+45dvh+8px)] lg:[scroll-margin-top:0]">
       {ad && (
         <div className="mb-3">
           <AdDetail ad={ad} />
@@ -707,15 +755,20 @@ function ShopDetail({
         </div>
       ))}
       <div className="mt-3 flex gap-2">
-        <button onClick={onRouteHere} className="btn-primary flex-1">
-          <Navigation className="h-4 w-4" aria-hidden />
-          ここへの道順
-        </button>
+        {!routeOn && (
+          <button onClick={onRouteHere} className="btn-primary flex-1">
+            <Navigation className="h-4 w-4" aria-hidden />
+            経路を表示
+          </button>
+        )}
         <button onClick={onToggleFavorite} className={`btn-outline ${isFavorite ? "border-coral-100 text-coupon" : ""}`} aria-pressed={isFavorite}>
           <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} aria-hidden />
           お気に入り
         </button>
       </div>
+      {routeOn && (
+        <RouteBox route={route} loading={routeLoading} error={routeError} mode={routeMode} onMode={onRouteMode} onClear={onRouteClear} />
+      )}
       <div className="mt-2 flex flex-wrap gap-3 text-sm">
         <a href={directions} target="_blank" rel="noreferrer" className="text-saga-600 underline">
           Google マップで開く
