@@ -3,8 +3,10 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ChevronDown, CircleCheck, ImagePlus, X } from "lucide-react";
+import { ChevronDown, CircleCheck, ImagePlus, Pencil, X } from "lucide-react";
 import { AdDetail } from "@/components/AdBanner";
+import AdStats from "@/components/AdStats";
+import ImagePicker, { type PickedImage } from "@/components/ImagePicker";
 import PremiumGate from "@/components/PremiumGate";
 import StoreSelect, { useMyStores } from "@/components/StoreSelect";
 import NotifyCheckbox from "@/components/NotifyCheckbox";
@@ -19,6 +21,10 @@ type Ad = {
   is_active: boolean;
   business_name: string;
   has_image?: boolean;
+  updated_at?: string | null;
+  view_count?: number;
+  click_count?: number;
+  viewer_count?: number;
 };
 type Done = { headline: string; endsAt: string; notified: number; warnings: string[]; imageUrl: string | null };
 
@@ -192,7 +198,7 @@ function Ads() {
       {ads.length > 0 && (
         <section className="space-y-2">
           <h2 className="text-sm font-semibold text-slate-700">出稿した広告</h2>
-          <p className="text-xs text-slate-500">タップすると、お客さまに見えている広告の内容を表示します。</p>
+          <p className="text-xs text-slate-500">タップすると、お客さまに見えている広告の内容と、見られた回数を表示します。内容の修正もできます（出稿回数は使いません）。</p>
           <ul className="space-y-2">
             {ads.map((a) => {
               const live = a.is_active && new Date(a.ends_at).getTime() > Date.now();
@@ -206,6 +212,7 @@ function Ads() {
                         <span className="block text-xs text-slate-500">
                           {a.business_name}・{new Date(a.ends_at).toLocaleDateString("ja-JP")}まで
                         </span>
+                        <AdStats ad={a} compact />
                       </span>
                       <span
                         className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${live ? "bg-tea-50 text-tea-700" : "bg-slate-100 text-slate-500"}`}
@@ -214,8 +221,11 @@ function Ads() {
                       </span>
                       <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-180" aria-hidden />
                     </summary>
-                    <div className="border-t border-slate-100 p-3">
+                    <div className="space-y-3 border-t border-slate-100 p-3">
+                      <AdStats ad={a} />
                       <AdDetail ad={{ ...a, business_id: 0 }} />
+                      {a.updated_at && <p className="text-xs text-slate-400">{new Date(a.updated_at).toLocaleString("ja-JP")} に修正</p>}
+                      {live && <AdEditor ad={a} onSaved={load} />}
                     </div>
                   </details>
                 </li>
@@ -268,6 +278,84 @@ function Completed({ done }: { done: Done }) {
       <Link href="/dashboard/business" className="btn-primary mx-auto w-full max-w-sm">
         事業主ホームに戻る
       </Link>
+    </div>
+  );
+}
+
+/** 出稿した広告の修正（見出し・本文・写真）。出稿回数は使わず、掲載期間も変わらない */
+function AdEditor({ ad, onSaved }: { ad: Ad; onSaved: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [headline, setHeadline] = useState(ad.headline);
+  const [body, setBody] = useState(ad.body);
+  const [image, setImage] = useState<PickedImage>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<{ text: string; error: boolean } | null>(null);
+
+  if (!editing) {
+    return (
+      <button onClick={() => setEditing(true)} className="btn-outline w-full">
+        <Pencil className="h-4 w-4" aria-hidden />
+        内容を修正する
+      </button>
+    );
+  }
+
+  async function save() {
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await api<{ warnings?: string[] }>(`/api/ads/${ad.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          headline,
+          body,
+          removeImage: removeImage && !image,
+          imageBase64: image ? await blobToBase64(image.blob) : undefined,
+        }),
+      });
+      setMsg({
+        text:
+          "広告を修正しました。お客さまの画面にすぐ反映されます。" +
+          (res.warnings?.length ? `\n\n次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
+        error: false,
+      });
+      setEditing(false);
+      onSaved();
+    } catch (e) {
+      setMsg({ text: (e as Error).message, error: true });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3 rounded-xl border border-saga-300 bg-saga-50/40 p-3">
+      <p className="text-sm font-semibold text-saga-700">広告の修正（出稿回数は使いません・掲載期間は変わりません）</p>
+      <div>
+        <label className="label">見出し（60 文字まで）</label>
+        <input value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={60} className="input" />
+      </div>
+      <div>
+        <label className="label">本文（120 文字まで）</label>
+        <input value={body} onChange={(e) => setBody(e.target.value)} maxLength={120} className="input" />
+      </div>
+      {ad.has_image && !image && (
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={removeImage} onChange={(e) => setRemoveImage(e.target.checked)} className="h-4 w-4 accent-saga-600" />
+          今の写真を外す
+        </label>
+      )}
+      <ImagePicker value={image} onChange={setImage} hint={ad.has_image ? "新しい写真を選ぶと差し替えます。" : "料理・商品・店内の写真など。"} />
+      {msg && <p className={`whitespace-pre-line text-sm font-bold ${msg.error ? "text-red-600" : "text-tea-700"}`}>{msg.text}</p>}
+      <div className="flex gap-2">
+        <button onClick={save} disabled={saving || !headline.trim()} className="btn-primary flex-1">
+          {saving ? "保存しています…" : "修正を保存する"}
+        </button>
+        <button onClick={() => setEditing(false)} className="btn-outline">
+          やめる
+        </button>
+      </div>
     </div>
   );
 }

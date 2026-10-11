@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapSpot, type RouteSummary } from "@/components/MapView";
-import AdBanner, { AdDetail, type Ad } from "@/components/AdBanner";
+import AdBanner, { AdDetail, AdList, useActiveAds, type Ad } from "@/components/AdBanner";
 import RouteBox from "@/components/RouteBox";
 import CouponRow from "@/components/CouponRow";
 import ShopPhoto from "@/components/ShopPhoto";
@@ -99,6 +99,7 @@ function CustomerDashboard() {
   const [nearby, setNearby] = useState<NearbyShop[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(Number(params.get("shop")) || null);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
+  const ads = useActiveAds();
   // 地図のピン・広告・一覧をタップしたら、そのお店の内容（クーポン含む）まで移動する
   const openShop = useCallback(
     (id: number, ad: Ad | null = null) => {
@@ -256,7 +257,7 @@ function CustomerDashboard() {
   return (
     <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
       <div className="sticky top-14 z-20 h-[45dvh] min-h-[300px] lg:relative lg:top-0 lg:order-2 lg:h-full lg:flex-1">
-        <AdBanner onSelect={(id, ad) => openShop(id, ad)} />
+        <AdBanner ads={ads} onSelect={(id, ad) => openShop(id, ad)} />
         <MapView
           shops={nearby}
           me={position}
@@ -352,6 +353,10 @@ function CustomerDashboard() {
           }}
         />
       )}
+
+      <div className="px-4 pt-3 empty:hidden">
+        <AdList ads={ads} onOpenShop={(id, ad) => openShop(id, ad)} />
+      </div>
 
       <nav className="sticky top-[calc(3.5rem+45dvh)] z-10 mt-1 flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 lg:top-0">
         {TABS.map((t) => {

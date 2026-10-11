@@ -27,8 +27,11 @@ export async function GET() {
   const user = await getSessionUser();
   if (user?.role === "business") {
     const rows = await query(
-      `SELECT a.id, a.business_id, a.headline, a.body, a.starts_at, a.ends_at, a.is_active, a.created_at,
-              (a.image IS NOT NULL) AS has_image, b.name AS business_name
+      `SELECT a.id, a.business_id, a.headline, a.body, a.starts_at, a.ends_at, a.is_active, a.created_at, a.updated_at,
+              (a.image IS NOT NULL) AS has_image, b.name AS business_name,
+              (SELECT count(*) FROM ad_events e WHERE e.ad_id = a.id AND e.kind = 'view')::int AS view_count,
+              (SELECT count(*) FROM ad_events e WHERE e.ad_id = a.id AND e.kind = 'click')::int AS click_count,
+              (SELECT count(DISTINCT e.customer_id) FROM ad_events e WHERE e.ad_id = a.id)::int AS viewer_count
          FROM ads a JOIN businesses b ON b.id = a.business_id
         WHERE b.owner_id = $1 ORDER BY a.created_at DESC`,
       [user.id],
@@ -37,7 +40,7 @@ export async function GET() {
     return NextResponse.json({ ads: rows, limit: ADS_PER_MONTH, used, remaining: Math.max(0, ADS_PER_MONTH - used) });
   }
   const rows = await query(
-    `SELECT a.id, a.headline, a.body, (a.image IS NOT NULL) AS has_image, b.id AS business_id, b.name AS business_name, b.lat, b.lng
+    `SELECT a.id, a.headline, a.body, a.ends_at, (a.image IS NOT NULL) AS has_image, b.id AS business_id, b.name AS business_name, b.lat, b.lng
        FROM ads a JOIN businesses b ON b.id = a.business_id
       WHERE a.is_active AND b.is_premium AND now() BETWEEN a.starts_at AND a.ends_at
       ORDER BY random() LIMIT 5`,
