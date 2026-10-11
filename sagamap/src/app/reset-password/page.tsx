@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleCheck } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -40,10 +41,10 @@ function ResetPasswordForm() {
 
   return (
     <main className="mx-auto max-w-md p-4">
-      <h1 className="mt-4 text-2xl font-extrabold">🔑 新しいパスワードの設定</h1>
+      <h1 className="mt-4 text-2xl font-bold">新しいパスワードの設定</h1>
       {done ? (
         <div className="card mt-4 text-center">
-          <p className="text-4xl">🎉</p>
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-tea-50 text-tea-600" aria-hidden><CircleCheck className="h-7 w-7" /></span>
           <p className="mt-2 font-bold">パスワードを変更しました</p>
           <Link href={done} className="btn-primary mt-4 w-full">
             ログインする

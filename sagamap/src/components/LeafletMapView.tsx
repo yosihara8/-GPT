@@ -3,8 +3,11 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { Landmark } from "lucide-react";
+import { categoryIcon } from "./CategoryIcon";
 import { MapLegend, isHighlighted, type MapViewProps } from "./MapView";
-import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER, categoryEmoji } from "@/lib/config";
+import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER } from "@/lib/config";
 import { formatDistance, type LatLng } from "@/lib/geo";
 import { escapeHtml } from "@/lib/escape";
 import type { RouteResult } from "@/lib/routing";
@@ -13,7 +16,19 @@ import type { RouteResult } from "@/lib/routing";
 const OSM_ATTRIBUTION =
   '道順 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>';
 
-const COLORS = { coupon: "#e5484d", shop: "#3b82f6", spot: "#d97706", me: "#2563eb", route: "#1f8a7a" };
+const COLORS = { coupon: "#d92d20", shop: "#1f4d3f", spot: "#b54708", me: "#2e90fa", route: "#1f4d3f" };
+
+/** アイコンの SVG 文字列（業種ごとに 1 回だけ作る） */
+const iconSvgCache = new Map<string, string>();
+function iconSvg(category: string, size: number) {
+  const key = `${category}:${size}`;
+  if (!iconSvgCache.has(key)) {
+    const Icon = categoryIcon(category);
+    iconSvgCache.set(key, renderToStaticMarkup(<Icon size={size} strokeWidth={2.2} color="#fff" aria-hidden />));
+  }
+  return iconSvgCache.get(key)!;
+}
+const spotSvg = renderToStaticMarkup(<Landmark size={14} strokeWidth={2.2} color="#fff" aria-hidden />);
 
 /**
  * Google Maps の API キーが無いときの代替地図（OpenStreetMap + Leaflet）。
@@ -74,10 +89,10 @@ export default function LeafletMapView({
     if (searchRadius) {
       const circle = L.circle(me, {
         radius: searchRadius,
-        color: COLORS.me,
-        weight: 2,
-        opacity: 0.8,
-        dashArray: "6 6",
+        color: COLORS.shop,
+        weight: 1.5,
+        opacity: 0.5,
+        fillColor: COLORS.shop,
         fillOpacity: 0.05,
         interactive: false,
       }).addTo(g);
@@ -100,16 +115,16 @@ export default function LeafletMapView({
     for (const shop of shops) {
       const red = isHighlighted(shop, me, highlightRadius);
       const selected = shop.id === selectedId;
-      const size = selected ? 46 : red ? 40 : 34;
+      const size = selected ? 40 : red ? 34 : 30;
       const icon = L.divIcon({
         className: "",
         iconSize: [size, size],
-        iconAnchor: [size / 2, size],
-        tooltipAnchor: [0, -size],
-        html: `<div class="sm-pin" style="width:${size}px;height:${size}px;background:${red ? COLORS.coupon : COLORS.shop}"><span style="font-size:${Math.round(size * 0.45)}px">${escapeHtml(categoryEmoji(shop.category))}</span></div>`,
+        iconAnchor: [size / 2, size / 2],
+        tooltipAnchor: [0, -size / 2],
+        html: `<div class="sm-pin" style="width:${size}px;height:${size}px;background:${red ? COLORS.coupon : COLORS.shop}${selected ? ";box-shadow:0 0 0 4px rgba(31,77,63,.25),0 4px 10px rgba(16,24,40,.2)" : ""}">${iconSvg(shop.category, Math.round(size * 0.48))}</div>`,
       });
       L.marker(shop, { icon, zIndexOffset: selected ? 1000 : red ? 500 : 0, keyboard: true, title: shop.name })
-        .bindTooltip(escapeHtml(`${shop.name}（${shop.category}）${red ? " 🎟️クーポンあり" : ""}`))
+        .bindTooltip(escapeHtml(`${shop.name}（${shop.category}）${red ? "・クーポンあり" : ""}`))
         .on("click", () => onSelectRef.current?.(shop.id))
         .addTo(g);
     }
@@ -122,11 +137,11 @@ export default function LeafletMapView({
     for (const s of spots) {
       const icon = L.divIcon({
         className: "",
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        html: `<div style="width:28px;height:28px;border-radius:9999px;background:${COLORS.spot};border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px">⭐</div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        html: `<div class="sm-pin" style="width:26px;height:26px;border-radius:7px;background:${COLORS.spot}">${spotSvg}</div>`,
       });
-      L.marker(s, { icon, title: s.name }).bindTooltip(escapeHtml(`⭐ ${s.name}`)).addTo(g);
+      L.marker(s, { icon, title: s.name }).bindTooltip(escapeHtml(s.name)).addTo(g);
     }
   }, [spots]);
 
@@ -184,7 +199,7 @@ export default function LeafletMapView({
               className: "",
               iconSize: [24, 24],
               iconAnchor: [12, 34],
-              html: `<div style="width:24px;height:24px;border-radius:9999px;background:${COLORS.route};color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)">${n + 1}</div>`,
+              html: `<div style="width:24px;height:24px;border-radius:9999px;background:#101828;color:#fff;font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(16,24,40,.25)">${n + 1}</div>`,
             }),
             interactive: false,
           }).addTo(g);

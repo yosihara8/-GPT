@@ -8,7 +8,9 @@ import AdBanner from "@/components/AdBanner";
 import ShopPhoto from "@/components/ShopPhoto";
 import LocationAccuracy from "@/components/LocationAccuracy";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { CATEGORIES, COUPON_HIGHLIGHT_RADIUS_M, categoryEmoji } from "@/lib/config";
+import { CATEGORIES, COUPON_HIGHLIGHT_RADIUS_M } from "@/lib/config";
+import CategoryIcon from "@/components/CategoryIcon";
+import { ChevronRight, LayoutGrid, LocateFixed, Luggage, Store, Ticket } from "lucide-react";
 import { formatDistance, haversineMeters } from "@/lib/geo";
 
 type Shop = MapShop & { address: string; service_description: string; has_photo?: boolean };
@@ -46,41 +48,9 @@ export default function HomePage() {
   const isCustomer = session?.user.role === "customer";
 
   return (
-    <main className="mx-auto max-w-5xl">
-      {/* 表題 */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-saga-500 via-saga-600 to-coral-500 px-4 pb-4 pt-5 text-white">
-        <span className="pointer-events-none absolute -right-2 top-1 animate-float text-5xl opacity-90" aria-hidden>
-          🎈
-        </span>
-        <span className="pointer-events-none absolute right-16 top-2 hidden animate-float text-3xl opacity-70 [animation-delay:1.2s] sm:block" aria-hidden>
-          🎈
-        </span>
-        <p className="text-xs font-bold tracking-widest text-sun-300">SAGA × GEOSPATIAL × AI</p>
-        <h1 className="mt-1 text-2xl font-extrabold leading-tight drop-shadow sm:text-3xl">
-          佐賀おでかけマップ
-          <span className="ml-2 align-middle text-base font-bold opacity-90">SagaMap</span>
-        </h1>
-        <p className="mt-1 text-sm font-bold opacity-90">地元のお店と、まだ知らない佐賀へ。近くのクーポンを地図で見つけよう！</p>
-        <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
-          <button
-            onClick={() => setCategory(null)}
-            className={`chip ${category === null ? "border-white bg-white text-saga-700" : "border-white/50 bg-white/10 text-white"}`}
-          >
-            🗾 すべて
-          </button>
-          {CATEGORIES.filter((c) => shops.some((s) => s.category === c)).map((c) => (
-            <button
-              key={c}
-              onClick={() => setCategory(category === c ? null : c)}
-              className={`chip ${category === c ? "border-white bg-white text-saga-700" : "border-white/50 bg-white/10 text-white"}`}
-            >
-              {categoryEmoji(c)} {c}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <div className="relative">
+    <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
+      {/* 地図（スマホは上、パソコンは右側いっぱい） */}
+      <div className="relative h-[58dvh] min-h-[360px] lg:order-2 lg:h-full lg:flex-1">
         <AdBanner onSelect={setSelectedId} />
         <MapView
           shops={visible}
@@ -90,84 +60,127 @@ export default function HomePage() {
           searchRadius={COUPON_HIGHLIGHT_RADIUS_M}
           selectedId={selectedId}
           onSelectShop={setSelectedId}
-          className="h-[60vh]"
+          className="h-full"
         />
-        <button onClick={locate} className="absolute bottom-3 right-3 z-10 rounded-full bg-white px-4 py-2 text-sm font-bold text-saga-700 shadow-pop">
-          📍 現在地
+        <button
+          onClick={locate}
+          className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-pop hover:bg-slate-50"
+        >
+          <LocateFixed className="h-4 w-4 text-saga-600" aria-hidden />
+          現在地
         </button>
       </div>
 
-      <section className="space-y-4 p-4">
-        <LocationAccuracy status={status} accuracy={accuracy} />
-        {isFallback && (
-          <p className="rounded-2xl bg-sun-100 px-4 py-2 text-xs font-bold text-amber-800">
-            位置情報が取得できなかったため、佐賀駅を現在地として表示しています。
-          </p>
-        )}
+      {/* 一覧パネル（スマホは地図の下から重なるシート、パソコンは左側） */}
+      <div className="relative z-10 -mt-4 rounded-t-2xl bg-white shadow-[0_-4px_24px_rgba(16,24,40,0.10)] lg:order-1 lg:mt-0 lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:rounded-none lg:border-r lg:border-slate-200 lg:shadow-none">
+        <div className="mx-auto mb-1 mt-2.5 h-1 w-9 rounded-full bg-slate-300 lg:hidden" aria-hidden />
+        <section className="px-4 pb-3 pt-3 lg:pt-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-saga-600">SAGA × GEOSPATIAL × AI</p>
+          <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 lg:text-2xl">
+            佐賀おでかけマップ
+            <span className="ml-2 align-middle text-sm font-medium text-slate-400">SagaMap</span>
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">地元のお店と、まだ知らない佐賀へ。近くのクーポンを地図で見つけよう！</p>
+          <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
+            <button onClick={() => setCategory(null)} className={category === null ? "chip-on" : "chip-off"}>
+              <LayoutGrid className="h-4 w-4" aria-hidden />
+              すべて
+            </button>
+            {CATEGORIES.filter((c) => shops.some((s) => s.category === c)).map((c) => (
+              <button key={c} onClick={() => setCategory(category === c ? null : c)} className={category === c ? "chip-on" : "chip-off"}>
+                <CategoryIcon category={c} className="h-4 w-4" />
+                {c}
+              </button>
+            ))}
+          </div>
+        </section>
 
-        {selected ? (
-          <div className="card overflow-hidden p-0">
-            <ShopPhoto shop={selected} className="h-40 w-full" />
-            <div className="p-4">
-              <p className="text-xs font-bold text-saga-600">
-                {categoryEmoji(selected.category)} {selected.category}
-              </p>
-              <h2 className="text-xl font-extrabold">{selected.name}</h2>
-              <p className="mt-1 text-sm text-slate-600">{selected.service_description}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {selected.address}
-                {position && `・現在地から ${formatDistance(haversineMeters(position, selected))}`}
-              </p>
-              {selected.has_coupon && (
-                <p className="mt-2 inline-block rounded-full bg-coral-50 px-3 py-1 text-sm font-extrabold text-coupon">🎟️ クーポン配信中</p>
-              )}
-              <Link
-                href={isCustomer ? `/dashboard/customer?shop=${selected.id}` : `/shops/${selected.id}`}
-                className="btn-primary mt-3 w-full"
-              >
-                {isCustomer ? "クーポン・道順を見る" : "店舗情報を確認する"}
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="card flex items-center gap-4">
-            <span className="text-4xl" aria-hidden>
-              🎟️
-            </span>
-            <div>
-              <p className="font-bold">
-                現在地から 500m 以内に
-                <span className="mx-1 text-3xl font-extrabold text-coupon">{nearbyCoupons.length}</span>
-                件のクーポン店
-              </p>
-              <p className="text-xs text-slate-500">
-                {shops.length === 0 ? "掲載店舗を募集中です。お店の方はぜひ無料で掲載してください！" : "ピンをタップすると店舗情報が表示されます。"}
-              </p>
-            </div>
-          </div>
-        )}
+        <section className="space-y-3 border-t border-slate-100 p-4">
+          <LocationAccuracy status={status} accuracy={accuracy} />
+          {isFallback && (
+            <p className="rounded-lg bg-sun-100 px-3 py-2 text-xs text-amber-800">
+              位置情報が取得できなかったため、佐賀駅を現在地として表示しています。
+            </p>
+          )}
 
-        {!session && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="card border-t-4 border-t-coral-500">
-              <p className="text-3xl" aria-hidden>🧳</p>
-              <h3 className="mt-1 text-lg font-extrabold">観光で来た方</h3>
-              <p className="mt-1 text-sm text-slate-600">クーポン検索・AI おすすめ・徒歩ルート案内が、無料の会員登録で使えます。</p>
-              <Link href="/register/customer" className="btn-primary mt-3 w-full">
-                無料で会員登録
+          {selected ? (
+            <div className="overflow-hidden rounded-2xl border border-slate-200">
+              <ShopPhoto shop={selected} className="h-40 w-full" />
+              <div className="p-4">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                  <CategoryIcon category={selected.category} className="h-3.5 w-3.5" />
+                  {selected.category}
+                </p>
+                <h2 className="mt-0.5 text-lg font-bold text-slate-900">{selected.name}</h2>
+                <p className="mt-1 text-sm text-slate-600">{selected.service_description}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {selected.address}
+                  {position && `・現在地から ${formatDistance(haversineMeters(position, selected))}`}
+                </p>
+                {selected.has_coupon && (
+                  <p className="mt-2 inline-flex items-center gap-1 rounded-md bg-coral-50 px-2 py-0.5 text-xs font-semibold text-coupon">
+                    <Ticket className="h-3.5 w-3.5" aria-hidden />
+                    クーポン配信中
+                  </p>
+                )}
+                <Link
+                  href={isCustomer ? `/dashboard/customer?shop=${selected.id}` : `/shops/${selected.id}`}
+                  className="btn-primary mt-3 w-full"
+                >
+                  {isCustomer ? "クーポン・道順を見る" : "店舗情報を確認する"}
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-coral-50 text-coupon" aria-hidden>
+                <Ticket className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-slate-800">
+                  現在地から 500m 以内に
+                  <span className="mx-1 text-2xl font-bold tabular-nums text-coupon">{nearbyCoupons.length}</span>
+                  件のクーポン店
+                </p>
+                <p className="text-xs text-slate-500">
+                  {shops.length === 0 ? "掲載店舗を募集中です。お店の方はぜひ無料で掲載してください！" : "ピンをタップすると店舗情報が表示されます。"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!session && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <Link href="/register/customer" className="group flex items-start gap-3 rounded-2xl border border-slate-200 p-4 hover:border-saga-300 hover:bg-saga-50/40">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-saga-50 text-saga-600" aria-hidden>
+                  <Luggage className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold text-slate-900">観光で来た方</span>
+                  <span className="mt-0.5 block text-sm text-slate-600">クーポン検索・AI おすすめ・徒歩ルート案内が、無料の会員登録で使えます。</span>
+                  <span className="mt-2 inline-flex items-center gap-0.5 text-sm font-semibold text-saga-600">
+                    無料で会員登録
+                    <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
+                  </span>
+                </span>
+              </Link>
+              <Link href="/register/business" className="group flex items-start gap-3 rounded-2xl border border-slate-200 p-4 hover:border-saga-300 hover:bg-saga-50/40">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600" aria-hidden>
+                  <Store className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold text-slate-900">お店を営む方</span>
+                  <span className="mt-0.5 block text-sm text-slate-600">無料で 1 店舗を地図に掲載。有料プランでクーポン発行・広告出稿もできます。</span>
+                  <span className="mt-2 inline-flex items-center gap-0.5 text-sm font-semibold text-saga-600">
+                    店舗を無料で掲載
+                    <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
+                  </span>
+                </span>
               </Link>
             </div>
-            <div className="card border-t-4 border-t-tea-500">
-              <p className="text-3xl" aria-hidden>🏪</p>
-              <h3 className="mt-1 text-lg font-extrabold">お店を営む方</h3>
-              <p className="mt-1 text-sm text-slate-600">無料で 1 店舗を地図に掲載。有料プランでクーポン発行・広告出稿もできます。</p>
-              <Link href="/register/business" className="btn-outline mt-3 w-full">
-                店舗を無料で掲載
-              </Link>
-            </div>
-          </div>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
     </main>
   );
 }

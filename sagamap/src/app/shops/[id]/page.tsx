@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { queryOne } from "@/lib/db";
-import { PRICE_LEVEL_LABELS, categoryEmoji } from "@/lib/config";
+import { PRICE_LEVEL_LABELS } from "@/lib/config";
+import CategoryIcon from "@/components/CategoryIcon";
+import { ArrowLeft, ExternalLink, Navigation, Ticket } from "lucide-react";
 import { getSessionUser } from "@/lib/session";
 import ShopPhoto from "@/components/ShopPhoto";
 
@@ -52,19 +54,21 @@ export default async function ShopPage({ params }: { params: { id: string } }) {
 
   return (
     <main className="mx-auto max-w-2xl p-4">
-      <Link href="/" className="text-sm font-bold text-saga-600">
-        ← 地図に戻る
+      <Link href="/" className="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900">
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        地図に戻る
       </Link>
       <article className="card mt-3 overflow-hidden p-0">
         <ShopPhoto shop={shop} className="h-56 w-full" />
         <div className="space-y-3 p-5">
-          <p className="text-sm font-bold text-saga-600">
-            {categoryEmoji(shop.category)} {shop.category}　{PRICE_LEVEL_LABELS[shop.price_level]}
+          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+            <CategoryIcon category={shop.category} className="h-4 w-4" />
+            {shop.category}　{PRICE_LEVEL_LABELS[shop.price_level]}
           </p>
-          <h1 className="text-2xl font-extrabold">{shop.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{shop.name}</h1>
           {shop.service_description && <p className="leading-7 text-slate-700">{shop.service_description}</p>}
 
-          <dl className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm">
+          <dl className="space-y-2 rounded-xl bg-slate-50 p-4 text-sm">
             <div className="flex gap-3">
               <dt className="w-16 shrink-0 font-bold text-slate-500">住所</dt>
               <dd>{shop.address}</dd>
@@ -81,9 +85,10 @@ export default async function ShopPage({ params }: { params: { id: string } }) {
             </div>
           </dl>
 
-          <div className="flex flex-wrap gap-3 text-sm font-bold">
-            <a href={mapUrl} target="_blank" rel="noreferrer" className="text-saga-600 underline">
-              📍 地図アプリで場所を見る
+          <div className="flex flex-wrap gap-3 text-sm font-medium">
+            <a href={mapUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-saga-600 underline">
+              地図アプリで場所を見る
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
             </a>
             {shop.instagram_url && (
               <a href={shop.instagram_url} target="_blank" rel="noreferrer" className="text-saga-600 underline">
@@ -99,12 +104,14 @@ export default async function ShopPage({ params }: { params: { id: string } }) {
 
           {isCustomer ? (
             <Link href={`/dashboard/customer?shop=${shop.id}`} className="btn-primary w-full">
-              {shop.has_coupon ? "🎟️ クーポン・道順を見る" : "🗺️ 道順を見る"}
+              {shop.has_coupon ? <Ticket className="h-4 w-4" aria-hidden /> : <Navigation className="h-4 w-4" aria-hidden />}
+              {shop.has_coupon ? "クーポン・道順を見る" : "道順を見る"}
             </Link>
           ) : (
-            <div className="rounded-2xl bg-coral-50 p-4">
-              <p className="font-extrabold text-coupon">
-                {shop.has_coupon ? "🎟️ このお店はクーポンを配信中です" : "🎈 会員登録でもっと便利に"}
+            <div className={`rounded-xl p-4 ${shop.has_coupon ? "bg-coral-50" : "bg-saga-50"}`}>
+              <p className={`flex items-center gap-1.5 font-bold ${shop.has_coupon ? "text-coupon" : "text-saga-700"}`}>
+                {shop.has_coupon && <Ticket className="h-4 w-4" aria-hidden />}
+                {shop.has_coupon ? "このお店はクーポンを配信中です" : "会員登録でもっと便利に"}
               </p>
               <p className="mt-1 text-sm text-slate-600">
                 無料の会員登録で、クーポンの利用・お気に入り・道順の案内が使えます。

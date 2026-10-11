@@ -1,3 +1,4 @@
+import { CircleAlert, CircleCheck, Mail } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { query } from "@/lib/db";
@@ -23,8 +24,8 @@ export default function VerifyEmailPage({ searchParams }: { searchParams: { toke
     const ok = searchParams.done === "1";
     return (
       <main className="mx-auto max-w-md p-6 text-center">
-        <p className="text-5xl">{ok ? "✅" : "⚠️"}</p>
-        <h1 className="mt-4 text-xl font-extrabold">{ok ? "メールアドレスを確認しました" : "リンクが無効か、期限切れです"}</h1>
+        {ok ? <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-tea-50 text-tea-600" aria-hidden><CircleCheck className="h-7 w-7" /></span> : <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-sun-100 text-amber-700" aria-hidden><CircleAlert className="h-7 w-7" /></span>}
+        <h1 className="mt-4 text-xl font-bold">{ok ? "メールアドレスを確認しました" : "リンクが無効か、期限切れです"}</h1>
         <p className="mt-2 text-sm text-slate-600">{ok ? "ご協力ありがとうございます。" : "マイページから確認メールを再送できます。"}</p>
         <Link href="/" className="btn-primary mt-6">
           地図に戻る
@@ -34,8 +35,8 @@ export default function VerifyEmailPage({ searchParams }: { searchParams: { toke
   }
   return (
     <main className="mx-auto max-w-md p-6 text-center">
-      <p className="text-5xl">📧</p>
-      <h1 className="mt-4 text-xl font-extrabold">メールアドレスの確認</h1>
+      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-saga-50 text-saga-600" aria-hidden><Mail className="h-7 w-7" /></span>
+      <h1 className="mt-4 text-xl font-bold">メールアドレスの確認</h1>
       <form action={verify}>
         <input type="hidden" name="token" value={searchParams.token ?? ""} />
         <button className="btn-primary mt-6">確認を完了する</button>

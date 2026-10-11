@@ -47,7 +47,7 @@ export default function PhotoUploader({ shop, onChanged }: { shop: Shop; onChang
 
   return (
     <section className="card space-y-3">
-      <h2 className="font-extrabold">📷 店舗写真</h2>
+      <h2 className="font-bold">店舗写真</h2>
       <ShopPhoto shop={shop} className="h-48 w-full rounded-2xl" />
       <div className="flex flex-wrap gap-2">
         <label className={`btn-primary cursor-pointer ${busy ? "pointer-events-none opacity-50" : ""}`}>

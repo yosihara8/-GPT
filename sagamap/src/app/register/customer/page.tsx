@@ -94,7 +94,7 @@ function CustomerRegisterForm() {
         <label className="flex items-start gap-2 rounded-2xl bg-saga-50 p-3 text-sm">
           <input type="checkbox" name="notifyEnabled" defaultChecked className="mt-0.5 h-5 w-5 accent-saga-600" />
           <span>
-            <b>📧 お得なお知らせメールを受け取る</b>
+            <b>お得なお知らせメールを受け取る</b>
             <br />
             <span className="text-xs text-slate-600">毎週金曜日に、新着クーポン・お店のお知らせをまとめてお届けします。いつでも配信停止できます。</span>
           </span>

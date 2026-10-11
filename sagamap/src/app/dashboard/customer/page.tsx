@@ -11,7 +11,24 @@ import SwipeCards, { type RecCard } from "@/components/SwipeCards";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useDistanceMatrix } from "@/hooks/useDistanceMatrix";
 import { api } from "@/lib/fetcher";
-import { CATEGORIES, PRICE_LEVEL_LABELS, categoryEmoji } from "@/lib/config";
+import { CATEGORIES, PRICE_LEVEL_LABELS } from "@/lib/config";
+import CategoryIcon from "@/components/CategoryIcon";
+import {
+  Bell,
+  Car,
+  Footprints,
+  Heart,
+  Landmark,
+  LocateFixed,
+  MapPin,
+  Navigation,
+  Route as RouteIcon,
+  Sparkles,
+  Ticket,
+  Users,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { estimateWalkMinutes, formatDistance, haversineMeters } from "@/lib/geo";
 
 type NearbyShop = {
@@ -50,7 +67,7 @@ const RANGES = [
   { label: "8km", value: 8000 },
 ];
 const TABS = ["近く", "お気に入り", "おすすめ", "クーポン", "ルート", "お知らせ"] as const;
-const TAB_ICONS: Record<string, string> = { 近く: "📍", お気に入り: "❤️", おすすめ: "✨", クーポン: "🎟️", ルート: "🗺️", お知らせ: "🔔" };
+const TAB_ICONS: Record<string, LucideIcon> = { 近く: MapPin, お気に入り: Heart, おすすめ: Sparkles, クーポン: Ticket, ルート: RouteIcon, お知らせ: Bell };
 
 type Favorite = { id: number; name: string; address: string; lat: number; lng: number; category: string; price_level: number; best_discount: number | null };
 type Stop = MapSpot & { key: string };
@@ -140,9 +157,9 @@ function CustomerDashboard() {
     const shop = (b: { id: number; name: string; lat: number; lng: number }): Stop => ({ ...b, key: `shop-${b.id}` });
     const byDist = <T extends { lat: number; lng: number }>(xs: T[]) => [...xs].sort((a, b) => dist(a) - dist(b));
     return [
-      { title: "❤️ お気に入り", items: byDist(favorites).map(shop) },
-      { title: "📍 近くのお店", items: nearby.filter((n) => !favIds.has(n.id)).slice(0, 10).map(shop) },
-      { title: "⭐ 観光名所", items: byDist(spots).map((s) => ({ ...s, key: `spot-${s.id}` })) },
+      { title: "お気に入り", icon: Heart, items: byDist(favorites).map(shop) },
+      { title: "近くのお店", icon: MapPin, items: nearby.filter((n) => !favIds.has(n.id)).slice(0, 10).map(shop) },
+      { title: "観光名所", icon: Landmark, items: byDist(spots).map((s) => ({ ...s, key: `spot-${s.id}` })) },
     ];
   }, [favorites, favIds, nearby, spots, position]);
   const allStops = useMemo(() => new Map(stopGroups.flatMap((g) => g.items).map((s) => [s.key, s])), [stopGroups]);
@@ -170,9 +187,7 @@ function CustomerDashboard() {
     if (!selectedId) return setDetail(null);
     api<Detail>(`/api/businesses/${selectedId}`).then((d) => {
       setDetail(d);
-      requestAnimationFrame(() =>
-        document.getElementById("shop-detail")?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      );
+      requestAnimationFrame(scrollToDetail);
     });
   }, [selectedId]);
 
@@ -206,8 +221,8 @@ function CustomerDashboard() {
   const unread = notifications.filter((n) => !n.read_at).length;
 
   return (
-    <main className="mx-auto max-w-3xl">
-      <div className="relative">
+    <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
+      <div className="relative h-[58dvh] min-h-[360px] lg:order-2 lg:h-full lg:flex-1">
         <AdBanner onSelect={setSelectedId} />
         <MapView
           shops={nearby}
@@ -225,20 +240,31 @@ function CustomerDashboard() {
           }}
           selectedId={selectedId}
           onSelectShop={setSelectedId}
-          className="h-[60vh]"
+          className="h-full"
         />
-        <div className="absolute bottom-3 right-3 flex flex-col gap-2">
-          <button onClick={toggleFlow} className={`rounded-full px-3 py-2 text-xs font-medium shadow ${flow ? "bg-saga-600 text-white" : "bg-white"}`}>
+        <div className="absolute bottom-6 right-3 z-10 flex flex-col items-end gap-2 lg:bottom-3">
+          <button
+            onClick={toggleFlow}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold shadow-pop ${flow ? "bg-saga-600 text-white" : "bg-white text-slate-800 hover:bg-slate-50"}`}
+          >
+            <Users className="h-4 w-4" aria-hidden />
             人の流れ
           </button>
-          <button onClick={locate} className="rounded-full bg-white px-3 py-2 text-xs font-medium shadow">
+          <button onClick={locate} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-pop hover:bg-slate-50">
+            <LocateFixed className="h-4 w-4 text-saga-600" aria-hidden />
             現在地
           </button>
         </div>
       </div>
 
+      <div
+        id="customer-panel"
+        className="relative z-10 -mt-4 rounded-t-2xl bg-white shadow-[0_-4px_24px_rgba(16,24,40,0.10)] lg:order-1 lg:mt-0 lg:w-[440px] lg:shrink-0 lg:overflow-y-auto lg:rounded-none lg:border-r lg:border-slate-200 lg:shadow-none"
+      >
+      <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-slate-300 lg:hidden" aria-hidden />
+
       {flow && (
-        <div className="flex items-center gap-3 border-b bg-white px-4 py-2 text-sm">
+        <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-2.5 text-sm">
           <span className="shrink-0 text-slate-600">{flowHour}時台の利用者の流れ（実測）</span>
           <input type="range" min={0} max={23} value={flowHour} onChange={(e) => setFlowHour(Number(e.target.value))} className="w-full accent-saga-600" />
         </div>
@@ -249,10 +275,10 @@ function CustomerDashboard() {
         <LocationAccuracy status={status} accuracy={accuracy} />
       </div>
       {isFallback && (
-        <p className="bg-amber-50 px-4 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>
+        <p className="mx-4 mt-2 rounded-lg bg-sun-100 px-3 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>
       )}
       {message && (
-        <p className="bg-saga-50 px-4 py-2 text-sm text-saga-700" onClick={() => setMessage(null)}>
+        <p className="mx-4 mt-2 rounded-lg bg-saga-50 px-3 py-2 text-sm font-medium text-saga-700" onClick={() => setMessage(null)}>
           {message}
         </p>
       )}
@@ -269,19 +295,23 @@ function CustomerDashboard() {
         />
       )}
 
-      <nav className="sticky top-14 z-20 flex gap-1 overflow-x-auto border-b bg-white px-2">
-        {TABS.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`shrink-0 border-b-2 px-3 py-3 text-sm ${tab === t ? "border-saga-600 font-semibold text-saga-700" : "border-transparent text-slate-500"}`}
-          >
-            {TAB_ICONS[t]} {t}
-            {t === "お気に入り" && favorites.length > 0 && <span className="ml-1 text-xs text-slate-400">{favorites.length}</span>}
-            {t === "お知らせ" && unread > 0 && <span className="ml-1 rounded-full bg-coupon px-1.5 text-[10px] text-white">{unread}</span>}
-          </button>
-        ))}
-        <Link href="/dashboard/customer/history" className="ml-auto shrink-0 px-3 py-3 text-sm text-slate-500">
+      <nav className="sticky top-14 z-20 mt-1 flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 lg:top-0">
+        {TABS.map((t) => {
+          const Icon = TAB_ICONS[t];
+          return (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-sm ${tab === t ? "border-saga-600 font-semibold text-saga-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+            >
+              <Icon className="h-4 w-4" aria-hidden />
+              {t}
+              {t === "お気に入り" && favorites.length > 0 && <span className="text-xs text-slate-400">{favorites.length}</span>}
+              {t === "お知らせ" && unread > 0 && <span className="rounded-full bg-coupon px-1.5 text-[10px] font-semibold text-white">{unread}</span>}
+            </button>
+          );
+        })}
+        <Link href="/dashboard/customer/history" className="ml-auto shrink-0 px-3 py-3 text-sm text-slate-500 hover:text-slate-700">
           履歴・設定
         </Link>
       </nav>
@@ -307,12 +337,12 @@ function CustomerDashboard() {
             <ul className="space-y-2">
               {nearby.map((s) => (
                 <li key={s.id}>
-                  <button onClick={() => setSelectedId(s.id)} className="card flex w-full items-center gap-3 text-left">
+                  <button onClick={() => setSelectedId(s.id)} className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left hover:bg-slate-50">
                     <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg ring-4 ${s.highlight ? "bg-coral-50 ring-coupon/40" : "bg-saga-50 ring-shop/30"}`}
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${s.highlight ? "bg-coral-50 text-coupon" : "bg-saga-50 text-saga-600"}`}
                       aria-hidden
                     >
-                      {categoryEmoji(s.category)}
+                      <CategoryIcon category={s.category} className="h-5 w-5" />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold">{s.name}</span>
@@ -326,7 +356,7 @@ function CustomerDashboard() {
                       {travel[s.id]?.duration ?? `徒歩約${s.walk_minutes}分`}
                     </span>
                     {s.best_discount && (
-                      <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-coupon">{s.best_discount}%OFF</span>
+                      <span className="shrink-0 rounded-md bg-coral-50 px-2 py-0.5 text-xs font-semibold text-coupon">{s.best_discount}%OFF</span>
                     )}
                   </button>
                 </li>
@@ -339,7 +369,7 @@ function CustomerDashboard() {
           <div className="space-y-2">
             {favorites.length === 0 && (
               <p className="card text-sm text-slate-600">
-                まだお気に入りがありません。地図のピンやお店の一覧から、気になるお店の「🤍 お気に入り」を押して登録しましょう。
+                まだお気に入りがありません。地図のピンやお店の一覧から、気になるお店の「お気に入り」を押して登録しましょう。
               </p>
             )}
             {favorites.map((f) => {
@@ -347,8 +377,8 @@ function CustomerDashboard() {
               return (
                 <div key={f.id} className="card flex items-center gap-3">
                   <button onClick={() => setSelectedId(f.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-coral-50 text-lg" aria-hidden>
-                      {categoryEmoji(f.category)}
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-saga-50 text-saga-600" aria-hidden>
+                      <CategoryIcon category={f.category} className="h-5 w-5" />
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate font-bold">{f.name}</span>
@@ -361,8 +391,8 @@ function CustomerDashboard() {
                   <button onClick={() => showRoute([`shop-${f.id}`])} className="btn-primary shrink-0 px-3 py-1.5">
                     道順
                   </button>
-                  <button onClick={() => toggleFavorite(f.id)} aria-label="お気に入りから外す" className="shrink-0 text-xl">
-                    ❤️
+                  <button onClick={() => toggleFavorite(f.id)} aria-label="お気に入りから外す" className="shrink-0 rounded-lg p-1.5 text-coupon hover:bg-coral-50">
+                    <Heart className="h-5 w-5 fill-current" aria-hidden />
                   </button>
                 </div>
               );
@@ -372,12 +402,15 @@ function CustomerDashboard() {
 
         {tab === "おすすめ" && (
           <div>
-            <h2 className="mb-1 text-lg font-extrabold">✨ あなたへのおすすめ</h2>
+            <h2 className="mb-1 flex items-center gap-1.5 text-lg font-bold">
+              <Sparkles className="h-5 w-5 text-saga-600" aria-hidden />
+              あなたへのおすすめ
+            </h2>
             <p className="mb-4 text-xs text-slate-500">閲覧・クーポン利用の履歴、現在地、混雑度から AI が選びました。</p>
             <SwipeCards
               cards={recs}
               onSwipe={(card, liked) => liked && setSelectedId(card.id)}
-              onOpen={(card) => (card.id === selectedId ? document.getElementById("shop-detail")?.scrollIntoView({ behavior: "smooth" }) : setSelectedId(card.id))}
+              onOpen={(card) => (card.id === selectedId ? scrollToDetail() : setSelectedId(card.id))}
             />
           </div>
         )}
@@ -387,7 +420,7 @@ function CustomerDashboard() {
             {coupons.length === 0 && <p className="text-sm text-slate-500">条件に合うクーポンはありません。</p>}
             {coupons.map((c) => (
               <li key={c.id} className="card flex items-center gap-3">
-                <span className="shrink-0 text-2xl font-black text-coupon">{c.discount_rate}%</span>
+                <span className="shrink-0 text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
                 <button onClick={() => setSelectedId(c.business_id)} className="min-w-0 flex-1 text-left">
                   <span className="block truncate font-semibold">{c.title}</span>
                   <span className="block truncate text-xs text-slate-500">
@@ -407,7 +440,7 @@ function CustomerDashboard() {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm text-slate-600">行き先を選ぶと、現在地から<b>道に沿った</b>最適な順番のルートを表示します。</p>
-              <div className="flex shrink-0 rounded-full bg-slate-100 p-1 text-sm font-bold">
+              <div className="flex shrink-0 rounded-lg bg-slate-100 p-1 text-sm font-semibold">
                 {(["foot", "car"] as const).map((m) => (
                   <button
                     key={m}
@@ -415,20 +448,22 @@ function CustomerDashboard() {
                       setRouteMode(m);
                       if (routeStops) setRouteLoading(true);
                     }}
-                    className={`rounded-full px-3 py-1 ${routeMode === m ? "bg-white text-saga-700 shadow" : "text-slate-500"}`}
+                    className={`inline-flex items-center gap-1 rounded-md px-3 py-1 ${routeMode === m ? "bg-white text-saga-700 shadow-sm" : "text-slate-500"}`}
                   >
-                    {m === "foot" ? "🚶 徒歩" : "🚗 車"}
+                    {m === "foot" ? <Footprints className="h-4 w-4" aria-hidden /> : <Car className="h-4 w-4" aria-hidden />}
+                    {m === "foot" ? "徒歩" : "車"}
                   </button>
                 ))}
               </div>
             </div>
 
-            {routeLoading && <p className="text-sm font-bold text-saga-600">🗺️ ルートを計算しています…</p>}
+            {routeLoading && <p className="text-sm font-medium text-saga-600">ルートを計算しています…</p>}
             {routeError && <p className="text-sm text-red-600">{routeError}</p>}
             {route && (
-              <div className="card border-2 border-tea-500">
-                <p className="text-lg font-extrabold">
-                  {route.mode === "WALKING" ? "🚶 徒歩" : "🚗 車"}で {formatDistance(route.totalMeters)}・約 {Math.max(1, Math.round(route.totalSeconds / 60))} 分
+              <div className="card border-saga-300 ring-1 ring-saga-100">
+                <p className="flex items-center gap-1.5 text-lg font-bold">
+                  {route.mode === "WALKING" ? <Footprints className="h-5 w-5 text-saga-600" aria-hidden /> : <Car className="h-5 w-5 text-saga-600" aria-hidden />}
+                  {route.mode === "WALKING" ? "徒歩" : "車"}で {formatDistance(route.totalMeters)}・約 {Math.max(1, Math.round(route.totalSeconds / 60))} 分
                 </p>
                 {route.estimated && (
                   <p className="text-xs text-amber-700">道順を取得できなかったため、直線距離からの目安を表示しています。</p>
@@ -437,7 +472,7 @@ function CustomerDashboard() {
                   {route.legs.map((l, i) => (
                     <li key={i} className="flex justify-between gap-2">
                       <span>
-                        <b className="mr-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-tea-500 text-xs text-white">{i + 1}</b>
+                        <b className="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold text-white">{i + 1}</b>
                         {l.from} → {l.to}
                       </span>
                       <span className="shrink-0 text-slate-500">
@@ -455,7 +490,7 @@ function CustomerDashboard() {
                   </p>
                 )}
                 <div className="mt-3 flex gap-2">
-                  <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="btn-outline flex-1">
+                  <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="btn-outline flex-1 lg:hidden">
                     地図で見る
                   </button>
                   <button
@@ -476,14 +511,17 @@ function CustomerDashboard() {
             {stopGroups.map((g) =>
               g.items.length === 0 ? null : (
                 <section key={g.title}>
-                  <h3 className="mb-2 text-sm font-extrabold text-slate-700">{g.title}</h3>
+                  <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                    <g.icon className="h-4 w-4 text-slate-400" aria-hidden />
+                    {g.title}
+                  </h3>
                   <ul className="space-y-2">
                     {g.items.map((s) => {
                       const m = position ? haversineMeters(position, s) : null;
                       const checked = routeKeys.includes(s.key);
                       return (
                         <li key={s.key}>
-                          <label className={`card flex items-center gap-3 py-3 ${checked ? "ring-2 ring-saga-500" : ""}`}>
+                          <label className={`flex cursor-pointer items-center gap-3 rounded-xl border bg-white px-3 py-3 ${checked ? "border-saga-500 ring-1 ring-saga-500" : "border-slate-200 hover:bg-slate-50"}`}>
                             <input
                               type="checkbox"
                               className="h-5 w-5 accent-saga-600"
@@ -492,7 +530,7 @@ function CustomerDashboard() {
                                 setRouteKeys((ks) => (ks.includes(s.key) ? ks.filter((k) => k !== s.key) : [...ks, s.key].slice(0, 9)))
                               }
                             />
-                            <span className="flex-1 font-bold">{s.name}</span>
+                            <span className="flex-1 font-medium">{s.name}</span>
                             {m != null && <span className="shrink-0 text-xs text-slate-500">{formatDistance(m)}</span>}
                           </label>
                         </li>
@@ -503,7 +541,7 @@ function CustomerDashboard() {
               ),
             )}
 
-            <div className="sticky bottom-3 z-10">
+            <div className="sticky bottom-3 z-10 lg:bottom-4">
               <button disabled={routeKeys.length === 0} onClick={() => showRoute(routeKeys)} className="btn-primary w-full py-3 text-base">
                 {routeKeys.length ? `${routeKeys.length} か所を回るルートを表示` : "行き先を選んでください"}
               </button>
@@ -530,7 +568,7 @@ function CustomerDashboard() {
             </div>
             {notifications.length === 0 && <p className="text-sm text-slate-500">お知らせはまだありません。</p>}
             {notifications.map((n) => (
-              <div key={n.id} className={`card ${n.read_at ? "" : "border-saga-500"}`}>
+              <div key={n.id} className={`card ${n.read_at ? "" : "border-l-4 border-l-saga-600"}`}>
                 <p className="text-xs text-slate-500">{new Date(n.created_at).toLocaleDateString("ja-JP")}</p>
                 <p className="font-semibold">{n.title}</p>
                 <p className="whitespace-pre-line text-sm text-slate-600">{n.body}</p>
@@ -544,8 +582,18 @@ function CustomerDashboard() {
           </div>
         )}
       </section>
+      </div>
     </main>
   );
+}
+
+/** 店舗詳細までスクロール（パソコンでは左の一覧パネルの中だけを動かす） */
+function scrollToDetail() {
+  const el = document.getElementById("shop-detail");
+  const panel = document.getElementById("customer-panel");
+  if (!el) return;
+  if (panel && getComputedStyle(panel).overflowY === "auto") panel.scrollTo({ top: el.offsetTop, behavior: "smooth" });
+  else el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function Filters(props: {
@@ -605,16 +653,17 @@ function ShopDetail({
   const b = detail.business;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}&travelmode=walking`;
   return (
-    <div id="shop-detail" className="scroll-mt-16 border-b bg-white p-4">
+    <div id="shop-detail" className="scroll-mt-16 border-b border-slate-100 bg-white p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs text-saga-600">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+            <CategoryIcon category={b.category} className="h-3.5 w-3.5" />
             {b.category} {PRICE_LEVEL_LABELS[b.price_level]}
           </p>
           <h2 className="text-lg font-bold">{b.name}</h2>
         </div>
-        <button onClick={onClose} aria-label="閉じる" className="text-xl text-slate-400">
-          ×
+        <button onClick={onClose} aria-label="閉じる" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+          <X className="h-5 w-5" aria-hidden />
         </button>
       </div>
       <p className="text-sm text-slate-600">{b.service_description}</p>
@@ -625,10 +674,12 @@ function ShopDetail({
       </p>
       <div className="mt-3 flex gap-2">
         <button onClick={onRouteHere} className="btn-primary flex-1">
-          🗺️ ここへの道順
+          <Navigation className="h-4 w-4" aria-hidden />
+          ここへの道順
         </button>
-        <button onClick={onToggleFavorite} className={`btn-outline ${isFavorite ? "border-coral-400 text-coupon" : ""}`}>
-          {isFavorite ? "❤️ お気に入り" : "🤍 お気に入り"}
+        <button onClick={onToggleFavorite} className={`btn-outline ${isFavorite ? "border-coral-100 text-coupon" : ""}`} aria-pressed={isFavorite}>
+          <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} aria-hidden />
+          お気に入り
         </button>
       </div>
       <div className="mt-2 flex flex-wrap gap-3 text-sm">
@@ -647,8 +698,8 @@ function ShopDetail({
         )}
       </div>
       {detail.coupons.map((c) => (
-        <div key={c.id} className="mt-3 flex items-center gap-3 rounded-xl border-2 border-dashed border-coupon/50 bg-red-50 p-3">
-          <span className="text-2xl font-black text-coupon">{c.discount_rate}%</span>
+        <div key={c.id} className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-coupon/40 bg-coral-50/60 p-3">
+          <span className="text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
           <span className="min-w-0 flex-1 text-sm">
             <span className="block font-semibold">{c.title}</span>
             <span className="text-xs text-slate-500">

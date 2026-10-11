@@ -56,15 +56,15 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
   return (
     <main className="mx-auto max-w-lg p-4">
       {inviteCode ? (
-        <div className="mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-sun-400 via-coral-500 to-saga-600 p-5 text-white shadow-pop">
-          <p className="text-xs font-extrabold tracking-widest text-sun-100">SPECIAL INVITATION</p>
-          <h1 className="mt-1 text-2xl font-extrabold">🎁 特別招待 事業主登録</h1>
+        <div className="mt-4 overflow-hidden rounded-2xl bg-saga-600 p-5 text-white">
+          <p className="text-xs font-bold tracking-widest text-sun-100">SPECIAL INVITATION</p>
+          <h1 className="mt-1 text-2xl font-bold">特別招待 事業主登録</h1>
           <p className="mt-2 text-sm font-bold leading-6">
             運営からのご紹介で、<span className="rounded bg-white/25 px-1">有料プランのすべての機能を無料</span>でご利用いただけます。
           </p>
           <ul className="mt-2 space-y-0.5 text-sm">
-            <li>✅ クーポン発行　✅ 広告出稿（月 2 回）</li>
-            <li>✅ SNS 連携　✅ 紹介プログラム　✅ 複数店舗の登録</li>
+            <li>✓ クーポン発行　✓ 広告出稿（月 2 回）</li>
+            <li>✓ SNS 連携　✓ 紹介プログラム　✓ 複数店舗の登録</li>
           </ul>
           <p className="mt-2 text-xs opacity-90">※ お支払い情報の登録は不要です。</p>
         </div>
@@ -91,7 +91,7 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
             className={`input ${addressError ? "border-coupon ring-4 ring-coral-100" : ""}`}
           />
           {addressError ? (
-            <p className="mt-1 text-sm font-bold text-coupon">⚠️ {addressError}</p>
+            <p className="mt-1 text-sm font-bold text-coupon">{addressError}</p>
           ) : (
             <p className="mt-1 text-xs text-slate-500">都道府県から番地まで入力すると、地図に自動でお店の場所が表示されます。</p>
           )}

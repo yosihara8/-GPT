@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="mx-auto max-w-md p-4">
-      <h1 className="mt-4 text-2xl font-extrabold">🔑 パスワードの再設定</h1>
+      <h1 className="mt-4 text-2xl font-bold">パスワードの再設定</h1>
       {sent ? (
         <div className="card mt-4 space-y-2 text-sm">
           <p className="font-bold">ご登録のメールアドレス宛てに、再設定用のリンクをお送りしました（1 時間有効）。</p>
@@ -42,13 +42,13 @@ export default function ForgotPasswordPage() {
         </div>
       ) : (
         <form onSubmit={onSubmit} className="card mt-4 space-y-4">
-          <div className="grid grid-cols-2 rounded-full bg-slate-100 p-1 text-sm font-bold">
+          <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-bold">
             {(["customer", "business"] as const).map((r) => (
               <button
                 type="button"
                 key={r}
                 onClick={() => setRole(r)}
-                className={`rounded-full py-2 ${role === r ? "bg-white text-saga-700 shadow" : "text-slate-500"}`}
+                className={`rounded-md py-2 ${role === r ? "bg-white text-saga-700 shadow" : "text-slate-500"}`}
               >
                 {r === "customer" ? "お客さま" : "事業主"}
               </button>

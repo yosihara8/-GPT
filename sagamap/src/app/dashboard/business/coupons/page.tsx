@@ -48,7 +48,7 @@ function Coupons() {
       setMsgIsError(false);
       setMsg(
         `クーポンを発行しました。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}` +
-          (res.warnings?.length ? `\n\n⚠️ 次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
+          (res.warnings?.length ? `\n\n次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
       );
       form.reset();
       load();
@@ -93,7 +93,7 @@ function Coupons() {
           const expired = new Date(c.expires_at).getTime() < Date.now();
           return (
             <li key={c.id} className={`card flex items-center gap-3 ${expired ? "opacity-50" : ""}`}>
-              <span className="w-14 shrink-0 text-xl font-black text-coupon">{c.discount_rate}%</span>
+              <span className="w-14 shrink-0 text-xl font-bold text-coupon">{c.discount_rate}%</span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold">{c.title}</span>
                 <span className="block truncate text-xs text-slate-500">
