@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapSpot, type RouteSummary } from "@/components/MapView";
 import AdBanner, { AdDetail, type Ad } from "@/components/AdBanner";
 import RouteBox from "@/components/RouteBox";
+import ShopPhoto from "@/components/ShopPhoto";
 import { scrollToElement } from "@/lib/scroll";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import LocationAccuracy from "@/components/LocationAccuracy";
@@ -45,6 +46,8 @@ type NearbyShop = {
   distance_m: number;
   walk_minutes: number;
   highlight: boolean;
+  has_photo?: boolean;
+  photo_version?: number | null;
 };
 type Coupon = {
   id: number;
@@ -59,6 +62,7 @@ type Coupon = {
 };
 type Detail = {
   business: NearbyShop & { service_description: string; contact: string; instagram_url: string | null; twitter_url: string | null };
+  // has_photo / photo_version は NearbyShop と共通
   coupons: Coupon[];
 };
 type Notification = { id: number; title: string; body: string; link: string | null; created_at: string; read_at: string | null };
@@ -394,7 +398,7 @@ function CustomerDashboard() {
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${s.highlight ? "bg-coral-50 text-coupon" : "bg-saga-50 text-saga-600"}`}
                       aria-hidden
                     >
-                      <CategoryIcon category={s.category} className="h-5 w-5" />
+                      {s.has_photo ? <ShopPhoto shop={s} className="h-10 w-10 rounded-lg" /> : <CategoryIcon category={s.category} className="h-5 w-5" />}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold">{s.name}</span>
@@ -721,6 +725,7 @@ function ShopDetail({
           <AdDetail ad={ad} />
         </div>
       )}
+      {b.has_photo && <ShopPhoto shop={b} className="mb-3 h-44 w-full rounded-xl" />}
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">

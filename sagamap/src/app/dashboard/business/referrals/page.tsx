@@ -41,7 +41,7 @@ async function saveQrImage(storeId: number, storeName: string) {
   ctx.fillText("紹介用リンク", canvas.width / 2, size + pad + 70);
   ctx.fillStyle = "#475467";
   ctx.font = '28px "Noto Sans JP", sans-serif';
-  ctx.fillText(`${storeName}（SagaMap）`, canvas.width / 2, size + pad + 115);
+  ctx.fillText(`${storeName}（佐賀観光マップ）`, canvas.width / 2, size + pad + 115);
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) return;
@@ -91,12 +91,12 @@ function Referrals() {
       <section className="card space-y-2">
         <h2 className="text-lg font-bold">紹介プログラムとは</h2>
         <p className="text-sm leading-7 text-slate-700">
-          お店のお客さまに <span className="font-semibold text-saga-600">SagaMap を紹介し、会員登録</span>してもらうプログラムです。
+          お店のお客さまに <span className="font-semibold text-saga-600">佐賀観光マップを紹介し、会員登録</span>してもらうプログラムです。
           下の<span className="font-semibold text-saga-600">紹介リンク・QR コード</span>からお客さまが会員登録すると「紹介 1 名」になります。
         </p>
         <ol className="space-y-1 text-sm">
           <li>① 店頭 POP・レジ横・SNS に QR コードやリンクを載せる</li>
-          <li>② お客さまが読み取って、SagaMap に無料で会員登録</li>
+          <li>② お客さまが読み取って、佐賀観光マップに無料で会員登録</li>
           <li>
             ③ <span className="font-semibold text-saga-600">毎月 1 日〜末日</span>の紹介人数を数え、<span className="font-semibold text-saga-600">{data.goal} 名以上</span>で
             <span className="font-semibold text-saga-600">

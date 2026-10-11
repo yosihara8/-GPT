@@ -33,16 +33,13 @@ export default function Header() {
           </button>
         </div>
       )}
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href={home} className="flex min-w-0 items-center gap-2.5" aria-label="ホームへ">
-          <Logo className={`h-8 w-8 ${dark ? "text-saga-500" : ""}`} />
-          <span className="leading-tight">
-            <span className={`block text-[17px] font-bold tracking-tight ${dark ? "text-white" : "text-slate-900"}`}>SagaMap</span>
-            <span className={`text-[10px] font-medium ${area ? "hidden sm:block" : "block"} ${dark ? "text-slate-400" : "text-slate-500"}`}>佐賀おでかけ AI マップ</span>
-          </span>
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
+        <Link href={home} className="flex min-w-0 items-center gap-2 sm:gap-2.5" aria-label="佐賀観光マップ ホームへ">
+          <Logo className={`h-7 w-7 shrink-0 sm:h-8 sm:w-8 ${dark ? "text-saga-500" : ""}`} />
+          <span className={`whitespace-nowrap text-base font-bold tracking-tight sm:text-[17px] ${dark ? "text-white" : "text-slate-900"}`}>佐賀観光マップ</span>
           {area && (
             <span
-              className={`ml-0.5 whitespace-nowrap rounded-md px-2 py-0.5 text-[11px] font-semibold ${dark ? "bg-saga-500 text-white" : "bg-saga-50 text-saga-700 ring-1 ring-saga-100"}`}
+              className={`whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${dark ? "bg-saga-500 text-white" : "bg-saga-50 text-saga-700 ring-1 ring-saga-100"}`}
             >
               {area}
             </span>
@@ -54,21 +51,21 @@ export default function Header() {
               {showDashboardLink && (
                 <Link
                   href={user.role === "admin" ? "/admin" : dashboard}
-                  className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}
+                  className={`rounded-lg px-2 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}
                 >
                   {user.role === "admin" ? "管理画面" : "マイページ"}
                 </Link>
               )}
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className={`rounded-lg px-2 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
               >
                 ログアウト
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}>
+              <Link href="/login" className={`rounded-lg px-2 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}>
                 ログイン
               </Link>
               <Link href="/register/customer" className="btn-primary px-3.5 py-1.5">

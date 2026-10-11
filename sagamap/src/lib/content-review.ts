@@ -63,9 +63,9 @@ export async function runContentReview() {
       stopped.push(`${row.business_name}：${label}`);
       await sendMail(
         row.owner_email,
-        `【SagaMap】${label}の掲載を停止しました`,
+        `【佐賀観光マップ】${label}の掲載を停止しました`,
         `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
-          <p style="font-size:20px;font-weight:bold">🎈 SagaMap</p>
+          <p style="font-size:20px;font-weight:bold">佐賀観光マップ</p>
           <p>${escapeHtml(row.owner_name)} 様</p>
           <p>${escapeHtml(row.business_name)} の${escapeHtml(label)}に、法令（景品表示法・医薬品医療機器等法）上掲載できない表現が含まれていたため、掲載を停止しました。</p>
           <ul>${result.blocked.map((r) => `<li>${escapeHtml(r)}</li>`).join("")}</ul>
@@ -98,7 +98,7 @@ export async function runContentReview() {
     for (const a of admins) {
       await sendMail(
         a.email,
-        `【SagaMap】掲載チェック：停止 ${stopped.length} 件・要確認 ${flagged.length} 件`,
+        `【佐賀観光マップ】掲載チェック：停止 ${stopped.length} 件・要確認 ${flagged.length} 件`,
         `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
           <p style="font-size:20px;font-weight:bold">🛡️ 掲載チェックの結果</p>
           ${stopped.length ? `<h3>自動で停止したもの（事業者に通知済み）</h3>${list(stopped)}` : ""}

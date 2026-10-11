@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { APP_URL, OPERATOR, OPERATOR_ADDRESS } from "./config";
 import { escapeHtml } from "./escape";
 
-const from = process.env.MAIL_FROM ?? "SagaMap <noreply@sagamap.jp>";
+const from = process.env.MAIL_FROM ?? "佐賀観光マップ <noreply@sagamap.jp>";
 /** 返信はお問い合わせ窓口に届くようにする */
 const replyTo = OPERATOR.email;
 
