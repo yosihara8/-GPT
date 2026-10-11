@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { categoryEmoji } from "@/lib/config";
+import CategoryIcon from "./CategoryIcon";
 
 type Props = {
   shop: { id: number; name: string; category: string; has_photo?: boolean; photo_version?: number | null };
@@ -19,8 +19,8 @@ export default function ShopPhoto({ shop, className = "" }: Props) {
     );
   }
   return (
-    <div className={`flex items-center justify-center bg-gradient-to-br from-sun-100 via-coral-50 to-saga-50 ${className}`} aria-hidden>
-      <span className="text-5xl">{categoryEmoji(shop.category)}</span>
+    <div className={`flex items-center justify-center bg-slate-100 text-slate-400 ${className}`} aria-hidden>
+      <CategoryIcon category={shop.category} className="h-1/3 max-h-12 w-1/3 max-w-12" strokeWidth={1.5} />
     </div>
   );
 }

@@ -47,7 +47,7 @@ function Ads() {
       setMsgIsError(false);
       setMsg(
         `広告を出稿しました。地図上部のバナー枠に表示されます。${res.notified ? `お客さま ${res.notified} 人のアプリにお知らせしました（メールは毎週金曜にまとめて届きます）` : ""}` +
-          (res.warnings?.length ? `\n\n⚠️ 次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
+          (res.warnings?.length ? `\n\n次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
       );
       form.reset();
       setPreview({ headline: "", body: "" });
@@ -66,9 +66,9 @@ function Ads() {
   return (
     <div className="space-y-4">
       {quota && (
-        <div className={`card flex items-center justify-between ${quota.remaining === 0 ? "border-4 border-sun-400" : ""}`}>
+        <div className={`card flex items-center justify-between ${quota.remaining === 0 ? "border-sun-400 ring-1 ring-sun-400" : ""}`}>
           <div>
-            <p className="font-extrabold">📣 広告出稿は月 {quota.limit} 回まで</p>
+            <p className="font-bold">広告出稿は月 {quota.limit} 回まで</p>
             <p className="text-xs text-slate-500">毎月 1 日〜末日で数えます。翌月 1 日に回数がリセットされます。</p>
           </div>
           <p className="shrink-0 text-right">
@@ -80,8 +80,8 @@ function Ads() {
       )}
       <div>
         <p className="mb-1 text-xs text-slate-500">プレビュー（地図上部に表示されます）</p>
-        <div className="flex items-center gap-3 rounded-xl border-2 border-amber-400 bg-white px-3 py-2 shadow">
-          <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-amber-950">PR</span>
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-pop">
+          <span className="shrink-0 rounded border border-slate-300 px-1.5 py-px text-[10px] font-semibold tracking-wide text-slate-500">PR</span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-bold">{preview.headline || "見出し"}</span>
             <span className="block truncate text-xs text-slate-600">{preview.body || "本文"}</span>

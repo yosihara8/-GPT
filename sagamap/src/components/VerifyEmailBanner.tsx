@@ -15,7 +15,7 @@ export default function VerifyEmailBanner() {
   if (!show) return null;
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-sun-100 px-4 py-3 text-sm font-bold text-amber-900">
-      📧 メールアドレスの確認が済んでいません。届いたメールのリンクを開いてください。
+      メールアドレスの確認が済んでいません。届いたメールのリンクを開いてください。
       <button
         className="underline"
         onClick={() =>

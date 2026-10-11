@@ -26,9 +26,9 @@ export default async function CouponPage({ params }: { params: { id: string } })
 
   return (
     <main className="mx-auto max-w-md p-4">
-      <div className="card mt-4 border-2 border-dashed border-coupon/50 text-center">
+      <div className="card mt-4 border-dashed border-coupon/40 text-center">
         <p className="text-sm text-slate-500">{c.business_name}</p>
-        <p className="mt-2 text-5xl font-black text-coupon">{c.discount_rate}% OFF</p>
+        <p className="mt-2 text-5xl font-bold text-coupon">{c.discount_rate}% OFF</p>
         <p className="mt-2 font-semibold">{c.title}</p>
         {c.conditions && <p className="mt-1 text-sm text-slate-600">{c.conditions}</p>}
         <p className="mt-3 text-xs text-slate-500">

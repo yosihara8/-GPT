@@ -25,8 +25,8 @@ const TABS = [
   { key: "stores", label: "店舗" },
   { key: "customers", label: "顧客" },
   { key: "logs", label: "操作記録" },
-  { key: "invites", label: "🎁 特別招待" },
-  { key: "reviews", label: "🛡️ 掲載チェック" },
+  { key: "invites", label: "特別招待" },
+  { key: "reviews", label: "掲載チェック" },
   { key: "errors", label: "エラー" },
   { key: "admins", label: "運営者・設定" },
 ] as const;
@@ -248,7 +248,7 @@ function format(key: string, v: Row[string]) {
   if (v == null || v === "") return <span className="text-slate-400">—</span>;
   if (typeof v === "boolean") return v ? "◯" : "—";
   if (key === "plan") {
-    if (v === "special") return <b className="text-coral-600">🎁 特別</b>;
+    if (v === "special") return <b className="text-saga-600">特別</b>;
     return v === "premium" ? <b className="text-saga-700">有料</b> : "無料";
   }
   if (key === "monthly_price") return `${Number(v).toLocaleString()} 円`;
@@ -281,7 +281,7 @@ function Admins() {
     <div className="grid gap-4 sm:grid-cols-2">
       <PasswordChangeForm minLength={12} />
       <section className="card space-y-2">
-        <h2 className="font-extrabold">💾 データのバックアップ</h2>
+        <h2 className="font-bold">データのバックアップ</h2>
         <p className="text-sm text-slate-600">
           全データを JSON ファイルで保存します。月に 1 回程度の保存をおすすめします（パスワードと写真は含みません）。
         </p>
@@ -353,7 +353,7 @@ function Invites() {
   return (
     <div className="space-y-4">
       <section className="card space-y-3">
-        <h2 className="text-lg font-extrabold">🎁 特別招待リンクの発行</h2>
+        <h2 className="text-lg font-bold">特別招待リンクの発行</h2>
         <p className="text-sm text-slate-600">
           運営から紹介する事業者に送るリンクです。このリンクから事業主登録すると、<b>有料プランのすべての機能を無料</b>で使えます（お支払い不要）。
         </p>
@@ -385,7 +385,7 @@ function Invites() {
             <QRCodeSVG value={i.url} size={110} marginSize={1} />
           </div>
           <div className="min-w-0 flex-1 space-y-1 text-sm">
-            <p className="font-extrabold">
+            <p className="font-bold">
               {i.label || "（メモなし）"}
               <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${i.usable ? "bg-tea-50 text-tea-700" : "bg-slate-100 text-slate-500"}`}>
                 {i.usable ? "利用できます" : "利用不可"}
@@ -449,18 +449,18 @@ function Reviews() {
   return (
     <div className="space-y-4">
       <section className="card space-y-2 text-sm text-slate-600">
-        <h2 className="text-lg font-extrabold text-slate-900">🛡️ 掲載チェック（景品表示法・医薬品医療機器等法）</h2>
+        <h2 className="text-lg font-bold text-slate-900">掲載チェック（景品表示法・医薬品医療機器等法）</h2>
         <p>
           クーポン・広告は登録時と毎日 0:10 に自動でチェックしています。「日本一」「最安」「No.1」、効能の断定、割引率の食い違いなど<b>掲載できない表現は自動で停止</b>し、事業者にメールで知らせます。
         </p>
         <p>二重価格・期間限定・「無料」など、事実なら問題ない表現はここに表示されます。内容を確認して「問題なし」か「停止」を選んでください。</p>
       </section>
       {items === null && <p className="text-sm text-slate-500">読み込み中…</p>}
-      {items?.length === 0 && <p className="card text-sm font-bold text-tea-700">✅ 確認待ちはありません。</p>}
+      {items?.length === 0 && <p className="card text-sm font-medium text-tea-700">確認待ちはありません。</p>}
       {items?.map((i) => (
         <section key={`${i.type}-${i.id}`} className="card space-y-2 text-sm">
-          <p className="font-extrabold">
-            <span className="mr-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs">{i.type === "coupon" ? "🎟️ クーポン" : "📣 広告"}</span>
+          <p className="font-bold">
+            <span className="mr-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs">{i.type === "coupon" ? "クーポン" : "広告"}</span>
             {i.business_name}
             <span className="ml-2 text-xs font-normal text-slate-500">{i.owner_email}</span>
           </p>

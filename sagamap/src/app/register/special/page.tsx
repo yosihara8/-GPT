@@ -1,5 +1,6 @@
 "use client";
 
+import { Ticket } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -30,8 +31,8 @@ function SpecialRegister() {
   if (!valid) {
     return (
       <main className="mx-auto max-w-md p-6 text-center">
-        <p className="text-5xl">🎟️</p>
-        <h1 className="mt-4 text-xl font-extrabold">この招待リンクは使えません</h1>
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500" aria-hidden><Ticket className="h-7 w-7" /></span>
+        <h1 className="mt-4 text-xl font-bold">この招待リンクは使えません</h1>
         <p className="mt-2 text-sm text-slate-600">
           有効期限が切れたか、利用できる人数に達した可能性があります。お手数ですが、紹介してくれた運営者にお問い合わせください。
         </p>

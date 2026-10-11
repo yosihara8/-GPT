@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PRICE_LEVEL_LABELS, categoryEmoji } from "@/lib/config";
+import { PRICE_LEVEL_LABELS } from "@/lib/config";
+import CategoryIcon from "./CategoryIcon";
+import { Heart, X } from "lucide-react";
 
 export type RecCard = {
   id: number;
@@ -106,16 +108,16 @@ export default function SwipeCards({ cards, onSwipe, onOpen }: Props) {
         <button
           aria-label="スキップ"
           onClick={() => finish(-1)}
-          className="h-14 w-14 rounded-full border border-slate-300 bg-white text-2xl text-slate-500 shadow"
+          className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-pop hover:bg-slate-50"
         >
-          ✕
+          <X className="h-6 w-6" aria-hidden />
         </button>
         <button
           aria-label="行きたい"
           onClick={() => finish(1)}
-          className="h-14 w-14 rounded-full bg-coupon text-2xl text-white shadow"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-saga-600 text-white shadow-pop hover:bg-saga-700"
         >
-          ♥
+          <Heart className="h-6 w-6 fill-current" aria-hidden />
         </button>
       </div>
       <p className="mt-2 text-center text-xs text-slate-500">
@@ -141,11 +143,9 @@ function Card({
     <div
       {...handlers}
       style={style}
-      className={`absolute inset-0 cursor-grab touch-pan-y overflow-hidden rounded-3xl border-4 border-white bg-gradient-to-br from-white via-white to-sun-100 p-5 shadow-pop ${className}`}
+      className={`absolute inset-0 cursor-grab touch-pan-y overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-pop ${className}`}
     >
-      <span className="pointer-events-none absolute -bottom-4 -right-2 text-8xl opacity-20" aria-hidden>
-        {categoryEmoji(card.category)}
-      </span>
+      <CategoryIcon category={card.category} className="pointer-events-none absolute -bottom-3 -right-3 h-28 w-28 text-slate-100" strokeWidth={1.5} />
       {badge && (
         <span
           className={`absolute right-4 top-4 rotate-12 rounded border-2 px-2 py-0.5 text-sm font-bold ${
@@ -155,13 +155,14 @@ function Card({
           {badge === "like" ? "行きたい" : "スキップ"}
         </span>
       )}
-      <p className="text-xs font-bold text-saga-600">
-        {categoryEmoji(card.category)} {card.category}　{PRICE_LEVEL_LABELS[card.price_level]}
+      <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+        <CategoryIcon category={card.category} className="h-3.5 w-3.5" />
+        {card.category}　{PRICE_LEVEL_LABELS[card.price_level]}
       </p>
-      <h3 className="mt-1 text-2xl font-extrabold text-slate-900">{card.name}</h3>
+      <h3 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{card.name}</h3>
       <p className="mt-2 line-clamp-2 text-sm text-slate-600">{card.service_description}</p>
       {card.best_discount && (
-        <p className="mt-3 inline-block rounded-full bg-red-50 px-3 py-1 text-sm font-bold text-coupon">
+        <p className="mt-3 inline-block rounded-md bg-coral-50 px-2.5 py-1 text-sm font-semibold text-coupon">
           {card.best_discount}% OFF クーポン
         </p>
       )}

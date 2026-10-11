@@ -52,7 +52,7 @@ export type MapViewProps = {
   className?: string;
 };
 
-const COLORS = { coupon: "#e5484d", shop: "#3b82f6", spot: "#d97706", me: "#111827" };
+const COLORS = { coupon: "#d92d20", shop: "#1f4d3f", spot: "#b54708", me: "#2e90fa" };
 
 function pinIcon(color: string, scale = 1): google.maps.Icon {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40">
@@ -123,7 +123,7 @@ function GoogleMapView({
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 8,
-        fillColor: "#2563eb",
+        fillColor: COLORS.me,
         fillOpacity: 1,
         strokeColor: "#fff",
         strokeWeight: 3,
@@ -138,10 +138,10 @@ function GoogleMapView({
           map,
           center: me,
           radius: searchRadius,
-          strokeColor: "#2563eb",
-          strokeOpacity: 0.6,
+          strokeColor: COLORS.shop,
+          strokeOpacity: 0.5,
           strokeWeight: 1,
-          fillColor: "#2563eb",
+          fillColor: COLORS.shop,
           fillOpacity: 0.06,
           clickable: false,
         })
@@ -257,7 +257,7 @@ function GoogleMapView({
           map,
           directions: result,
           suppressMarkers: true,
-          polylineOptions: { strokeColor: "#1f8a7a", strokeWeight: 5, strokeOpacity: 0.85 },
+          polylineOptions: { strokeColor: COLORS.shop, strokeWeight: 5, strokeOpacity: 0.85 },
         });
         const route = result.routes[0];
         const order = [origin, ...route.waypoint_order.map((i) => stops[i]), destination];
@@ -296,17 +296,17 @@ function GoogleMapView({
 
 export function MapLegend() {
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-2xl bg-white/90 px-3 py-2 text-xs font-bold text-slate-700 shadow-pop">
+    <div className="pointer-events-none absolute bottom-3 left-3 z-10 space-y-1 rounded-lg bg-white/95 px-2.5 py-2 text-[11px] font-medium text-slate-600 shadow-pop">
       <div className="flex items-center gap-1.5">
-        <span className="inline-block h-3 w-3 rounded-full bg-coupon" />
+        <span className="inline-block h-2.5 w-2.5 rounded-full bg-coupon" />
         500m 以内のクーポン店
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="inline-block h-3 w-3 rounded-full bg-shop" />
+        <span className="inline-block h-2.5 w-2.5 rounded-full bg-shop" />
         お店
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="inline-block h-3 w-3 rounded-full bg-amber-600" />
+        <span className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#b54708]" />
         観光名所
       </div>
     </div>

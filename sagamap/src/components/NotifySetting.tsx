@@ -20,7 +20,7 @@ export default function NotifySetting() {
   return (
     <section className="card flex items-center justify-between gap-3">
       <div>
-        <h2 className="font-extrabold">📧 お知らせメール</h2>
+        <h2 className="font-bold">お知らせメール</h2>
         <p className="text-xs text-slate-600">毎週金曜日に、新着クーポン・お店のお知らせをまとめてお届けします。</p>
       </div>
       <button

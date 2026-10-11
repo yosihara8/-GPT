@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Check, Lock } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapShop } from "@/components/MapView";
@@ -115,7 +116,7 @@ function BusinessDashboard() {
 
       {/* プラン（無料・有料を並べて、ご利用中のプランを強調） */}
       <section className="space-y-3">
-        <h2 className="font-extrabold">現在のプラン</h2>
+        <h2 className="font-bold">現在のプラン</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <PlanCard
             current={!premium}
@@ -126,7 +127,7 @@ function BusinessDashboard() {
           />
           <PlanCard
             current={premium}
-            title={owner?.complimentary ? "有料プラン（🎁 特別招待）" : "有料プラン"}
+            title={owner?.complimentary ? "有料プラン（特別招待）" : "有料プラン"}
             price={owner?.complimentary ? "0 円（特別招待・お支払い不要）" : `月額 ${(premium ? owner!.monthly_price : PRICE_STANDARD).toLocaleString()} 円（税込）`}
             tone="coral"
             features={["クーポン発行", "広告出稿（月 2 回まで）", "SNS 連携（Instagram・X）", "紹介割引（月 10 名で翌月 2,980 円）", "複数店舗の登録"]}
@@ -168,8 +169,7 @@ function BusinessDashboard() {
                 setHour(h);
               }}
             />
-            <p className={`rounded-2xl px-3 py-2 text-sm ${insight.collecting ? "bg-sun-100 text-amber-900" : "bg-saga-50 text-saga-900"}`}>
-              {insight.collecting ? "📊 " : "💡 "}
+            <p className={`rounded-lg px-3 py-2 text-sm ${insight.collecting ? "bg-sun-100 text-amber-900" : "bg-saga-50 text-saga-900"}`}>
               {insight.advice}
             </p>
             <p className="text-xs text-slate-500">
@@ -216,19 +216,24 @@ function BusinessDashboard() {
 }
 
 function PlanCard(props: { current: boolean; title: string; price: string; features: string[]; tone: "tea" | "coral" }) {
-  const ring = props.tone === "coral" ? "border-coral-500" : "border-tea-500";
-  const badge = props.tone === "coral" ? "bg-coral-500" : "bg-tea-500";
   return (
-    <div className={`card relative border-4 ${props.current ? ring : "border-transparent opacity-60"}`}>
+    <div className={`card relative ${props.current ? "border-saga-600 ring-1 ring-saga-600" : "opacity-70"}`}>
       {props.current && (
-        <span className={`absolute -top-3 left-4 rounded-full px-3 py-0.5 text-xs font-extrabold text-white ${badge}`}>✓ ご利用中</span>
+        <span className="absolute -top-2.5 left-4 rounded-md bg-saga-600 px-2 py-0.5 text-[11px] font-semibold text-white">ご利用中</span>
       )}
-      <p className="mt-1 text-lg font-extrabold">{props.title}</p>
-      <p className="text-2xl font-black">{props.price}</p>
-      <ul className="mt-2 space-y-1 text-sm">
+      <p className="mt-1 text-base font-semibold text-slate-700">{props.title}</p>
+      <p className="text-2xl font-bold tracking-tight">{props.price}</p>
+      <ul className="mt-3 space-y-1.5 text-sm">
         {props.features.map((f) => (
-          <li key={f}>
-            {props.current ? "✅" : props.tone === "coral" ? "🔒" : "・"} {f}
+          <li key={f} className="flex items-start gap-2">
+            {props.current ? (
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-saga-600" aria-hidden />
+            ) : props.tone === "coral" ? (
+              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+            ) : (
+              <span className="mt-0.5 h-4 w-4 shrink-0 text-center text-slate-400">・</span>
+            )}
+            {f}
           </li>
         ))}
       </ul>

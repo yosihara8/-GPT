@@ -46,8 +46,8 @@ function Referrals() {
   return (
     <div className="space-y-4">
       {/* 仕組みの説明 */}
-      <section className="card space-y-2 border-t-4 border-t-coral-500">
-        <h2 className="text-lg font-extrabold">🤝 紹介プログラムとは</h2>
+      <section className="card space-y-2">
+        <h2 className="text-lg font-bold">紹介プログラムとは</h2>
         <p className="text-sm leading-7 text-slate-700">
           お店のお客さまに <b>SagaMap を紹介し、会員登録</b>してもらうプログラムです。
           下の<b>紹介リンク・QR コード</b>からお客さまが会員登録すると「紹介 1 名」になります。
@@ -68,15 +68,15 @@ function Referrals() {
           今月の紹介人数（{t.start}〜{t.end}）
         </p>
         <p className="mt-1">
-          <span className="text-4xl font-black tabular-nums">{t.count} 名</span>
+          <span className="text-4xl font-bold tabular-nums">{t.count} 名</span>
           <span className="ml-2 text-slate-500">/ 目標 {data.goal} 名</span>
         </p>
         <div className="mt-3 h-4 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuemin={0} aria-valuemax={data.goal} aria-valuenow={t.count}>
-          <div className="h-full rounded-full bg-gradient-to-r from-coral-500 to-sun-500 transition-all" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-saga-600 transition-all" style={{ width: `${pct}%` }} />
         </div>
         <p className={`mt-4 rounded-2xl px-3 py-2 text-sm font-bold ${t.achieved ? "bg-tea-50 text-tea-700" : "bg-sun-100 text-amber-900"}`}>
           {t.achieved
-            ? `🎉 今月の目標を達成しました！${t.next}の月額は ${data.discountPrice.toLocaleString()} 円（税込）になります`
+            ? `今月の目標を達成しました！${t.next}の月額は ${data.discountPrice.toLocaleString()} 円（税込）になります`
             : `あと ${remaining} 名の紹介で、${t.next}の月額が ${data.discountPrice.toLocaleString()} 円（税込）になります`}
         </p>
         <p className="mt-2 text-sm text-slate-600">
@@ -87,7 +87,7 @@ function Referrals() {
 
       {/* 月別の記録 */}
       <section className="card">
-        <h2 className="font-extrabold">📅 月別の紹介人数</h2>
+        <h2 className="font-bold">月別の紹介人数</h2>
         <table className="mt-2 w-full text-sm">
           <thead>
             <tr className="text-left text-xs text-slate-500">
@@ -104,7 +104,7 @@ function Referrals() {
                 </td>
                 <td className="py-2 tabular-nums">{h.count} 名</td>
                 <td className="py-2">
-                  {h.achieved ? <b className="text-tea-700">✅ 達成（翌月割引）</b> : i === 0 ? <span className="text-slate-500">集計中</span> : <span className="text-slate-400">未達成</span>}
+                  {h.achieved ? <b className="text-tea-700">達成（翌月割引）</b> : i === 0 ? <span className="text-slate-500">集計中</span> : <span className="text-slate-400">未達成</span>}
                 </td>
               </tr>
             ))}
@@ -132,7 +132,7 @@ function Referrals() {
       ))}
 
       <section className="card">
-        <h2 className="font-extrabold">紹介で登録したお客さま</h2>
+        <h2 className="font-bold">紹介で登録したお客さま</h2>
         {data.customers.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">まだ紹介はありません。</p>
         ) : (

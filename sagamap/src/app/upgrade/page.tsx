@@ -76,7 +76,7 @@ function Upgrade() {
       {error && <p className="text-sm text-red-600">{error}</p>}
       {special && (
         <p className="rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">
-          🎁 特別招待により、有料プランのすべての機能を無料でご利用いただけます。お支払いの手続きは不要です。
+          特別招待により、有料プランのすべての機能を無料でご利用いただけます。お支払いの手続きは不要です。
         </p>
       )}
       {plan && !special && (
@@ -95,12 +95,12 @@ function Upgrade() {
 
 function PlanCard(props: { title: string; price: string; note?: string; items: string[]; current: boolean; highlight?: boolean }) {
   return (
-    <div className={`card ${props.highlight ? "border-2 border-saga-600" : ""}`}>
+    <div className={`card ${props.highlight ? "border-saga-600 ring-1 ring-saga-600" : ""}`}>
       <div className="flex items-center justify-between">
         <h2 className="font-bold">{props.title}</h2>
         {props.current && <span className="rounded-full bg-slate-900 px-2 py-0.5 text-xs text-white">ご利用中</span>}
       </div>
-      <p className="mt-2 text-2xl font-black">{props.price}</p>
+      <p className="mt-2 text-2xl font-bold">{props.price}</p>
       {props.note && <p className="text-xs text-saga-700">{props.note}</p>}
       <ul className="mt-3 space-y-1.5 text-sm">
         {props.items.map((i) => (
