@@ -4,15 +4,19 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { Eye } from "lucide-react";
 import Logo from "./Logo";
+import { useTheme } from "./ThemeScope";
 
 export default function Header() {
   const { data } = useSession();
   const user = data?.user;
+  const theme = useTheme();
+  const dark = theme === "admin";
+  const area = theme === "admin" ? "管理者" : theme === "business" ? "事業主" : null;
   const dashboard =
     user?.role === "admin" ? "/admin" : user?.role === "business" ? "/dashboard/business" : "/dashboard/customer";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className={`sticky top-0 z-30 border-b backdrop-blur ${dark ? "border-slate-800 bg-slate-900/95" : "border-slate-200 bg-white/95"}`}>
       {user?.impersonated && (
         <div className="flex items-center justify-center gap-3 bg-slate-900 px-4 py-1.5 text-xs font-medium text-white">
           <Eye className="h-3.5 w-3.5" aria-hidden />
@@ -26,26 +30,36 @@ export default function Header() {
         </div>
       )}
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="SagaMap トップへ">
-          <Logo className="h-8 w-8" />
+        <Link href="/" className="flex min-w-0 items-center gap-2.5" aria-label="SagaMap トップへ">
+          <Logo className={`h-8 w-8 ${dark ? "text-saga-500" : ""}`} />
           <span className="leading-tight">
-            <span className="block text-[17px] font-bold tracking-tight text-slate-900">SagaMap</span>
-            <span className="block text-[10px] font-medium text-slate-500">佐賀おでかけ AI マップ</span>
+            <span className={`block text-[17px] font-bold tracking-tight ${dark ? "text-white" : "text-slate-900"}`}>SagaMap</span>
+            <span className={`text-[10px] font-medium ${area ? "hidden sm:block" : "block"} ${dark ? "text-slate-400" : "text-slate-500"}`}>佐賀おでかけ AI マップ</span>
           </span>
+          {area && (
+            <span
+              className={`ml-0.5 whitespace-nowrap rounded-md px-2 py-0.5 text-[11px] font-semibold ${dark ? "bg-saga-500 text-white" : "bg-saga-50 text-saga-700 ring-1 ring-saga-100"}`}
+            >
+              {area}
+            </span>
+          )}
         </Link>
-        <nav className="flex items-center gap-1 text-sm font-medium">
+        <nav className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-sm font-medium sm:gap-1">
           {user ? (
             <>
-              <Link href={dashboard} className="rounded-lg px-3 py-1.5 text-slate-700 hover:bg-slate-100">
+              <Link href={dashboard} className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}>
                 {user.role === "admin" ? "管理画面" : "マイページ"}
               </Link>
-              <button onClick={() => signOut({ callbackUrl: "/" })} className="rounded-lg px-3 py-1.5 text-slate-500 hover:bg-slate-100">
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
+              >
                 ログアウト
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="rounded-lg px-3 py-1.5 text-slate-700 hover:bg-slate-100">
+              <Link href="/login" className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}>
                 ログイン
               </Link>
               <Link href="/register/customer" className="btn-primary px-3.5 py-1.5">

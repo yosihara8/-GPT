@@ -5,6 +5,44 @@
 :root {
   color-scheme: light;
 }
+
+/*
+ * 画面の種類ごとの色（ThemeScope が data-theme を付ける）
+ *  お客さま（初期値）… 深い緑
+ *  事業主 … 青
+ *  管理者 … 紫（ヘッダーも濃い色にして、ひと目で区別できるようにする）
+ */
+:root,
+[data-theme="customer"] {
+  --brand-50: 238 245 242;
+  --brand-100: 215 232 224;
+  --brand-300: 141 188 169;
+  --brand-500: 47 111 92;
+  --brand-600: 31 77 63;
+  --brand-700: 24 61 50;
+  --brand-900: 15 42 34;
+  --page-bg: 246 247 246;
+}
+[data-theme="business"] {
+  --brand-50: 239 244 255;
+  --brand-100: 209 224 255;
+  --brand-300: 132 173 255;
+  --brand-500: 41 112 255;
+  --brand-600: 21 94 239;
+  --brand-700: 0 78 235;
+  --brand-900: 0 53 158;
+  --page-bg: 245 247 251;
+}
+[data-theme="admin"] {
+  --brand-50: 244 243 255;
+  --brand-100: 235 233 254;
+  --brand-300: 189 180 254;
+  --brand-500: 122 90 248;
+  --brand-600: 105 65 198;
+  --brand-700: 83 56 158;
+  --brand-900: 62 28 150;
+  --page-bg: 242 242 247;
+}
 body {
   @apply bg-cream text-slate-900 antialiased;
   font-feature-settings: "palt";
