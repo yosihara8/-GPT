@@ -190,7 +190,7 @@ function Ads() {
         <p className="text-xs text-slate-500">
           「日本一」「最安」「No.1」など根拠を示せない表現や、効能をうたう表現は自動チェックで掲載できません（景品表示法・医薬品医療機器等法）。
         </p>
-        <button disabled={quota?.remaining === 0 || sending || imageBusy} className="btn-primary w-full">
+        <button disabled={quota?.remaining === 0 || sending || imageBusy} className="btn-accent w-full">
           {quota?.remaining === 0 ? "今月の出稿回数を使い切りました" : sending ? "出稿しています…" : "出稿する"}
         </button>
       </form>

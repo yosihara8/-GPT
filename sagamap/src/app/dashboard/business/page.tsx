@@ -91,6 +91,31 @@ function BusinessDashboard() {
 
   return (
     <main className="mx-auto max-w-4xl space-y-4 p-4">
+      {/* 深緑の帯（有田焼の唐草をうすく敷く）に見出し、その上に数字を重ねる */}
+      <div className="karakusa -mx-4 -mt-4 flex flex-wrap items-end justify-between gap-3 bg-saga-600 px-5 pb-16 pt-6 text-white sm:mx-0 sm:mt-0 sm:rounded-3xl">
+        <div className="min-w-0">
+          <p className="num text-[10px] font-bold tracking-[0.3em] text-sun-400">BUSINESS</p>
+          <h1 className="mt-1 text-2xl font-extrabold">事業主ダッシュボード</h1>
+          <p className="mt-0.5 truncate text-sm text-white/70">{owner?.email}</p>
+        </div>
+        {stores.length > 1 && (
+          <select value={storeId ?? ""} onChange={(e) => setStoreId(Number(e.target.value))} className="input w-auto border-white/20 text-slate-900">
+            {stores.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {/* 基本統計 */}
+      <div className="relative !-mt-14 grid grid-cols-3 gap-2 px-1 sm:gap-3 sm:px-3">
+        <StatTile label="累計閲覧数" value={storeStats?.view_count} />
+        <StatTile label="直近 7 日の閲覧" value={storeStats?.views_7d} />
+        <StatTile label="クーポン利用数" value={storeStats?.coupon_uses} />
+      </div>
+
       <VerifyEmailBanner />
       {params.get("welcome") && (
         <p className="rounded-lg bg-saga-50 px-4 py-3 text-sm text-saga-700">ご登録ありがとうございます！店舗が地図に掲載されました。</p>
@@ -100,22 +125,6 @@ function BusinessDashboard() {
           有料プランへのお申し込みありがとうございます。反映まで数秒かかる場合があります。
         </p>
       )}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold">事業主ダッシュボード</h1>
-          <p className="text-sm text-slate-500">{owner?.email}</p>
-        </div>
-        {stores.length > 1 && (
-          <select value={storeId ?? ""} onChange={(e) => setStoreId(Number(e.target.value))} className="input w-auto">
-            {stores.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
 
       {/* プラン（普段は 1 行に短縮。タップで無料・有料の全文を表示） */}
       <details className="group card p-0">
@@ -163,13 +172,6 @@ function BusinessDashboard() {
           )}
         </div>
       </details>
-
-      {/* 基本統計 */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatTile label="累計閲覧数" value={storeStats?.view_count} />
-        <StatTile label="直近 7 日の閲覧" value={storeStats?.views_7d} />
-        <StatTile label="クーポン利用数" value={storeStats?.coupon_uses} />
-      </div>
 
       {/* 有料機能 */}
       <div className="grid grid-cols-3 gap-3">
@@ -270,21 +272,21 @@ function PlanCard(props: { current: boolean; title: string; price: string; featu
 
 function StatTile({ label, value }: { label: string; value?: number }) {
   return (
-    <div className="card">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">{value?.toLocaleString() ?? "—"}</p>
+    <div className="card px-3 py-3 sm:px-4">
+      <p className="text-[11px] font-bold text-slate-500 sm:text-xs">{label}</p>
+      <p className="num mt-1 text-[28px] font-extrabold leading-none text-slate-900 sm:text-4xl">{value?.toLocaleString() ?? "—"}</p>
     </div>
   );
 }
 
 function FeatureLink({ href, label, locked }: { href: string; label: string; locked: boolean }) {
   return (
-    <Link href={locked ? "/upgrade" : href} className="card flex flex-col items-center gap-1.5 py-3 text-center text-sm font-semibold hover:bg-slate-50">
+    <Link href={locked ? "/upgrade" : href} className="card flex flex-col items-center gap-1.5 px-2 py-3 text-center text-[13px] font-bold hover:bg-slate-50">
       <span>{label}</span>
       {locked ? (
-        <span className="text-[10px] font-normal text-amber-700">有料プラン</span>
+        <span className="text-[10px] font-bold text-sun-500">有料プラン</span>
       ) : (
-        <span className="rounded bg-saga-50 px-1.5 py-px text-[10px] font-semibold text-saga-700 ring-1 ring-saga-100">有料プラン中</span>
+        <span className="rounded bg-sun-400 px-1.5 py-px text-[10px] font-bold text-saga-900">有料プラン中</span>
       )}
     </Link>
   );

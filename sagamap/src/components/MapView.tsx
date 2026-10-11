@@ -52,7 +52,7 @@ export type MapViewProps = {
   className?: string;
 };
 
-const COLORS = { coupon: "#d92d20", shop: "#1f4d3f", spot: "#b54708", me: "#2e90fa" };
+const COLORS = { coupon: "#C43D2B", shop: "#1E3A6E", spot: "#B9832A", me: "#2e90fa" };
 
 function pinIcon(color: string, scale = 1): google.maps.Icon {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40">
@@ -310,7 +310,7 @@ export function MapLegend() {
         お店
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#b54708]" />
+        <span className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#B9832A]" />
         観光名所
       </div>
     </div>

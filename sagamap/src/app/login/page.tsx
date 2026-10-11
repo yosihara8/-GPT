@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useGoogleSignInAvailable } from "@/hooks/useGoogleSignIn";
 import { useRouter, useSearchParams } from "next/navigation";
+import SagaHero from "@/components/SagaHero";
 
 export default function LoginPage() {
   return (
@@ -42,14 +43,15 @@ function LoginForm() {
   }
 
   return (
-    <main className="mx-auto max-w-md p-4">
-      <h1 className="mt-4 text-2xl font-bold">ログイン</h1>
-      <div className="mt-4 grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm">
+    <main className="mx-auto max-w-md sm:p-4">
+      <SagaHero className="sm:rounded-3xl" title="ログイン" />
+      <div className="relative -mt-4 px-4 sm:px-0">
+      <div className="grid grid-cols-2 rounded-xl bg-white p-1 text-sm shadow-pop">
         {(["customer", "business"] as const).map((r) => (
           <button
             key={r}
             onClick={() => setRole(r)}
-            className={`rounded-md py-2 ${role === r ? "bg-white font-semibold shadow" : "text-slate-500"}`}
+            className={`rounded-lg py-2 ${role === r ? "bg-saga-600 font-bold text-white" : "text-slate-500"}`}
           >
             {r === "customer" ? "お客さま" : "事業主"}
           </button>
@@ -85,6 +87,7 @@ function LoginForm() {
           {role === "business" ? "事業主登録" : "会員登録"}
         </Link>
       </p>
+      </div>
     </main>
   );
 }

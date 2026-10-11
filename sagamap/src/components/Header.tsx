@@ -20,7 +20,7 @@ export default function Header() {
   const showDashboardLink = user && (user.role !== "admin" || theme === "admin");
 
   return (
-    <header className={`sticky top-0 z-30 border-b backdrop-blur ${dark ? "border-slate-800 bg-slate-900/95" : "border-slate-200 bg-white/95"}`}>
+    <header className={`sticky top-0 z-30 border-b backdrop-blur ${dark ? "border-slate-800 bg-slate-900/95" : "border-slate-200/80 bg-[#FFFDF9]/95"}`}>
       {user?.impersonated && (
         <div className="flex items-center justify-center gap-3 bg-slate-900 px-4 py-1.5 text-xs font-medium text-white">
           <Eye className="h-3.5 w-3.5" aria-hidden />
@@ -35,11 +35,11 @@ export default function Header() {
       )}
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
         <Link href={home} className="flex min-w-0 items-center gap-2 sm:gap-2.5" aria-label="佐賀観光マップ ホームへ">
-          <Logo className={`h-7 w-7 shrink-0 sm:h-8 sm:w-8 ${dark ? "text-saga-500" : ""}`} />
-          <span className={`whitespace-nowrap text-base font-bold tracking-tight sm:text-[17px] ${dark ? "text-white" : "text-slate-900"}`}>佐賀観光マップ</span>
+          <Logo light={dark} className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
+          <span className={`whitespace-nowrap font-mincho text-[15px] font-bold sm:text-lg sm:tracking-wider ${dark ? "text-white" : "text-slate-900"}`}>佐賀観光マップ</span>
           {area && (
             <span
-              className={`whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${dark ? "bg-saga-500 text-white" : "bg-saga-50 text-saga-700 ring-1 ring-saga-100"}`}
+              className={`whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-bold ${dark ? "bg-saga-500 text-white" : "bg-sun-400 text-saga-900"}`}
             >
               {area}
             </span>

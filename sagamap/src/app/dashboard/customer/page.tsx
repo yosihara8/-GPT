@@ -358,14 +358,14 @@ function CustomerDashboard() {
         <AdList ads={ads} onOpenShop={(id, ad) => openShop(id, ad)} />
       </div>
 
-      <nav className="sticky top-[calc(3.5rem+45dvh)] z-10 mt-1 flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 lg:top-0">
+      <nav className="sticky top-[calc(3.5rem+45dvh)] z-10 mt-1 flex gap-1 overflow-x-auto border-b border-slate-200 bg-[#FFFDF9] px-2 lg:top-0">
         {TABS.map((t) => {
           const Icon = TAB_ICONS[t];
           return (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-sm ${tab === t ? "border-saga-600 font-semibold text-saga-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+              className={`inline-flex shrink-0 items-center gap-1.5 border-b-[3px] px-3 py-3 text-sm ${tab === t ? "border-asa-500 font-bold text-saga-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
             >
               <Icon className="h-4 w-4" aria-hidden />
               {t}
@@ -743,7 +743,7 @@ function ShopDetail({
             <CategoryIcon category={b.category} className="h-3.5 w-3.5" />
             {b.category} {PRICE_LEVEL_LABELS[b.price_level]}
           </p>
-          <h2 className="text-lg font-bold">{b.name}</h2>
+          <h2 className="font-mincho text-xl font-bold">{b.name}</h2>
         </div>
         <button onClick={onClose} aria-label="閉じる" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
           <X className="h-5 w-5" aria-hidden />
@@ -768,7 +768,7 @@ function ShopDetail({
       ))}
       <div className="mt-3 flex gap-2">
         {!routeOn && (
-          <button onClick={onRouteHere} className="btn-primary flex-1">
+          <button onClick={onRouteHere} className="btn-accent flex-1">
             <Navigation className="h-4 w-4" aria-hidden />
             経路を表示
           </button>
