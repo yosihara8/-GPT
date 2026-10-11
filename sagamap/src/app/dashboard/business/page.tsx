@@ -11,6 +11,7 @@ import PasswordChangeForm from "@/components/PasswordChangeForm";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import CouponRow from "@/components/CouponRow";
 import { AdDetail } from "@/components/AdBanner";
+import AdStats from "@/components/AdStats";
 import { api } from "@/lib/fetcher";
 import { CATEGORIES, PRICE_OPTIONS, PRICE_STANDARD } from "@/lib/config";
 
@@ -462,7 +463,18 @@ type MyCoupon = {
   used_count: number;
   has_image?: boolean;
 };
-type MyAd = { id: number; headline: string; body: string; ends_at: string; is_active: boolean; business_name: string; has_image?: boolean };
+type MyAd = {
+  id: number;
+  headline: string;
+  body: string;
+  ends_at: string;
+  is_active: boolean;
+  business_name: string;
+  has_image?: boolean;
+  view_count?: number;
+  click_count?: number;
+  viewer_count?: number;
+};
 
 /** タップで開く項目（画面を変えずに内容を表示） */
 function Expandable({ summary, children }: { summary: React.ReactNode; children: React.ReactNode }) {
@@ -541,12 +553,19 @@ function RunningPromotions() {
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold">{a.headline}</span>
                   <span className="block text-xs text-slate-500">{until(a.ends_at)}</span>
+                  <AdStats ad={a} compact />
                 </span>
               </>
             }
           >
             <p className="mb-2 text-xs text-slate-500">{a.business_name}</p>
-            <AdDetail ad={{ ...a, business_id: 0 }} />
+            <AdStats ad={a} />
+            <div className="mt-2">
+              <AdDetail ad={{ ...a, business_id: 0 }} />
+            </div>
+            <Link href="/dashboard/business/ads" className="mt-2 inline-block text-xs font-medium text-saga-600">
+              広告の内容を修正する
+            </Link>
           </Expandable>
         ))}
       </div>

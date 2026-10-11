@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import MapView, { hasCoupon, isHighlighted, type MapShop, type MapSpot, type RouteSummary } from "@/components/MapView";
-import AdBanner, { AdDetail, type Ad } from "@/components/AdBanner";
+import AdBanner, { AdDetail, AdList, useActiveAds, type Ad } from "@/components/AdBanner";
 import { scrollToElement } from "@/lib/scroll";
 import ShopPhoto from "@/components/ShopPhoto";
 import LocationAccuracy from "@/components/LocationAccuracy";
@@ -49,6 +49,7 @@ export default function HomePage() {
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
   const isCustomer = session?.user.role === "customer";
+  const ads = useActiveAds();
 
   // 地図のピン・広告・一覧をタップしたら、同じページの中でお店の内容（クーポン・経路）を表示する
   const openShop = useCallback((id: number, ad: Ad | null = null) => {
@@ -139,7 +140,7 @@ export default function HomePage() {
     <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
       {/* 地図（スマホは画面上部に固定して、下の内容をスクロールしても見える。パソコンは右側いっぱい） */}
       <div className="sticky top-14 z-20 h-[45dvh] min-h-[300px] lg:relative lg:top-0 lg:order-2 lg:h-full lg:flex-1">
-        <AdBanner onSelect={(id, ad) => openShop(id, ad)} />
+        <AdBanner ads={ads} onSelect={(id, ad) => openShop(id, ad)} />
         <MapView
           shops={visible}
           me={position}
@@ -326,6 +327,7 @@ export default function HomePage() {
             dist={dist}
             onOpen={openShop}
           />
+          <AdList ads={ads} onOpenShop={(id, ad) => openShop(id, ad)} />
 
         </section>
       </div>

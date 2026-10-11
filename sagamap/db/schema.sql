@@ -260,3 +260,14 @@ ALTER TABLE ads ADD COLUMN IF NOT EXISTS image_type TEXT;
 ALTER TABLE coupons ADD COLUMN IF NOT EXISTS image BYTEA;
 ALTER TABLE coupons ADD COLUMN IF NOT EXISTS image_type TEXT;
 ALTER TABLE coupons ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+
+-- 広告の表示・タップの記録（お客さまが広告を見たかの統計）
+CREATE TABLE IF NOT EXISTS ad_events (
+  id           BIGSERIAL PRIMARY KEY,
+  ad_id        INTEGER NOT NULL REFERENCES ads(id) ON DELETE CASCADE,
+  kind         TEXT NOT NULL CHECK (kind IN ('view', 'click')),
+  customer_id  INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ad_events_ad_idx ON ad_events (ad_id, kind);
+ALTER TABLE ads ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
