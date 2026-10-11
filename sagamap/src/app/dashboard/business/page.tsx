@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Lock } from "lucide-react";
+import { Check, ChevronDown, Lock } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapShop } from "@/components/MapView";
@@ -114,31 +114,52 @@ function BusinessDashboard() {
         )}
       </div>
 
-      {/* プラン（無料・有料を並べて、ご利用中のプランを強調） */}
-      <section className="space-y-3">
-        <h2 className="font-bold">現在のプラン</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <PlanCard
-            current={!premium}
-            title="無料プラン"
-            price="0 円"
-            tone="tea"
-            features={["店舗の掲載（1 店舗）", "店舗写真・基本情報の表示", "閲覧数・クーポン利用数の確認", "いつ・どこで集客すべきかの分析"]}
-          />
-          <PlanCard
-            current={premium}
-            title={owner?.complimentary ? "有料プラン（特別招待）" : "有料プラン"}
-            price={owner?.complimentary ? "0 円（特別招待・お支払い不要）" : `月額 ${(premium ? owner!.monthly_price : PRICE_STANDARD).toLocaleString()} 円（税込）`}
-            tone="coral"
-            features={["クーポン発行", "広告出稿（月 2 回まで）", "SNS 連携（Instagram・X）", "紹介割引（月 10 名で翌月 2,980 円）", "複数店舗の登録"]}
-          />
+      {/* プラン（普段は 1 行に短縮。タップで無料・有料の全文を表示） */}
+      <details className="group card p-0">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+          <span className="min-w-0">
+            <span className="block text-xs text-slate-500">現在のプラン</span>
+            <span className="block truncate font-semibold">
+              {premium ? (owner?.complimentary ? "有料プラン（特別招待）" : "有料プラン") : "無料プラン"}
+              <span className="ml-2 text-sm font-normal text-slate-500">
+                {premium
+                  ? owner?.complimentary
+                    ? "お支払い不要"
+                    : `月額 ${owner!.monthly_price.toLocaleString()} 円（税込）`
+                  : "0 円"}
+              </span>
+            </span>
+          </span>
+          <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-saga-600">
+            <span className="group-open:hidden">詳しく見る</span>
+            <span className="hidden group-open:inline">閉じる</span>
+            <ChevronDown className="h-4 w-4 transition group-open:rotate-180" aria-hidden />
+          </span>
+        </summary>
+        <div className="space-y-3 border-t border-slate-100 p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <PlanCard
+              current={!premium}
+              title="無料プラン"
+              price="0 円"
+              tone="tea"
+              features={["店舗の掲載（1 店舗）", "店舗写真・基本情報の表示", "閲覧数・クーポン利用数の確認", "いつ・どこで集客すべきかの分析"]}
+            />
+            <PlanCard
+              current={premium}
+              title={owner?.complimentary ? "有料プラン（特別招待）" : "有料プラン"}
+              price={owner?.complimentary ? "0 円（特別招待・お支払い不要）" : `月額 ${(premium ? owner!.monthly_price : PRICE_STANDARD).toLocaleString()} 円（税込）`}
+              tone="coral"
+              features={["クーポン発行", "広告出稿（月 2 回まで）", "SNS 連携（Instagram・X）", "紹介割引（月 10 名で翌月 2,980 円）", "複数店舗の登録"]}
+            />
+          </div>
+          {!owner?.complimentary && (
+            <Link href="/upgrade" className={premium ? "btn-outline w-full" : "btn-primary w-full"}>
+              {premium ? "プラン・お支払いの管理" : "有料プランにアップグレードする"}
+            </Link>
+          )}
         </div>
-        {!owner?.complimentary && (
-          <Link href="/upgrade" className={premium ? "btn-outline w-full" : "btn-primary w-full"}>
-            {premium ? "プラン・お支払いの管理" : "有料プランにアップグレードする"}
-          </Link>
-        )}
-      </section>
+      </details>
 
       {/* 基本統計 */}
       <div className="grid grid-cols-3 gap-3">
@@ -252,9 +273,13 @@ function StatTile({ label, value }: { label: string; value?: number }) {
 
 function FeatureLink({ href, label, locked }: { href: string; label: string; locked: boolean }) {
   return (
-    <Link href={locked ? "/upgrade" : href} className="card flex flex-col items-center gap-1 py-3 text-center text-sm font-semibold">
+    <Link href={locked ? "/upgrade" : href} className="card flex flex-col items-center gap-1.5 py-3 text-center text-sm font-semibold hover:bg-slate-50">
       <span>{label}</span>
-      {locked && <span className="text-[10px] font-normal text-amber-700">有料プラン</span>}
+      {locked ? (
+        <span className="text-[10px] font-normal text-amber-700">有料プラン</span>
+      ) : (
+        <span className="rounded bg-saga-50 px-1.5 py-px text-[10px] font-semibold text-saga-700 ring-1 ring-saga-100">有料プラン中</span>
+      )}
     </Link>
   );
 }
