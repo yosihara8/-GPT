@@ -127,3 +127,26 @@ body {
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(16, 24, 40, 0.15);
 }
+
+/* 地図上の「クーポン発行中」ラベル */
+.leaflet-tooltip.sm-coupon-label {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #d92d20;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.25);
+}
+.leaflet-tooltip.sm-coupon-label::before {
+  display: none;
+}
+.sm-gmap-coupon-label {
+  transform: translateY(18px);
+  background: #fff;
+  padding: 0 4px;
+  border-radius: 4px;
+}

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import MapView, { isHighlighted, type MapShop, type MapSpot } from "@/components/MapView";
-import AdBanner from "@/components/AdBanner";
+import AdBanner, { AdDetail, type Ad } from "@/components/AdBanner";
+import { scrollToElement } from "@/lib/scroll";
 import ShopPhoto from "@/components/ShopPhoto";
 import LocationAccuracy from "@/components/LocationAccuracy";
 import { useGeolocation } from "@/hooks/useGeolocation";
@@ -14,6 +15,7 @@ import { ChevronRight, LayoutGrid, LocateFixed, Luggage, Store, Ticket } from "l
 import { formatDistance, haversineMeters } from "@/lib/geo";
 
 type Shop = MapShop & { address: string; service_description: string; has_photo?: boolean };
+type Coupon = { id: number; title: string; discount_rate: number; conditions: string; expires_at: string };
 
 /** トップ: 店舗一覧の地図（会員登録なしで閲覧できる集客の入り口） */
 export default function HomePage() {
@@ -23,6 +25,23 @@ export default function HomePage() {
   const [spots, setSpots] = useState<MapSpot[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [category, setCategory] = useState<string | null>(null);
+  const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+
+  // 地図のピン・広告をタップしたら、お店の内容（クーポン含む）まで移動する
+  const openShop = useCallback((id: number, ad: Ad | null = null) => {
+    setSelectedAd(ad);
+    setSelectedId(id);
+    setTimeout(() => scrollToElement("shop-card", "home-panel"), 80);
+  }, []);
+  useEffect(() => {
+    setCoupons([]);
+    if (!selectedId) return;
+    fetch(`/api/businesses/${selectedId}`)
+      .then((r) => r.json())
+      .then((d) => setCoupons(d.coupons ?? []))
+      .catch(() => setCoupons([]));
+  }, [selectedId]);
 
   useEffect(() => {
     fetch("/api/businesses").then((r) => r.json()).then((d) => setShops(d.businesses ?? []));
@@ -51,7 +70,7 @@ export default function HomePage() {
     <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
       {/* 地図（スマホは上、パソコンは右側いっぱい） */}
       <div className="relative h-[58dvh] min-h-[360px] lg:order-2 lg:h-full lg:flex-1">
-        <AdBanner onSelect={setSelectedId} />
+        <AdBanner onSelect={(id, ad) => openShop(id, ad)} />
         <MapView
           shops={visible}
           me={position}
@@ -59,7 +78,7 @@ export default function HomePage() {
           spots={spots}
           searchRadius={COUPON_HIGHLIGHT_RADIUS_M}
           selectedId={selectedId}
-          onSelectShop={setSelectedId}
+          onSelectShop={(id) => openShop(id)}
           className="h-full"
         />
         <button
@@ -72,7 +91,10 @@ export default function HomePage() {
       </div>
 
       {/* 一覧パネル（スマホは地図の下から重なるシート、パソコンは左側） */}
-      <div className="relative z-10 -mt-4 rounded-t-2xl bg-white shadow-[0_-4px_24px_rgba(16,24,40,0.10)] lg:order-1 lg:mt-0 lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:rounded-none lg:border-r lg:border-slate-200 lg:shadow-none">
+      <div
+        id="home-panel"
+        className="relative z-10 -mt-4 rounded-t-2xl bg-white shadow-[0_-4px_24px_rgba(16,24,40,0.10)] lg:order-1 lg:mt-0 lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:rounded-none lg:border-r lg:border-slate-200 lg:shadow-none"
+      >
         <div className="mx-auto mb-1 mt-2.5 h-1 w-9 rounded-full bg-slate-300 lg:hidden" aria-hidden />
         <section className="px-4 pb-3 pt-3 lg:pt-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-saga-600">SAGA × GEOSPATIAL × AI</p>
@@ -104,7 +126,9 @@ export default function HomePage() {
           )}
 
           {selected ? (
-            <div className="overflow-hidden rounded-2xl border border-slate-200">
+            <div id="shop-card" className="scroll-mt-16 space-y-3">
+            {selectedAd?.business_id === selected.id && <AdDetail ad={selectedAd} />}
+            <div className="overflow-hidden rounded-2xl border-2 border-saga-500">
               <ShopPhoto shop={selected} className="h-40 w-full" />
               <div className="p-4">
                 <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
@@ -123,13 +147,31 @@ export default function HomePage() {
                     クーポン配信中
                   </p>
                 )}
+                {coupons.map((c) => (
+                  <div key={c.id} className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-coupon/40 bg-coral-50/60 p-3">
+                    <span className="text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
+                    <span className="min-w-0 flex-1 text-sm">
+                      <span className="block font-semibold">{c.title}</span>
+                      <span className="text-xs text-slate-500">
+                        {c.conditions && `${c.conditions}・`}
+                        {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
+                      </span>
+                    </span>
+                  </div>
+                ))}
                 <Link
                   href={isCustomer ? `/dashboard/customer?shop=${selected.id}` : `/shops/${selected.id}`}
                   className="btn-primary mt-3 w-full"
                 >
                   {isCustomer ? "クーポン・道順を見る" : "店舗情報を確認する"}
                 </Link>
+                {!session && coupons.length > 0 && (
+                  <Link href="/register/customer" className="btn-outline mt-2 w-full">
+                    無料の会員登録でクーポンを使う
+                  </Link>
+                )}
               </div>
+            </div>
             </div>
           ) : (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4">

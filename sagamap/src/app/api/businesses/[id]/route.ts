@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 type Ctx = { params: { id: string } };
 
-/** 店舗詳細。顧客がログイン中なら閲覧履歴を記録し、クーポンも返す */
+/** 店舗詳細とクーポン。顧客がログイン中なら閲覧履歴を記録する */
 export async function GET(_req: Request, { params }: Ctx) {
   const id = Number(params.id);
   const biz = await queryOne(
@@ -21,19 +21,22 @@ export async function GET(_req: Request, { params }: Ctx) {
   );
   if (!biz) return NextResponse.json({ error: "店舗が見つかりません" }, { status: 404 });
 
+  const activeCoupons = () =>
+    query(
+      `SELECT id, title, discount_rate, conditions, expires_at FROM coupons
+        WHERE business_id = $1 AND is_active AND expires_at > now() ORDER BY discount_rate DESC`,
+      [id],
+    );
+
   const user = await getSessionUser();
   if (user?.role !== "customer") {
-    return NextResponse.json({ business: { ...biz, contact: undefined }, coupons: null, loginRequired: true });
+    // 未ログインでもクーポンの内容は見られる（利用には会員登録が必要）
+    return NextResponse.json({ business: { ...biz, contact: undefined }, coupons: await activeCoupons(), loginRequired: true });
   }
 
   await query("UPDATE businesses SET view_count = view_count + 1 WHERE id = $1", [id]);
   await query("INSERT INTO usage_history (customer_id, business_id) VALUES ($1, $2)", [user.id, id]);
-  const coupons = await query(
-    `SELECT id, title, discount_rate, conditions, expires_at FROM coupons
-      WHERE business_id = $1 AND is_active AND expires_at > now() ORDER BY discount_rate DESC`,
-    [id],
-  );
-  return NextResponse.json({ business: biz, coupons });
+  return NextResponse.json({ business: biz, coupons: await activeCoupons() });
 }
 
 const columns: Record<string, string> = {
