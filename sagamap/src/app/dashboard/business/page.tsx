@@ -9,6 +9,8 @@ import HourlyChart from "@/components/HourlyChart";
 import PhotoUploader from "@/components/PhotoUploader";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
+import CouponRow from "@/components/CouponRow";
+import { AdDetail } from "@/components/AdBanner";
 import { api } from "@/lib/fetcher";
 import { CATEGORIES, PRICE_OPTIONS, PRICE_STANDARD } from "@/lib/config";
 
@@ -449,10 +451,33 @@ function Input({ label, className = "", ...props }: { label: string } & React.In
   );
 }
 
-type MyCoupon = { id: number; title: string; discount_rate: number; expires_at: string; is_active: boolean; business_name: string; used_count: number };
+type MyCoupon = {
+  id: number;
+  title: string;
+  discount_rate: number;
+  conditions: string;
+  expires_at: string;
+  is_active: boolean;
+  business_name: string;
+  used_count: number;
+  has_image?: boolean;
+};
 type MyAd = { id: number; headline: string; body: string; ends_at: string; is_active: boolean; business_name: string; has_image?: boolean };
 
-/** 配信中のクーポン・広告の一覧（何を出しているかをひと目で分かるように） */
+/** タップで開く項目（画面を変えずに内容を表示） */
+function Expandable({ summary, children }: { summary: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <details className="group rounded-xl border border-slate-200 bg-white">
+      <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
+        {summary}
+        <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-180" aria-hidden />
+      </summary>
+      <div className="border-t border-slate-100 p-3">{children}</div>
+    </details>
+  );
+}
+
+/** 配信中のクーポン・広告の一覧（タップで内容を表示） */
 function RunningPromotions() {
   const [coupons, setCoupons] = useState<MyCoupon[] | null>(null);
   const [ads, setAds] = useState<MyAd[] | null>(null);
@@ -467,7 +492,10 @@ function RunningPromotions() {
 
   return (
     <section className="card space-y-4">
-      <h2 className="font-bold">いま配信中のクーポン・広告</h2>
+      <div>
+        <h2 className="font-bold">いま配信中のクーポン・広告</h2>
+        <p className="text-xs text-slate-500">タップすると、お客さまに見えている内容を表示します。</p>
+      </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-700">クーポン（{liveCoupons.length} 件）</h3>
@@ -476,24 +504,25 @@ function RunningPromotions() {
           </Link>
         </div>
         {coupons && liveCoupons.length === 0 && <p className="text-sm text-slate-500">配信中のクーポンはありません。</p>}
-        <ul className="space-y-2">
-          {liveCoupons.map((c) => (
-            <li key={c.id} className="flex items-center gap-3 rounded-xl border border-dashed border-coupon/40 bg-coral-50/50 p-3">
-              <span className="shrink-0 text-xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">{c.title}</span>
-                <span className="block text-xs text-slate-500">
-                  {c.business_name}・{until(c.expires_at)}
+        {liveCoupons.map((c) => (
+          <Expandable
+            key={c.id}
+            summary={
+              <>
+                <span className="w-12 shrink-0 text-xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">{c.title}</span>
+                  <span className="block text-xs text-slate-500">
+                    {until(c.expires_at)}・利用 {c.used_count} 回
+                  </span>
                 </span>
-              </span>
-              <span className="shrink-0 text-right text-xs text-slate-500">
-                利用
-                <br />
-                <b className="text-base text-slate-900">{c.used_count}</b> 回
-              </span>
-            </li>
-          ))}
-        </ul>
+              </>
+            }
+          >
+            <p className="text-xs text-slate-500">{c.business_name}</p>
+            <CouponRow coupon={c} />
+          </Expandable>
+        ))}
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -503,24 +532,23 @@ function RunningPromotions() {
           </Link>
         </div>
         {ads && liveAds.length === 0 && <p className="text-sm text-slate-500">配信中の広告はありません。</p>}
-        <ul className="space-y-2">
-          {liveAds.map((a) => (
-            <li key={a.id} className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
-              {a.has_image && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/api/ads/${a.id}/image`} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-              )}
-              <span className="shrink-0 rounded border border-slate-300 px-1.5 py-px text-[10px] font-semibold tracking-wide text-slate-500">PR</span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">{a.headline}</span>
-                <span className="block truncate text-xs text-slate-500">
-                  {a.body ? `${a.body}・` : ""}
-                  {until(a.ends_at)}
+        {liveAds.map((a) => (
+          <Expandable
+            key={a.id}
+            summary={
+              <>
+                <span className="shrink-0 rounded border border-slate-300 px-1.5 py-px text-[10px] font-semibold tracking-wide text-slate-500">PR</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">{a.headline}</span>
+                  <span className="block text-xs text-slate-500">{until(a.ends_at)}</span>
                 </span>
-              </span>
-            </li>
-          ))}
-        </ul>
+              </>
+            }
+          >
+            <p className="mb-2 text-xs text-slate-500">{a.business_name}</p>
+            <AdDetail ad={{ ...a, business_id: 0 }} />
+          </Expandable>
+        ))}
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { blockedMessage, checkAd } from "@/lib/content-check";
+import { decodeJpegBase64 } from "@/lib/upload-image";
 import { query } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { adCreateSchema } from "@/lib/schemas";
@@ -9,8 +10,6 @@ import { ADS_PER_MONTH } from "@/lib/config";
 import { getOwnerPlan, getSessionUser, ownsBusiness, premiumRequired, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
-
-const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
 
 /** 今月（日本時間の 1 日〜末日）に出稿した回数 */
 async function adsThisMonth(ownerId: number) {
@@ -66,16 +65,12 @@ export async function POST(req: Request) {
   // 景品表示法などの観点で自動チェック（NG は掲載不可、要注意は運営者が後で確認）
   const check = checkAd({ headline: d.headline, body: d.body });
   if (check.blocked.length) return NextResponse.json({ error: blockedMessage(check), reasons: check.blocked }, { status: 400 });
-  // 広告画像（任意）。中身が本当に JPEG か確認する（拡張子や Content-Type は偽装できるため）
+  // 広告画像（任意）
   let image: Buffer | null = null;
   if (d.imageBase64) {
-    image = Buffer.from(d.imageBase64, "base64");
-    if (image.length === 0 || image.length > MAX_IMAGE_BYTES) {
-      return NextResponse.json({ error: "画像は 1.5MB 以下にしてください" }, { status: 400 });
-    }
-    if (!(image[0] === 0xff && image[1] === 0xd8 && image[2] === 0xff)) {
-      return NextResponse.json({ error: "JPEG 形式の画像を送ってください" }, { status: 400 });
-    }
+    const decoded = decodeJpegBase64(d.imageBase64);
+    if (!decoded.ok) return NextResponse.json({ error: decoded.error }, { status: 400 });
+    image = decoded.image;
   }
   const [ad] = await query(
     `INSERT INTO ads (business_id, headline, body, ends_at, review_flags, image, image_type)

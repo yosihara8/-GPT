@@ -8,6 +8,7 @@ import { scrollToElement } from "@/lib/scroll";
 import ShopPhoto from "@/components/ShopPhoto";
 import LocationAccuracy from "@/components/LocationAccuracy";
 import RouteBox from "@/components/RouteBox";
+import CouponRow from "@/components/CouponRow";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CATEGORIES, COUPON_HIGHLIGHT_RADIUS_M, PRICE_LEVEL_LABELS } from "@/lib/config";
 import CategoryIcon from "@/components/CategoryIcon";
@@ -16,7 +17,7 @@ import { formatDistance, haversineMeters } from "@/lib/geo";
 import { api } from "@/lib/fetcher";
 
 type Shop = MapShop & { address: string; service_description: string; has_photo?: boolean };
-type Coupon = { id: number; title: string; discount_rate: number; conditions: string; expires_at: string };
+type Coupon = { id: number; title: string; discount_rate: number; conditions: string; expires_at: string; has_image?: boolean };
 type Detail = {
   business: {
     id: number;
@@ -256,21 +257,17 @@ export default function HomePage() {
                     </p>
                   )}
                   {detail?.coupons.map((c) => (
-                    <div key={c.id} className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-coupon/40 bg-coral-50/60 p-3">
-                      <span className="text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
-                      <span className="min-w-0 flex-1 text-sm">
-                        <span className="block font-semibold">{c.title}</span>
-                        <span className="text-xs text-slate-500">
-                          {c.conditions && `${c.conditions}・`}
-                          {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
-                        </span>
-                      </span>
-                      {isCustomer && (
-                        <button onClick={() => redeemCoupon(c.id)} className="btn-primary shrink-0 px-3 py-1.5">
-                          使う
-                        </button>
-                      )}
-                    </div>
+                    <CouponRow
+                      key={c.id}
+                      coupon={c}
+                      action={
+                        isCustomer && (
+                          <button onClick={() => redeemCoupon(c.id)} className="btn-primary shrink-0 px-3 py-1.5">
+                            使う
+                          </button>
+                        )
+                      }
+                    />
                   ))}
                   {message && <p className="mt-2 rounded-lg bg-saga-50 px-3 py-2 text-sm font-medium text-saga-700">{message}</p>}
 

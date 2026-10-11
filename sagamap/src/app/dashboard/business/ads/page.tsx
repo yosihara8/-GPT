@@ -3,7 +3,8 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { CircleCheck, ImagePlus, X } from "lucide-react";
+import { ChevronDown, CircleCheck, ImagePlus, X } from "lucide-react";
+import { AdDetail } from "@/components/AdBanner";
 import PremiumGate from "@/components/PremiumGate";
 import StoreSelect, { useMyStores } from "@/components/StoreSelect";
 import NotifyCheckbox from "@/components/NotifyCheckbox";
@@ -191,23 +192,32 @@ function Ads() {
       {ads.length > 0 && (
         <section className="space-y-2">
           <h2 className="text-sm font-semibold text-slate-700">出稿した広告</h2>
+          <p className="text-xs text-slate-500">タップすると、お客さまに見えている広告の内容を表示します。</p>
           <ul className="space-y-2">
             {ads.map((a) => {
               const live = a.is_active && new Date(a.ends_at).getTime() > Date.now();
               return (
-                <li key={a.id} className="card flex items-center gap-3">
-                  {a.has_image && <img src={`/api/ads/${a.id}/image`} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold">{a.headline}</span>
-                    <span className="block text-xs text-slate-500">
-                      {a.business_name}・{new Date(a.ends_at).toLocaleDateString("ja-JP")}まで
-                    </span>
-                  </span>
-                  <span
-                    className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${live ? "bg-tea-50 text-tea-700" : "bg-slate-100 text-slate-500"}`}
-                  >
-                    {live ? "配信中" : "終了"}
-                  </span>
+                <li key={a.id}>
+                  <details className="group rounded-2xl border border-slate-200 bg-white">
+                    <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
+                      {a.has_image && <img src={`/api/ads/${a.id}/image`} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold">{a.headline}</span>
+                        <span className="block text-xs text-slate-500">
+                          {a.business_name}・{new Date(a.ends_at).toLocaleDateString("ja-JP")}まで
+                        </span>
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${live ? "bg-tea-50 text-tea-700" : "bg-slate-100 text-slate-500"}`}
+                      >
+                        {live ? "配信中" : "終了"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-180" aria-hidden />
+                    </summary>
+                    <div className="border-t border-slate-100 p-3">
+                      <AdDetail ad={{ ...a, business_id: 0 }} />
+                    </div>
+                  </details>
                 </li>
               );
             })}
