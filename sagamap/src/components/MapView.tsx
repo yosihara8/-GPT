@@ -65,9 +65,10 @@ function pinIcon(color: string, scale = 1): google.maps.Icon {
   };
 }
 
+export const hasCoupon = (shop: MapShop) => Boolean(shop.has_coupon || (shop.best_discount ?? 0) > 0);
+
 export function isHighlighted(shop: MapShop, me: { lat: number; lng: number } | null | undefined, radius: number) {
-  const hasCoupon = shop.has_coupon || (shop.best_discount ?? 0) > 0;
-  return Boolean(me && hasCoupon && haversineMeters(me, shop) <= radius);
+  return Boolean(me && hasCoupon(shop) && haversineMeters(me, shop) <= radius);
 }
 
 function GoogleMapView({
@@ -159,7 +160,10 @@ function GoogleMapView({
       const marker = new google.maps.Marker({
         map,
         position: shop,
-        title: `${shop.name}（${shop.category}）${red ? " クーポンあり" : ""}`,
+        title: `${shop.name}（${shop.category}）${hasCoupon(shop) ? " クーポン発行中" : ""}`,
+        label: hasCoupon(shop)
+          ? { text: "クーポン発行中", color: COLORS.coupon, fontSize: "11px", fontWeight: "700", className: "sm-gmap-coupon-label" }
+          : undefined,
         icon: pinIcon(red ? COLORS.coupon : COLORS.shop, selected ? 1.3 : red ? 1.1 : 0.9),
         zIndex: selected ? 999 : red ? 500 : 100,
         animation: red ? google.maps.Animation.DROP : undefined,

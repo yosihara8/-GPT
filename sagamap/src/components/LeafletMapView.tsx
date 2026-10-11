@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Landmark } from "lucide-react";
 import { categoryIcon } from "./CategoryIcon";
-import { MapLegend, isHighlighted, type MapViewProps } from "./MapView";
+import { MapLegend, hasCoupon, isHighlighted, type MapViewProps } from "./MapView";
 import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER } from "@/lib/config";
 import { formatDistance, type LatLng } from "@/lib/geo";
 import { escapeHtml } from "@/lib/escape";
@@ -123,10 +123,22 @@ export default function LeafletMapView({
         tooltipAnchor: [0, -size / 2],
         html: `<div class="sm-pin" style="width:${size}px;height:${size}px;background:${red ? COLORS.coupon : COLORS.shop}${selected ? ";box-shadow:0 0 0 4px rgba(31,77,63,.25),0 4px 10px rgba(16,24,40,.2)" : ""}">${iconSvg(shop.category, Math.round(size * 0.48))}</div>`,
       });
-      L.marker(shop, { icon, zIndexOffset: selected ? 1000 : red ? 500 : 0, keyboard: true, title: shop.name })
-        .bindTooltip(escapeHtml(`${shop.name}（${shop.category}）${red ? "・クーポンあり" : ""}`))
+      const marker = L.marker(shop, { icon, zIndexOffset: selected ? 1000 : red ? 500 : 0, keyboard: true, title: shop.name })
         .on("click", () => onSelectRef.current?.(shop.id))
         .addTo(g);
+      // クーポンを配信中のお店は、地図上に「クーポン発行中」を常に表示する（タップでお店とクーポンの内容へ）
+      if (hasCoupon(shop)) {
+        marker.bindTooltip("クーポン発行中", {
+          permanent: true,
+          direction: "bottom",
+          offset: [0, size / 2 - 2],
+          className: "sm-coupon-label",
+          interactive: true,
+        });
+        marker.getTooltip()?.on("click", () => onSelectRef.current?.(shop.id));
+      } else {
+        marker.bindTooltip(escapeHtml(`${shop.name}（${shop.category}）`));
+      }
     }
   }, [shops, me, highlightRadius, selectedId]);
 

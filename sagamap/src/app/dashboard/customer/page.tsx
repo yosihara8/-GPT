@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapSpot, type RouteSummary } from "@/components/MapView";
-import AdBanner from "@/components/AdBanner";
+import AdBanner, { AdDetail, type Ad } from "@/components/AdBanner";
+import { scrollToElement } from "@/lib/scroll";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import LocationAccuracy from "@/components/LocationAccuracy";
 import SwipeCards, { type RecCard } from "@/components/SwipeCards";
@@ -90,6 +91,16 @@ function CustomerDashboard() {
   const [price, setPrice] = useState("");
   const [nearby, setNearby] = useState<NearbyShop[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(Number(params.get("shop")) || null);
+  const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
+  // 地図のピン・広告・一覧をタップしたら、そのお店の内容（クーポン含む）まで移動する
+  const openShop = useCallback(
+    (id: number, ad: Ad | null = null) => {
+      setSelectedAd(ad);
+      if (id === selectedId) setTimeout(scrollToDetail, 60);
+      else setSelectedId(id);
+    },
+    [selectedId],
+  );
   const [detail, setDetail] = useState<Detail | null>(null);
   const [recs, setRecs] = useState<RecCard[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -185,11 +196,14 @@ function CustomerDashboard() {
   // 店舗詳細（閲覧履歴として記録され、AI 推薦に反映される）。開いたら詳細の位置までスクロール
   useEffect(() => {
     if (!selectedId) return setDetail(null);
-    api<Detail>(`/api/businesses/${selectedId}`).then((d) => {
-      setDetail(d);
-      requestAnimationFrame(scrollToDetail);
-    });
+    api<Detail>(`/api/businesses/${selectedId}`).then(setDetail);
   }, [selectedId]);
+  // 詳細が表示されたら（画面に描かれた後で）その位置まで移動する
+  useEffect(() => {
+    if (!detail) return;
+    const t = setTimeout(scrollToDetail, 60);
+    return () => clearTimeout(t);
+  }, [detail]);
 
   // 時間帯別の利用者の流れ（実測）
   useEffect(() => {
@@ -223,7 +237,7 @@ function CustomerDashboard() {
   return (
     <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
       <div className="relative h-[58dvh] min-h-[360px] lg:order-2 lg:h-full lg:flex-1">
-        <AdBanner onSelect={setSelectedId} />
+        <AdBanner onSelect={(id, ad) => openShop(id, ad)} />
         <MapView
           shops={nearby}
           me={position}
@@ -239,7 +253,7 @@ function CustomerDashboard() {
             setRouteLoading(false);
           }}
           selectedId={selectedId}
-          onSelectShop={setSelectedId}
+          onSelectShop={(id) => openShop(id)}
           className="h-full"
         />
         <div className="absolute bottom-6 right-3 z-10 flex flex-col items-end gap-2 lg:bottom-3">
@@ -287,7 +301,11 @@ function CustomerDashboard() {
         <ShopDetail
           detail={detail}
           travel={travel[detail.business.id]?.duration}
-          onClose={() => setSelectedId(null)}
+          ad={selectedAd?.business_id === detail.business.id ? selectedAd : null}
+          onClose={() => {
+            setSelectedId(null);
+            setSelectedAd(null);
+          }}
           onRedeemCoupon={redeemCoupon}
           isFavorite={favIds.has(detail.business.id)}
           onToggleFavorite={() => toggleFavorite(detail.business.id)}
@@ -337,7 +355,7 @@ function CustomerDashboard() {
             <ul className="space-y-2">
               {nearby.map((s) => (
                 <li key={s.id}>
-                  <button onClick={() => setSelectedId(s.id)} className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left hover:bg-slate-50">
+                  <button onClick={() => openShop(s.id)} className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left hover:bg-slate-50">
                     <span
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${s.highlight ? "bg-coral-50 text-coupon" : "bg-saga-50 text-saga-600"}`}
                       aria-hidden
@@ -376,7 +394,7 @@ function CustomerDashboard() {
               const m = position ? haversineMeters(position, f) : null;
               return (
                 <div key={f.id} className="card flex items-center gap-3">
-                  <button onClick={() => setSelectedId(f.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                  <button onClick={() => openShop(f.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-saga-50 text-saga-600" aria-hidden>
                       <CategoryIcon category={f.category} className="h-5 w-5" />
                     </span>
@@ -421,7 +439,7 @@ function CustomerDashboard() {
             {coupons.map((c) => (
               <li key={c.id} className="card flex items-center gap-3">
                 <span className="shrink-0 text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
-                <button onClick={() => setSelectedId(c.business_id)} className="min-w-0 flex-1 text-left">
+                <button onClick={() => openShop(c.business_id)} className="min-w-0 flex-1 text-left">
                   <span className="block truncate font-semibold">{c.title}</span>
                   <span className="block truncate text-xs text-slate-500">
                     {c.business_name}
@@ -588,13 +606,7 @@ function CustomerDashboard() {
 }
 
 /** 店舗詳細までスクロール（パソコンでは左の一覧パネルの中だけを動かす） */
-function scrollToDetail() {
-  const el = document.getElementById("shop-detail");
-  const panel = document.getElementById("customer-panel");
-  if (!el) return;
-  if (panel && getComputedStyle(panel).overflowY === "auto") panel.scrollTo({ top: el.offsetTop, behavior: "smooth" });
-  else el.scrollIntoView({ behavior: "smooth", block: "start" });
-}
+const scrollToDetail = () => scrollToElement("shop-detail", "customer-panel");
 
 function Filters(props: {
   radius: number | null;
@@ -635,6 +647,7 @@ function Filters(props: {
 
 function ShopDetail({
   detail,
+  ad,
   travel,
   onClose,
   onRedeemCoupon,
@@ -643,6 +656,7 @@ function ShopDetail({
   onRouteHere,
 }: {
   detail: Detail;
+  ad: Ad | null;
   travel?: string;
   onClose: () => void;
   onRedeemCoupon: (id: number) => void;
@@ -654,6 +668,11 @@ function ShopDetail({
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}&travelmode=walking`;
   return (
     <div id="shop-detail" className="scroll-mt-16 border-b border-slate-100 bg-white p-4">
+      {ad && (
+        <div className="mb-3">
+          <AdDetail ad={ad} />
+        </div>
+      )}
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
@@ -672,6 +691,21 @@ function ShopDetail({
         {travel && `・${travel}`}
         {b.contact && `・${b.contact}`}
       </p>
+      {detail.coupons.map((c) => (
+        <div key={c.id} className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-coupon/40 bg-coral-50/60 p-3">
+          <span className="text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
+          <span className="min-w-0 flex-1 text-sm">
+            <span className="block font-semibold">{c.title}</span>
+            <span className="text-xs text-slate-500">
+              {c.conditions && `${c.conditions}・`}
+              {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
+            </span>
+          </span>
+          <button onClick={() => onRedeemCoupon(c.id)} className="btn-primary px-3 py-1.5">
+            使う
+          </button>
+        </div>
+      ))}
       <div className="mt-3 flex gap-2">
         <button onClick={onRouteHere} className="btn-primary flex-1">
           <Navigation className="h-4 w-4" aria-hidden />
@@ -697,21 +731,6 @@ function ShopDetail({
           </a>
         )}
       </div>
-      {detail.coupons.map((c) => (
-        <div key={c.id} className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-coupon/40 bg-coral-50/60 p-3">
-          <span className="text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
-          <span className="min-w-0 flex-1 text-sm">
-            <span className="block font-semibold">{c.title}</span>
-            <span className="text-xs text-slate-500">
-              {c.conditions && `${c.conditions}・`}
-              {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
-            </span>
-          </span>
-          <button onClick={() => onRedeemCoupon(c.id)} className="btn-primary px-3 py-1.5">
-            使う
-          </button>
-        </div>
-      ))}
     </div>
   );
 }
