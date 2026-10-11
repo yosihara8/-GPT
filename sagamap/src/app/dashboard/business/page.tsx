@@ -197,7 +197,7 @@ function BusinessDashboard() {
               {insight.advice}
             </p>
             <p className="text-xs text-slate-500">
-              ※ SagaMap の利用者が地図を開いた場所・時刻（匿名）と、お店のページの閲覧数を集計した実測値です。
+              ※ 佐賀観光マップの利用者が地図を開いた場所・時刻（匿名）と、お店のページの閲覧数を集計した実測値です。
             </p>
           </>
         )}

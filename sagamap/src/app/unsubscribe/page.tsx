@@ -24,7 +24,7 @@ export default function UnsubscribePage({ searchParams }: { searchParams: { toke
       <main className="mx-auto max-w-md p-4 text-center">
         <h1 className="mt-8 text-xl font-bold">{ok ? "配信を停止しました" : "リンクが無効です"}</h1>
         <p className="mt-2 text-sm text-slate-600">
-          {ok ? "SagaMap からの週 1 回のお知らせメールを停止しました。" : "URL をご確認のうえ、もう一度お試しください。"}
+          {ok ? "佐賀観光マップからの週 1 回のお知らせメールを停止しました。" : "URL をご確認のうえ、もう一度お試しください。"}
         </p>
         <Link href="/" className="btn-primary mt-6">
           地図に戻る

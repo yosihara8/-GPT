@@ -110,7 +110,7 @@ async function runDigest() {
       title,
       [...relevant, ...others].map((i) => `${i.kind === "coupon" ? "🎟️" : "📣"} ${i.business_name}：${i.title}`).join("\n"),
     ]);
-    messages.push({ to: c.email, subject: `【SagaMap】${title}`, html: customerMail(c, relevant, others) });
+    messages.push({ to: c.email, subject: `【佐賀観光マップ】${title}`, html: customerMail(c, relevant, others) });
   }
 
   if (notificationRows.length) {
@@ -125,9 +125,9 @@ async function runDigest() {
   for (const r of reachByOwner.values()) {
     messages.push({
       to: r.email,
-      subject: `【SagaMap】今週のお知らせが ${r.people} 人のお客さまに届きました`,
+      subject: `【佐賀観光マップ】今週のお知らせが ${r.people} 人のお客さまに届きました`,
       html: `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
-        <p style="font-size:20px;font-weight:bold">🎈 SagaMap</p>
+        <p style="font-size:20px;font-weight:bold">佐賀観光マップ</p>
         <p>${escapeHtml(r.name)} 様</p>
         <p>今週の新着まとめメールで、次のお知らせを <b>${r.people} 人</b>のお客さまにお届けしました。</p>
         <ul>${[...r.titles].map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
@@ -145,7 +145,7 @@ function customerMail(c: Customer, relevant: Item[], others: Item[]) {
       ${i.kind === "coupon" ? "🎟️" : "📣"} <b>${escapeHtml(i.business_name)}</b>：${escapeHtml(i.title)}</a>
       ${i.detail ? `<br><span style="color:#666;font-size:13px">${escapeHtml(i.detail)}</span>` : ""}</li>`;
   return `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
-    <p style="font-size:20px;font-weight:bold">🎈 SagaMap 今週の新着</p>
+    <p style="font-size:20px;font-weight:bold">佐賀観光マップ 今週の新着</p>
     <p>${escapeHtml(c.name)} さん、今週も佐賀のお店から新しいお知らせが届いています。</p>
     ${relevant.length ? `<h3>✨ あなたへのおすすめ</h3><ul style="padding-left:18px">${relevant.map(li).join("")}</ul>` : ""}
     ${others.length ? `<h3>📍 そのほかの新着</h3><ul style="padding-left:18px">${others.map(li).join("")}</ul>` : ""}

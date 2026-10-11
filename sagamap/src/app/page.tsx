@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import MapView, { hasCoupon, isHighlighted, type MapShop, type MapSpot, type RouteSummary } from "@/components/MapView";
@@ -12,7 +11,7 @@ import RouteBox from "@/components/RouteBox";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CATEGORIES, COUPON_HIGHLIGHT_RADIUS_M, PRICE_LEVEL_LABELS } from "@/lib/config";
 import CategoryIcon from "@/components/CategoryIcon";
-import { ChevronRight, ExternalLink, LayoutGrid, LocateFixed, Luggage, MapPin, Navigation, Sparkles, Store, Ticket, X } from "lucide-react";
+import { ChevronRight, ExternalLink, LayoutGrid, LocateFixed, MapPin, Navigation, Sparkles, Ticket, X } from "lucide-react";
 import { formatDistance, haversineMeters } from "@/lib/geo";
 import { api } from "@/lib/fetcher";
 
@@ -174,8 +173,7 @@ export default function HomePage() {
         <section className="px-4 pb-3 pt-3 lg:pt-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-saga-600">SAGA × GEOSPATIAL × AI</p>
           <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 lg:text-2xl">
-            佐賀おでかけマップ
-            <span className="ml-2 align-middle text-sm font-medium text-slate-400">SagaMap</span>
+            佐賀観光マップ
           </h1>
           <p className="mt-1 text-sm text-slate-600">地元のお店と、まだ知らない佐賀へ。近くのクーポンを地図で見つけよう！</p>
           <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
@@ -204,7 +202,7 @@ export default function HomePage() {
             <div id="shop-card" className="space-y-3 [scroll-margin-top:calc(3.5rem+45dvh+8px)] lg:[scroll-margin-top:0]">
               {selectedAd?.business_id === selected.id && <AdDetail ad={selectedAd} />}
               <div className="overflow-hidden rounded-2xl border-2 border-saga-500">
-                {selected.has_photo && <ShopPhoto shop={selected} className="h-36 w-full" />}
+                {selected.has_photo && <ShopPhoto shop={selected} className="h-44 w-full" />}
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -301,11 +299,6 @@ export default function HomePage() {
                       経路を表示
                     </button>
                   )}
-                  {!session && (detail?.coupons.length ?? 0) > 0 && (
-                    <Link href="/register/customer" className="btn-outline mt-2 w-full">
-                      無料の会員登録でクーポンを使う
-                    </Link>
-                  )}
                 </div>
               </div>
             </div>
@@ -337,36 +330,6 @@ export default function HomePage() {
             onOpen={openShop}
           />
 
-          {!session && (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <Link href="/register/customer" className="group flex items-start gap-3 rounded-2xl border border-slate-200 p-4 hover:border-saga-300 hover:bg-saga-50/40">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-saga-50 text-saga-600" aria-hidden>
-                  <Luggage className="h-5 w-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-slate-900">観光で来た方</span>
-                  <span className="mt-0.5 block text-sm text-slate-600">クーポン検索・AI おすすめ・徒歩ルート案内が、無料の会員登録で使えます。</span>
-                  <span className="mt-2 inline-flex items-center gap-0.5 text-sm font-semibold text-saga-600">
-                    無料で会員登録
-                    <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
-                  </span>
-                </span>
-              </Link>
-              <Link href="/register/business" className="group flex items-start gap-3 rounded-2xl border border-slate-200 p-4 hover:border-saga-300 hover:bg-saga-50/40">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600" aria-hidden>
-                  <Store className="h-5 w-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-slate-900">お店を営む方</span>
-                  <span className="mt-0.5 block text-sm text-slate-600">無料で 1 店舗を地図に掲載。有料プランでクーポン発行・広告出稿もできます。</span>
-                  <span className="mt-2 inline-flex items-center gap-0.5 text-sm font-semibold text-saga-600">
-                    店舗を無料で掲載
-                    <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
-                  </span>
-                </span>
-              </Link>
-            </div>
-          )}
         </section>
       </div>
     </main>
@@ -402,7 +365,7 @@ function ShopList({
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${hasCoupon(s) ? "bg-coral-50 text-coupon" : "bg-saga-50 text-saga-600"}`}
                 aria-hidden
               >
-                <CategoryIcon category={s.category} className="h-5 w-5" />
+                {s.has_photo ? <ShopPhoto shop={s} className="h-10 w-10 rounded-lg" /> : <CategoryIcon category={s.category} className="h-5 w-5" />}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold">{s.name}</span>

@@ -107,20 +107,7 @@ export default async function ShopPage({ params }: { params: { id: string } }) {
               {shop.has_coupon ? <Ticket className="h-4 w-4" aria-hidden /> : <Navigation className="h-4 w-4" aria-hidden />}
               {shop.has_coupon ? "クーポン・道順を見る" : "道順を見る"}
             </Link>
-          ) : (
-            <div className={`rounded-xl p-4 ${shop.has_coupon ? "bg-coral-50" : "bg-saga-50"}`}>
-              <p className={`flex items-center gap-1.5 font-bold ${shop.has_coupon ? "text-coupon" : "text-saga-700"}`}>
-                {shop.has_coupon && <Ticket className="h-4 w-4" aria-hidden />}
-                {shop.has_coupon ? "このお店はクーポンを配信中です" : "会員登録でもっと便利に"}
-              </p>
-              <p className="mt-1 text-sm text-slate-600">
-                無料の会員登録で、クーポンの利用・お気に入り・道順の案内が使えます。
-              </p>
-              <Link href={`/register/customer`} className="btn-primary mt-3 w-full">
-                無料で会員登録
-              </Link>
-            </div>
-          )}
+          ) : null}
         </div>
       </article>
     </main>

@@ -61,8 +61,8 @@ export async function GET() {
         collecting,
         peakHours,
         advice: collecting
-          ? `データを集めています（直近 ${FLOW_DAYS} 日で ${total} 件 / 目安 ${MIN_SAMPLES} 件）。SagaMap の利用者が増えると、時間帯ごとの傾向が表示されます。`
-          : `お店の周辺では ${peakHours.map((h) => `${h}時`).join("・")} 頃に SagaMap の利用者が多くなっています。その 1 時間前にクーポンや広告を出すと効果的です。`,
+          ? `データを集めています（直近 ${FLOW_DAYS} 日で ${total} 件 / 目安 ${MIN_SAMPLES} 件）。佐賀観光マップの利用者が増えると、時間帯ごとの傾向が表示されます。`
+          : `お店の周辺では ${peakHours.map((h) => `${h}時`).join("・")} 頃に 佐賀観光マップの利用者が多くなっています。その 1 時間前にクーポンや広告を出すと効果的です。`,
       };
     }),
   );

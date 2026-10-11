@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
   const rows = await query<{ distance_m: number; best_discount: number | null }>(
     `WITH me AS (SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography AS geog)
      SELECT b.id, b.name, b.address, b.lat, b.lng, b.category, b.price_level, b.crowd_level,
+            b.photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM b.photo_updated_at)::bigint AS photo_version,
             ST_Distance(b.location, me.geog) AS distance_m,
             (SELECT max(discount_rate) FROM coupons c
               WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount

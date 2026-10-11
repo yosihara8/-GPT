@@ -21,7 +21,7 @@ async function adminEmails() {
 
 const wrap = (title: string, body: string) =>
   `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
-    <p style="font-size:20px;font-weight:bold">🎈 SagaMap ${title}</p>${body}${mailFooter()}</div>`;
+    <p style="font-size:20px;font-weight:bold">佐賀観光マップ ${title}</p>${body}${mailFooter()}</div>`;
 
 /** 月 1 回：データベースのバックアップをメールで送る */
 async function monthlyBackup() {
@@ -30,7 +30,7 @@ async function monthlyBackup() {
   for (const to of await adminEmails()) {
     await sendMail(
       to,
-      `【SagaMap】月次バックアップ（${jstDate()}）`,
+      `【佐賀観光マップ】月次バックアップ（${jstDate()}）`,
       wrap(
         "月次バックアップ",
         `<p>データベースのバックアップを添付しました（${filename}）。</p>
@@ -51,7 +51,7 @@ async function monthlyLedger() {
   for (const to of await adminEmails()) {
     await sendMail(
       to,
-      `【SagaMap】${ledger.label} の帳簿`,
+      `【佐賀観光マップ】${ledger.label} の帳簿`,
       wrap(
         `${ledger.label} の帳簿`,
         `<p>${ledger.label} の帳簿（Excel）を添付しました。</p>

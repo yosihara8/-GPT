@@ -53,7 +53,7 @@ export const OPERATOR_ADDRESS = process.env.OPERATOR_ADDRESS?.trim() || null;
 
 /** 運営者情報（利用規約・特定商取引法に基づく表記で使用） */
 export const OPERATOR = {
-  serviceName: "SagaMap（サガマップ）",
+  serviceName: "佐賀観光マップ",
   name: "JapanAI研修",
   representative: DISCLOSE_ON_REQUEST,
   address: OPERATOR_ADDRESS ?? DISCLOSE_ON_REQUEST,

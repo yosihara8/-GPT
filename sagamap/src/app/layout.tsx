@@ -9,7 +9,7 @@ import { APP_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: { default: "SagaMap｜佐賀おでかけ AI マップ", template: "%s｜SagaMap" },
+  title: { default: "佐賀観光マップ", template: "%s｜佐賀観光マップ" },
   description: "佐賀の個人事業主とお客さんを結ぶ、地理空間 AI 観光マップ。近くのクーポン店舗を地図で見つけよう。",
 };
 
