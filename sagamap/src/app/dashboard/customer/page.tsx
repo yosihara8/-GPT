@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapSpot, type RouteSummary } from "@/components/MapView";
 import AdBanner, { AdDetail, type Ad } from "@/components/AdBanner";
 import RouteBox from "@/components/RouteBox";
+import CouponRow from "@/components/CouponRow";
 import ShopPhoto from "@/components/ShopPhoto";
 import { scrollToElement } from "@/lib/scroll";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
@@ -59,6 +60,7 @@ type Coupon = {
   business_name: string;
   category: string;
   distance_m: number | null;
+  has_image?: boolean;
 };
 type Detail = {
   business: NearbyShop & { service_description: string; contact: string; instagram_url: string | null; twitter_url: string | null };
@@ -476,6 +478,10 @@ function CustomerDashboard() {
             {coupons.length === 0 && <p className="text-sm text-slate-500">条件に合うクーポンはありません。</p>}
             {coupons.map((c) => (
               <li key={c.id} className="card flex items-center gap-3">
+                {c.has_image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/api/coupons/${c.id}/image`} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" loading="lazy" />
+                )}
                 <span className="shrink-0 text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
                 <button onClick={() => openShop(c.business_id)} className="min-w-0 flex-1 text-left">
                   <span className="block truncate font-semibold">{c.title}</span>
@@ -745,19 +751,15 @@ function ShopDetail({
         {b.contact && `・${b.contact}`}
       </p>
       {detail.coupons.map((c) => (
-        <div key={c.id} className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-coupon/40 bg-coral-50/60 p-3">
-          <span className="text-2xl font-bold tabular-nums text-coupon">{c.discount_rate}%</span>
-          <span className="min-w-0 flex-1 text-sm">
-            <span className="block font-semibold">{c.title}</span>
-            <span className="text-xs text-slate-500">
-              {c.conditions && `${c.conditions}・`}
-              {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
-            </span>
-          </span>
-          <button onClick={() => onRedeemCoupon(c.id)} className="btn-primary px-3 py-1.5">
-            使う
-          </button>
-        </div>
+        <CouponRow
+          key={c.id}
+          coupon={c}
+          action={
+            <button onClick={() => onRedeemCoupon(c.id)} className="btn-primary shrink-0 px-3 py-1.5">
+              使う
+            </button>
+          }
+        />
       ))}
       <div className="mt-3 flex gap-2">
         {!routeOn && (

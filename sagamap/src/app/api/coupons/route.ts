@@ -5,6 +5,7 @@ import { couponCreateSchema } from "@/lib/schemas";
 import { parseLatLng } from "@/lib/geo";
 import { announceToCustomers } from "@/lib/announce";
 import { blockedMessage, checkCoupon } from "@/lib/content-check";
+import { decodeJpegBase64 } from "@/lib/upload-image";
 import { getOwnerPlan, ownsBusiness, premiumRequired, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +22,11 @@ export async function GET(req: NextRequest) {
 
   if (auth.user.role === "business") {
     const rows = await query(
-      `SELECT c.*, b.name AS business_name,
+      `SELECT c.id, c.business_id, c.title, c.discount_rate, c.conditions, c.expires_at, c.is_active, c.created_at,
+              (c.image IS NOT NULL) AS has_image, b.name AS business_name,
               (SELECT count(*) FROM usage_history h WHERE h.coupon_id = c.id AND h.coupon_used)::int AS used_count
          FROM coupons c JOIN businesses b ON b.id = c.business_id
-        WHERE b.owner_id = $1 ORDER BY c.created_at DESC`,
+        WHERE b.owner_id = $1 AND c.deleted_at IS NULL ORDER BY c.created_at DESC`,
       [auth.user.id],
     );
     return NextResponse.json({ coupons: rows });
@@ -53,7 +55,7 @@ export async function GET(req: NextRequest) {
   }
 
   const rows = await query(
-    `SELECT c.id, c.title, c.discount_rate, c.conditions, c.expires_at,
+    `SELECT c.id, c.title, c.discount_rate, c.conditions, c.expires_at, (c.image IS NOT NULL) AS has_image,
             b.id AS business_id, b.name AS business_name, b.category, b.price_level, b.lat, b.lng,
             ${distanceSql} AS distance_m
        FROM coupons c JOIN businesses b ON b.id = c.business_id
@@ -81,10 +83,18 @@ export async function POST(req: Request) {
   // 景品表示法などの観点で自動チェック（NG は掲載不可、要注意は運営者が後で確認）
   const check = checkCoupon({ title: d.title, conditions: d.conditions, discount_rate: d.discountRate });
   if (check.blocked.length) return NextResponse.json({ error: blockedMessage(check), reasons: check.blocked }, { status: 400 });
+  // クーポン画像（任意）
+  let image: Buffer | null = null;
+  if (d.imageBase64) {
+    const decoded = decodeJpegBase64(d.imageBase64);
+    if (!decoded.ok) return NextResponse.json({ error: decoded.error }, { status: 400 });
+    image = decoded.image;
+  }
   const [row] = await query(
-    `INSERT INTO coupons (business_id, title, discount_rate, conditions, expires_at, review_flags)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [d.businessId, d.title, d.discountRate, d.conditions, d.expiresAt, check.warnings],
+    `INSERT INTO coupons (business_id, title, discount_rate, conditions, expires_at, review_flags, image, image_type)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING id, business_id, title, discount_rate, conditions, expires_at, is_active, created_at, (image IS NOT NULL) AS has_image`,
+    [d.businessId, d.title, d.discountRate, d.conditions, d.expiresAt, check.warnings, image, image ? "image/jpeg" : null],
   );
   const announced = d.notify
     ? await announceToCustomers({

@@ -255,3 +255,8 @@ END $$;
 -- 広告の画像（任意。ブラウザで縮小した JPEG）
 ALTER TABLE ads ADD COLUMN IF NOT EXISTS image BYTEA;
 ALTER TABLE ads ADD COLUMN IF NOT EXISTS image_type TEXT;
+
+-- クーポンの画像（任意）と削除（利用履歴を残すため、行は消さずに deleted_at を入れる）
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS image BYTEA;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS image_type TEXT;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;

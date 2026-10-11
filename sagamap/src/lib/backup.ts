@@ -11,7 +11,7 @@ const TABLES: Record<string, string> = {
   businesses:
     "SELECT id, owner_id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level, is_premium, instagram_url, twitter_url, view_count, created_at FROM businesses ORDER BY id",
   customers: "SELECT id, name, email, interests, notify_enabled, email_verified_at, created_at FROM customers ORDER BY id",
-  coupons: "SELECT * FROM coupons ORDER BY id",
+  coupons: "SELECT id, business_id, title, discount_rate, conditions, expires_at, is_active, created_at, review_flags, reviewed_at, deleted_at, (image IS NOT NULL) AS has_image FROM coupons ORDER BY id",
   referrals: "SELECT * FROM referrals ORDER BY id",
   referral_monthly_results: "SELECT * FROM referral_monthly_results",
   usage_history: "SELECT * FROM usage_history ORDER BY id",

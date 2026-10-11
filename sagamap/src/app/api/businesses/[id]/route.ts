@@ -23,7 +23,7 @@ export async function GET(_req: Request, { params }: Ctx) {
 
   const activeCoupons = () =>
     query(
-      `SELECT id, title, discount_rate, conditions, expires_at FROM coupons
+      `SELECT id, title, discount_rate, conditions, expires_at, (image IS NOT NULL) AS has_image FROM coupons
         WHERE business_id = $1 AND is_active AND expires_at > now() ORDER BY discount_rate DESC`,
       [id],
     );

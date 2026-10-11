@@ -54,6 +54,8 @@ export const couponCreateSchema = z.object({
   conditions: z.string().trim().max(300).default(""),
   expiresAt: z.coerce.date().refine((d) => d.getTime() > Date.now(), "有効期限は未来の日時にしてください"),
   notify: z.boolean().default(true),
+  /** クーポン画像（任意）。JPEG を base64 にしたもの（最大 1.5MB） */
+  imageBase64: z.string().max(2_100_000, "画像は 1.5MB 以下にしてください").optional(),
 });
 
 export const adCreateSchema = z.object({

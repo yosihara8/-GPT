@@ -19,7 +19,7 @@ type Data = {
 };
 
 /**
- * QR コードを画像（PNG）にして保存する。下に店名と「紹介用リンク」の文字を入れる。
+ * QR コードを画像（PNG）にして保存する。下に「無料会員登録」と店名を入れる。
  * スマホでは共有メニュー（「画像を保存」で写真に保存できる）、パソコンではダウンロード。
  */
 async function saveQrImage(storeId: number, storeName: string) {
@@ -38,7 +38,7 @@ async function saveQrImage(storeId: number, storeName: string) {
   ctx.fillStyle = "#101828";
   ctx.textAlign = "center";
   ctx.font = 'bold 44px "Noto Sans JP", sans-serif';
-  ctx.fillText("紹介用リンク", canvas.width / 2, size + pad + 70);
+  ctx.fillText("無料会員登録", canvas.width / 2, size + pad + 70);
   ctx.fillStyle = "#475467";
   ctx.font = '28px "Noto Sans JP", sans-serif';
   ctx.fillText(`${storeName}（佐賀観光マップ）`, canvas.width / 2, size + pad + 115);
@@ -48,7 +48,7 @@ async function saveQrImage(storeId: number, storeName: string) {
   const file = new File([blob], `sagamap-referral-qr-${storeId}.png`, { type: "image/png" });
   const touch = window.matchMedia("(pointer: coarse)").matches;
   if (touch && navigator.canShare?.({ files: [file] })) {
-    await navigator.share({ files: [file], title: "紹介用リンク" }).catch(() => undefined);
+    await navigator.share({ files: [file], title: "無料会員登録" }).catch(() => undefined);
     return;
   }
   const url = URL.createObjectURL(blob);
@@ -163,7 +163,7 @@ function Referrals() {
           <div className="flex shrink-0 flex-col items-center gap-2">
             <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center">
               <QRCodeCanvas id={`qr-${s.id}`} value={s.url} size={140} marginSize={1} />
-              <p className="mt-1 text-xs font-semibold text-slate-700">紹介用リンク</p>
+              <p className="mt-1 text-xs font-semibold text-slate-700">無料会員登録</p>
             </div>
             <button onClick={() => saveQrImage(s.id, s.name)} className="btn-outline px-3 py-1.5 text-xs">
               <Download className="h-3.5 w-3.5" aria-hidden />
