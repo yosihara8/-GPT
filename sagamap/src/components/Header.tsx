@@ -14,6 +14,9 @@ export default function Header() {
   const area = theme === "admin" ? "管理者" : theme === "business" ? "事業主" : null;
   const dashboard = user?.role === "business" ? "/dashboard/business" : "/dashboard/customer";
   // 管理画面へのリンクは管理画面の中だけに出す（お客さま・事業主の画面には置かない）
+  // ロゴ（ホーム）は今いる画面の種類の中にとどまる
+  const home =
+    theme === "business" && user?.role === "business" ? "/dashboard/business" : theme === "admin" && user?.role === "admin" ? "/admin" : "/";
   const showDashboardLink = user && (user.role !== "admin" || theme === "admin");
 
   return (
@@ -31,7 +34,7 @@ export default function Header() {
         </div>
       )}
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex min-w-0 items-center gap-2.5" aria-label="SagaMap トップへ">
+        <Link href={home} className="flex min-w-0 items-center gap-2.5" aria-label="ホームへ">
           <Logo className={`h-8 w-8 ${dark ? "text-saga-500" : ""}`} />
           <span className="leading-tight">
             <span className={`block text-[17px] font-bold tracking-tight ${dark ? "text-white" : "text-slate-900"}`}>SagaMap</span>

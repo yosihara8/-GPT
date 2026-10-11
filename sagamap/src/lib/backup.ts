@@ -15,7 +15,7 @@ const TABLES: Record<string, string> = {
   referrals: "SELECT * FROM referrals ORDER BY id",
   referral_monthly_results: "SELECT * FROM referral_monthly_results",
   usage_history: "SELECT * FROM usage_history ORDER BY id",
-  ads: "SELECT * FROM ads ORDER BY id",
+  ads: "SELECT id, business_id, headline, body, starts_at, ends_at, is_active, created_at, review_flags, reviewed_at, (image IS NOT NULL) AS has_image FROM ads ORDER BY id",
   notifications: "SELECT * FROM notifications ORDER BY id",
   favorites: "SELECT * FROM favorites",
   invite_codes: "SELECT * FROM invite_codes ORDER BY id",

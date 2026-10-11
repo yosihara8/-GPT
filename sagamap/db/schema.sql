@@ -251,3 +251,7 @@ BEGIN
     CREATE UNIQUE INDEX IF NOT EXISTS admins_only_one ON admins ((true));
   END IF;
 END $$;
+
+-- 広告の画像（任意。ブラウザで縮小した JPEG）
+ALTER TABLE ads ADD COLUMN IF NOT EXISTS image BYTEA;
+ALTER TABLE ads ADD COLUMN IF NOT EXISTS image_type TEXT;

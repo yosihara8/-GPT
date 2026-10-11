@@ -62,4 +62,6 @@ export const adCreateSchema = z.object({
   body: z.string().trim().max(120).default(""),
   days: z.coerce.number().int().min(1).max(90).default(30),
   notify: z.boolean().default(true),
+  /** 広告画像（任意）。JPEG を base64 にしたもの（最大 1.5MB） */
+  imageBase64: z.string().max(2_100_000, "画像は 1.5MB 以下にしてください").optional(),
 });
