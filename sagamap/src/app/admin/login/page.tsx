@@ -48,9 +48,6 @@ export default function AdminLoginPage() {
           {loading ? "ログイン中…" : "ログイン"}
         </button>
       </form>
-      <p className="mt-4 text-center text-xs text-slate-500">
-        運営者が未登録の場合は <Link href="/admin/setup" className="underline">初期設定</Link> から作成してください。
-      </p>
     </main>
   );
 }

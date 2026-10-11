@@ -29,5 +29,5 @@ export default withAuth(
   },
 );
 
-// /admin/login と /admin/setup はログイン前に開くページなので対象外
-export const config = { matcher: ["/dashboard/:path*", "/upgrade", "/admin", "/admin/((?!login|setup).*)"] };
+// /admin/login はログイン前に開くページなので対象外
+export const config = { matcher: ["/dashboard/:path*", "/upgrade", "/admin", "/admin/((?!login).*)"] };

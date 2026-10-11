@@ -258,24 +258,10 @@ function format(key: string, v: Row[string]) {
 
 function Admins() {
   const [admins, setAdmins] = useState<{ id: number; name: string; email: string; created_at: string }[]>([]);
-  const [message, setMessage] = useState<string | null>(null);
   const load = useCallback(() => api<{ admins: typeof admins }>("/api/admin/admins").then((d) => setAdmins(d.admins)), []);
   useEffect(() => {
     load();
   }, [load]);
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    try {
-      await api("/api/admin/admins", { method: "POST", body: JSON.stringify(Object.fromEntries(new FormData(form))) });
-      setMessage("運営者を追加しました");
-      form.reset();
-      load();
-    } catch (err) {
-      setMessage((err as Error).message);
-    }
-  }
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -289,21 +275,17 @@ function Admins() {
           バックアップをダウンロード
         </a>
       </section>
-      <ul className="card divide-y">
-        {admins.map((a) => (
-          <li key={a.id} className="py-2 text-sm">
-            <b>{a.name}</b>　{a.email}
-          </li>
-        ))}
-      </ul>
-      <form onSubmit={onSubmit} className="card space-y-3">
-        <h2 className="font-bold">運営者を追加</h2>
-        <input name="name" required placeholder="名前" className="input" />
-        <input name="email" type="email" required placeholder="メールアドレス" className="input" />
-        <input name="password" type="password" required minLength={12} placeholder="パスワード（12 文字以上）" autoComplete="new-password" className="input" />
-        {message && <p className="text-sm text-saga-700">{message}</p>}
-        <button className="btn-primary w-full">追加する</button>
-      </form>
+      <section className="card space-y-2">
+        <h2 className="font-bold">運営者アカウント</h2>
+        <ul className="divide-y">
+          {admins.map((a) => (
+            <li key={a.id} className="py-2 text-sm">
+              <b>{a.name}</b>　{a.email}
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-slate-500">運営者はこのアカウントだけです。安全のため、画面から運営者を追加することはできません。</p>
+      </section>
     </div>
   );
 }

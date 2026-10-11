@@ -243,3 +243,11 @@ ALTER TABLE coupons ADD COLUMN IF NOT EXISTS review_flags TEXT[] NOT NULL DEFAUL
 ALTER TABLE coupons ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
 ALTER TABLE ads ADD COLUMN IF NOT EXISTS review_flags TEXT[] NOT NULL DEFAULT '{}';
 ALTER TABLE ads ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+
+-- 運営者は 1 人だけ（2 人目は登録できない）。既に複数いる場合は作らない（ビルドを止めないため）
+DO $$
+BEGIN
+  IF (SELECT count(*) FROM admins) <= 1 THEN
+    CREATE UNIQUE INDEX IF NOT EXISTS admins_only_one ON admins ((true));
+  END IF;
+END $$;
