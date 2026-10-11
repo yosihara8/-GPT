@@ -2,19 +2,7 @@
 
 import { useState } from "react";
 import ShopPhoto from "./ShopPhoto";
-
-/** 画像を最大 1200px の JPEG に縮小する */
-async function resizeToJpeg(file: File, max = 1200): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("画像を変換できませんでした"))), "image/jpeg", 0.82),
-  );
-}
+import { resizeToJpeg } from "@/lib/image";
 
 type Shop = { id: number; name: string; category: string; has_photo?: boolean; photo_version?: number | null };
 

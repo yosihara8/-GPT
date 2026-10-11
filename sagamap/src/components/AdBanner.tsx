@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Ad = { id: number; headline: string; body: string; business_id: number; business_name: string };
+type Ad = { id: number; headline: string; body: string; business_id: number; business_name: string; has_image?: boolean };
 
 /** 地図上部の広告バナー（有料プラン）。5 秒ごとに切り替え */
 export default function AdBanner({ onSelect }: { onSelect?: (businessId: number) => void }) {
@@ -29,6 +29,10 @@ export default function AdBanner({ onSelect }: { onSelect?: (businessId: number)
       onClick={() => onSelect?.(ad.business_id)}
       className="absolute left-3 right-3 top-3 z-[500] flex items-center gap-3 rounded-xl border border-slate-200 bg-white/95 px-3 py-2 text-left shadow-pop backdrop-blur"
     >
+      {ad.has_image && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`/api/ads/${ad.id}/image`} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+      )}
       <span className="shrink-0 rounded border border-slate-300 px-1.5 py-px text-[10px] font-semibold tracking-wide text-slate-500">PR</span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold text-slate-900">{ad.headline}</span>

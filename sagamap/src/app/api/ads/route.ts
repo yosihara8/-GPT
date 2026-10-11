@@ -10,6 +10,8 @@ import { getOwnerPlan, getSessionUser, ownsBusiness, premiumRequired, requireApi
 
 export const dynamic = "force-dynamic";
 
+const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
+
 /** 今月（日本時間の 1 日〜末日）に出稿した回数 */
 async function adsThisMonth(ownerId: number) {
   const row = await queryOne<{ n: number }>(
@@ -26,7 +28,9 @@ export async function GET() {
   const user = await getSessionUser();
   if (user?.role === "business") {
     const rows = await query(
-      `SELECT a.*, b.name AS business_name FROM ads a JOIN businesses b ON b.id = a.business_id
+      `SELECT a.id, a.business_id, a.headline, a.body, a.starts_at, a.ends_at, a.is_active, a.created_at,
+              (a.image IS NOT NULL) AS has_image, b.name AS business_name
+         FROM ads a JOIN businesses b ON b.id = a.business_id
         WHERE b.owner_id = $1 ORDER BY a.created_at DESC`,
       [user.id],
     );
@@ -34,7 +38,7 @@ export async function GET() {
     return NextResponse.json({ ads: rows, limit: ADS_PER_MONTH, used, remaining: Math.max(0, ADS_PER_MONTH - used) });
   }
   const rows = await query(
-    `SELECT a.id, a.headline, a.body, b.id AS business_id, b.name AS business_name, b.lat, b.lng
+    `SELECT a.id, a.headline, a.body, (a.image IS NOT NULL) AS has_image, b.id AS business_id, b.name AS business_name, b.lat, b.lng
        FROM ads a JOIN businesses b ON b.id = a.business_id
       WHERE a.is_active AND b.is_premium AND now() BETWEEN a.starts_at AND a.ends_at
       ORDER BY random() LIMIT 5`,
@@ -62,10 +66,22 @@ export async function POST(req: Request) {
   // 景品表示法などの観点で自動チェック（NG は掲載不可、要注意は運営者が後で確認）
   const check = checkAd({ headline: d.headline, body: d.body });
   if (check.blocked.length) return NextResponse.json({ error: blockedMessage(check), reasons: check.blocked }, { status: 400 });
+  // 広告画像（任意）。中身が本当に JPEG か確認する（拡張子や Content-Type は偽装できるため）
+  let image: Buffer | null = null;
+  if (d.imageBase64) {
+    image = Buffer.from(d.imageBase64, "base64");
+    if (image.length === 0 || image.length > MAX_IMAGE_BYTES) {
+      return NextResponse.json({ error: "画像は 1.5MB 以下にしてください" }, { status: 400 });
+    }
+    if (!(image[0] === 0xff && image[1] === 0xd8 && image[2] === 0xff)) {
+      return NextResponse.json({ error: "JPEG 形式の画像を送ってください" }, { status: 400 });
+    }
+  }
   const [ad] = await query(
-    `INSERT INTO ads (business_id, headline, body, ends_at, review_flags)
-     VALUES ($1, $2, $3, now() + make_interval(days => $4), $5) RETURNING *`,
-    [d.businessId, d.headline, d.body, d.days, check.warnings],
+    `INSERT INTO ads (business_id, headline, body, ends_at, review_flags, image, image_type)
+     VALUES ($1, $2, $3, now() + make_interval(days => $4), $5, $6, $7)
+     RETURNING id, business_id, headline, body, starts_at, ends_at, is_active, created_at, (image IS NOT NULL) AS has_image`,
+    [d.businessId, d.headline, d.body, d.days, check.warnings, image, image ? "image/jpeg" : null],
   );
   const announced = d.notify
     ? await announceToCustomers({
