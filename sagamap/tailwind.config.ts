@@ -2,7 +2,8 @@ import type { Config } from "tailwindcss";
 
 /**
  * SagaMap のカラーテーマ（モダンな地図アプリ調。色数を絞り、装飾を抑える）
- *  saga  … ブランドカラー（嬉野茶の深い緑。主要ボタン・選択中・リンク）
+ *  saga  … ブランドカラー（主要ボタン・選択中・リンク）。画面の種類ごとに globals.css の変数で切り替える
+ *          お客さま＝深い緑 / 事業主＝青 / 管理者＝紫
  *  coral … クーポン・注意を引く赤系
  *  sun   … 注意・お知らせの琥珀色
  *  tea   … 成功・安心の緑
@@ -16,13 +17,13 @@ const config: Config = {
       },
       colors: {
         saga: {
-          50: "#eef5f2",
-          100: "#d7e8e0",
-          300: "#8dbca9",
-          500: "#2f6f5c",
-          600: "#1f4d3f",
-          700: "#183d32",
-          900: "#0f2a22",
+          50: "rgb(var(--brand-50) / <alpha-value>)",
+          100: "rgb(var(--brand-100) / <alpha-value>)",
+          300: "rgb(var(--brand-300) / <alpha-value>)",
+          500: "rgb(var(--brand-500) / <alpha-value>)",
+          600: "rgb(var(--brand-600) / <alpha-value>)",
+          700: "rgb(var(--brand-700) / <alpha-value>)",
+          900: "rgb(var(--brand-900) / <alpha-value>)",
         },
         coral: {
           50: "#fef3f2",
@@ -34,7 +35,7 @@ const config: Config = {
         },
         sun: { 100: "#fffaeb", 300: "#fedf89", 400: "#fdb022", 500: "#dc6803" },
         tea: { 50: "#ecfdf3", 100: "#dcfae6", 500: "#17b26a", 600: "#079455", 700: "#067647" },
-        cream: "#f6f7f6",
+        cream: "rgb(var(--page-bg) / <alpha-value>)",
         coupon: "#d92d20",
         shop: "#1f4d3f",
       },
