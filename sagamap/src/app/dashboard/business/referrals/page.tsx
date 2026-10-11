@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
+import { Download } from "lucide-react";
 import PremiumGate from "@/components/PremiumGate";
 import { api } from "@/lib/fetcher";
 
@@ -16,6 +17,47 @@ type Data = {
   stores: { id: number; name: string; count: number; url: string }[];
   customers: { email: string; registered_at: string; business_name: string }[];
 };
+
+/**
+ * QR コードを画像（PNG）にして保存する。下に店名と「紹介用リンク」の文字を入れる。
+ * スマホでは共有メニュー（「画像を保存」で写真に保存できる）、パソコンではダウンロード。
+ */
+async function saveQrImage(storeId: number, storeName: string) {
+  const qr = document.getElementById(`qr-${storeId}`) as HTMLCanvasElement | null;
+  if (!qr) return;
+  const size = 600;
+  const pad = 48;
+  const canvas = document.createElement("canvas");
+  canvas.width = size + pad * 2;
+  canvas.height = size + pad * 2 + 130;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(qr, pad, pad, size, size);
+  ctx.fillStyle = "#101828";
+  ctx.textAlign = "center";
+  ctx.font = 'bold 44px "Noto Sans JP", sans-serif';
+  ctx.fillText("紹介用リンク", canvas.width / 2, size + pad + 70);
+  ctx.fillStyle = "#475467";
+  ctx.font = '28px "Noto Sans JP", sans-serif';
+  ctx.fillText(`${storeName}（SagaMap）`, canvas.width / 2, size + pad + 115);
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) return;
+  const file = new File([blob], `sagamap-referral-qr-${storeId}.png`, { type: "image/png" });
+  const touch = window.matchMedia("(pointer: coarse)").matches;
+  if (touch && navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title: "紹介用リンク" }).catch(() => undefined);
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = file.name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 export default function ReferralsPage() {
   return (
@@ -49,14 +91,17 @@ function Referrals() {
       <section className="card space-y-2">
         <h2 className="text-lg font-bold">紹介プログラムとは</h2>
         <p className="text-sm leading-7 text-slate-700">
-          お店のお客さまに <b>SagaMap を紹介し、会員登録</b>してもらうプログラムです。
-          下の<b>紹介リンク・QR コード</b>からお客さまが会員登録すると「紹介 1 名」になります。
+          お店のお客さまに <span className="font-semibold text-saga-600">SagaMap を紹介し、会員登録</span>してもらうプログラムです。
+          下の<span className="font-semibold text-saga-600">紹介リンク・QR コード</span>からお客さまが会員登録すると「紹介 1 名」になります。
         </p>
         <ol className="space-y-1 text-sm">
           <li>① 店頭 POP・レジ横・SNS に QR コードやリンクを載せる</li>
           <li>② お客さまが読み取って、SagaMap に無料で会員登録</li>
           <li>
-            ③ <b>毎月 1 日〜末日</b>の紹介人数を数え、<b>{data.goal} 名以上</b>で<b>翌月の月額が {data.standardPrice.toLocaleString()} 円 → {data.discountPrice.toLocaleString()} 円（税込）</b>
+            ③ <span className="font-semibold text-saga-600">毎月 1 日〜末日</span>の紹介人数を数え、<span className="font-semibold text-saga-600">{data.goal} 名以上</span>で
+            <span className="font-semibold text-saga-600">
+              翌月の月額が {data.standardPrice.toLocaleString()} 円 → {data.discountPrice.toLocaleString()} 円（税込）
+            </span>
           </li>
         </ol>
         <p className="text-xs text-slate-500">※ 紹介人数は毎月 1 日に 0 名からカウントし直します。割引は達成した月の翌月 1 か月分です。</p>
@@ -115,8 +160,15 @@ function Referrals() {
       {/* 紹介リンク */}
       {data.stores.map((s) => (
         <section key={s.id} className="card flex flex-col items-center gap-4 sm:flex-row">
-          <div className="rounded-2xl border bg-white p-3">
-            <QRCodeSVG value={s.url} size={140} marginSize={1} />
+          <div className="flex shrink-0 flex-col items-center gap-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center">
+              <QRCodeCanvas id={`qr-${s.id}`} value={s.url} size={140} marginSize={1} />
+              <p className="mt-1 text-xs font-semibold text-slate-700">紹介用リンク</p>
+            </div>
+            <button onClick={() => saveQrImage(s.id, s.name)} className="btn-outline px-3 py-1.5 text-xs">
+              <Download className="h-3.5 w-3.5" aria-hidden />
+              QR コードを画像で保存
+            </button>
           </div>
           <div className="w-full min-w-0 flex-1">
             <p className="text-sm text-slate-500">
