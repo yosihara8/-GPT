@@ -1,19 +1,23 @@
 import type { Config } from "tailwindcss";
 
 /**
- * SagaMap のカラーテーマ（モダンな地図アプリ調。色数を絞り、装飾を抑える）
+ * 佐賀観光マップのカラーテーマ（観光の色：藍・朝焼け・柿右衛門・嬉野茶・黄金・白磁・墨）
  *  saga  … ブランドカラー（主要ボタン・選択中・リンク）。画面の種類ごとに globals.css の変数で切り替える
- *          お客さま＝深い緑 / 事業主＝青 / 管理者＝紫
- *  coral … クーポン・注意を引く赤系
- *  sun   … 注意・お知らせの琥珀色
- *  tea   … 成功・安心の緑
+ *          お客さま＝藍 / 事業主＝深緑 / 管理者＝紫
+ *  asa   … 朝焼け。いちばん押してほしいボタン（登録・経路・クーポンを出す）
+ *  coral … 柿右衛門の赤。クーポン・割引
+ *  sun   … 黄金。お知らせ・有料プラン
+ *  tea   … 嬉野茶の緑。成功・安心
+ *  slate … 墨をもとにした、少し温かみのある灰色
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", '"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', "Meiryo", "sans-serif"],
+        sans: ['"Zen Kaku Gothic New"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', "Meiryo", "sans-serif"],
+        mincho: ['"Shippori Mincho B1"', '"Hiragino Mincho ProN"', '"Yu Mincho"', "serif"],
+        num: ["Outfit", '"Zen Kaku Gothic New"', "sans-serif"],
       },
       colors: {
         saga: {
@@ -25,22 +29,36 @@ const config: Config = {
           700: "rgb(var(--brand-700) / <alpha-value>)",
           900: "rgb(var(--brand-900) / <alpha-value>)",
         },
-        coral: {
-          50: "#fef3f2",
-          100: "#fee4e2",
-          400: "#f97066",
-          500: "#e5483d",
-          600: "#d92d20",
-          700: "#b42318",
+        slate: {
+          50: "#F7F3EC",
+          100: "#F0EBE2",
+          200: "#E6DFD3",
+          300: "#D3CBBE",
+          400: "#A8A39A",
+          500: "#7D7A74",
+          600: "#5C5A57",
+          700: "#42424A",
+          800: "#2C2E37",
+          900: "#1B1F2A",
+          950: "#12141C",
         },
-        sun: { 100: "#fffaeb", 300: "#fedf89", 400: "#fdb022", 500: "#dc6803" },
-        tea: { 50: "#ecfdf3", 100: "#dcfae6", 500: "#17b26a", 600: "#079455", 700: "#067647" },
+        asa: { 50: "#FDF0EA", 100: "#FBDCCD", 500: "#EE6A3A", 600: "#D9572A", 700: "#B54520" },
+        coral: {
+          50: "#FCF1EE",
+          100: "#F8DFD9",
+          400: "#DB6A57",
+          500: "#C43D2B",
+          600: "#B23626",
+          700: "#8E2A1E",
+        },
+        sun: { 100: "#FBF3DF", 300: "#F0D290", 400: "#E3B04B", 500: "#B9832A" },
+        tea: { 50: "#F2F5EA", 100: "#E3EBD3", 500: "#5F7F35", 600: "#4E6B2A", 700: "#3E5622" },
         cream: "rgb(var(--page-bg) / <alpha-value>)",
-        coupon: "#d92d20",
-        shop: "#1f4d3f",
+        coupon: "#C43D2B",
+        shop: "#1E3A6E",
       },
       boxShadow: {
-        pop: "0 1px 2px rgba(16,24,40,0.05), 0 4px 12px rgba(16,24,40,0.08)",
+        pop: "0 1px 2px rgba(20,40,77,0.05), 0 6px 18px rgba(20,40,77,0.08)",
       },
       keyframes: {
         float: { "0%,100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-8px)" } },

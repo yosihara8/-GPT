@@ -162,7 +162,7 @@ function Coupons() {
         <p className="text-xs text-slate-500">
           「日本一」「最安」「No.1」など根拠を示せない表現や、効能をうたう表現は自動チェックで掲載できません（景品表示法・医薬品医療機器等法）。
         </p>
-        <button disabled={sending} className="btn-primary w-full">
+        <button disabled={sending} className="btn-accent w-full">
           {sending ? "発行しています…" : "発行する"}
         </button>
       </form>

@@ -16,7 +16,7 @@ import type { RouteResult } from "@/lib/routing";
 const OSM_ATTRIBUTION =
   '道順 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>';
 
-const COLORS = { coupon: "#d92d20", shop: "#1f4d3f", spot: "#b54708", me: "#2e90fa", route: "#1f4d3f" };
+const COLORS = { coupon: "#C43D2B", shop: "#1E3A6E", spot: "#B9832A", me: "#2e90fa", route: "#EE6A3A" };
 
 /** アイコンの SVG 文字列（業種ごとに 1 回だけ作る） */
 const iconSvgCache = new Map<string, string>();

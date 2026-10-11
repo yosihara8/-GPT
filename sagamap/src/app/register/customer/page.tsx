@@ -7,6 +7,7 @@ import { useGoogleSignInAvailable } from "@/hooks/useGoogleSignIn";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CATEGORIES } from "@/lib/config";
 import { api } from "@/lib/fetcher";
+import SagaHero from "@/components/SagaHero";
 
 export default function CustomerRegisterPage() {
   return (
@@ -62,13 +63,21 @@ function CustomerRegisterForm() {
   const toggle = (c: string) => setInterests((xs) => (xs.includes(c) ? xs.filter((x) => x !== c) : [...xs, c]));
 
   return (
-    <main className="mx-auto max-w-lg p-4">
-      <h1 className="mt-4 text-2xl font-bold">会員登録（無料）</h1>
-      <p className="mt-1 text-sm text-slate-600">クーポン検索・AI おすすめ・徒歩ルート案内が使えるようになります。</p>
+    <main className="mx-auto max-w-lg sm:p-4">
+      <SagaHero
+        className="sm:rounded-3xl"
+        title={
+          <>
+            会員登録<span className="text-lg">（無料）</span>
+          </>
+        }
+        lead="クーポン検索・AI おすすめ・徒歩ルート案内が使えるようになります。"
+      />
+      <div className="relative -mt-4 px-4 sm:px-0">
       {referrer && (
-        <p className="mt-3 rounded-lg bg-saga-50 px-3 py-2 text-sm text-saga-700">「{referrer}」からのご紹介です</p>
+        <p className="mb-3 rounded-xl bg-white px-3 py-2 text-sm font-bold text-saga-700 shadow-pop">「{referrer}」からのご紹介です</p>
       )}
-      <form onSubmit={onSubmit} className="card mt-4 space-y-4">
+      <form onSubmit={onSubmit} className="card space-y-4 p-5">
         <div>
           <label className="label" htmlFor="name">名前</label>
           <input id="name" name="name" required className="input" autoComplete="name" />
@@ -104,7 +113,7 @@ function CustomerRegisterForm() {
           <Link href="/privacy" className="underline">プライバシーポリシー</Link>に同意したものとみなします。
         </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button disabled={loading} className="btn-primary w-full">
+        <button disabled={loading} className="btn-accent w-full rounded-full py-3 text-base">
           {loading ? "登録中…" : "無料で登録する"}
         </button>
         {googleAvailable && (
@@ -117,6 +126,7 @@ function CustomerRegisterForm() {
         登録済みの方は <Link className="text-saga-600 underline" href="/login">ログイン</Link>
         {"　"}お店の方は <Link className="text-saga-600 underline" href="/register/business">事業主登録</Link>
       </p>
+      </div>
     </main>
   );
 }

@@ -28,26 +28,33 @@ export default async function CouponPage({ params }: { params: { id: string } })
   const expired = c.ended || c.expires_at.getTime() < Date.now();
 
   return (
-    <main className="mx-auto max-w-md p-4">
-      <div className="card mt-4 overflow-hidden border-dashed border-coupon/40 p-0 text-center">
-        {c.has_image && !c.ended && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/api/coupons/${params.id}/image`} alt="" className="h-44 w-full object-cover" />
-        )}
-        <div className="p-4">
-        <p className="text-sm text-slate-500">{c.business_name}</p>
-        <p className="mt-2 text-5xl font-bold text-coupon">{c.discount_rate}% OFF</p>
-        <p className="mt-2 font-semibold">{c.title}</p>
-        {c.conditions && <p className="mt-1 text-sm text-slate-600">{c.conditions}</p>}
-        <p className="mt-3 text-xs text-slate-500">
-          {c.ended ? "このクーポンは配信が終了しました" : expired ? "このクーポンは期限切れです" : `${c.expires_at.toLocaleDateString("ja-JP")} まで有効`}
-        </p>
-        <p className="mt-1 text-xs text-slate-500">{c.address}</p>
+    <main className="karakusa min-h-[70vh] bg-saga-600 px-4 pb-8 pt-6">
+      <div className="mx-auto max-w-md">
+        <div className="overflow-hidden rounded-3xl bg-[#FAF6EF] text-center shadow-[0_20px_40px_rgba(10,20,40,0.35)]">
+          {c.has_image && !c.ended && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={`/api/coupons/${params.id}/image`} alt="" className="h-44 w-full object-cover" />
+          )}
+          <div className="px-5 pb-6 pt-5">
+            <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">COUPON</p>
+            <p className="mt-1 font-mincho text-lg font-bold text-slate-900">{c.business_name}</p>
+            <p className={`mt-3 font-num font-extrabold leading-none ${expired ? "text-slate-400" : "text-coupon"}`}>
+              <span className="text-7xl tracking-tight">{c.discount_rate}</span>
+              <span className="text-3xl">%OFF</span>
+            </p>
+            <p className="mt-3 font-mincho text-base font-bold">{c.title}</p>
+            {c.conditions && <p className="mt-1 text-sm text-slate-600">{c.conditions}</p>}
+            <div className="my-4 border-t-2 border-dashed border-slate-300" aria-hidden />
+            <p className={`text-sm font-bold ${expired ? "text-slate-500" : "text-saga-600"}`}>
+              {c.ended ? "このクーポンは配信が終了しました" : expired ? "このクーポンは期限切れです" : `${c.expires_at.toLocaleDateString("ja-JP")} まで有効`}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">{c.address}</p>
+          </div>
         </div>
+        <Link href={`/dashboard/customer?shop=${c.business_id}`} className="btn mt-5 w-full bg-white py-3 text-saga-600 hover:bg-slate-50">
+          地図でお店を見る
+        </Link>
       </div>
-      <Link href={`/dashboard/customer?shop=${c.business_id}`} className="btn-primary mt-4 w-full">
-        地図でお店を見る
-      </Link>
     </main>
   );
 }

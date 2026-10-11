@@ -170,11 +170,11 @@ export default function HomePage() {
       {/* 一覧パネル（スマホは地図の下、パソコンは左側） */}
       <div
         id="home-panel"
-        className="relative z-10 bg-white lg:order-1 lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-slate-200"
+        className="relative z-10 bg-[#FFFDF9] lg:order-1 lg:w-[420px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-slate-200"
       >
         <section className="px-4 pb-3 pt-3 lg:pt-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-saga-600">SAGA × GEOSPATIAL × AI</p>
-          <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 lg:text-2xl">
+          <p className="num text-[10px] font-bold uppercase tracking-[0.28em] text-asa-500">SAGA × GEOSPATIAL × AI</p>
+          <h1 className="mt-1 text-2xl font-extrabold text-slate-900 lg:text-[28px]">
             佐賀観光マップ
           </h1>
           <p className="mt-1 text-sm text-slate-600">地元のお店と、まだ知らない佐賀へ。近くのクーポンを地図で見つけよう！</p>
@@ -213,7 +213,7 @@ export default function HomePage() {
                         {selected.category}
                         {b?.price_level ? `　${PRICE_LEVEL_LABELS[b.price_level]}` : ""}
                       </p>
-                      <h2 className="mt-0.5 text-lg font-bold text-slate-900">{selected.name}</h2>
+                      <h2 className="mt-0.5 font-mincho text-xl font-bold text-slate-900">{selected.name}</h2>
                     </div>
                     <button
                       onClick={() => {
@@ -291,7 +291,7 @@ export default function HomePage() {
                         setRouteOn(true);
                         scrollToElement("shop-card", "home-panel");
                       }}
-                      className="btn-primary mt-3 w-full"
+                      className="btn-accent mt-3 w-full"
                     >
                       <Navigation className="h-4 w-4" aria-hidden />
                       経路を表示
