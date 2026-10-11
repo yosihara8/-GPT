@@ -12,8 +12,9 @@ export default function Header() {
   const theme = useTheme();
   const dark = theme === "admin";
   const area = theme === "admin" ? "管理者" : theme === "business" ? "事業主" : null;
-  const dashboard =
-    user?.role === "admin" ? "/admin" : user?.role === "business" ? "/dashboard/business" : "/dashboard/customer";
+  const dashboard = user?.role === "business" ? "/dashboard/business" : "/dashboard/customer";
+  // 管理画面へのリンクは管理画面の中だけに出す（お客さま・事業主の画面には置かない）
+  const showDashboardLink = user && (user.role !== "admin" || theme === "admin");
 
   return (
     <header className={`sticky top-0 z-30 border-b backdrop-blur ${dark ? "border-slate-800 bg-slate-900/95" : "border-slate-200 bg-white/95"}`}>
@@ -47,9 +48,14 @@ export default function Header() {
         <nav className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-sm font-medium sm:gap-1">
           {user ? (
             <>
-              <Link href={dashboard} className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}>
-                {user.role === "admin" ? "管理画面" : "マイページ"}
-              </Link>
+              {showDashboardLink && (
+                <Link
+                  href={user.role === "admin" ? "/admin" : dashboard}
+                  className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}
+                >
+                  {user.role === "admin" ? "管理画面" : "マイページ"}
+                </Link>
+              )}
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
                 className={`rounded-lg px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}

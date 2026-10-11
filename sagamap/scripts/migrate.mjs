@@ -25,7 +25,8 @@ try {
 
   // 運営者（サイトのオーナー）。初期パスワードはログイン後に管理画面で変更する
   const owner = await client.query(
-    `INSERT INTO admins (name, email, password_hash) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING`,
+    `INSERT INTO admins (name, email, password_hash)
+     SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM admins)`,
     ["サイト運営者", INITIAL_ADMIN.email, INITIAL_ADMIN.passwordHash],
   );
   if (owner.rowCount) console.log("[migrate] 運営者アカウントを作成しました");
