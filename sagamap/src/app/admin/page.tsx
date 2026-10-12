@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { api } from "@/lib/fetcher";
+import EmailChangeForm from "@/components/EmailChangeForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -265,6 +266,7 @@ function Admins() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
+      <EmailChangeForm onChanged={() => load()} />
       <PasswordChangeForm minLength={12} />
       <section className="card space-y-2">
         <h2 className="font-bold">データのバックアップ</h2>

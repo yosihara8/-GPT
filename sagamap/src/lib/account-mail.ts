@@ -24,6 +24,21 @@ export async function sendVerificationMail(role: Role, userId: number, email: st
   );
 }
 
+/** メールアドレスが変更されたことを、元のアドレスに知らせる */
+export async function sendEmailChangedNotice(oldEmail: string, newEmail: string) {
+  await sendMail(
+    oldEmail,
+    "【佐賀観光マップ】メールアドレスが変更されました",
+    layout(
+      "メールアドレスが変更されました",
+      `<p>佐賀観光マップのアカウントのメールアドレスが、次のアドレスに変更されました。</p>
+       <p><b>${escapeHtml(newEmail)}</b></p>
+       <p>ご自身で変更した場合は、このメールは破棄してください。<br>
+       心当たりがない場合は、第三者に変更された可能性があります。このメールに返信するか、サイトの「特定商取引法に基づく表記」に記載の問い合わせ先までご連絡ください。</p>`,
+    ),
+  );
+}
+
 export async function createResetUrl(role: Role, userId: number, ttlMinutes: number) {
   const token = await createToken("reset_password", role, userId, ttlMinutes);
   return `${APP_URL}/reset-password?token=${token}`;
