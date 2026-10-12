@@ -8,6 +8,7 @@ import { backupAttachment } from "@/lib/backup";
 import { buildMonthlyLedger } from "@/lib/ledger";
 import { mailEnabled, mailFooter, sendMail } from "@/lib/mail";
 import { logServerError } from "@/lib/server-error";
+import { sendOwnerReports } from "@/lib/owner-report";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -72,7 +73,7 @@ async function monthlyLedger() {
 /**
  * 毎日の自動処理（Vercel Cron が毎日 0:10 日本時間に呼び出す）。
  *  - 毎日：クーポン・広告の掲載チェック
- *  - 毎月 1 回：紹介割引の判定、データベースのバックアップ、前月の帳簿をメール送信
+ *  - 毎月 1 回：紹介割引の判定、データベースのバックアップ、前月の帳簿をメール送信、事業主への月次レポート
  * どれかが失敗しても他は実行し、失敗したものは翌日に再実行する。
  */
 export async function GET(req: Request) {
@@ -92,6 +93,9 @@ export async function GET(req: Request) {
     }),
     // メールが使えない間は実行しない（設定後の最初の実行で送る）
     backup: async () => (mailEnabled() ? runOnce("monthly-backup", month, monthlyBackup) : { skipped: "メール未設定" }),
+    // 毎月 1 日：事業主に先月のレポートメール（お店に来ようとしたお客さまの数・次にやること）
+    ownerReport: async () =>
+      mailEnabled() ? runOnce("monthly-owner-report", month, () => sendOwnerReports((to, subject, html) => sendMail(to, subject, html))) : { skipped: "メール未設定" },
     ledger: async () => (mailEnabled() ? runOnce("monthly-ledger", month, monthlyLedger) : { skipped: "メール未設定" }),
   };
   const results: Record<string, unknown> = {};

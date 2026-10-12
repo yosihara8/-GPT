@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ChevronDown, Lock } from "lucide-react";
+import { Check, ChevronDown, Lock, QrCode } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapShop } from "@/components/MapView";
@@ -60,7 +60,7 @@ type Store = {
   line_url?: string | null;
 };
 type Stats = {
-  stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number; route_30d?: number; call_30d?: number; save_30d?: number; coupon_view_30d?: number }[];
+  stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number; route_30d?: number; call_30d?: number; save_30d?: number; coupon_view_30d?: number; qr_scan_30d?: number }[];
   insights: {
     businessId: number;
     area: string;
@@ -153,7 +153,30 @@ function BusinessDashboard() {
           <MiniStat label="お気に入りに保存" value={storeStats?.save_30d} />
           <MiniStat label="クーポンを見た" value={storeStats?.coupon_view_30d} />
         </div>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <MiniStat label="QR ポスターから来た" value={storeStats?.qr_scan_30d} />
+          <Link href="/dashboard/business/report" className="flex flex-col justify-center rounded-xl bg-saga-600 px-3 py-2 text-white">
+            <span className="text-sm font-bold">月次レポートを見る</span>
+            <span className="text-[11px] text-white/80">先月との比べ方・次にやること</span>
+          </Link>
+        </div>
       </section>
+
+      {/* レジ横 QR ポスター */}
+      {store && (
+        <section className="card flex items-center gap-3">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-asa-50 text-asa-600">
+            <QrCode className="h-6 w-6" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold">レジ横に置く QR ポスター</h2>
+            <p className="text-xs text-slate-500">印刷して置くだけ。お客さまがスマホで読み取ると、無料登録してすぐクーポンを使えます（登録は紹介にも数えます）。</p>
+          </div>
+          <Link href="/dashboard/business/poster" className="btn-accent shrink-0 px-4">
+            作る
+          </Link>
+        </section>
+      )}
 
       <VerifyEmailBanner />
       {params.get("welcome") && (

@@ -28,6 +28,7 @@ export async function GET() {
     call_30d: number;
     save_30d: number;
     coupon_view_30d: number;
+    qr_scan_30d: number;
   }>(
     `SELECT b.id, b.name, b.lat, b.lng, b.view_count,
             (SELECT count(*) FROM usage_history h WHERE h.business_id = b.id AND h.coupon_used)::int AS coupon_uses,
@@ -35,7 +36,8 @@ export async function GET() {
             (SELECT count(*) FROM shop_events e WHERE e.business_id = b.id AND e.kind = 'route' AND e.created_at > now() - interval '30 days')::int AS route_30d,
             (SELECT count(*) FROM shop_events e WHERE e.business_id = b.id AND e.kind = 'call' AND e.created_at > now() - interval '30 days')::int AS call_30d,
             (SELECT count(*) FROM shop_events e WHERE e.business_id = b.id AND e.kind = 'save' AND e.created_at > now() - interval '30 days')::int AS save_30d,
-            (SELECT count(*) FROM shop_events e WHERE e.business_id = b.id AND e.kind = 'coupon_view' AND e.created_at > now() - interval '30 days')::int AS coupon_view_30d
+            (SELECT count(*) FROM shop_events e WHERE e.business_id = b.id AND e.kind = 'coupon_view' AND e.created_at > now() - interval '30 days')::int AS coupon_view_30d,
+            (SELECT count(*) FROM shop_events e WHERE e.business_id = b.id AND e.kind = 'qr_scan' AND e.created_at > now() - interval '30 days')::int AS qr_scan_30d
        FROM businesses b WHERE b.owner_id = $1 ORDER BY b.id`,
     [auth.user.id],
   );

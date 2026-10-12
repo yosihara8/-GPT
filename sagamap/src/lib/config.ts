@@ -69,6 +69,11 @@ export const PRICE_OPTIONS = [
   { value: "3", label: "¥3,000〜（1 人あたり）" },
 ];
 
+/** レジ横 QR ポスターのリンク（読み取り回数を数え、登録後はそのお店のページを開く） */
+export function posterUrl(businessId: number) {
+  return `${APP_URL}/p/${businessId}`;
+}
+
 export function referralUrl(businessId: number) {
   return `${APP_URL}/ref?biz_id=${businessId}`;
 }

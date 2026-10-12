@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, Trash2 } from "lucide-react";
 import PremiumGate from "@/components/PremiumGate";
 import StoreSelect, { useMyStores } from "@/components/StoreSelect";
@@ -8,6 +8,7 @@ import NotifyCheckbox from "@/components/NotifyCheckbox";
 import ImagePicker, { type PickedImage } from "@/components/ImagePicker";
 import CouponRow from "@/components/CouponRow";
 import { api } from "@/lib/fetcher";
+import { eventPeriod, type SagaEvent } from "@/lib/events";
 import { blobToBase64 } from "@/lib/image";
 import { COUPON_TYPES, COUPON_TYPE_LABELS, type CouponType, type CouponValue } from "@/lib/coupon";
 
@@ -88,6 +89,13 @@ function Coupons() {
   useEffect(() => {
     load();
   }, [load]);
+  // イベント特集（開催中・もうすぐ）。選ぶとイベント限定クーポンになり、特集ページにまとめて載る
+  const [events, setEvents] = useState<SagaEvent[]>([]);
+  const [eventId, setEventId] = useState<number | null>(null);
+  const expiryRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    api<{ events: SagaEvent[] }>("/api/events").then((d) => setEvents(d.events)).catch(() => setEvents([]));
+  }, []);
 
   const defaultExpiry = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
 
@@ -107,6 +115,7 @@ function Coupons() {
           firstVisitOnly: f.firstVisitOnly === "on",
           expiresAt: `${f.expiresAt}T23:59:59+09:00`,
           imageBase64: image ? await blobToBase64(image.blob) : undefined,
+          eventId: eventId ?? undefined,
         }),
       });
       setMsgIsError(false);
@@ -115,6 +124,7 @@ function Coupons() {
           (res.warnings?.length ? `\n\n次の点を確認してください（運営者も確認します）：\n・${res.warnings.join("\n・")}` : ""),
       );
       form.reset();
+      setEventId(null);
       if (image) URL.revokeObjectURL(image.url);
       setImage(null);
       load();
@@ -200,13 +210,38 @@ function Coupons() {
           )}
           <div>
             <label className="label">有効期限</label>
-            <input name="expiresAt" type="date" defaultValue={defaultExpiry} required className="input" />
+            <input ref={expiryRef} name="expiresAt" type="date" defaultValue={defaultExpiry} required className="input" />
           </div>
         </div>
         <div>
           <label className="label">利用条件</label>
           <input name="conditions" className="input" placeholder="平日 11:00-14:00、1 会計 1 回まで" />
         </div>
+        {events.length > 0 && (
+          <div className="rounded-xl border-2 border-asa-500/40 bg-asa-50 p-3">
+            <p className="text-sm font-bold text-asa-700">イベント限定クーポンにする（任意）</p>
+            <p className="text-xs text-slate-600">選ぶと、イベント特集のページと地図の画面の特集にまとめて載ります。期限はイベントの最終日になります。</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" onClick={() => setEventId(null)} aria-pressed={eventId === null} className={eventId === null ? "chip-on" : "chip-off"}>
+                しない
+              </button>
+              {events.map((ev) => (
+                <button
+                  key={ev.id}
+                  type="button"
+                  aria-pressed={eventId === ev.id}
+                  onClick={() => {
+                    setEventId(ev.id);
+                    if (expiryRef.current) expiryRef.current.value = ev.ends_on;
+                  }}
+                  className={eventId === ev.id ? "chip bg-asa-500 text-white" : "chip-off"}
+                >
+                  {ev.title}（{eventPeriod(ev)}）
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <details className="rounded-xl bg-slate-50 px-3 py-2">
           <summary className="cursor-pointer text-sm font-bold text-saga-600">使い方の設定（先着人数・初めての方限定・何度でも）</summary>
           <div className="mt-2 space-y-2 pb-1">

@@ -42,7 +42,7 @@ const nextConfig = {
       { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }, { key: "Cache-Control", value: "no-store" }] },
       // ただし、だれが見ても同じ公開データ（店舗一覧・観光名所・写真）は各 API が CDN 用のキャッシュを指定する
       {
-        source: "/api/:path((?!spots$|businesses$|businesses/\\d+/photo$|photos/\\d+/image$|menu/\\d+/image$|coupons/\\d+/image$|ads/\\d+/image$).*)",
+        source: "/api/:path((?!spots$|events$|businesses$|businesses/\\d+/photo$|photos/\\d+/image$|menu/\\d+/image$|coupons/\\d+/image$|ads/\\d+/image$).*)",
         headers: [{ key: "Cache-Control", value: "no-store" }],
       },
     ];

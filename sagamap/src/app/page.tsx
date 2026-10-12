@@ -44,6 +44,7 @@ import { shopStatus } from "@/lib/open-status";
 import { paymentTags } from "@/lib/payment";
 import { useNotifications } from "@/hooks/useNotifications";
 import NoticeSheet from "@/components/customer/NoticeSheet";
+import EventBanners from "@/components/customer/EventBanners";
 import GuideTour, { guideUnseen, type TourStep } from "@/components/customer/GuideTour";
 import { api } from "@/lib/fetcher";
 
@@ -229,7 +230,9 @@ function CustomerHome() {
     const id = Number(params.get("shop"));
     if (opened.current || !id || shops.length === 0) return;
     opened.current = true;
-    if (shops.some((s) => s.id === id)) openSheet(id);
+    // ?coupon= があれば、そのクーポンをいちばん上に出して開く（イベント特集・ポスターから）
+    const couponId = Number(params.get("coupon"));
+    if (shops.some((s) => s.id === id)) openSheet(id, couponId ? { type: "coupon", couponId } : { type: "shop" });
   }, [params, shops, openSheet]);
 
   const dist = useCallback((p: { lat: number; lng: number }) => (here ? haversineMeters(here, p) : null), [here]);
@@ -563,6 +566,8 @@ function CustomerHome() {
                 </button>
               )}
             </section>
+
+            <EventBanners />
 
             {isCustomer && couponList.length > 0 && (
               <div data-tour="coupons">

@@ -7,6 +7,7 @@ import { api } from "@/lib/fetcher";
 import EmailChangeForm from "@/components/EmailChangeForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { QRCodeSVG } from "qrcode.react";
+import EventsAdmin from "@/components/admin/EventsAdmin";
 
 type Stats = {
   customers: number;
@@ -28,6 +29,7 @@ const TABS = [
   { key: "customers", label: "顧客" },
   { key: "logs", label: "操作記録" },
   { key: "invites", label: "特別招待" },
+  { key: "events", label: "イベント特集" },
   { key: "reviews", label: "掲載チェック" },
   { key: "errors", label: "エラー" },
   { key: "admins", label: "運営者・設定" },
@@ -65,8 +67,9 @@ export default function AdminPage() {
       {tab === "overview" && <Overview />}
       {tab === "admins" && <Admins />}
       {tab === "invites" && <Invites />}
+      {tab === "events" && <EventsAdmin />}
       {tab === "reviews" && <Reviews />}
-      {tab !== "overview" && tab !== "admins" && tab !== "invites" && tab !== "reviews" && <List key={tab} type={tab} />}
+      {tab !== "overview" && tab !== "admins" && tab !== "invites" && tab !== "events" && tab !== "reviews" && <List key={tab} type={tab} />}
     </main>
   );
 }
