@@ -6,7 +6,9 @@ import { queryOne } from "./db";
 
 export async function getSessionUser() {
   const session = await getServerSession(authOptions);
-  return session?.user ?? null;
+  // 無効にされたログイン（パスワード変更後の古い端末など）は、ログインしていない扱い
+  if (!session?.user?.id || !session.user.role) return null;
+  return session.user;
 }
 
 type ApiAuth =

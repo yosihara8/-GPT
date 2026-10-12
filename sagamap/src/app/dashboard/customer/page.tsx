@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bell, ChevronRight, Clock, Heart, Map as MapIcon, Route as RouteIcon, Settings } from "lucide-react";
@@ -12,6 +12,8 @@ import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import EmailChangeForm from "@/components/EmailChangeForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import NotifySetting from "@/components/NotifySetting";
+import NotificationList from "@/components/customer/NotificationList";
+import { useNotifications } from "@/hooks/useNotifications";
 
 type Favorite = {
   id: number;
@@ -24,7 +26,6 @@ type Favorite = {
   has_photo?: boolean;
   photo_version?: number | null;
 };
-type Notification = { id: number; title: string; body: string; link: string | null; created_at: string; read_at: string | null };
 type Row = {
   id: number;
   viewed_at: string;
@@ -51,7 +52,8 @@ function MyPageInner() {
   const params = useSearchParams();
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const notes = useNotifications(true);
+  const newsRef = useRef<HTMLElement>(null);
   const [rows, setRows] = useState<Row[] | null>(null);
   const [filter, setFilter] = useState<"all" | "coupon">("all");
 
@@ -65,12 +67,42 @@ function MyPageInner() {
   useEffect(() => {
     if (shop) return;
     loadFavorites();
-    api<{ notifications: Notification[] }>("/api/notifications").then((d) => setNotifications(d.notifications));
     api<{ history: Row[] }>("/api/history").then((d) => setRows(d.history));
   }, [shop]);
 
+  // いま見ている欄（下のメニューで色を付ける）
+  const [activeSection, setActiveSection] = useState("news");
+  useEffect(() => {
+    const ids = ["news", "favorites", "history", "settings"];
+    const onScroll = () => {
+      let cur = "news";
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 140) cur = id;
+      }
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) cur = "settings";
+      setActiveSection(cur);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // お知らせ欄が画面に入ったら（＝見たら）既読にする。未読の数・地図の画面の「新しいお知らせ」も消える
+  const { markSeen, items: noteItems } = notes;
+  useEffect(() => {
+    const el = newsRef.current;
+    if (!el || noteItems.every((n) => n.read_at)) return;
+    const io = new IntersectionObserver((es) => {
+      if (es.some((e) => e.isIntersecting)) setTimeout(markSeen, 800);
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [noteItems, markSeen]);
+
   if (shop) return null;
-  const unread = notifications.filter((n) => !n.read_at).length;
+  const unread = notes.unread;
+  const section = activeSection;
   const shown = (rows ?? []).filter((r) => filter === "all" || r.coupon_used);
   const usedCount = (rows ?? []).filter((r) => r.coupon_used).length;
 
@@ -94,7 +126,7 @@ function MyPageInner() {
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
           <Stat label="お気に入り" value={favorites.length} />
           <Stat label="使ったクーポン" value={usedCount} />
-          <Stat label="未読のお知らせ" value={unread} />
+          <Stat label="新着のお知らせ" value={unread + notes.freshIds.size} />
         </div>
         <Link href="/" className="btn-accent mt-4 w-full rounded-full py-3">
           <MapIcon className="h-4 w-4" aria-hidden />
@@ -104,8 +136,15 @@ function MyPageInner() {
 
       <nav className="sticky top-14 z-10 flex border-b border-slate-200 bg-[#FFFDF9]/95 backdrop-blur">
         {nav.map((n) => (
-          <a key={n.href} href={n.href} className="relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-bold text-slate-600">
-            <n.icon className="h-5 w-5 text-saga-600" aria-hidden />
+          <a
+            key={n.href}
+            href={n.href}
+            aria-current={section === n.href.slice(1) ? "true" : undefined}
+            className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-bold ${section === n.href.slice(1) ? "text-saga-700" : "text-slate-500"}`}
+          >
+            <span className={`grid h-7 w-12 place-items-center rounded-full transition ${section === n.href.slice(1) ? "bg-saga-600 text-white" : "text-saga-600"}`}>
+              <n.icon className="h-5 w-5" aria-hidden />
+            </span>
             {n.label}
             {n.badge > 0 && <span className="num absolute right-[22%] top-1.5 rounded-full bg-coupon px-1.5 text-[10px] text-white">{n.badge}</span>}
           </a>
@@ -117,44 +156,22 @@ function MyPageInner() {
       </div>
 
       {/* お知らせ */}
-      <section id="news" className="scroll-mt-28 px-4 pt-5">
+      <section id="news" ref={newsRef} className="scroll-mt-28 px-4 pt-5">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
             <Bell className="h-4 w-4 text-asa-500" aria-hidden />
             お知らせ
           </h2>
-          {unread > 0 && (
-            <button
-              className="text-xs font-bold text-saga-600"
-              onClick={() =>
-                api("/api/notifications", { method: "PATCH" }).then(() =>
-                  setNotifications((ns) => ns.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() }))),
-                )
-              }
-            >
-              すべて既読にする
-            </button>
-          )}
         </div>
-        {notifications.length === 0 ? (
-          <p className="mt-2 rounded-2xl bg-white p-4 text-sm text-slate-500 ring-1 ring-slate-200/70">お知らせはまだありません。新しいクーポンが出るとここに届きます。</p>
-        ) : (
-          <ul className="mt-2 space-y-2">
-            {notifications.slice(0, 20).map((n) => (
-              <li key={n.id} className={`rounded-2xl bg-white p-4 ring-1 ring-slate-200/70 ${n.read_at ? "" : "border-l-4 border-l-asa-500"}`}>
-                <p className="text-xs text-slate-500">{new Date(n.created_at).toLocaleDateString("ja-JP")}</p>
-                <p className="font-bold">{n.title}</p>
-                <p className="whitespace-pre-line text-sm text-slate-600">{n.body}</p>
-                {n.link && (
-                  <Link href={n.link} className="mt-1 inline-flex items-center text-sm font-bold text-saga-600">
-                    詳しく見る
-                    <ChevronRight className="h-4 w-4" aria-hidden />
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="mt-2">
+          <NotificationList
+            items={notes.items}
+            freshIds={notes.freshIds}
+            onOpen={(n) => n.link && router.push(n.link)}
+            onDelete={notes.remove}
+            onDeleteRead={notes.removeRead}
+          />
+        </div>
       </section>
 
       {/* お気に入り */}

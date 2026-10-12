@@ -2,7 +2,7 @@
 import CategoryIcon from "./CategoryIcon";
 
 type Props = {
-  shop: { id: number; name: string; category: string; has_photo?: boolean; photo_version?: number | null };
+  shop: { id: number; name: string; category: string; has_photo?: boolean; photo_version?: number | null; cover_photo_id?: number | null };
   className?: string;
 };
 
@@ -30,6 +30,10 @@ export default function ShopPhoto({ shop, className = "" }: Props) {
         loading="lazy"
       />
     );
+  }
+  // メイン写真がなければ、お店の写真（外観・店内など）の 1 枚目
+  if (shop.cover_photo_id) {
+    return <img src={`/api/photos/${shop.cover_photo_id}/image`} alt={`${shop.name}の写真`} className={`object-cover ${className}`} loading="lazy" />;
   }
   const art = ART[shop.category] ?? { bg: "from-[#F3EDE3] to-[#E9DCC6]", fg: "text-[#9C8665]" };
   return (

@@ -81,6 +81,15 @@ export async function GET(req: Request) {
   const tasks: Record<string, () => Promise<unknown>> = {
     referrals: () => runOnce("monthly-referrals", month, applyMonthlyReferralPricing),
     contentReview: () => runOnce("content-review", jstDate(), runContentReview),
+    // 古いデータの片付け（読んだお知らせは 30 日、読んでいないものも 90 日で消す。行動の記録は 1 年）
+    cleanup: async () => ({
+      notifications: (
+        await query(
+          "DELETE FROM notifications WHERE (read_at IS NOT NULL AND read_at < now() - interval '30 days') OR created_at < now() - interval '90 days' RETURNING 1",
+        )
+      ).length,
+      shopEvents: (await query("DELETE FROM shop_events WHERE created_at < now() - interval '400 days' RETURNING 1")).length,
+    }),
     // メールが使えない間は実行しない（設定後の最初の実行で送る）
     backup: async () => (mailEnabled() ? runOnce("monthly-backup", month, monthlyBackup) : { skipped: "メール未設定" }),
     ledger: async () => (mailEnabled() ? runOnce("monthly-ledger", month, monthlyLedger) : { skipped: "メール未設定" }),

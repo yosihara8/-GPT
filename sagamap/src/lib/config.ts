@@ -124,4 +124,4 @@ export const PAYMENT_KEYS = PAYMENT_GROUPS.map((g) => g.key) as [PaymentGroupKey
 /** お店の写真の種類 */
 export const PHOTO_KINDS = ["外観", "店内", "客席", "料理・商品", "雑貨・グッズ", "メニュー表", "スタッフ", "その他"] as const;
 /** 写真の枚数（無料プラン / 有料プラン） */
-export const PHOTO_LIMIT = { free: 5, premium: 20 } as const;
+export const PHOTO_LIMIT = { free: 3, premium: 20 } as const;

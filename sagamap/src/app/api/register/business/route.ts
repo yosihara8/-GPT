@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { weakPasswordReason } from "@/lib/accounts";
 import { clientIp, rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
 import { pool } from "@/lib/db";
@@ -18,6 +19,8 @@ export async function POST(req: Request) {
   const body = await parseBody(req, businessRegisterSchema);
   if (!body.ok) return body.response;
   const d = body.data;
+  const weak = weakPasswordReason(d.password, d.email);
+  if (weak) return NextResponse.json({ error: weak }, { status: 400 });
 
   const pos = await geocodeAddress(d.address);
   if (!pos) return NextResponse.json({ error: ADDRESS_NOT_FOUND, field: "address" }, { status: 422 });

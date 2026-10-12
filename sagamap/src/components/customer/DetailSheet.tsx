@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   CalendarClock,
@@ -67,6 +67,9 @@ export type MenuItem = { id: number; name: string; price: number | null; descrip
 /** どこから開いたか（クーポン・広告から開いたときは、その内容をいちばん上に大きく出す） */
 export type SheetFrom = { type: "coupon"; couponId: number } | { type: "ad"; ad: Ad } | { type: "shop" };
 
+/** スクロールする枠の中での要素の位置 */
+const posIn = (box: HTMLElement, el: HTMLElement) => el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+
 /** 電話番号らしい文字列なら、タップで電話をかけられるようにする */
 export const phoneOf = (s?: string | null) => {
   const m = s?.match(/0\d{1,4}-?\d{1,4}-?\d{3,4}/);
@@ -126,6 +129,38 @@ export default function DetailSheet({
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
   }, [shop.id, from]);
+
+  const tabs = (
+    [
+      ["top", "写真・概要", true],
+      ["coupon", "クーポン", (coupons?.length ?? 0) > 0],
+      ["menu", "メニュー", (menu?.length ?? 0) > 0],
+      ["hours", "営業時間", Boolean(shop.weekly_hours || shop.business_hours || shop.closed_days || shop.special_days?.length)],
+      ["info", "支払い・アクセス", true],
+      ["near", "近くのお店", nearby.length > 0],
+    ] as [string, string, boolean][]
+  ).filter((t) => t[2]);
+  const [activeTab, setActiveTab] = useState("top");
+  const jump = (key: string) => {
+    const box = scroller.current;
+    if (!box) return;
+    if (key === "top") return box.scrollTo({ top: 0, behavior: "smooth" });
+    const el = box.querySelector<HTMLElement>(`[data-sec="${key}"]`);
+    if (el) box.scrollTo({ top: posIn(box, el) - 52, behavior: "smooth" });
+  };
+  useEffect(() => {
+    const box = scroller.current;
+    if (!box) return;
+    const onScroll = () => {
+      let cur = "top";
+      box.querySelectorAll<HTMLElement>("[data-sec]").forEach((el) => {
+        if (posIn(box, el) - 60 <= box.scrollTop) cur = el.dataset.sec!;
+      });
+      setActiveTab(cur);
+    };
+    box.addEventListener("scroll", onScroll, { passive: true });
+    return () => box.removeEventListener("scroll", onScroll);
+  }, []);
 
   const tel = phoneOf(shop.contact);
   const status = shopStatus(shop);
@@ -233,7 +268,28 @@ export default function DetailSheet({
           </div>
         </section>
 
+        {/* お店のページの目次（食べログ・ホットペッパーのように、見たい情報へ 1 タップで） */}
+        <nav
+          aria-label="お店のページの目次"
+          className="no-scrollbar sticky top-0 z-20 flex gap-1 overflow-x-auto border-b border-slate-200/80 bg-[#FFFDF9]/95 px-3 py-2 backdrop-blur"
+        >
+          {tabs.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => jump(key)}
+              aria-current={activeTab === key ? "true" : undefined}
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-bold transition ${
+                activeTab === key ? "bg-saga-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
         {/* ④ このお店のクーポン */}
+        <div data-sec="coupon" />
         {(otherCoupons.length > 0 || (!focusCoupon && coupons === null)) && (
           <section className="px-4 pt-5">
             <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-coupon">
@@ -252,6 +308,7 @@ export default function DetailSheet({
           <p className="mx-4 mt-5 rounded-2xl bg-white px-4 py-3 text-sm text-slate-500 ring-1 ring-slate-200/70">このお店は、いまクーポンを配信していません。</p>
         )}
 
+        <div data-sec="menu" />
         {/* メニュー・商品（写真・価格） */}
         {menu && menu.length > 0 && (
           <Carousel title="メニュー・商品" eyebrow="MENU" icon={<UtensilsCrossed className="h-4 w-4 text-asa-500" aria-hidden />} count={menu.length}>
@@ -289,6 +346,7 @@ export default function DetailSheet({
           </section>
         )}
 
+        <div data-sec="hours" />
         {/* ⑥ 営業時間・カレンダー */}
         <HoursCard
           weeklyHours={shop.weekly_hours}
@@ -298,6 +356,7 @@ export default function DetailSheet({
           closedText={shop.closed_days}
         />
 
+        <div data-sec="info" />
         {/* ⑦ 基本情報 */}
         <section className="mx-4 mt-5 rounded-3xl bg-white p-4 ring-1 ring-slate-200/70">
           <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
@@ -393,7 +452,7 @@ export default function DetailSheet({
           </dl>
           {/* 小さな地図（場所の確認） */}
           <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-slate-200">
-            <MapView shops={[shop]} me={me} selectedId={shop.id} highlightRadius={Number.POSITIVE_INFINITY} legend={false} className="h-44" />
+            <MapView shops={[shop]} me={me} selectedId={shop.id} highlightRadius={Number.POSITIVE_INFINITY} legend={false} layerToggle={false} className="h-44" />
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button onClick={onRoute} className="btn-outline">
@@ -407,6 +466,7 @@ export default function DetailSheet({
           </div>
         </section>
 
+        <div data-sec="near" />
         {/* ⑦ 3 回目のタップ：近くのお店（はしご・ついで寄りを提案） */}
         {nearby.length > 0 && (
           <Carousel title="このお店の近くのお店" eyebrow="NEXT STOP" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="このお店からの距離・クーポン配信中のお店を先に表示">

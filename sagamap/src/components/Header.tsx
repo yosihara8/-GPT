@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { Eye } from "lucide-react";
+import { Eye, LogOut } from "lucide-react";
 import Logo from "./Logo";
 import { useTheme } from "./ThemeScope";
 
 export default function Header() {
   const { data } = useSession();
+  const pathname = usePathname() ?? "";
   const user = data?.user;
   const theme = useTheme();
   const dark = theme === "admin";
@@ -45,22 +47,32 @@ export default function Header() {
             </span>
           )}
         </Link>
-        <nav className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-sm font-medium sm:gap-1">
+        <nav className="ml-2 flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-medium">
           {user ? (
             <>
+              {/* お客さまは「地図」と「マイページ」を切り替え。開いている方に色を付ける */}
+              {user.role === "customer" && theme !== "admin" && (
+                <Link href="/" aria-current={pathname === "/" ? "page" : undefined} className={tabClass(pathname === "/", dark)}>
+                  地図
+                </Link>
+              )}
               {showDashboardLink && (
                 <Link
                   href={user.role === "admin" ? "/admin" : dashboard}
-                  className={`rounded-lg px-2 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}
+                  data-tour="mypage"
+                  aria-current={pathname.startsWith(user.role === "admin" ? "/admin" : dashboard) ? "page" : undefined}
+                  className={tabClass(pathname.startsWith(user.role === "admin" ? "/admin" : dashboard), dark)}
                 >
                   {user.role === "admin" ? "管理画面" : "マイページ"}
                 </Link>
               )}
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className={`rounded-lg px-2 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
+                aria-label="ログアウト"
+                className={`flex items-center gap-1 rounded-full px-2 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
               >
-                ログアウト
+                <LogOut className="h-4 w-4 sm:hidden" aria-hidden />
+                <span className="hidden sm:inline">ログアウト</span>
               </button>
             </>
           ) : (
@@ -77,4 +89,10 @@ export default function Header() {
       </div>
     </header>
   );
+}
+
+/** ヘッダーのリンク。開いているページは色つき（藍の背景・白い文字）にする */
+function tabClass(on: boolean, dark: boolean) {
+  if (on) return `rounded-full px-3 py-1.5 font-bold sm:px-3.5 ${dark ? "bg-white text-slate-900" : "bg-saga-600 text-white"}`;
+  return `rounded-full px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`;
 }

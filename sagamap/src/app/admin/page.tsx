@@ -54,7 +54,8 @@ export default function AdminPage() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`shrink-0 border-b-2 px-3 py-2 text-sm ${tab === t.key ? "border-saga-600 font-semibold text-saga-700" : "border-transparent text-slate-500"}`}
+            aria-current={tab === t.key ? "page" : undefined}
+            className={`shrink-0 rounded-t-lg border-b-[3px] px-3 py-2 text-sm ${tab === t.key ? "border-saga-600 bg-saga-600 font-bold text-white" : "border-transparent text-slate-500 hover:bg-slate-100"}`}
           >
             {t.label}
           </button>
@@ -266,6 +267,7 @@ function Admins() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
+      <TwoFactor />
       <EmailChangeForm onChanged={() => load()} />
       <PasswordChangeForm minLength={12} />
       <section className="card space-y-2">
@@ -289,6 +291,96 @@ function Admins() {
         <p className="text-xs text-slate-500">運営者はこのアカウントだけです。安全のため、画面から運営者を追加することはできません。</p>
       </section>
     </div>
+  );
+}
+
+/** 二段階認証（運営者アカウントの乗っ取り対策） */
+function TwoFactor() {
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [setup, setSetup] = useState<{ secret: string; url: string } | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const load = useCallback(() => api<{ enabled: boolean }>("/api/admin/totp").then((d) => setEnabled(d.enabled)), []);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function post(body: Record<string, string>) {
+    setMsg(null);
+    try {
+      return await api<{ secret?: string; url?: string }>("/api/admin/totp", { method: "POST", body: JSON.stringify(body) });
+    } catch (e) {
+      setMsg((e as Error).message);
+      return null;
+    }
+  }
+
+  return (
+    <section className={`card space-y-3 sm:col-span-2 ${enabled === false ? "ring-2 ring-amber-400" : ""}`}>
+      <h2 className="font-bold">二段階認証（ログインに認証アプリの 6 桁を追加）</h2>
+      {enabled === null ? null : enabled ? (
+        <>
+          <p className="rounded-lg bg-tea-50 px-3 py-2 text-sm font-bold text-tea-700">設定済みです。パスワードが漏れても、スマホがなければログインできません。</p>
+          <form
+            className="grid gap-2 sm:grid-cols-[1fr_140px_auto]"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const f = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
+              if (!confirm("二段階認証を解除すると、安全性が下がります。解除しますか？")) return;
+              if (await post({ action: "disable", password: f.password, code: f.code })) load();
+            }}
+          >
+            <input name="password" type="password" required placeholder="パスワード" autoComplete="current-password" className="input" />
+            <input name="code" inputMode="numeric" maxLength={6} required placeholder="6 桁" className="input num" />
+            <button className="btn-outline">解除する</button>
+          </form>
+        </>
+      ) : setup ? (
+        <div className="grid gap-4 sm:grid-cols-[auto_1fr]">
+          <div className="justify-self-center rounded-xl bg-white p-2 ring-1 ring-slate-200">
+            <QRCodeSVG value={setup.url} size={168} marginSize={1} />
+          </div>
+          <div className="space-y-2 text-sm">
+            <p>① スマホの認証アプリ（Google Authenticator・Microsoft Authenticator など）で、左の QR コードを読み取ります。</p>
+            <p className="text-xs text-slate-500">
+              読み取れないときは、このキーを入力：<code className="break-all rounded bg-slate-100 px-1">{setup.secret}</code>
+            </p>
+            <p>② アプリに出た 6 桁の数字を入れて「有効にする」を押します。</p>
+            <form
+              className="flex gap-2"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const code = String(new FormData(e.currentTarget).get("code") ?? "");
+                if (await post({ action: "enable", code })) {
+                  setSetup(null);
+                  setMsg("二段階認証を有効にしました。次回のログインから 6 桁の数字が必要です。");
+                  load();
+                }
+              }}
+            >
+              <input name="code" inputMode="numeric" maxLength={6} required placeholder="6 桁" className="input num w-32 text-center text-lg" />
+              <button className="btn-primary">有効にする</button>
+            </form>
+          </div>
+        </div>
+      ) : (
+        <>
+          <p className="text-sm text-slate-600">
+            <b className="text-amber-700">まだ設定されていません。</b>運営者アカウントはすべてのデータを扱えるため、設定を強くおすすめします。ログインのたびに、スマホのアプリに出る 6 桁の数字も必要になります。
+          </p>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={async () => {
+              const d = await post({ action: "start" });
+              if (d?.secret && d.url) setSetup({ secret: d.secret, url: d.url });
+            }}
+          >
+            二段階認証を設定する
+          </button>
+        </>
+      )}
+      {msg && <p className="text-sm font-bold text-saga-700">{msg}</p>}
+    </section>
   );
 }
 

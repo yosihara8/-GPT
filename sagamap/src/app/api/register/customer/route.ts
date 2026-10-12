@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { weakPasswordReason } from "@/lib/accounts";
 import { clientIp, rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
@@ -18,6 +19,8 @@ export async function POST(req: Request) {
   const body = await parseBody(req, customerRegisterSchema);
   if (!body.ok) return body.response;
   const d = body.data;
+  const weak = weakPasswordReason(d.password, d.email);
+  if (weak) return NextResponse.json({ error: weak }, { status: 400 });
 
   let customer: { id: number } | null;
   try {

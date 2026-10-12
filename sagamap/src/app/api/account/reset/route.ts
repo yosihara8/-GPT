@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { query } from "@/lib/db";
 import { parseBody } from "@/lib/http";
-import { ACCOUNT_TABLE, passwordRule } from "@/lib/accounts";
+import { ACCOUNT_TABLE, passwordRule, weakPasswordReason } from "@/lib/accounts";
 import { consumeToken, peekToken } from "@/lib/tokens";
 import { clientIp, rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
 
@@ -26,12 +26,15 @@ export async function POST(req: Request) {
   if (body.data.password.length < passwordRule(peek.role)) {
     return NextResponse.json({ error: `パスワードは ${passwordRule(peek.role)} 文字以上にしてください` }, { status: 400 });
   }
+  const weak = weakPasswordReason(body.data.password);
+  if (weak) return NextResponse.json({ error: weak }, { status: 400 });
   const owner = await consumeToken("reset_password", body.data.token);
   if (!owner) return invalid();
   const table = ACCOUNT_TABLE[owner.role];
   // パスワードを再設定できた＝メールを受け取れているので、確認済みにする
   const verify = owner.role === "admin" ? "" : ", email_verified_at = coalesce(email_verified_at, now())";
-  await query(`UPDATE ${table} SET password_hash = $1${verify} WHERE id = $2`, [
+  // 再設定したら、これまでのログインはすべて無効にする
+  await query(`UPDATE ${table} SET password_hash = $1, session_version = session_version + 1${verify} WHERE id = $2`, [
     await bcrypt.hash(body.data.password, owner.role === "admin" ? 12 : 10),
     owner.user_id,
   ]);
