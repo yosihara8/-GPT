@@ -129,7 +129,7 @@ function List({ type }: { type: ListKey }) {
 
   async function viewAs(row: Row) {
     const who = type === "owners" ? "事業主" : "お客さま";
-    if (!confirm(`「${row.email}」の${who}画面を表示します。\n管理画面に戻るときは、もう一度管理者としてログインしてください。`)) return;
+    if (!confirm(`「${row.email}」の${who}画面を表示します。\n上の「管理画面に戻る」で、ログインし直さずに戻れます。`)) return;
     try {
       const d = await api<{ token: string; role: string; redirect: string }>("/api/admin/impersonate", {
         method: "POST",
@@ -272,8 +272,8 @@ function Admins() {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <TwoFactor />
-      <EmailChangeForm onChanged={() => load()} />
-      <PasswordChangeForm minLength={12} />
+      <EmailChangeForm admin onChanged={() => load()} />
+      <PasswordChangeForm admin minLength={12} />
       <section className="card space-y-2">
         <h2 className="font-bold">データのバックアップ</h2>
         <p className="text-sm text-slate-600">

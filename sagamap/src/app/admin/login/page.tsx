@@ -1,14 +1,12 @@
 "use client";
 
-import PasswordInput from "@/components/PasswordInput";
 import Link from "next/link";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { Lock } from "lucide-react";
+import PasswordInput from "@/components/PasswordInput";
 
-/** 運営者ログイン */
+/** 運営者ログイン（管理画面専用。お客さま・事業主のログインとは別） */
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   // 二段階認証を設定済みなら、パスワードのあとに認証アプリの 6 桁を聞く
@@ -19,39 +17,44 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError(null);
     const f = new FormData(e.currentTarget);
-    const res = await signIn("credentials", {
-      email: f.get("email"),
-      password: f.get("password"),
-      role: "admin",
-      otp: f.get("otp") ?? "",
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error === "OTP_REQUIRED") {
-      setNeedOtp(true);
-      setError("認証アプリに表示されている 6 桁の数字を入れてください");
-    } else if (res?.error === "OTP_INVALID") {
-      setNeedOtp(true);
-      setError("6 桁の数字が違うか、時間切れです。最新の数字を入れてください");
-    } else if (res?.error) {
-      setError(res.error === "CredentialsSignin" ? "メールアドレスまたはパスワードが正しくありません" : res.error);
-    } else {
-      router.push("/admin");
-      router.refresh();
+    try {
+      const res = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: f.get("email"), password: f.get("password"), otp: f.get("otp") || undefined }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.ok) {
+        window.location.href = "/admin";
+        return;
+      }
+      if (d.otpRequired) setNeedOtp(true);
+      setError(d.error ?? "ログインできませんでした");
+    } catch {
+      setError("通信できませんでした。電波の良いところでもう一度お試しください");
     }
+    setLoading(false);
   }
 
   return (
     <main className="mx-auto max-w-md p-4">
-      <h1 className="mt-4 text-2xl font-bold">運営者ログイン</h1>
+      <h1 className="mt-6 flex items-center gap-2 text-2xl font-bold">
+        <Lock className="h-6 w-6 text-saga-600" aria-hidden />
+        運営者ログイン
+      </h1>
+      <p className="mt-1 text-sm text-slate-500">この画面は運営者専用です。</p>
       <form onSubmit={onSubmit} className="card mt-4 space-y-4">
         <div>
-          <label className="label" htmlFor="email">メールアドレス</label>
+          <label className="label" htmlFor="email">
+            メールアドレス
+          </label>
           <input id="email" name="email" type="email" required autoComplete="username" className="input" />
         </div>
         <div>
-          <label className="label" htmlFor="password">パスワード</label>
-          <PasswordInput id="password" name="password" required autoComplete="current-password" className="input" />
+          <label className="label" htmlFor="password">
+            パスワード
+          </label>
+          <PasswordInput id="password" name="password" required autoComplete="current-password" />
         </div>
         {needOtp && (
           <div>
@@ -71,10 +74,19 @@ export default function AdminLoginPage() {
             />
           </div>
         )}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-600" role="alert">
+            {error}
+          </p>
+        )}
         <button disabled={loading} className="btn-primary w-full">
           {loading ? "ログイン中…" : "ログイン"}
         </button>
+        <p className="text-right text-sm">
+          <Link href="/admin/forgot" className="font-bold text-saga-600 underline">
+            パスワードを忘れた方
+          </Link>
+        </p>
       </form>
     </main>
   );

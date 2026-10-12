@@ -28,7 +28,7 @@ export default function Header() {
           <Eye className="h-3.5 w-3.5" aria-hidden />
           管理者として「{user.email}」の画面を表示中
           <button
-            onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            onClick={() => signOut({ callbackUrl: "/admin" })}
             className="rounded-md bg-white px-2.5 py-0.5 font-semibold text-slate-900"
           >
             管理画面に戻る

@@ -67,6 +67,10 @@
 - `/?shop=ID&coupon=ID` でそのクーポンを上に出してお店のページを開く。
 
 ## 運営者（管理者）
+- 管理画面は独立：専用のログイン（/admin/login → /api/admin/auth/login。Cookie は `__Host-sagamap-admin`、12 時間、SameSite=Strict）。お客さま・事業主のログイン（NextAuth）では運営者に入れない。両方同時にログインしていても干渉しない。
+- 管理画面では公開サイトのヘッダー・フッターを出さない（SiteChrome / admin/layout.tsx の専用ヘッダー）。
+- パスワードを忘れたら /admin/forgot（運営者のメールにだけ再設定リンク。二段階認証は解除しない）。
+- メールもスマホも使えないときの緊急用：Vercel の環境変数 ADMIN_RECOVERY_PASSWORD（12 文字以上。ADMIN_RECOVERY_EMAIL も可）を入れて再デプロイ → 1 回だけ反映し二段階認証も解除。反映後は環境変数を消す。
 - 運営者はオーナー 1 人だけ。追加できる画面・API を作らない（DB の一意インデックスでも 1 人に制限）。
 - お客さま・事業主の画面に管理画面へのリンクを置かない。
 

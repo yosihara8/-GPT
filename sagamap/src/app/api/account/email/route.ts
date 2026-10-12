@@ -8,13 +8,13 @@ import { sendEmailChangedNotice, sendVerificationMail } from "@/lib/account-mail
 import { auditLog } from "@/lib/audit";
 import { getStripe, stripeEnv } from "@/lib/stripe";
 import { rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
-import { requireApiUser } from "@/lib/session";
+import { requireAccountUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 /** 今のメールアドレスと、変更できるか（Google だけで登録した方はパスワードがないため変更不可） */
-export async function GET() {
-  const auth = await requireApiUser();
+export async function GET(req: Request) {
+  const auth = await requireAccountUser(req);
   if (!auth.ok) return auth.response;
   const { id, role } = auth.user;
   const row = await queryOne<{ email: string; has_password: boolean }>(
@@ -31,7 +31,7 @@ const schema = z.object({
 
 /** ログイン中のアカウントのメールアドレス変更（今のパスワードで本人確認） */
 export async function POST(req: Request) {
-  const auth = await requireApiUser();
+  const auth = await requireAccountUser(req);
   if (!auth.ok) return auth.response;
   const { id, role } = auth.user;
   if (auth.user.impersonated) {
