@@ -95,5 +95,5 @@ function LoginForm() {
 /** オープンリダイレクト防止: サイト内パスのみ許可 */
 function safeCallback(url: string | null, role: string) {
   if (url && url.startsWith("/") && !url.startsWith("//")) return url;
-  return role === "business" ? "/dashboard/business" : "/dashboard/customer";
+  return role === "business" ? "/dashboard/business" : "/";
 }

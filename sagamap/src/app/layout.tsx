@@ -10,7 +10,7 @@ import { APP_URL } from "@/lib/config";
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: { default: "佐賀観光マップ", template: "%s｜佐賀観光マップ" },
-  description: "佐賀の個人事業主とお客さんを結ぶ、地理空間 AI 観光マップ。近くのクーポン店舗を地図で見つけよう。",
+  description: "佐賀のお店と、旅する人をつなぐ観光マップ。近くのクーポン・おすすめのお店・観光スポットを地図で見つけよう。",
 };
 
 export const viewport: Viewport = {

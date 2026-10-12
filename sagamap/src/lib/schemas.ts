@@ -35,6 +35,8 @@ export const storeUpdateSchema = z
     crowdLevel: z.coerce.number().int().min(1).max(5),
     instagramUrl: optionalUrl,
     twitterUrl: optionalUrl,
+    businessHours: z.string().trim().max(100),
+    closedDays: z.string().trim().max(100),
   })
   .partial();
 

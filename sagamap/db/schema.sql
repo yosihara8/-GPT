@@ -274,3 +274,7 @@ ALTER TABLE ads ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
 
 -- 解約手続き済みの有料プランが終わる日（それまでは有料プランのまま使える）
 ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS plan_ends_at TIMESTAMPTZ;
+
+-- 営業時間・定休日（事業主が自由に入力。例「11:00〜20:00」「水曜日」）
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS business_hours TEXT NOT NULL DEFAULT '';
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS closed_days TEXT NOT NULL DEFAULT '';

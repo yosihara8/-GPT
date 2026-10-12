@@ -52,7 +52,7 @@ function CustomerRegisterForm() {
         }),
       });
       await signIn("credentials", { email: f.email, password: f.password, role: "customer", redirect: false });
-      router.push("/dashboard/customer");
+      router.push("/");
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -117,7 +117,7 @@ function CustomerRegisterForm() {
           {loading ? "登録中…" : "無料で登録する"}
         </button>
         {googleAvailable && (
-          <button type="button" onClick={() => signIn("google", { callbackUrl: "/dashboard/customer" })} className="btn-outline w-full">
+          <button type="button" onClick={() => signIn("google", { callbackUrl: "/" })} className="btn-outline w-full">
             Google で登録
           </button>
         )}

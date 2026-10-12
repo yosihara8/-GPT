@@ -26,6 +26,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     token,
     role,
-    redirect: role === "business" ? "/dashboard/business" : "/dashboard/customer",
+    redirect: role === "business" ? "/dashboard/business" : "/",
   });
 }

@@ -32,6 +32,8 @@ type Store = {
   twitter_url: string | null;
   has_photo: boolean;
   photo_version: number | null;
+  business_hours?: string;
+  closed_days?: string;
 };
 type Stats = {
   stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number }[];
@@ -316,6 +318,8 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
       contact: f.contact,
       priceLevel: f.priceLevel,
       crowdLevel: f.crowdLevel,
+      businessHours: f.businessHours,
+      closedDays: f.closedDays,
     };
     if (premium) {
       body.instagramUrl = f.instagramUrl;
@@ -353,7 +357,9 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
           <label className="label">サービス内容</label>
           <textarea name="serviceDescription" defaultValue={store.service_description} rows={3} className="input" />
         </div>
-        <Input label="連絡先" name="contact" defaultValue={store.contact} />
+        <Input label="連絡先（電話番号など）" name="contact" defaultValue={store.contact} />
+        <Input label="営業時間" name="businessHours" defaultValue={store.business_hours ?? ""} placeholder="例：11:00〜20:00（L.O. 19:30）" />
+        <Input label="定休日" name="closedDays" defaultValue={store.closed_days ?? ""} placeholder="例：水曜日・第3火曜日" />
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="label">価格帯</label>

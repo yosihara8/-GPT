@@ -50,6 +50,8 @@ export type MapViewProps = {
   onSelectShop?: (id: number) => void;
   selectedId?: number | null;
   className?: string;
+  /** 凡例を表示するか（お客さまの地図では出さない） */
+  legend?: boolean;
 };
 
 const COLORS = { coupon: "#C43D2B", shop: "#1E3A6E", spot: "#B9832A", me: "#2e90fa" };
@@ -68,7 +70,28 @@ function pinIcon(color: string, scale = 1): google.maps.Icon {
 export const hasCoupon = (shop: MapShop) => Boolean(shop.has_coupon || (shop.best_discount ?? 0) > 0);
 
 export function isHighlighted(shop: MapShop, me: { lat: number; lng: number } | null | undefined, radius: number) {
+  if (radius === Number.POSITIVE_INFINITY) return hasCoupon(shop);
   return Boolean(me && hasCoupon(shop) && haversineMeters(me, shop) <= radius);
+}
+
+/** 地図の札に出す短い文字（割引率があれば「10%OFF」） */
+export const couponLabel = (shop: MapShop) => (shop.best_discount ? `${shop.best_discount}%OFF` : "クーポン");
+
+/**
+ * 重なった札をまとめる。優先度の高い札だけ残し、重なった数を「+2」のように付ける。
+ * items は優先度の高い順。box は画面上の位置（px）。
+ */
+export function declutter<T>(items: { key: T; x: number; y: number; w: number; h: number }[]) {
+  const kept: { key: T; x: number; y: number; w: number; h: number; extra: number }[] = [];
+  const hidden = new Set<T>();
+  for (const it of items) {
+    const hit = kept.find((k) => Math.abs(k.x - it.x) * 2 < k.w + it.w && Math.abs(k.y - it.y) * 2 < k.h + it.h);
+    if (hit) {
+      hit.extra++;
+      hidden.add(it.key);
+    } else kept.push({ ...it, extra: 0 });
+  }
+  return { hidden, extra: new Map(kept.map((k) => [k.key, k.extra])) };
 }
 
 function GoogleMapView({
@@ -83,6 +106,7 @@ function GoogleMapView({
   onSelectShop,
   selectedId,
   className = "h-[62vh]",
+  legend = true,
 }: MapViewProps) {
   const { ready, error } = useGoogleMaps();
   const divRef = useRef<HTMLDivElement>(null);
@@ -162,7 +186,7 @@ function GoogleMapView({
         position: shop,
         title: `${shop.name}（${shop.category}）${hasCoupon(shop) ? " クーポン発行中" : ""}`,
         label: hasCoupon(shop)
-          ? { text: "クーポン発行中", color: COLORS.coupon, fontSize: "11px", fontWeight: "700", className: "sm-gmap-coupon-label" }
+          ? { text: couponLabel(shop), color: COLORS.coupon, fontSize: "11px", fontWeight: "700", className: "sm-gmap-coupon-label" }
           : undefined,
         icon: pinIcon(red ? COLORS.coupon : COLORS.shop, selected ? 1.3 : red ? 1.1 : 0.9),
         zIndex: selected ? 999 : red ? 500 : 100,
@@ -171,7 +195,40 @@ function GoogleMapView({
       marker.addListener("click", () => onSelectRef.current?.(shop.id));
       return marker;
     });
+    // 札が重なったら 1 つにまとめる（地図を動かすたびに計算し直す）
+    const coupons = shops
+      .map((shop, i) => ({ shop, marker: shopMarkers.current[i] }))
+      .filter(({ shop }) => hasCoupon(shop))
+      .sort((a, b) => Number(b.shop.id === selectedId) - Number(a.shop.id === selectedId) || (b.shop.best_discount ?? 0) - (a.shop.best_discount ?? 0));
+    const relabel = () => {
+      const proj = map.getProjection();
+      if (!proj) return;
+      const scale = 2 ** (map.getZoom() ?? 15);
+      const boxes = coupons.map(({ shop }) => {
+        const p = proj.fromLatLngToPoint(new google.maps.LatLng(shop.lat, shop.lng))!;
+        return { key: shop.id, x: p.x * scale, y: p.y * scale, w: 70, h: 22 };
+      });
+      const { hidden, extra } = declutter(boxes);
+      for (const { shop, marker } of coupons) {
+        const n = extra.get(shop.id) ?? 0;
+        marker.setLabel(
+          hidden.has(shop.id)
+            ? null
+            : { text: `${couponLabel(shop)}${n ? ` +${n}` : ""}`, color: COLORS.coupon, fontSize: "11px", fontWeight: "700", className: "sm-gmap-coupon-label" },
+        );
+      }
+    };
+    const listener = map.addListener("idle", relabel);
+    relabel();
+    return () => listener.remove();
   }, [ready, shops, me, highlightRadius, selectedId]);
+
+  // 選んだお店を地図の中心に
+  useEffect(() => {
+    const shop = shops.find((s) => s.id === selectedId);
+    if (ready && shop) mapRef.current?.panTo(shop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, selectedId]);
 
   // 観光名所
   useEffect(() => {
@@ -293,7 +350,7 @@ function GoogleMapView({
     <div className={`relative ${className}`}>
       <div ref={divRef} className="absolute inset-0" aria-label="店舗マップ" />
       {!ready && <div className="absolute inset-0 animate-pulse bg-slate-100" />}
-      <MapLegend />
+      {legend && <MapLegend />}
     </div>
   );
 }

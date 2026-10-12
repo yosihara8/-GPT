@@ -19,7 +19,7 @@ export default function ShopPhoto({ shop, className = "" }: Props) {
     );
   }
   return (
-    <div className={`flex items-center justify-center bg-slate-100 text-slate-400 ${className}`} aria-hidden>
+    <div className={`flex items-center justify-center bg-gradient-to-br from-[#F3EDE3] to-[#E9DCC6] text-[#B49F7E] ${className}`} aria-hidden>
       <CategoryIcon category={shop.category} className="h-1/3 max-h-12 w-1/3 max-w-12" strokeWidth={1.5} />
     </div>
   );
