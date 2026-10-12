@@ -5,6 +5,7 @@ import { escapeHtml } from "@/lib/escape";
 import { mailEnabled, mailFooter, sendMailBatch, type MailMessage } from "@/lib/mail";
 import { logServerError } from "@/lib/server-error";
 import { isCronRequest } from "@/lib/cron";
+import { COUPON_HEADLINE_SQL } from "@/lib/coupon";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -69,7 +70,7 @@ async function runDigest() {
   const items = await query<Item>(
     `SELECT 'coupon' AS kind, c.id, b.id AS business_id, b.name AS business_name, b.category,
             o.id AS owner_id, o.email AS owner_email, o.name AS owner_name,
-            c.title || '（' || c.discount_rate || '% OFF）' AS title,
+            c.title || '（' || ${COUPON_HEADLINE_SQL('c')} || '）' AS title,
             to_char(c.expires_at AT TIME ZONE 'Asia/Tokyo', 'MM/DD') || ' まで' AS detail
        FROM coupons c JOIN businesses b ON b.id = c.business_id JOIN business_owners o ON o.id = b.owner_id
       WHERE c.is_active AND c.expires_at > now() AND c.created_at > now() - interval '7 days'

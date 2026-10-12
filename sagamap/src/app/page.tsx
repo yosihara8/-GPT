@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Bell,
+  Clock,
   Car,
   ChevronRight,
   Footprints,
@@ -32,7 +33,7 @@ import LocationAccuracy from "@/components/LocationAccuracy";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import Carousel from "@/components/customer/Carousel";
 import { AdCard, CouponCard, ShopCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
-import DetailSheet, { type DetailCoupon, type DetailShop, type SheetFrom } from "@/components/customer/DetailSheet";
+import DetailSheet, { type DetailCoupon, type DetailShop, type MenuItem, type SheetFrom } from "@/components/customer/DetailSheet";
 import CouponUse, { type UseTarget } from "@/components/customer/CouponUse";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CATEGORIES } from "@/lib/config";
@@ -89,9 +90,12 @@ function CustomerHome() {
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  // すぐに行けるお店の絞り込み（営業中・クーポンあり・お店の特徴）
+  const [filters, setFilters] = useState<string[]>([]);
+  const toggleFilter = (f: string) => setFilters((xs) => (xs.includes(f) ? xs.filter((x) => x !== f) : [...xs, f]));
   const [preview, setPreview] = useState<number | null>(null);
   const [sheet, setSheet] = useState<{ id: number; from: SheetFrom } | null>(null);
-  const [detail, setDetail] = useState<{ id: number; business: Partial<DetailShop>; coupons: DetailCoupon[] } | null>(null);
+  const [detail, setDetail] = useState<{ id: number; business: Partial<DetailShop>; coupons: DetailCoupon[]; menu: MenuItem[] } | null>(null);
   const [useTarget, setUseTarget] = useState<UseTarget | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -150,8 +154,8 @@ function CustomerHome() {
     if (detail?.id === id) return;
     fetch(`/api/businesses/${id}`)
       .then((r) => r.json())
-      .then((d) => setDetail({ id, business: d.business ?? {}, coupons: d.coupons ?? [] }))
-      .catch(() => setDetail({ id, business: {}, coupons: [] }));
+      .then((d) => setDetail({ id, business: d.business ?? {}, coupons: d.coupons ?? [], menu: d.menu ?? [] }))
+      .catch(() => setDetail({ id, business: {}, coupons: [], menu: [] }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheet?.id]);
 
@@ -249,9 +253,14 @@ function CustomerHome() {
   const q = query.trim().toLowerCase();
   const visible = useMemo(() => {
     let xs = category ? shops.filter((s) => s.category === category) : shops;
-    if (q) xs = xs.filter((s) => `${s.name} ${s.category} ${s.service_description} ${s.address}`.toLowerCase().includes(q));
+    if (q) xs = xs.filter((s) => `${s.name} ${s.category} ${s.service_description} ${s.address} ${(s.amenities ?? []).join(" ")}`.toLowerCase().includes(q));
+    for (const f of filters) {
+      if (f === "営業中") xs = xs.filter((s) => openStatus(s.business_hours, s.closed_days)?.open);
+      else if (f === "クーポンあり") xs = xs.filter(hasCoupon);
+      else xs = xs.filter((s) => s.amenities?.includes(f));
+    }
     return xs;
-  }, [shops, category, q]);
+  }, [shops, category, q, filters]);
   const byDistance = useCallback(<T extends { lat: number; lng: number }>(xs: T[]) => [...xs].sort((a, b) => (dist(a) ?? 0) - (dist(b) ?? 0)), [dist]);
 
   // 経路の行き先：選んだお店／観光スポット／お気に入りを巡るルート
@@ -358,6 +367,13 @@ function CustomerHome() {
             )}
           </label>
           <div className="pointer-events-auto -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 lg:mr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {QUICK_FILTERS.map((f) => (
+              <button key={f} onClick={() => toggleFilter(f)} aria-pressed={filters.includes(f)} className={`${filters.includes(f) ? "chip bg-asa-500 text-white" : "chip-off"} shadow-pop`}>
+                {f === "営業中" ? <Clock className="h-4 w-4" aria-hidden /> : f === "クーポンあり" ? <Ticket className="h-4 w-4" aria-hidden /> : null}
+                {f}
+              </button>
+            ))}
+            <span className="w-px shrink-0 bg-slate-300/70" aria-hidden />
             <button onClick={() => setCategory(null)} className={`${category === null ? "chip-on" : "chip-off"} shadow-pop`}>
               <LayoutGrid className="h-4 w-4" aria-hidden />
               すべて
@@ -427,11 +443,16 @@ function CustomerHome() {
           {isFallback && <p className="rounded-xl bg-sun-100 px-3 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>}
         </div>
 
-        {q ? (
+        {q || filters.length > 0 ? (
           /* 検索の結果 */
           <section className="px-4 pt-3">
             <h2 className="text-[15px] font-bold">
-              「{query.trim()}」のお店 <span className="num text-sm text-slate-400">{visible.length}</span>
+              {q ? `「${query.trim()}」のお店` : `${filters.join("・")}のお店`} <span className="num text-sm text-slate-400">{visible.length}</span>
+              {filters.length > 0 && (
+                <button onClick={() => setFilters([])} className="ml-2 text-xs font-bold text-saga-600">
+                  絞り込みを解除
+                </button>
+              )}
             </h2>
             {visible.length === 0 && <p className="mt-2 text-sm text-slate-500">見つかりませんでした。別の言葉でさがしてみてください。</p>}
             <ul className="mt-2 space-y-2">
@@ -447,21 +468,37 @@ function CustomerHome() {
         ) : (
           <>
             <section className="px-4 pt-4">
-              <p className="text-xs font-bold text-asa-500">{hello}</p>
-              <h1 className="mt-0.5 text-[22px] font-extrabold leading-snug text-slate-900">{name ? `${name}さん、今日はどこへ行こう。` : "今日は、どこへ行こう。"}</h1>
-              {isCustomer && (
-                <p className="mt-1 text-sm text-slate-600">
-                  {nearbyCouponCount > 0 ? (
-                    <>
-                      近く（1km 以内）で使えるクーポンが <b className="num text-lg text-coupon">{nearbyCouponCount}</b> 件あります
-                    </>
-                  ) : (
-                    "地図のピンや、下の一覧からお店を選べます"
+              <div className="relative overflow-hidden rounded-3xl bg-[#1F3D73] shadow-[0_10px_28px_rgba(20,40,77,0.18)]">
+                <img src="/art/panorama.svg" alt="" className="absolute inset-0 h-full w-full object-cover object-[60%_45%]" aria-hidden />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#14284D]/85 via-[#14284D]/45 to-transparent" aria-hidden />
+                <div className="relative px-5 py-5 text-white">
+                  <p className="text-xs font-bold text-white/80">{hello}</p>
+                  <h1 className="mt-1 text-[21px] font-extrabold leading-snug drop-shadow">
+                    {name ? (
+                      <>
+                        {name}さん、
+                        <br />
+                        今日はどこへ行こう。
+                      </>
+                    ) : (
+                      "今日は、どこへ行こう。"
+                    )}
+                  </h1>
+                  {isCustomer && (
+                    <p className="mt-2 text-sm text-white/90">
+                      {nearbyCouponCount > 0 ? (
+                        <>
+                          近く（1km 以内）で使えるクーポン <b className="num text-xl text-sun-400">{nearbyCouponCount}</b> 件
+                        </>
+                      ) : (
+                        "地図のピンや、下の一覧からお店を選べます"
+                      )}
+                    </p>
                   )}
-                </p>
-              )}
+                </div>
+              </div>
               {unread > 0 && (
-                <Link href="/dashboard/customer#news" className="mt-2 flex items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-sm ring-1 ring-slate-200/70">
+                <Link href="/dashboard/customer#news" className="mt-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-sm ring-1 ring-slate-200/70">
                   <Bell className="h-4 w-4 text-asa-500" aria-hidden />
                   新しいお知らせが <b className="num text-asa-500">{unread}</b> 件あります
                   <ChevronRight className="ml-auto h-4 w-4 text-slate-400" aria-hidden />
@@ -470,7 +507,7 @@ function CustomerHome() {
             </section>
 
             {isCustomer && couponList.length > 0 && (
-              <Carousel title="近くのクーポン" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップで、クーポンの条件・お店の情報・行き方を表示" count={coupons.length}>
+              <Carousel title="近くのクーポン" eyebrow="COUPON" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップで、クーポンの条件・お店の情報・行き方を表示" count={coupons.length}>
                 {couponList.map((c) => (
                   <CouponCard
                     key={c.id}
@@ -484,7 +521,7 @@ function CustomerHome() {
               </Carousel>
             )}
             {ads.length > 0 && (
-              <Carousel title="PR・お店からのお知らせ" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} note="タップで、お知らせの全文とお店の情報を表示">
+              <Carousel title="PR・お店からのお知らせ" eyebrow="NEWS" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} note="タップで、お知らせの全文とお店の情報を表示">
                 {ads.map((ad) => (
                   <AdCard
                     key={ad.id}
@@ -498,7 +535,7 @@ function CustomerHome() {
               </Carousel>
             )}
             {recList.length > 0 && (
-              <Carousel title={recs.length ? "あなたへのおすすめ" : "おすすめのお店"} icon={<Sparkles className="h-4 w-4 text-asa-500" aria-hidden />} note={recs.length ? "見たお店・使ったクーポンから選んでいます" : "クーポン配信中のお店"}>
+              <Carousel title={recs.length ? "あなたへのおすすめ" : "おすすめのお店"} eyebrow="PICK UP" icon={<Sparkles className="h-4 w-4 text-asa-500" aria-hidden />} note={recs.length ? "見たお店・使ったクーポンから選んでいます" : "クーポン配信中のお店"}>
                 {recList.map(({ shop, note }) => (
                   <ShopCard
                     key={shop.id}
@@ -513,7 +550,7 @@ function CustomerHome() {
               </Carousel>
             )}
             {nearList.length > 0 && (
-              <Carousel title="近くのお店" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="現在地から近い順">
+              <Carousel title="近くのお店" eyebrow="NEARBY" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="現在地から近い順">
                 {nearList.map((shop) => (
                   <ShopCard
                     key={shop.id}
@@ -528,7 +565,7 @@ function CustomerHome() {
               </Carousel>
             )}
             {spotList.length > 0 && (
-              <Carousel title="観光スポット" icon={<Landmark className="h-4 w-4 text-sun-500" aria-hidden />} note="タップで、地図に行き方を表示">
+              <Carousel title="観光スポット" eyebrow="SIGHTSEEING" icon={<Landmark className="h-4 w-4 text-sun-500" aria-hidden />} note="タップで、地図に行き方を表示">
                 {spotList.map((s) => (
                   <SpotCard key={s.id} name={s.name} description={s.description} meters={dist(s)} onOpen={() => startRoute({ ...s, kind: "spot" })} />
                 ))}
@@ -555,6 +592,7 @@ function CustomerHome() {
         <DetailSheet
           shop={sheetShop}
           coupons={sheetCoupons}
+          menu={detail && detail.id === sheet?.id ? detail.menu : null}
           shopAds={ads.filter((a) => a.business_id === sheetShop.id)}
           from={sheet!.from}
           me={position}
@@ -605,8 +643,8 @@ function PreviewCard({
       <button onClick={onOpen} className="flex w-full gap-3 p-3 text-left">
         <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl">
           <ShopPhoto shop={shop} className="h-full w-full" />
-          {(shop.best_discount ?? 0) > 0 && (
-            <span className="num absolute bottom-1 left-1 rounded-md bg-coupon px-1.5 py-0.5 text-[11px] font-extrabold text-white">{shop.best_discount}%OFF</span>
+          {shop.best_label && (
+            <span className="num absolute bottom-1 left-1 rounded-md bg-coupon px-1.5 py-0.5 text-[11px] font-extrabold text-white">{shop.best_label}</span>
           )}
         </span>
         <span className="min-w-0 flex-1">
@@ -735,10 +773,13 @@ function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | n
         </span>
         {status && <span className={`text-[11px] font-bold ${status.open ? "text-tea-700" : "text-slate-500"}`}>{status.label}</span>}
       </span>
-      {(s.best_discount ?? 0) > 0 && <span className="num shrink-0 rounded-lg bg-coral-50 px-2 py-1 text-xs font-bold text-coupon">{s.best_discount}%OFF</span>}
+      {s.best_label && <span className="num shrink-0 rounded-lg bg-coral-50 px-2 py-1 text-xs font-bold text-coupon">{s.best_label}</span>}
     </button>
   );
 }
+
+/** よく使う絞り込み（地図の上に並べる） */
+const QUICK_FILTERS = ["営業中", "クーポンあり", "駐車場あり", "テイクアウト", "子ども連れ歓迎", "カード払いOK"];
 
 function greeting() {
   const h = new Date().getHours();

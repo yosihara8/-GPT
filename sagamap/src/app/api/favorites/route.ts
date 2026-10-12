@@ -3,6 +3,7 @@ import { z } from "zod";
 import { query } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { requireApiUser } from "@/lib/session";
+import { BEST_LABEL_SQL } from "@/lib/coupon";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,8 @@ export async function GET() {
   const favorites = await query(
     `SELECT b.id, b.name, b.address, b.lat, b.lng, b.category, b.price_level,
             b.photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM b.photo_updated_at)::bigint AS photo_version,
-            (SELECT max(discount_rate) FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount
+            (SELECT max(discount_rate) FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount,
+            ${BEST_LABEL_SQL("b")} AS best_label
        FROM favorites f JOIN businesses b ON b.id = f.business_id
       WHERE f.customer_id = $1 ORDER BY f.created_at DESC`,
     [auth.user.id],

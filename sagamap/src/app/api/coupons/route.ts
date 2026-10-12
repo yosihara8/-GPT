@@ -7,6 +7,7 @@ import { announceToCustomers } from "@/lib/announce";
 import { blockedMessage, checkCoupon } from "@/lib/content-check";
 import { decodeJpegBase64 } from "@/lib/upload-image";
 import { getOwnerPlan, ownsBusiness, premiumRequired, requireApiUser } from "@/lib/session";
+import { COUPON_PUBLIC_COLUMNS, couponHeadline } from "@/lib/coupon";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,7 @@ export async function GET(req: NextRequest) {
     const rows = await query(
       `SELECT c.id, c.business_id, c.title, c.discount_rate, c.conditions, c.expires_at, c.is_active, c.created_at,
               (c.image IS NOT NULL) AS has_image, b.name AS business_name,
+              c.coupon_type, c.amount_yen, c.special_price, c.regular_price, c.benefit, c.max_uses, c.repeatable, c.first_visit_only,
               (SELECT count(*) FROM usage_history h WHERE h.coupon_id = c.id AND h.coupon_used)::int AS used_count
          FROM coupons c JOIN businesses b ON b.id = c.business_id
         WHERE b.owner_id = $1 AND c.deleted_at IS NULL ORDER BY c.created_at DESC`,
@@ -55,7 +57,7 @@ export async function GET(req: NextRequest) {
   }
 
   const rows = await query(
-    `SELECT c.id, c.title, c.discount_rate, c.conditions, c.expires_at, (c.image IS NOT NULL) AS has_image,
+    `SELECT ${COUPON_PUBLIC_COLUMNS("c")},
             b.id AS business_id, b.name AS business_name, b.category, b.price_level, b.lat, b.lng,
             ${distanceSql} AS distance_m
        FROM coupons c JOIN businesses b ON b.id = c.business_id
@@ -81,7 +83,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "店舗が見つかりません" }, { status: 404 });
   }
   // 景品表示法などの観点で自動チェック（NG は掲載不可、要注意は運営者が後で確認）
-  const check = checkCoupon({ title: d.title, conditions: d.conditions, discount_rate: d.discountRate });
+  const check = checkCoupon({
+    title: `${d.title}\n${d.benefit}`,
+    conditions: d.conditions,
+    discount_rate: d.couponType === "percent" ? d.discountRate : undefined,
+  });
   if (check.blocked.length) return NextResponse.json({ error: blockedMessage(check), reasons: check.blocked }, { status: 400 });
   // クーポン画像（任意）
   let image: Buffer | null = null;
@@ -91,16 +97,35 @@ export async function POST(req: Request) {
     image = decoded.image;
   }
   const [row] = await query(
-    `INSERT INTO coupons (business_id, title, discount_rate, conditions, expires_at, review_flags, image, image_type)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING id, business_id, title, discount_rate, conditions, expires_at, is_active, created_at, (image IS NOT NULL) AS has_image`,
-    [d.businessId, d.title, d.discountRate, d.conditions, d.expiresAt, check.warnings, image, image ? "image/jpeg" : null],
+    `INSERT INTO coupons (business_id, title, discount_rate, conditions, expires_at, review_flags, image, image_type,
+                          coupon_type, amount_yen, special_price, regular_price, benefit, max_uses, repeatable, first_visit_only)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+     RETURNING id, business_id, title, discount_rate, conditions, expires_at, is_active, created_at, (image IS NOT NULL) AS has_image,
+               coupon_type, amount_yen, special_price, regular_price, benefit, max_uses, repeatable, first_visit_only`,
+    [
+      d.businessId,
+      d.title,
+      d.couponType === "percent" ? d.discountRate : null,
+      d.conditions,
+      d.expiresAt,
+      check.warnings,
+      image,
+      image ? "image/jpeg" : null,
+      d.couponType,
+      d.couponType === "yen" ? d.amountYen : null,
+      d.couponType === "price" ? d.specialPrice : null,
+      d.couponType === "price" ? (d.regularPrice ?? null) : null,
+      d.couponType === "gift" ? d.benefit : "",
+      d.maxUses ?? null,
+      d.repeatable,
+      d.firstVisitOnly,
+    ],
   );
   const announced = d.notify
     ? await announceToCustomers({
         businessId: d.businessId,
         kind: "coupon",
-        title: `${d.title}（${d.discountRate}% OFF）`,
+        title: `${d.title}（${couponHeadline({ coupon_type: d.couponType, discount_rate: d.discountRate, amount_yen: d.amountYen, special_price: d.specialPrice, regular_price: d.regularPrice, benefit: d.benefit })}）`,
         body: `${d.conditions ? `${d.conditions}・` : ""}${d.expiresAt.toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })} まで有効`,
         link: `/dashboard/customer/coupons/${row.id}`,
       })

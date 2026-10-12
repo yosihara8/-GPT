@@ -3,6 +3,7 @@ import { APP_URL } from "./config";
 import { checkAd, checkCoupon } from "./content-check";
 import { escapeHtml } from "./escape";
 import { mailFooter, sendMail } from "./mail";
+import { COUPON_HEADLINE_SQL } from "./coupon";
 
 export type ReviewItem = {
   type: "coupon" | "ad";
@@ -17,7 +18,7 @@ export type ReviewItem = {
 /** 運営者の確認待ち（要注意の表現があり、まだ確認していない掲載中のもの） */
 export async function pendingReviews() {
   return query<ReviewItem>(
-    `SELECT 'coupon' AS type, c.id, c.title || '（' || c.discount_rate || '% OFF）' || CASE WHEN c.conditions <> '' THEN ' / ' || c.conditions ELSE '' END AS text,
+    `SELECT 'coupon' AS type, c.id, c.title || '（' || ${COUPON_HEADLINE_SQL('c')} || '）' || CASE WHEN c.conditions <> '' THEN ' / ' || c.conditions ELSE '' END AS text,
             b.name AS business_name, o.email AS owner_email, c.review_flags, c.created_at
        FROM coupons c JOIN businesses b ON b.id = c.business_id JOIN business_owners o ON o.id = b.owner_id
       WHERE c.is_active AND c.expires_at > now() AND cardinality(c.review_flags) > 0 AND c.reviewed_at IS NULL

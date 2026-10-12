@@ -1,6 +1,7 @@
 import { query, queryOne } from "./db";
 import { haversineMeters, estimateWalkMinutes, type LatLng } from "./geo";
 import { jstHour } from "./flows";
+import { BEST_LABEL_SQL } from "./coupon";
 
 /**
  * 簡易 AI 推薦エンジン（ハイブリッド型）
@@ -22,6 +23,7 @@ type Candidate = {
   price_level: number;
   crowd_level: number;
   best_discount: number | null;
+  best_label?: string | null;
 };
 
 export type Recommendation = Candidate & {
@@ -88,7 +90,8 @@ export async function recommendForCustomer(customerId: number, here: LatLng | nu
   const candidates = await query<Candidate>(
     `SELECT b.id, b.name, b.address, b.category, b.service_description, b.lat, b.lng, b.price_level, b.crowd_level,
             (SELECT max(discount_rate) FROM coupons c
-              WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount
+              WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount,
+            ${BEST_LABEL_SQL("b")} AS best_label
        FROM businesses b`,
   );
 
@@ -127,8 +130,8 @@ export async function recommendForCustomer(customerId: number, here: LatLng | nu
     const sCrowd = Math.max(0, 1 - crowdNow);
     if (sCrowd > 0.6) reasons.push("今は空いていそう");
 
-    const sCoupon = b.best_discount ? 1 : 0;
-    if (b.best_discount) reasons.push(`${b.best_discount}% OFF クーポンあり`);
+    const sCoupon = b.best_label ? 1 : 0;
+    if (b.best_label) reasons.push(`${b.best_label} クーポンあり`);
 
     let score =
       WEIGHTS.category * sCat +

@@ -288,3 +288,37 @@ CREATE TABLE IF NOT EXISTS shop_events (
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS shop_events_biz_idx ON shop_events (business_id, kind, created_at);
+
+-- クーポンの種類（％引き・円引き・特別価格・特典サービス）と使い方の設定
+ALTER TABLE coupons ALTER COLUMN discount_rate DROP NOT NULL;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS coupon_type TEXT NOT NULL DEFAULT 'percent';
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS amount_yen INTEGER;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS special_price INTEGER;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS regular_price INTEGER;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS benefit TEXT NOT NULL DEFAULT '';
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS max_uses INTEGER;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS repeatable BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS first_visit_only BOOLEAN NOT NULL DEFAULT false;
+DO $$ BEGIN
+  ALTER TABLE coupons ADD CONSTRAINT coupons_type_check CHECK (coupon_type IN ('percent', 'yen', 'price', 'gift'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- メニュー・商品（写真・価格つき。お店のページに表示）
+CREATE TABLE IF NOT EXISTS menu_items (
+  id           SERIAL PRIMARY KEY,
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  name         TEXT NOT NULL,
+  price        INTEGER,
+  description  TEXT NOT NULL DEFAULT '',
+  image        BYTEA,
+  image_type   TEXT,
+  sort         INTEGER NOT NULL DEFAULT 0,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS menu_items_biz_idx ON menu_items (business_id, sort, id);
+
+-- お店の特徴（駐車場・カード払いなど）と、予約・ホームページ・LINE のリンク
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS amenities TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS website_url TEXT;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS reservation_url TEXT;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS line_url TEXT;

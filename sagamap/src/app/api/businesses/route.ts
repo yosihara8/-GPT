@@ -4,6 +4,7 @@ import { parseBody } from "@/lib/http";
 import { storeCreateSchema } from "@/lib/schemas";
 import { ADDRESS_NOT_FOUND, geocodeAddress } from "@/lib/geocode";
 import { getOwnerPlan, requireApiUser } from "@/lib/session";
+import { BEST_LABEL_SQL } from "@/lib/coupon";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,8 @@ export async function GET() {
             b.photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM b.photo_updated_at)::bigint AS photo_version,
             b.business_hours, b.closed_days,
             EXISTS (SELECT 1 FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS has_coupon,
-            (SELECT max(c.discount_rate) FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount
+            (SELECT max(c.discount_rate) FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount,
+            ${BEST_LABEL_SQL("b")} AS best_label, b.amenities
        FROM businesses b ORDER BY b.id`,
   );
   return NextResponse.json({ businesses: rows });

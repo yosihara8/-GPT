@@ -6,12 +6,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 /** 横にスライドして見る一覧（スマホは指で、パソコンは左右のボタンで動かす） */
 export default function Carousel({
   title,
+  eyebrow,
   icon,
   note,
   children,
   count,
 }: {
   title: string;
+  /** 見出しの上の小さな英字（例 COUPON） */
+  eyebrow?: string;
   icon?: React.ReactNode;
   note?: React.ReactNode;
   children: React.ReactNode;
@@ -23,7 +26,8 @@ export default function Carousel({
     <section className="py-3">
       <div className="mb-2 flex items-end justify-between gap-2 px-4">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-slate-900">
+          {eyebrow && <p className="num text-[10px] font-bold tracking-[0.28em] text-asa-500">{eyebrow}</p>}
+          <h2 className="flex items-center gap-1.5 font-mincho text-[17px] font-bold text-slate-900">
             {icon}
             {title}
             {count != null && <span className="num text-xs font-semibold text-slate-400">{count}</span>}

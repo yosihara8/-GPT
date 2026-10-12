@@ -89,3 +89,21 @@ export const DATABASE_URL =
  * 外部に公開されない DATABASE_URL（Vercel + Neon で自動設定）を代わりに使う。
  */
 export const AUTH_SECRET = process.env.NEXTAUTH_SECRET || DATABASE_URL;
+
+/** お店の特徴（事業主が選ぶ。お客さまのお店のページと絞り込みに使う） */
+export const AMENITIES = [
+  "駐車場あり",
+  "カード払いOK",
+  "電子マネー・QR決済",
+  "テイクアウト",
+  "予約できる",
+  "子ども連れ歓迎",
+  "ペットOK",
+  "Wi-Fiあり",
+  "英語メニュー・英語対応",
+  "全席禁煙",
+  "個室あり",
+  "車いすで入れる",
+  "1人でも入りやすい",
+  "団体・グループOK",
+] as const;
