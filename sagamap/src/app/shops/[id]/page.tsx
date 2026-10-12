@@ -22,6 +22,8 @@ type Shop = {
   price_level: number;
   instagram_url: string | null;
   twitter_url: string | null;
+  threads_url: string | null;
+  facebook_url: string | null;
   has_photo: boolean;
   photo_version: number | null;
   has_coupon: boolean;
@@ -31,7 +33,7 @@ async function getShop(id: number) {
   if (!Number.isInteger(id)) return null;
   return queryOne<Shop>(
     `SELECT b.id, b.name, b.address, b.lat, b.lng, b.category, b.service_description, b.contact, b.price_level,
-            b.instagram_url, b.twitter_url, b.photo IS NOT NULL AS has_photo,
+            b.instagram_url, b.twitter_url, b.threads_url, b.facebook_url, b.photo IS NOT NULL AS has_photo,
             EXTRACT(EPOCH FROM b.photo_updated_at)::bigint AS photo_version,
             EXISTS (SELECT 1 FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS has_coupon
        FROM businesses b WHERE b.id = $1`,
@@ -98,6 +100,16 @@ export default async function ShopPage({ params }: { params: { id: string } }) {
             {shop.twitter_url && (
               <a href={shop.twitter_url} target="_blank" rel="noreferrer" className="text-saga-600 underline">
                 X（Twitter）
+              </a>
+            )}
+            {shop.threads_url && (
+              <a href={shop.threads_url} target="_blank" rel="noreferrer" className="text-saga-600 underline">
+                Threads
+              </a>
+            )}
+            {shop.facebook_url && (
+              <a href={shop.facebook_url} target="_blank" rel="noreferrer" className="text-saga-600 underline">
+                Facebook
               </a>
             )}
           </div>

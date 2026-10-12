@@ -2,6 +2,8 @@
  * 営業時間・定休日（事業主が自由に書いた文字）から「営業中」などを判断する。
  * 読み取れない書き方のときは null（表示しない）
  */
+import { isWeekly, scheduleStatus, type SpecialDay } from "./schedule";
+
 const DAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
 export type OpenStatus = { label: string; open: boolean };
@@ -29,6 +31,17 @@ export function openStatus(hours?: string | null, closedDays?: string | null, no
     return { label: left <= 60 ? `まもなく閉店（${m[3]}:${m[4]}まで）` : `営業中（${m[3]}:${m[4]}まで）`, open: true };
   }
   return { label: `営業時間外（${m[1]}:${m[2]}から）`, open: false };
+}
+
+/** お店の営業状況。営業カレンダーがあればそれを使い、なければ自由入力の文字から判断する */
+export function shopStatus(
+  shop: { business_hours?: string | null; closed_days?: string | null; weekly_hours?: unknown; special_days?: SpecialDay[] | null },
+  now = new Date(),
+): OpenStatus | null {
+  if (isWeekly(shop.weekly_hours)) return scheduleStatus(shop.weekly_hours, shop.special_days ?? [], now);
+  const sp = shop.special_days?.find((d) => d.closed && d.day === new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10));
+  if (sp) return { label: "本日臨時休業", open: false };
+  return openStatus(shop.business_hours, shop.closed_days, now);
 }
 
 /** クーポンの残り日数（7 日以内のときだけ表示用の文字を返す） */
