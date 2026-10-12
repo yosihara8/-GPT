@@ -1,31 +1,51 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Bell, ChevronRight, Heart, Landmark, LayoutGrid, LocateFixed, MapPin, Megaphone, Search, Sparkles, Ticket, X } from "lucide-react";
+import {
+  Bell,
+  Car,
+  ChevronRight,
+  Footprints,
+  Heart,
+  Landmark,
+  LayoutGrid,
+  LocateFixed,
+  Map as MapIcon,
+  MapPin,
+  Megaphone,
+  Navigation,
+  Search,
+  Sparkles,
+  Store,
+  Ticket,
+  X,
+} from "lucide-react";
 import MapView, { hasCoupon, type MapShop, type MapSpot, type RouteSummary } from "@/components/MapView";
 import { trackAd, useActiveAds, type Ad } from "@/components/AdBanner";
 import CategoryIcon from "@/components/CategoryIcon";
+import ShopPhoto from "@/components/ShopPhoto";
 import LocationAccuracy from "@/components/LocationAccuracy";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import RouteBox from "@/components/RouteBox";
 import Carousel from "@/components/customer/Carousel";
 import { AdCard, CouponCard, ShopCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
-import ShopSheet, { type SheetCoupon, type SheetShop } from "@/components/customer/ShopSheet";
+import DetailSheet, { type DetailCoupon, type DetailShop, type SheetFrom } from "@/components/customer/DetailSheet";
 import CouponUse, { type UseTarget } from "@/components/customer/CouponUse";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CATEGORIES } from "@/lib/config";
-import { haversineMeters } from "@/lib/geo";
+import { formatDistance, haversineMeters } from "@/lib/geo";
+import { openStatus } from "@/lib/open-status";
 import { api } from "@/lib/fetcher";
-import { scrollToElement } from "@/lib/scroll";
 
-type Shop = MapShop &
-  SheetShop & { address: string; service_description: string; has_photo?: boolean; photo_version?: number | null; best_discount?: number | null };
+type Shop = MapShop & DetailShop & { address: string; service_description: string };
 type Spot = MapSpot & { description?: string };
 type Rec = { id: number; reasons?: string[] };
 type Favorite = { id: number; name: string; lat: number; lng: number };
+type RouteTarget = { id: number; name: string; lat: number; lng: number; kind: "shop" | "spot"; description?: string };
+type ShopEvent = "route" | "call" | "save" | "share" | "coupon_view";
 
 export default function HomePage() {
   return (
@@ -35,11 +55,18 @@ export default function HomePage() {
   );
 }
 
+/** 事業主向けの統計に、お客さまの行動を記録する（失敗しても画面には影響させない） */
+function trackShop(id: number, kind: ShopEvent) {
+  fetch(`/api/businesses/${id}/event`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind }) }).catch(
+    () => undefined,
+  );
+}
+
 /**
  * お客さまの画面（地図・お店・クーポン・経路を 1 ページで）
- *  - 地図は上に固定。検索と業種の切り替えは地図の上
- *  - お店を選ぶと、その場でお店の内容（行動ボタン・クーポン・経路）を表示
- *  - 下に「近くのクーポン」「あなたへのおすすめ」「近くのお店」「PR」「観光スポット」を横にスライドして見る
+ *  1 回目のタップ：カード・クーポン・PR → お店のページ（画面いっぱい）。地図のピン → 地図の下に小さな案内
+ *  2 回目のタップ：経路（地図に表示）／電話／クーポンを使う
+ *  3 回目のタップ：ナビ開始・利用済みの画面・近くのお店へ
  */
 function CustomerHome() {
   const params = useSearchParams();
@@ -62,14 +89,14 @@ function CustomerHome() {
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(Number(params.get("shop")) || null);
-  const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null);
-  const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
-  const [detail, setDetail] = useState<{ business: Partial<SheetShop>; coupons: SheetCoupon[] } | null>(null);
+  const [preview, setPreview] = useState<number | null>(null);
+  const [sheet, setSheet] = useState<{ id: number; from: SheetFrom } | null>(null);
+  const [detail, setDetail] = useState<{ id: number; business: Partial<DetailShop>; coupons: DetailCoupon[] } | null>(null);
   const [useTarget, setUseTarget] = useState<UseTarget | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   // 経路（表示中に別のお店を選ぶと、そのお店への経路に切り替わる）
-  const [routeOn, setRouteOn] = useState(false);
+  const [routeTo, setRouteTo] = useState<RouteTarget | null>(null);
   const [favRoute, setFavRoute] = useState(params.get("route") === "fav");
   const [routeMode, setRouteMode] = useState<"foot" | "car">("foot");
   const [route, setRoute] = useState<RouteSummary | null>(null);
@@ -116,44 +143,107 @@ function CustomerHome() {
     fetch("/api/ping", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(position) }).catch(() => undefined);
   }, [status, position, accuracy]);
 
-  // お店の詳細（会員は閲覧履歴として記録され、おすすめに反映される）
+  // お店のページを開いたら詳細を読み込む（会員は閲覧履歴として記録され、おすすめに反映される）
   useEffect(() => {
-    setDetail(null);
-    if (!selectedId) return;
-    fetch(`/api/businesses/${selectedId}`)
+    if (!sheet) return;
+    const id = sheet.id;
+    if (detail?.id === id) return;
+    fetch(`/api/businesses/${id}`)
       .then((r) => r.json())
-      .then((d) => setDetail({ business: d.business ?? {}, coupons: d.coupons ?? [] }))
-      .catch(() => setDetail(null));
-  }, [selectedId]);
+      .then((d) => setDetail({ id, business: d.business ?? {}, coupons: d.coupons ?? [] }))
+      .catch(() => setDetail({ id, business: {}, coupons: [] }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sheet?.id]);
+
+  // お店のページは「戻る」（スマホの戻るボタン・ジェスチャー）で閉じられるようにする
+  const pushed = useRef(false);
+  useEffect(() => {
+    const onPop = () => {
+      if (pushed.current) {
+        pushed.current = false;
+        setSheet(null);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  // 開いている間は後ろの画面が動かないようにする
+  useEffect(() => {
+    if (!sheet) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [sheet]);
+
+  const openSheet = useCallback((id: number, from: SheetFrom = { type: "shop" }) => {
+    setPreview(null);
+    setSheet({ id, from });
+    if (!pushed.current) {
+      window.history.pushState({ sagamapSheet: true }, "");
+      pushed.current = true;
+    }
+  }, []);
+  const closeSheet = useCallback(() => {
+    if (pushed.current) window.history.back();
+    else setSheet(null);
+  }, []);
+
+  // メール・お知らせのリンク（?shop=ID）から来たら、そのお店のページを開く
+  const opened = useRef(false);
+  useEffect(() => {
+    const id = Number(params.get("shop"));
+    if (opened.current || !id || shops.length === 0) return;
+    opened.current = true;
+    if (shops.some((s) => s.id === id)) openSheet(id);
+  }, [params, shops, openSheet]);
 
   const dist = useCallback((p: { lat: number; lng: number }) => (here ? haversineMeters(here, p) : null), [here]);
   const favIds = useMemo(() => new Set(favorites.map((f) => f.id)), [favorites]);
+  const showToast = (t: string) => {
+    setToast(t);
+    setTimeout(() => setToast(null), 2200);
+  };
   async function toggleFavorite(id: number) {
     if (!isCustomer) return;
-    if (favIds.has(id)) await api(`/api/favorites?businessId=${id}`, { method: "DELETE" });
-    else await api("/api/favorites", { method: "POST", body: JSON.stringify({ businessId: id }) });
+    if (favIds.has(id)) {
+      await api(`/api/favorites?businessId=${id}`, { method: "DELETE" });
+      showToast("お気に入りから外しました");
+    } else {
+      await api("/api/favorites", { method: "POST", body: JSON.stringify({ businessId: id }) });
+      trackShop(id, "save");
+      showToast("お気に入りに保存しました（マイページで見られます）");
+    }
     loadFavorites();
   }
+  async function share(shop: { id: number; name: string }) {
+    const url = `${location.origin}/shops/${shop.id}`;
+    trackShop(shop.id, "share");
+    try {
+      if (navigator.share) await navigator.share({ title: `${shop.name}｜佐賀観光マップ`, url });
+      else {
+        await navigator.clipboard.writeText(url);
+        showToast("リンクをコピーしました");
+      }
+    } catch {
+      /* 共有をやめた場合は何もしない */
+    }
+  }
 
-  const openShop = useCallback((id: number, ad: Ad | null = null) => {
-    setSelectedAd(ad);
-    setSelectedSpot(null);
-    setSelectedId(id);
-    setTimeout(() => scrollToElement("shop-card", "home-panel"), 80);
-  }, []);
-  const openSpot = useCallback((s: Spot) => {
-    setSelectedId(null);
-    setSelectedAd(null);
-    setSelectedSpot(s);
-    setRouteOn(true);
-    setTimeout(() => scrollToElement("shop-card", "home-panel"), 80);
-  }, []);
-  const closeSheet = () => {
-    setSelectedId(null);
-    setSelectedSpot(null);
-    setSelectedAd(null);
-    setRouteOn(false);
-  };
+  // 経路を始める：お店のページを閉じて、地図に経路を出す（地図が見える位置まで戻す）
+  const startRoute = useCallback(
+    (t: RouteTarget) => {
+      setFavRoute(false);
+      setPreview(null);
+      setRouteTo(t);
+      if (t.kind === "shop") trackShop(t.id, "route");
+      if (pushed.current) closeSheet();
+      else setSheet(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [closeSheet],
+  );
 
   // 検索（店名・業種・紹介文・住所）と業種の切り替え
   const q = query.trim().toLowerCase();
@@ -164,16 +254,12 @@ function CustomerHome() {
   }, [shops, category, q]);
   const byDistance = useCallback(<T extends { lat: number; lng: number }>(xs: T[]) => [...xs].sort((a, b) => (dist(a) ?? 0) - (dist(b) ?? 0)), [dist]);
 
-  const selected = shops.find((s) => s.id === selectedId) ?? null;
-  const sheetShop: SheetShop | null = selected ? { ...selected, ...detail?.business } : null;
-
   // 経路の行き先：選んだお店／観光スポット／お気に入りを巡るルート
   const routeStops = useMemo<MapSpot[] | null>(() => {
-    if (routeOn && selected) return [{ id: selected.id, name: selected.name, lat: selected.lat, lng: selected.lng }];
-    if (routeOn && selectedSpot) return [selectedSpot];
+    if (routeTo) return [{ id: routeTo.id, name: routeTo.name, lat: routeTo.lat, lng: routeTo.lng }];
     if (favRoute && favorites.length) return favorites.slice(0, 9).map((f) => ({ id: f.id, name: f.name, lat: f.lat, lng: f.lng }));
     return null;
-  }, [routeOn, selected, selectedSpot, favRoute, favorites]);
+  }, [routeTo, favRoute, favorites]);
   useEffect(() => {
     if (!routeStops) return;
     setRoute(null);
@@ -215,6 +301,22 @@ function CustomerHome() {
   const name = session?.user.name;
   const nearbyCouponCount = coupons.filter((c) => (c.distance_m ?? Infinity) <= 1000).length;
 
+  // お店のページに出す内容
+  const sheetBase = sheet ? shops.find((s) => s.id === sheet.id) : undefined;
+  const sheetShop: DetailShop | null = sheetBase ? { ...sheetBase, ...(detail?.id === sheet?.id ? detail?.business : {}) } : null;
+  const sheetCoupons = detail && detail.id === sheet?.id ? detail.coupons : null;
+  const sheetNearby = useMemo(() => {
+    if (!sheetBase) return [];
+    return shops
+      .filter((s) => s.id !== sheetBase.id)
+      .map((s) => ({ shop: s, meters: haversineMeters(sheetBase, s) }))
+      .filter((x) => x.meters <= 3000)
+      .sort((a, b) => Number(hasCoupon(b.shop)) - Number(hasCoupon(a.shop)) || a.meters - b.meters)
+      .slice(0, 10);
+  }, [sheetBase, shops]);
+  const previewShop = preview ? shops.find((s) => s.id === preview) : undefined;
+  const routeShop = routeTo?.kind === "shop" ? shops.find((s) => s.id === routeTo.id) : undefined;
+
   return (
     <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
       {/* 地図（スマホは上に固定。パソコンは右側いっぱい） */}
@@ -225,8 +327,8 @@ function CustomerHome() {
           meAccuracy={accuracy}
           spots={spots}
           highlightRadius={Number.POSITIVE_INFINITY}
-          selectedId={selectedId}
-          onSelectShop={(id) => openShop(id)}
+          selectedId={sheet?.id ?? preview ?? routeShop?.id ?? null}
+          onSelectShop={(id) => setPreview(id)}
           routeStops={routeStops}
           routeMode={routeMode}
           onRoute={(r, err) => {
@@ -239,7 +341,7 @@ function CustomerHome() {
         />
         {/* 検索と業種（地図の上） */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[600] space-y-2 p-3">
-          <label className="pointer-events-auto flex h-11 items-center gap-2 rounded-full lg:max-w-lg bg-white px-4 shadow-[0_2px_10px_rgba(20,40,77,0.18)] ring-1 ring-slate-200/70">
+          <label className="pointer-events-auto flex h-11 items-center gap-2 rounded-full bg-white px-4 shadow-[0_2px_10px_rgba(20,40,77,0.18)] ring-1 ring-slate-200/70 lg:max-w-lg">
             <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
             <input
               value={query}
@@ -255,7 +357,7 @@ function CustomerHome() {
               </button>
             )}
           </label>
-          <div className="pointer-events-auto -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="pointer-events-auto -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 lg:mr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button onClick={() => setCategory(null)} className={`${category === null ? "chip-on" : "chip-off"} shadow-pop`}>
               <LayoutGrid className="h-4 w-4" aria-hidden />
               すべて
@@ -271,49 +373,79 @@ function CustomerHome() {
         <button
           onClick={locate}
           aria-label="現在地に戻る"
-          className="absolute bottom-3 right-3 z-[600] flex h-11 w-11 items-center justify-center rounded-full bg-white text-saga-600 shadow-pop hover:bg-slate-50"
+          className={`absolute right-3 z-[600] flex h-11 w-11 items-center justify-center rounded-full bg-white text-saga-600 shadow-pop hover:bg-slate-50 ${previewShop || routeTo || favRoute ? "top-[112px]" : "bottom-3"}`}
         >
           <LocateFixed className="h-5 w-5" aria-hidden />
         </button>
+
+        {/* 地図のピンを押したとき：地図の下に小さな案内（もう 1 回押すとお店のページ） */}
+        {previewShop && !routeTo && (
+          <div className="absolute inset-x-3 bottom-3 z-[700]">
+            <PreviewCard
+              shop={previewShop}
+              meters={dist(previewShop)}
+              onOpen={() => openSheet(previewShop.id)}
+              onRoute={() => startRoute({ id: previewShop.id, name: previewShop.name, lat: previewShop.lat, lng: previewShop.lng, kind: "shop" })}
+              onClose={() => setPreview(null)}
+            />
+          </div>
+        )}
+
+        {/* 経路を表示中：所要時間・ナビ開始・お店の情報へ */}
+        {(routeTo || (favRoute && favorites.length > 0)) && (
+          <div className="absolute inset-x-3 bottom-3 z-[700]">
+            <RouteBar
+              title={routeTo ? routeTo.name : `お気に入り ${Math.min(9, favorites.length)} か所を巡るルート`}
+              subtitle={routeTo?.kind === "spot" ? routeTo.description : undefined}
+              route={route}
+              loading={routeLoading}
+              error={routeError}
+              mode={routeMode}
+              onMode={setRouteMode}
+              navUrl={
+                routeTo
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${routeTo.lat},${routeTo.lng}&travelmode=${routeMode === "car" ? "driving" : "walking"}`
+                  : null
+              }
+              onNav={() => routeTo?.kind === "shop" && trackShop(routeTo.id, "route")}
+              onInfo={routeTo?.kind === "shop" ? () => openSheet(routeTo.id) : undefined}
+              onClose={() => {
+                setRouteTo(null);
+                setFavRoute(false);
+                setRoute(null);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* 一覧パネル（スマホは地図の下、パソコンは左側） */}
-      <div id="home-panel" className="relative z-10 bg-cream pb-6 lg:order-1 lg:w-[460px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-slate-200">
+      <div id="home-panel" className="relative z-10 bg-cream pb-8 lg:order-1 lg:w-[480px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-slate-200">
         <div className="space-y-2 px-4 pt-3 empty:hidden">
           <VerifyEmailBanner />
           <LocationAccuracy status={status} accuracy={accuracy} />
           {isFallback && <p className="rounded-xl bg-sun-100 px-3 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>}
         </div>
 
-        {/* 検索の結果 */}
         {q ? (
+          /* 検索の結果 */
           <section className="px-4 pt-3">
             <h2 className="text-[15px] font-bold">
               「{query.trim()}」のお店 <span className="num text-sm text-slate-400">{visible.length}</span>
             </h2>
             {visible.length === 0 && <p className="mt-2 text-sm text-slate-500">見つかりませんでした。別の言葉でさがしてみてください。</p>}
             <ul className="mt-2 space-y-2">
-              {byDistance(visible).slice(0, 30).map((s) => (
-                <li key={s.id}>
-                  <button onClick={() => { setQuery(""); openShop(s.id); }} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-slate-200/70">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-saga-50 text-saga-600" aria-hidden>
-                      <CategoryIcon category={s.category} className="h-5 w-5" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-bold">{s.name}</span>
-                      <span className="block truncate text-xs text-slate-500">
-                        {s.category}・{travelText(dist(s))}
-                      </span>
-                    </span>
-                    {(s.best_discount ?? 0) > 0 && <span className="num shrink-0 rounded-lg bg-coral-50 px-2 py-1 text-xs font-bold text-coupon">{s.best_discount}%OFF</span>}
-                  </button>
-                </li>
-              ))}
+              {byDistance(visible)
+                .slice(0, 30)
+                .map((s) => (
+                  <li key={s.id}>
+                    <ResultRow shop={s} meters={dist(s)} onOpen={() => openSheet(s.id)} />
+                  </li>
+                ))}
             </ul>
           </section>
         ) : (
-          !sheetShop &&
-          !selectedSpot && (
+          <>
             <section className="px-4 pt-4">
               <p className="text-xs font-bold text-asa-500">{hello}</p>
               <h1 className="mt-0.5 text-[22px] font-extrabold leading-snug text-slate-900">{name ? `${name}さん、今日はどこへ行こう。` : "今日は、どこへ行こう。"}</h1>
@@ -332,91 +464,36 @@ function CustomerHome() {
                 <Link href="/dashboard/customer#news" className="mt-2 flex items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-sm ring-1 ring-slate-200/70">
                   <Bell className="h-4 w-4 text-asa-500" aria-hidden />
                   新しいお知らせが <b className="num text-asa-500">{unread}</b> 件あります
+                  <ChevronRight className="ml-auto h-4 w-4 text-slate-400" aria-hidden />
                 </Link>
               )}
             </section>
-          )
-        )}
 
-        {/* 選んだお店／観光スポット */}
-        {sheetShop && !q && (
-          <ShopSheet
-            shop={sheetShop}
-            coupons={detail?.coupons ?? null}
-            ad={selectedAd?.business_id === sheetShop.id ? selectedAd : null}
-            meters={dist(sheetShop)}
-            favorite={favIds.has(sheetShop.id)}
-            routeOn={routeOn}
-            route={route}
-            routeLoading={routeLoading}
-            routeError={routeError}
-            routeMode={routeMode}
-            onRoute={() => {
-              setFavRoute(false);
-              setRouteOn(true);
-            }}
-            onRouteMode={setRouteMode}
-            onRouteClear={() => setRouteOn(false)}
-            onFavorite={() => toggleFavorite(sheetShop.id)}
-            onUseCoupon={(c) => setUseTarget({ ...c, shopName: sheetShop.name })}
-            onClose={closeSheet}
-          />
-        )}
-        {selectedSpot && !q && (
-          <article id="shop-card" className="mx-4 mt-3 rounded-3xl bg-white p-4 shadow-[0_2px_4px_rgba(20,40,77,0.05),0_12px_32px_rgba(20,40,77,0.12)] ring-1 ring-slate-200/70 [scroll-margin-top:calc(3.5rem+42dvh+8px)] lg:[scroll-margin-top:12px]">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="flex items-center gap-1 text-xs font-medium text-sun-500">
-                  <Landmark className="h-3.5 w-3.5" aria-hidden />
-                  観光スポット{dist(selectedSpot) != null && `・${travelText(dist(selectedSpot))}`}
-                </p>
-                <h2 className="mt-1 font-mincho text-[22px] font-bold">{selectedSpot.name}</h2>
-              </div>
-              <button onClick={closeSheet} aria-label="閉じる" className="rounded-full p-1.5 text-slate-500 hover:bg-slate-100">
-                <X className="h-5 w-5" aria-hidden />
-              </button>
-            </div>
-            {selectedSpot.description && <p className="mt-1 text-sm text-slate-600">{selectedSpot.description}</p>}
-            <RouteBox route={route} loading={routeLoading} error={routeError} mode={routeMode} onMode={setRouteMode} onClear={closeSheet} />
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${selectedSpot.lat},${selectedSpot.lng}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 inline-block text-sm font-bold text-saga-600"
-            >
-              Google マップで開く
-            </a>
-          </article>
-        )}
-        {favRoute && !selected && !selectedSpot && favorites.length > 0 && (
-          <section className="mx-4 mt-3 rounded-3xl bg-white p-4 ring-1 ring-slate-200/70">
-            <p className="flex items-center gap-1.5 font-bold">
-              <Heart className="h-4 w-4 fill-coupon text-coupon" aria-hidden />
-              お気に入り {Math.min(9, favorites.length)} か所を巡るルート
-            </p>
-            {route?.legs && (
-              <ol className="mt-2 space-y-1 text-sm">
-                {route.legs.map((l, i) => (
-                  <li key={i} className="flex justify-between gap-2">
-                    <span className="truncate">
-                      <b className="num mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[11px] text-white">{i + 1}</b>
-                      {l.to}
-                    </span>
-                    <span className="shrink-0 text-slate-500">{l.duration}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-            <RouteBox route={route} loading={routeLoading} error={routeError} mode={routeMode} onMode={setRouteMode} onClear={() => setFavRoute(false)} />
-          </section>
-        )}
-
-        {!q && (
-          <>
             {isCustomer && couponList.length > 0 && (
-              <Carousel title="近くのクーポン" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップすると、お店とクーポンの内容を表示します" count={coupons.length}>
+              <Carousel title="近くのクーポン" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップで、クーポンの条件・お店の情報・行き方を表示" count={coupons.length}>
                 {couponList.map((c) => (
-                  <CouponCard key={c.id} coupon={c} onOpen={() => openShop(c.business_id)} />
+                  <CouponCard
+                    key={c.id}
+                    coupon={c}
+                    onOpen={() => {
+                      trackShop(c.business_id, "coupon_view");
+                      openSheet(c.business_id, { type: "coupon", couponId: c.id });
+                    }}
+                  />
+                ))}
+              </Carousel>
+            )}
+            {ads.length > 0 && (
+              <Carousel title="PR・お店からのお知らせ" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} note="タップで、お知らせの全文とお店の情報を表示">
+                {ads.map((ad) => (
+                  <AdCard
+                    key={ad.id}
+                    ad={ad}
+                    onOpen={() => {
+                      trackAd(ad.id, "click");
+                      openSheet(ad.business_id, { type: "ad", ad });
+                    }}
+                  />
                 ))}
               </Carousel>
             )}
@@ -427,9 +504,9 @@ function CustomerHome() {
                     key={shop.id}
                     shop={shop}
                     meters={dist(shop)}
-                    note={note}
+                    note={note ?? openStatus(shop.business_hours, shop.closed_days)?.label}
                     favorite={favIds.has(shop.id)}
-                    onOpen={() => openShop(shop.id)}
+                    onOpen={() => openSheet(shop.id)}
                     onFavorite={isCustomer ? () => toggleFavorite(shop.id) : undefined}
                   />
                 ))}
@@ -442,31 +519,18 @@ function CustomerHome() {
                     key={shop.id}
                     shop={shop}
                     meters={dist(shop)}
+                    note={openStatus(shop.business_hours, shop.closed_days)?.label}
                     favorite={favIds.has(shop.id)}
-                    onOpen={() => openShop(shop.id)}
+                    onOpen={() => openSheet(shop.id)}
                     onFavorite={isCustomer ? () => toggleFavorite(shop.id) : undefined}
                   />
                 ))}
               </Carousel>
             )}
-            {ads.length > 0 && (
-              <Carousel title="PR・お店からのお知らせ" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />}>
-                {ads.map((ad) => (
-                  <AdCard
-                    key={ad.id}
-                    ad={ad}
-                    onOpen={() => {
-                      trackAd(ad.id, "click");
-                      openShop(ad.business_id, ad);
-                    }}
-                  />
-                ))}
-              </Carousel>
-            )}
             {spotList.length > 0 && (
-              <Carousel title="観光スポット" icon={<Landmark className="h-4 w-4 text-sun-500" aria-hidden />} note="タップすると、地図に経路を表示します">
+              <Carousel title="観光スポット" icon={<Landmark className="h-4 w-4 text-sun-500" aria-hidden />} note="タップで、地図に行き方を表示">
                 {spotList.map((s) => (
-                  <SpotCard key={s.id} name={s.name} description={s.description} meters={dist(s)} onOpen={() => openSpot(s)} />
+                  <SpotCard key={s.id} name={s.name} description={s.description} meters={dist(s)} onOpen={() => startRoute({ ...s, kind: "spot" })} />
                 ))}
               </Carousel>
             )}
@@ -486,8 +550,193 @@ function CustomerHome() {
         )}
       </div>
 
+      {/* お店のページ（画面いっぱい。パソコンは左側。戻るボタンで閉じる） */}
+      {sheetShop && (
+        <DetailSheet
+          shop={sheetShop}
+          coupons={sheetCoupons}
+          shopAds={ads.filter((a) => a.business_id === sheetShop.id)}
+          from={sheet!.from}
+          me={position}
+          meters={dist(sheetShop)}
+          favorite={favIds.has(sheetShop.id)}
+          nearby={sheetNearby}
+          favIds={favIds}
+          onClose={closeSheet}
+          onRoute={() => startRoute({ id: sheetShop.id, name: sheetShop.name, lat: sheetShop.lat, lng: sheetShop.lng, kind: "shop" })}
+          onNav={() => trackShop(sheetShop.id, "route")}
+          onCall={() => trackShop(sheetShop.id, "call")}
+          onFavorite={() => toggleFavorite(sheetShop.id)}
+          onShare={() => share(sheetShop)}
+          onUseCoupon={(c) => setUseTarget({ ...c, shopName: sheetShop.name })}
+          onOpenShop={(id) => setSheet({ id, from: { type: "shop" } })}
+          onToggleFavorite={isCustomer ? toggleFavorite : undefined}
+        />
+      )}
+
       <CouponUse target={useTarget} onClose={() => setUseTarget(null)} onUsed={loadRecs} />
+
+      {toast && (
+        <div className="fixed inset-x-0 bottom-24 z-[2100] flex justify-center px-4" role="status">
+          <p className="rounded-full bg-slate-900/90 px-4 py-2 text-sm font-bold text-white shadow-lg">{toast}</p>
+        </div>
+      )}
     </main>
+  );
+}
+
+/** 地図のピンを押したときの小さな案内（写真・割引・営業中・距離） */
+function PreviewCard({
+  shop,
+  meters,
+  onOpen,
+  onRoute,
+  onClose,
+}: {
+  shop: Shop;
+  meters: number | null;
+  onOpen: () => void;
+  onRoute: () => void;
+  onClose: () => void;
+}) {
+  const status = openStatus(shop.business_hours, shop.closed_days);
+  return (
+    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_8px_24px_rgba(20,40,77,0.25)] ring-1 ring-slate-200/70">
+      <button onClick={onOpen} className="flex w-full gap-3 p-3 text-left">
+        <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl">
+          <ShopPhoto shop={shop} className="h-full w-full" />
+          {(shop.best_discount ?? 0) > 0 && (
+            <span className="num absolute bottom-1 left-1 rounded-md bg-coupon px-1.5 py-0.5 text-[11px] font-extrabold text-white">{shop.best_discount}%OFF</span>
+          )}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1 text-[11px] text-slate-500">
+            <CategoryIcon category={shop.category} className="h-3 w-3" />
+            {shop.category}
+          </span>
+          <span className="mt-0.5 block truncate text-base font-bold text-slate-900">{shop.name}</span>
+          <span className="mt-0.5 block truncate text-xs text-slate-500">{travelText(meters)}</span>
+          {status && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${status.open ? "bg-tea-100 text-tea-700" : "bg-slate-100 text-slate-600"}`}>{status.label}</span>}
+        </span>
+      </button>
+      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 border-t border-slate-100 p-2">
+        <button onClick={onOpen} className="btn-outline rounded-full py-2">
+          <Store className="h-4 w-4" aria-hidden />
+          お店の詳細
+        </button>
+        <button onClick={onRoute} className="btn-accent rounded-full py-2">
+          <Navigation className="h-4 w-4" aria-hidden />
+          ここへ行く
+        </button>
+        <button onClick={onClose} aria-label="閉じる" className="rounded-full px-3 text-slate-400 hover:bg-slate-100">
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** 経路を表示している間の帯（徒歩・車／所要時間／ナビ開始／お店の情報） */
+function RouteBar({
+  title,
+  subtitle,
+  route,
+  loading,
+  error,
+  mode,
+  onMode,
+  navUrl,
+  onNav,
+  onInfo,
+  onClose,
+}: {
+  title: string;
+  subtitle?: string;
+  route: RouteSummary | null;
+  loading: boolean;
+  error: string | null;
+  mode: "foot" | "car";
+  onMode: (m: "foot" | "car") => void;
+  navUrl: string | null;
+  onNav: () => void;
+  onInfo?: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="rounded-3xl bg-white p-3 shadow-[0_8px_24px_rgba(20,40,77,0.25)] ring-1 ring-slate-200/70">
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold text-slate-900">{title}</p>
+          {subtitle && <p className="truncate text-xs text-slate-500">{subtitle}</p>}
+          <p className="mt-0.5 text-lg font-extrabold text-saga-600">
+            {loading ? (
+              <span className="text-sm font-bold">経路を計算しています…</span>
+            ) : error ? (
+              <span className="text-sm font-bold text-red-600">{error}</span>
+            ) : route ? (
+              <>
+                {route.mode === "WALKING" ? "徒歩" : "車"}で約 <span className="num">{Math.max(1, Math.round(route.totalSeconds / 60))}</span> 分
+                <span className="ml-1 text-sm font-bold text-slate-500">（{formatDistance(route.totalMeters)}）</span>
+              </>
+            ) : null}
+          </p>
+          {route?.estimated && <p className="text-[11px] text-amber-700">道順を取得できず、直線距離からの目安です</p>}
+        </div>
+        <div className="flex shrink-0 rounded-full bg-slate-100 p-1 text-xs font-bold">
+          {(["foot", "car"] as const).map((m) => (
+            <button key={m} onClick={() => onMode(m)} aria-pressed={mode === m} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 ${mode === m ? "bg-saga-600 text-white" : "text-slate-500"}`}>
+              {m === "foot" ? <Footprints className="h-3.5 w-3.5" aria-hidden /> : <Car className="h-3.5 w-3.5" aria-hidden />}
+              {m === "foot" ? "徒歩" : "車"}
+            </button>
+          ))}
+        </div>
+        <button onClick={onClose} aria-label="経路を消す" className="shrink-0 rounded-full p-1.5 text-slate-400 hover:bg-slate-100">
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+      <div className={`mt-2 grid gap-2 ${onInfo && navUrl ? "grid-cols-2" : "grid-cols-1"}`}>
+        {onInfo && (
+          <button onClick={onInfo} className="btn-outline rounded-full py-2">
+            <Store className="h-4 w-4" aria-hidden />
+            お店の情報・クーポン
+          </button>
+        )}
+        {navUrl && (
+          <a href={navUrl} target="_blank" rel="noreferrer" onClick={onNav} className="btn-accent rounded-full py-2">
+            <MapIcon className="h-4 w-4" aria-hidden />
+            ナビを開始
+          </a>
+        )}
+      </div>
+      {route?.provider === "osm" && (
+        <p className="mt-1 text-right text-[10px] text-slate-400">
+          道順 ©{" "}
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
+            OpenStreetMap contributors
+          </a>
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** 検索結果の 1 行 */
+function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | null; onOpen: () => void }) {
+  const status = openStatus(s.business_hours, s.closed_days);
+  return (
+    <button onClick={onOpen} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-slate-200/70">
+      <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+        <ShopPhoto shop={s} className="h-full w-full" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-bold">{s.name}</span>
+        <span className="block truncate text-xs text-slate-500">
+          {s.category}・{travelText(meters)}
+        </span>
+        {status && <span className={`text-[11px] font-bold ${status.open ? "text-tea-700" : "text-slate-500"}`}>{status.label}</span>}
+      </span>
+      {(s.best_discount ?? 0) > 0 && <span className="num shrink-0 rounded-lg bg-coral-50 px-2 py-1 text-xs font-bold text-coupon">{s.best_discount}%OFF</span>}
+    </button>
   );
 }
 
