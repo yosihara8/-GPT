@@ -271,3 +271,6 @@ CREATE TABLE IF NOT EXISTS ad_events (
 );
 CREATE INDEX IF NOT EXISTS ad_events_ad_idx ON ad_events (ad_id, kind);
 ALTER TABLE ads ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+
+-- 解約手続き済みの有料プランが終わる日（それまでは有料プランのまま使える）
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS plan_ends_at TIMESTAMPTZ;

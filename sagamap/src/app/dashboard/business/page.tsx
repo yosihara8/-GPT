@@ -16,7 +16,7 @@ import AdStats from "@/components/AdStats";
 import { api } from "@/lib/fetcher";
 import { CATEGORIES, PRICE_OPTIONS, PRICE_STANDARD } from "@/lib/config";
 
-type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number };
+type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number; plan_ends_at?: string | null };
 type Store = {
   id: number;
   name: string;
@@ -142,6 +142,11 @@ function BusinessDashboard() {
                   : "0 円"}
               </span>
             </span>
+            {premium && owner?.plan_ends_at && (
+              <span className="mt-0.5 block text-xs font-bold text-coupon">
+                解約手続き済み・{new Date(owner.plan_ends_at).toLocaleDateString("ja-JP")}まで有料プランを使えます
+              </span>
+            )}
           </span>
           <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-saga-600">
             <span className="group-open:hidden">詳しく見る</span>

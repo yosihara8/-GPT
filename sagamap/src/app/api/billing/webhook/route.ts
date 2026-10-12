@@ -28,6 +28,7 @@ export async function POST(req: Request) {
         await setPlan(ownerId, "premium", {
           customerId: String(s.customer),
           subscriptionId: String(s.subscription),
+          endsAt: null,
         });
       }
       break;
@@ -41,6 +42,8 @@ export async function POST(req: Request) {
       await setPlan(ownerId, active ? "premium" : "free", {
         customerId: String(sub.customer),
         subscriptionId: active ? sub.id : null,
+        // 解約手続き済みなら、支払い済みの期間の最終日まで有料プランのまま（その日に subscription.deleted が届く）
+        endsAt: active && sub.cancel_at ? new Date(sub.cancel_at * 1000) : null,
       });
       break;
     }
@@ -51,14 +54,14 @@ export async function POST(req: Request) {
 async function setPlan(
   ownerId: number,
   plan: "free" | "premium",
-  stripeIds: { customerId: string; subscriptionId: string | null },
+  stripeIds: { customerId: string; subscriptionId: string | null; endsAt: Date | null },
 ) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
     await client.query(
-      `UPDATE business_owners SET plan = $1, stripe_customer_id = $2, stripe_subscription_id = $3 WHERE id = $4`,
-      [plan, stripeIds.customerId, stripeIds.subscriptionId, ownerId],
+      `UPDATE business_owners SET plan = $1, stripe_customer_id = $2, stripe_subscription_id = $3, plan_ends_at = $4 WHERE id = $5`,
+      [plan, stripeIds.customerId, stripeIds.subscriptionId, stripeIds.endsAt, ownerId],
     );
     await client.query("UPDATE businesses SET is_premium = $1 WHERE owner_id = $2", [plan === "premium", ownerId]);
     await client.query("COMMIT");
