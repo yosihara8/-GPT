@@ -28,12 +28,14 @@ function Upgrade() {
   const [plan, setPlan] = useState<"free" | "premium" | null>(null);
   const [special, setSpecial] = useState(false);
   const [price, setPrice] = useState(PRICE_STANDARD);
+  const [endsAt, setEndsAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api<{ owner: { plan: "free" | "premium"; monthly_price: number; complimentary?: boolean } }>("/api/me").then((d) => {
+    api<{ owner: { plan: "free" | "premium"; monthly_price: number; complimentary?: boolean; plan_ends_at?: string | null } }>("/api/me").then((d) => {
       setPlan(d.owner.plan);
+      setEndsAt(d.owner.plan_ends_at ?? null);
       setSpecial(Boolean(d.owner.complimentary));
       setPrice(d.owner.monthly_price);
     });
@@ -77,6 +79,12 @@ function Upgrade() {
       {special && (
         <p className="rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">
           特別招待により、有料プランのすべての機能を無料でご利用いただけます。お支払いの手続きは不要です。
+        </p>
+      )}
+      {plan === "premium" && endsAt && (
+        <p className="rounded-xl bg-coral-50 px-4 py-3 text-sm text-coral-700">
+          解約の手続きが済んでいます。<b>{new Date(endsAt).toLocaleDateString("ja-JP")}</b>
+          まではお支払い済みのため、有料プランをそのまま使えます。その日を過ぎると無料プランに戻ります。続ける場合は、下のボタンから解約を取り消せます。
         </p>
       )}
       {plan && !special && (
