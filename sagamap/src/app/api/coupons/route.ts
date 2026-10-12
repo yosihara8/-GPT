@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { query } from "@/lib/db";
+import { query, queryOne } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { couponCreateSchema } from "@/lib/schemas";
 import { parseLatLng } from "@/lib/geo";
@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
       `SELECT c.id, c.business_id, c.title, c.discount_rate, c.conditions, c.expires_at, c.is_active, c.created_at,
               (c.image IS NOT NULL) AS has_image, b.name AS business_name,
               c.coupon_type, c.amount_yen, c.special_price, c.regular_price, c.benefit, c.max_uses, c.repeatable, c.first_visit_only,
-              (SELECT count(*) FROM usage_history h WHERE h.coupon_id = c.id AND h.coupon_used)::int AS used_count
+              (SELECT count(*) FROM usage_history h WHERE h.coupon_id = c.id AND h.coupon_used)::int AS used_count,
+              (SELECT e.title FROM events e WHERE e.id = c.event_id) AS event_title
          FROM coupons c JOIN businesses b ON b.id = c.business_id
         WHERE b.owner_id = $1 AND c.deleted_at IS NULL ORDER BY c.created_at DESC`,
       [auth.user.id],
@@ -82,6 +83,11 @@ export async function POST(req: Request) {
   if (!(await ownsBusiness(auth.user.id, d.businessId))) {
     return NextResponse.json({ error: "店舗が見つかりません" }, { status: 404 });
   }
+  // イベント限定：公開中で、まだ終わっていないイベントだけ選べる
+  if (d.eventId) {
+    const ev = await queryOne("SELECT id FROM events WHERE id = $1 AND is_published AND ends_on >= (now() AT TIME ZONE 'Asia/Tokyo')::date", [d.eventId]);
+    if (!ev) return NextResponse.json({ error: "選んだイベントは終了したか、見つかりません" }, { status: 400 });
+  }
   // 景品表示法などの観点で自動チェック（NG は掲載不可、要注意は運営者が後で確認）
   const check = checkCoupon({
     title: `${d.title}\n${d.benefit}`,
@@ -98,8 +104,8 @@ export async function POST(req: Request) {
   }
   const [row] = await query(
     `INSERT INTO coupons (business_id, title, discount_rate, conditions, expires_at, review_flags, image, image_type,
-                          coupon_type, amount_yen, special_price, regular_price, benefit, max_uses, repeatable, first_visit_only)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                          coupon_type, amount_yen, special_price, regular_price, benefit, max_uses, repeatable, first_visit_only, event_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
      RETURNING id, business_id, title, discount_rate, conditions, expires_at, is_active, created_at, (image IS NOT NULL) AS has_image,
                coupon_type, amount_yen, special_price, regular_price, benefit, max_uses, repeatable, first_visit_only`,
     [
@@ -119,6 +125,7 @@ export async function POST(req: Request) {
       d.maxUses ?? null,
       d.repeatable,
       d.firstVisitOnly,
+      d.eventId ?? null,
     ],
   );
   const announced = d.notify

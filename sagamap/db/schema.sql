@@ -365,3 +365,30 @@ ALTER TABLE admins ADD COLUMN IF NOT EXISTS session_version INTEGER NOT NULL DEF
 ALTER TABLE admins ADD COLUMN IF NOT EXISTS totp_secret TEXT;
 ALTER TABLE admins ADD COLUMN IF NOT EXISTS totp_enabled_at TIMESTAMPTZ;
 ALTER TABLE admins ADD COLUMN IF NOT EXISTS totp_last_step BIGINT;
+
+-- レジ横 QR ポスターの読み取り（shop_events に qr_scan を追加）
+ALTER TABLE shop_events DROP CONSTRAINT IF EXISTS shop_events_kind_check;
+ALTER TABLE shop_events ADD CONSTRAINT shop_events_kind_check CHECK (kind IN ('route', 'call', 'save', 'share', 'coupon_view', 'qr_scan'));
+
+-- イベント特集（バルーンフェスタ・有田陶器市など）。期間中は地図の画面に特集を出し、イベント限定クーポンをまとめる
+CREATE TABLE IF NOT EXISTS events (
+  id           SERIAL PRIMARY KEY,
+  slug         TEXT NOT NULL UNIQUE,
+  title        TEXT NOT NULL,
+  subtitle     TEXT NOT NULL DEFAULT '',
+  description  TEXT NOT NULL DEFAULT '',
+  area         TEXT NOT NULL DEFAULT '',
+  starts_on    DATE NOT NULL,
+  ends_on      DATE NOT NULL,
+  color        TEXT NOT NULL DEFAULT '#1E3A6E',
+  link_url     TEXT,
+  lat          DOUBLE PRECISION,
+  lng          DOUBLE PRECISION,
+  is_published BOOLEAN NOT NULL DEFAULT true,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE coupons ADD COLUMN IF NOT EXISTS event_id INTEGER REFERENCES events(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS coupons_event_idx ON coupons (event_id) WHERE event_id IS NOT NULL;
+
+-- 事業主への月 1 回のレポートメール（ダッシュボードで止められる）
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS report_enabled BOOLEAN NOT NULL DEFAULT true;

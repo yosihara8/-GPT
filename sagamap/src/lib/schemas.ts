@@ -84,6 +84,8 @@ export const couponCreateSchema = z
     repeatable: z.boolean().default(false),
     firstVisitOnly: z.boolean().default(false),
     notify: z.boolean().default(true),
+    /** イベント限定クーポン（任意） */
+    eventId: optionalInt(1, 2_147_483_647, "イベントが見つかりません"),
     /** クーポン画像（任意）。JPEG を base64 にしたもの（最大 1.5MB） */
     imageBase64: z.string().max(2_100_000, "画像は 1.5MB 以下にしてください").optional(),
   })

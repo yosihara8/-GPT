@@ -91,6 +91,7 @@ export type CardCoupon = CouponValue & {
   used_count?: number | null;
   repeatable?: boolean | null;
   first_visit_only?: boolean | null;
+  event_title?: string | null;
 };
 
 /** クーポンのカード（小さなチケット。種類ごとに色が変わる） */
@@ -104,6 +105,9 @@ export function CouponCard({ coupon: c, onOpen }: { coupon: CardCoupon; onOpen: 
     >
       <CouponStub coupon={c} />
       <span className="min-w-0 flex-1 py-2.5 pl-4 pr-3">
+        {c.event_title && (
+          <span className="mb-0.5 block truncate text-[10px] font-bold text-asa-600">{c.event_title} 限定</span>
+        )}
         <span className="line-clamp-2 text-sm font-bold leading-snug text-slate-900">{c.title}</span>
         {c.coupon_type === "gift" && c.benefit && <span className="block truncate text-xs font-bold text-tea-700">{c.benefit}</span>}
         <span className="mt-0.5 block truncate text-xs text-slate-600">{c.business_name}</span>

@@ -98,6 +98,6 @@ function safeCallback(url: string | null, role: string) {
   const safe = url && url.startsWith("/") && !url.startsWith("//") && !url.includes("\\") ? url : null;
   if (role === "business") return safe ?? "/dashboard/business";
   // お客さまはログイン後、まず地図の画面へ。お店・クーポンを指したリンク（お知らせ・共有）のときだけ、その画面へ
-  if (safe && (/^\/\?shop=\d+/.test(safe) || /^\/shops\/\d+/.test(safe) || /^\/dashboard\/customer\/coupons\/\d+/.test(safe))) return safe;
+  if (safe && (/^\/\?shop=\d+/.test(safe) || /^\/shops\/\d+/.test(safe) || /^\/events\/[a-z0-9-]+$/.test(safe) || /^\/dashboard\/customer\/coupons\/\d+/.test(safe))) return safe;
   return "/";
 }

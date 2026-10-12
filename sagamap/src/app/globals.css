@@ -248,3 +248,20 @@ body {
     display: none;
   }
 }
+
+/* 印刷（QR ポスターなど）：画面の上下のメニューは出さず、背景色もそのまま印刷する */
+@media print {
+  header,
+  nav,
+  footer,
+  aside {
+    display: none !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    background: #fff !important;
+  }
+}

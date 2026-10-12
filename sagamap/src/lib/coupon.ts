@@ -88,7 +88,9 @@ export const BEST_LABEL_SQL = (b = "b") => `(SELECT ${COUPON_SHORT_SQL("cx")} FR
 export const COUPON_PUBLIC_COLUMNS = (c = "c") =>
   `${c}.id, ${c}.title, ${c}.discount_rate, ${c}.conditions, ${c}.expires_at, (${c}.image IS NOT NULL) AS has_image,
    ${c}.coupon_type, ${c}.amount_yen, ${c}.special_price, ${c}.regular_price, ${c}.benefit, ${c}.max_uses, ${c}.repeatable, ${c}.first_visit_only,
-   (SELECT count(*) FROM usage_history uh WHERE uh.coupon_id = ${c}.id AND uh.coupon_used)::int AS used_count`;
+   (SELECT count(*) FROM usage_history uh WHERE uh.coupon_id = ${c}.id AND uh.coupon_used)::int AS used_count,
+   (SELECT ev.title FROM events ev WHERE ev.id = ${c}.event_id) AS event_title,
+   (SELECT ev.slug FROM events ev WHERE ev.id = ${c}.event_id) AS event_slug`;
 
 /** 先着の残り（先着の設定がなければ null） */
 export function remainingUses(c: { max_uses?: number | null; used_count?: number | null }) {
