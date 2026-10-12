@@ -3,6 +3,7 @@ import { queryOne } from "@/lib/db";
 import { APP_URL, PRICE_DISCOUNT } from "@/lib/config";
 import { getStripe } from "@/lib/stripe";
 import { requireApiUser } from "@/lib/session";
+import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
 
@@ -32,29 +33,58 @@ export async function POST() {
   }
   const stripe = getStripe();
 
-  if (owner.plan === "premium" && owner.stripe_customer_id) {
-    const portal = await stripe.billingPortal.sessions.create({
-      customer: owner.stripe_customer_id,
-      return_url: `${APP_URL}/dashboard/business`,
-    });
-    return NextResponse.json({ url: portal.url });
+  try {
+    // 有料プラン中、または Stripe 側に有効な契約が残っている場合はポータルへ（二重契約を防ぐ）
+    let hasActive = owner.plan === "premium";
+    if (!hasActive && owner.stripe_customer_id) {
+      const subs = await stripe.subscriptions.list({ customer: owner.stripe_customer_id, status: "all", limit: 10 });
+      hasActive = subs.data.some((s) => ["active", "trialing", "past_due"].includes(s.status));
+    }
+    if (hasActive && owner.stripe_customer_id) {
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: owner.stripe_customer_id,
+        return_url: `${APP_URL}/dashboard/business`,
+      });
+      return NextResponse.json({ url: portal.url });
+    }
+
+    // 紹介 10 名を達成済みなら最初から割引価格で契約
+    const price =
+      owner.monthly_price === PRICE_DISCOUNT ? process.env.STRIPE_PRICE_DISCOUNT : process.env.STRIPE_PRICE_STANDARD;
+    if (!price) return NextResponse.json({ error: "Stripe の Price ID が未設定です" }, { status: 503 });
+
+    const session = await stripe.checkout.sessions.create(
+      {
+        mode: "subscription",
+        line_items: [{ price, quantity: 1 }],
+        ...(owner.stripe_customer_id ? { customer: owner.stripe_customer_id } : { customer_email: owner.email }),
+        client_reference_id: String(owner.id),
+        metadata: { owner_id: String(owner.id) },
+        subscription_data: { metadata: { owner_id: String(owner.id) } },
+        success_url: `${APP_URL}/dashboard/business?upgraded=1`,
+        cancel_url: `${APP_URL}/upgrade?canceled=1`,
+        locale: "ja",
+      },
+      // 短時間にボタンを 2 回押しても、申し込み画面は 1 つだけ作る
+      { idempotencyKey: `checkout-${owner.id}-${price}-${Math.floor(Date.now() / 60000)}` },
+    );
+    return NextResponse.json({ url: session.url });
+  } catch (e) {
+    await logServerError("billing", e);
+    return NextResponse.json({ error: stripeErrorMessage(e) }, { status: 502 });
   }
+}
 
-  // 紹介 10 名を達成済みなら最初から割引価格で契約
-  const price =
-    owner.monthly_price === PRICE_DISCOUNT ? process.env.STRIPE_PRICE_DISCOUNT : process.env.STRIPE_PRICE_STANDARD;
-  if (!price) return NextResponse.json({ error: "Stripe の Price ID が未設定です" }, { status: 503 });
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    line_items: [{ price, quantity: 1 }],
-    ...(owner.stripe_customer_id ? { customer: owner.stripe_customer_id } : { customer_email: owner.email }),
-    client_reference_id: String(owner.id),
-    metadata: { owner_id: String(owner.id) },
-    subscription_data: { metadata: { owner_id: String(owner.id) } },
-    success_url: `${APP_URL}/dashboard/business?upgraded=1`,
-    cancel_url: `${APP_URL}/upgrade?canceled=1`,
-    locale: "ja",
-  });
-  return NextResponse.json({ url: session.url });
+/** Stripe のエラーを、運営者・事業主に分かる日本語にする */
+function stripeErrorMessage(e: unknown) {
+  const err = e as { type?: string; code?: string; message?: string };
+  const detail = err.message ? `（${err.message}）` : "";
+  if (err.type === "StripeAuthenticationError") return `決済の設定（シークレットキー）が正しくありません。管理者にお問い合わせください${detail}`;
+  if (err.code === "resource_missing") {
+    return `決済の設定（料金 ID）が見つかりません。テスト用と本番用のキー・料金 ID が混ざっていないか確認してください${detail}`;
+  }
+  if (err.type === "StripePermissionError" || /activat|verif|cannot currently/i.test(err.message ?? "")) {
+    return `決済アカウントの有効化（本人確認など）が完了していないため、お申し込みを受け付けられません${detail}`;
+  }
+  return `決済でエラーが発生しました。時間をおいて再度お試しください${detail}`;
 }
