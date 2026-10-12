@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import type Stripe from "stripe";
 import { query } from "./db";
 import { OPERATOR } from "./config";
-import { getStripe } from "./stripe";
+import { getStripe, stripeEnv } from "./stripe";
 
 /** 日本時間の「前月」の範囲（例: 2026-10-01 に実行 → 2026-09-01〜2026-09-30） */
 export function previousMonthJst(now = new Date()) {
@@ -83,7 +83,7 @@ async function stripeEntries(start: Date, end: Date) {
 /** 月 1 回メールで送る帳簿（Excel） */
 export async function buildMonthlyLedger(now = new Date()) {
   const { start, end, label } = previousMonthJst(now);
-  const stripeReady = Boolean(process.env.STRIPE_SECRET_KEY);
+  const stripeReady = Boolean(stripeEnv("STRIPE_SECRET_KEY"));
   const { entries, payouts } = stripeReady ? await stripeEntries(start, end) : { entries: [], payouts: [] };
   entries.sort((a, b) => a.date.getTime() - b.date.getTime());
 

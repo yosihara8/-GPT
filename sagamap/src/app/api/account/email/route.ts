@@ -6,7 +6,7 @@ import { isUniqueViolation, parseBody } from "@/lib/http";
 import { ACCOUNT_TABLE } from "@/lib/accounts";
 import { sendEmailChangedNotice, sendVerificationMail } from "@/lib/account-mail";
 import { auditLog } from "@/lib/audit";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, stripeEnv } from "@/lib/stripe";
 import { rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
 import { requireApiUser } from "@/lib/session";
 
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
   );
 
   // 決済（Stripe）の請求先メールもそろえる（失敗しても変更自体は有効）
-  if (role === "business" && row.stripe_customer_id && process.env.STRIPE_SECRET_KEY) {
+  if (role === "business" && row.stripe_customer_id && stripeEnv("STRIPE_SECRET_KEY")) {
     await getStripe()
       .customers.update(row.stripe_customer_id, { email: next })
       .catch((e) => console.error("stripe email update failed", e));

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { pool } from "@/lib/db";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, stripeEnv } from "@/lib/stripe";
 import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 /** Stripe Webhook: https://www.saga-kanko-map.com/api/billing/webhook */
 export async function POST(req: Request) {
   const signature = req.headers.get("stripe-signature");
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = stripeEnv("STRIPE_WEBHOOK_SECRET");
   if (!signature || !secret) return NextResponse.json({ error: "missing signature" }, { status: 400 });
   const stripe = getStripe();
 
