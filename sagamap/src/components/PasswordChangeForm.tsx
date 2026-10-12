@@ -9,9 +9,17 @@ import { api } from "@/lib/fetcher";
 /** ログインし直す画面（運営者は運営者用） */
 const loginUrl = (role?: string) => (role === "admin" ? "/admin/login" : role === "business" ? "/login?role=business" : "/login");
 
-export default function PasswordChangeForm({ minLength = 8 }: { minLength?: number }) {
+export default function PasswordChangeForm({ minLength = 8, admin = false }: { minLength?: number; admin?: boolean }) {
   const { data } = useSession();
-  const role = data?.user?.role;
+  const role = admin ? "admin" : data?.user?.role;
+  const q = admin ? "?as=admin" : "";
+  // ログアウト：管理画面は専用のログインを切る。お客さま・事業主はいつものログアウト
+  const logout = async () => {
+    if (admin) {
+      await fetch("/api/admin/auth/logout", { method: "POST" });
+      window.location.href = "/admin/login";
+    } else await signOut({ callbackUrl: loginUrl(role) });
+  };
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -20,11 +28,11 @@ export default function PasswordChangeForm({ minLength = 8 }: { minLength?: numb
     const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
     if (f.next !== f.next2) return setMsg({ ok: false, text: "確認用のパスワードが一致しません" });
     try {
-      await api("/api/account/password", { method: "POST", body: JSON.stringify({ current: f.current, next: f.next }) });
+      await api(`/api/account/password${q}`, { method: "POST", body: JSON.stringify({ current: f.current, next: f.next }) });
       form.reset();
       // パスワードを変えると、この端末を含むすべての端末のログインが切れる（盗まれたログインも使えなくなる）
       setMsg({ ok: true, text: "パスワードを変更しました。安全のため、すべての端末でログアウトしました。新しいパスワードでログインしてください。" });
-      setTimeout(() => signOut({ callbackUrl: loginUrl(role) }), 2500);
+      setTimeout(logout, 2500);
     } catch (err) {
       setMsg({ ok: false, text: (err as Error).message });
     }
@@ -33,8 +41,8 @@ export default function PasswordChangeForm({ minLength = 8 }: { minLength?: numb
   async function logoutAll() {
     if (!confirm("この端末を含め、ログインしているすべての端末（スマホ・パソコン）からログアウトします。よろしいですか？")) return;
     try {
-      await api("/api/account/logout-all", { method: "POST" });
-      await signOut({ callbackUrl: loginUrl(role) });
+      await api(`/api/account/logout-all${q}`, { method: "POST" });
+      await logout();
     } catch (err) {
       setMsg({ ok: false, text: (err as Error).message });
     }

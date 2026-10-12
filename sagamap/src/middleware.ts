@@ -1,13 +1,14 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import { AUTH_SECRET } from "@/lib/config";
+import { ADMIN_COOKIE, verifyAdmin } from "@/lib/admin-session";
 
 /**
  * 会員登録必須ページ。
  * 地図トップ `/` と店舗ページ `/shops/*` も会員向け（未登録の方には最初に会員登録画面を表示する）。
  */
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
     const role = req.nextauth.token?.role;
     const path = req.nextUrl.pathname;
     if (isMemberMapPath(path)) {
@@ -21,8 +22,10 @@ export default withAuth(
       }
       return;
     }
+    // 管理画面は専用のログイン（お客さま・事業主のログインとは別の Cookie）。署名と期限を確かめる
     if (path.startsWith("/admin")) {
-      if (role !== "admin") return NextResponse.redirect(new URL("/admin/login", req.url));
+      const ok = await verifyAdmin(req.cookies.get(ADMIN_COOKIE)?.value, AUTH_SECRET ?? "");
+      if (!ok) return NextResponse.redirect(new URL("/admin/login", req.url));
       return;
     }
     const needs = path.startsWith("/dashboard/customer") ? "customer" : "business";
@@ -45,5 +48,5 @@ export default withAuth(
 
 const isMemberMapPath = (path: string) => path === "/" || path.startsWith("/shops/");
 
-// /admin/login はログイン前に開くページなので対象外
-export const config = { matcher: ["/", "/shops/:path*", "/dashboard/:path*", "/upgrade", "/admin", "/admin/((?!login).*)"] };
+// /admin/login・/admin/forgot はログイン前に開くページなので対象外
+export const config = { matcher: ["/", "/shops/:path*", "/dashboard/:path*", "/upgrade", "/admin", "/admin/((?!login|forgot).*)"] };

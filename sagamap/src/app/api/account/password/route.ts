@@ -5,7 +5,7 @@ import { query, queryOne } from "@/lib/db";
 import { parseBody } from "@/lib/http";
 import { ACCOUNT_TABLE, passwordRule, weakPasswordReason } from "@/lib/accounts";
 import { rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
-import { requireApiUser } from "@/lib/session";
+import { requireAccountUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ const schema = z.object({ current: z.string().min(1).max(128), next: z.string().
 
 /** ログイン中のアカウントのパスワード変更 */
 export async function POST(req: Request) {
-  const auth = await requireApiUser();
+  const auth = await requireAccountUser(req);
   if (!auth.ok) return auth.response;
   const { id, role } = auth.user;
   const rl = await rateLimit(`password-change:${role}:${id}`, 10, 15 * 60);

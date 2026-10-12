@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ErrorReporter from "@/components/ErrorReporter";
 import ThemeScope from "@/components/ThemeScope";
+import SiteChrome from "@/components/SiteChrome";
 import { APP_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -35,9 +36,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <ErrorReporter />
           <ThemeScope>
-            <Header />
+            <SiteChrome>
+              <Header />
+            </SiteChrome>
             <div className="flex-1">{children}</div>
-            <Footer />
+            <SiteChrome>
+              <Footer />
+            </SiteChrome>
           </ThemeScope>
         </Providers>
       </body>

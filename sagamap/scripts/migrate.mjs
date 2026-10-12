@@ -31,6 +31,31 @@ try {
   );
   if (owner.rowCount) console.log("[migrate] 運営者アカウントを作成しました");
 
+  // 緊急用：運営者のパスワードを Vercel の環境変数から決め直す（メールもスマホも使えないとき）。
+  // ADMIN_RECOVERY_PASSWORD（12 文字以上）を入れて再デプロイすると、1 回だけ反映し、二段階認証も解除する。
+  // ADMIN_RECOVERY_EMAIL を入れると、運営者のメールアドレスも変える。反映後は環境変数を必ず消す。
+  const rec = env.ADMIN_RECOVERY_PASSWORD;
+  if (rec) {
+    if (rec.length < 12) {
+      console.warn("[migrate] ADMIN_RECOVERY_PASSWORD は 12 文字以上にしてください（反映していません）");
+    } else {
+      const { createHash } = await import("node:crypto");
+      const bcrypt = (await import("bcryptjs")).default;
+      const mark = createHash("sha256").update(`${rec}\n${env.ADMIN_RECOVERY_EMAIL ?? ""}`).digest("hex").slice(0, 32);
+      const claimed = await client.query("INSERT INTO job_runs (job, period) VALUES ('admin-recovery', $1) ON CONFLICT DO NOTHING RETURNING period", [mark]);
+      if (claimed.rowCount) {
+        const email = env.ADMIN_RECOVERY_EMAIL?.trim().toLowerCase();
+        await client.query(
+          `UPDATE admins SET password_hash = $1, session_version = session_version + 1,
+                  totp_secret = NULL, totp_enabled_at = NULL, totp_last_step = NULL${email ? ", email = $2" : ""}`,
+          email ? [await bcrypt.hash(rec, 12), email] : [await bcrypt.hash(rec, 12)],
+        );
+        await client.query("DELETE FROM rate_limits WHERE key LIKE 'admin-login%'");
+        console.log("[migrate] 運営者のパスワードを緊急用の設定で決め直しました。Vercel の ADMIN_RECOVERY_PASSWORD を消してください");
+      }
+    }
+  }
+
   // 観光名所（実在の場所）は空なら投入
   const spots = await client.query("SELECT count(*)::int AS n FROM tourist_spots");
   if (spots.rows[0].n === 0) {

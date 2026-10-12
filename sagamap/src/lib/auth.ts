@@ -8,8 +8,6 @@ import { recordReferral } from "./referral";
 import { AUTH_SECRET } from "./config";
 import { clientIp, rateLimit, resetRateLimit, tooManyRequestsMessage } from "./rate-limit";
 import { consumeToken } from "./tokens";
-import { verifyTotp } from "./totp";
-import { mailEnabled, mailFooter, sendMail } from "./mail";
 
 export type Role = "business" | "customer" | "admin";
 
@@ -43,8 +41,9 @@ const providers: NextAuthOptions["providers"] = [
 
       const email = credentials?.email?.trim().toLowerCase();
       const password = credentials?.password;
-      const role: Role =
-        credentials?.role === "business" ? "business" : credentials?.role === "admin" ? "admin" : "customer";
+      // 運営者はここではログインできない（管理画面専用のログイン /admin/login を使う）
+      if (credentials?.role === "admin") return null;
+      const role: Role = credentials?.role === "business" ? "business" : "customer";
       if (!email || !password) return null;
 
       // 総当たり攻撃対策: 同じアカウントへは 15 分に 10 回、同じ接続元からは 15 分に 50 回まで
@@ -58,28 +57,13 @@ const providers: NextAuthOptions["providers"] = [
         if (!rl.ok) throw new Error(tooManyRequestsMessage(rl.retryAfter));
       }
 
-      const table = { business: "business_owners", customer: "customers", admin: "admins" }[role];
+      const table = { business: "business_owners", customer: "customers" }[role];
       const row = await queryOne<{ id: number; name: string; email: string; password_hash: string | null; session_version: number }>(
         `SELECT id, name, email, password_hash, session_version FROM ${table} WHERE email = $1`,
         [email],
       );
       if (!row?.password_hash || !(await bcrypt.compare(password, row.password_hash))) return null;
 
-      // 運営者は、二段階認証を設定していれば認証アプリの 6 桁も確認する（パスワードが漏れても入られない）
-      if (role === "admin") {
-        const tf = await queryOne<{ totp_secret: string | null; totp_enabled_at: string | null; totp_last_step: string | null }>(
-          "SELECT totp_secret, totp_enabled_at, totp_last_step FROM admins WHERE id = $1",
-          [row.id],
-        );
-        if (tf?.totp_enabled_at && tf.totp_secret) {
-          if (!credentials?.otp) throw new Error("OTP_REQUIRED");
-          const step = verifyTotp(tf.totp_secret, credentials.otp);
-          // 同じ 6 桁の使い回し（盗み見・再送）も断る
-          if (step === null || (tf.totp_last_step && step <= Number(tf.totp_last_step))) throw new Error("OTP_INVALID");
-          await queryOne("UPDATE admins SET totp_last_step = $1 WHERE id = $2", [step, row.id]);
-        }
-        await notifyAdminLogin(row.email, ip);
-      }
       await resetRateLimit(accountKey);
       return { id: String(row.id), name: row.name, email: row.email, role, sv: row.session_version };
     },
@@ -163,17 +147,3 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
-
-/** 運営者がログインしたらメールで知らせる（身に覚えのないログインにすぐ気づけるように） */
-async function notifyAdminLogin(email: string, ip: string) {
-  if (!mailEnabled()) return;
-  const at = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
-  await sendMail(
-    email,
-    "【佐賀観光マップ】管理画面にログインしました",
-    `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
-      <p>管理画面にログインがありました。</p>
-      <ul><li>日時：${at}</li><li>接続元：${ip.replace(/[<>&"]/g, "")}</li></ul>
-      <p style="color:#b45309">心当たりがない場合は、すぐにパスワードを変更し、二段階認証を設定してください。</p>${mailFooter()}</div>`,
-  ).catch(() => undefined);
-}

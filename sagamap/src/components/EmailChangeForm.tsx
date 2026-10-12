@@ -5,20 +5,21 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/fetcher";
 
 /** メールアドレスの変更（今のパスワードで本人確認） */
-export default function EmailChangeForm({ onChanged }: { onChanged?: (email: string) => void }) {
+export default function EmailChangeForm({ onChanged, admin = false }: { onChanged?: (email: string) => void; admin?: boolean }) {
+  const endpoint = admin ? "/api/account/email?as=admin" : "/api/account/email";
   const [current, setCurrent] = useState<string | null>(null);
   const [canChange, setCanChange] = useState(true);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api<{ email: string; canChange: boolean }>("/api/account/email")
+    api<{ email: string; canChange: boolean }>(endpoint)
       .then((d) => {
         setCurrent(d.email);
         setCanChange(d.canChange);
       })
       .catch(() => setCurrent(""));
-  }, []);
+  }, [endpoint]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,7 +31,7 @@ export default function EmailChangeForm({ onChanged }: { onChanged?: (email: str
     setSaving(true);
     setMsg(null);
     try {
-      const d = await api<{ email: string; verify: boolean }>("/api/account/email", {
+      const d = await api<{ email: string; verify: boolean }>(endpoint, {
         method: "POST",
         body: JSON.stringify({ email: f.email, password: f.password }),
       });
