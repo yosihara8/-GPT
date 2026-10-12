@@ -339,3 +339,20 @@ CREATE TABLE IF NOT EXISTS business_days (
   note         TEXT NOT NULL DEFAULT '',
   PRIMARY KEY (business_id, day)
 );
+
+-- お支払い方法（クレジットカード・バーコード決済・交通系IC・電子マネー）。payment_none は「使えない」と選んだ種類
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS payment_methods TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS payment_none TEXT[] NOT NULL DEFAULT '{}';
+
+-- お店の写真（外観・店内・客席・商品など。お店のページで横にスライドして見る）
+CREATE TABLE IF NOT EXISTS business_photos (
+  id           SERIAL PRIMARY KEY,
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  kind         TEXT NOT NULL DEFAULT 'その他',
+  caption      TEXT NOT NULL DEFAULT '',
+  image        BYTEA NOT NULL,
+  image_type   TEXT NOT NULL DEFAULT 'image/jpeg',
+  sort         INTEGER NOT NULL DEFAULT 0,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS business_photos_biz_idx ON business_photos (business_id, sort, id);

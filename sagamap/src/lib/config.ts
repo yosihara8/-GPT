@@ -93,8 +93,6 @@ export const AUTH_SECRET = process.env.NEXTAUTH_SECRET || DATABASE_URL;
 /** お店の特徴（事業主が選ぶ。お客さまのお店のページと絞り込みに使う） */
 export const AMENITIES = [
   "駐車場あり",
-  "カード払いOK",
-  "電子マネー・QR決済",
   "テイクアウト",
   "予約できる",
   "子ども連れ歓迎",
@@ -107,3 +105,23 @@ export const AMENITIES = [
   "1人でも入りやすい",
   "団体・グループOK",
 ] as const;
+
+/** お支払い方法（事業主が選ぶ。種類ごとに「使えない」も選べる） */
+export const PAYMENT_GROUPS = [
+  { key: "card", label: "クレジットカード", items: ["VISA", "Mastercard", "JCB", "American Express", "Diners Club"] },
+  { key: "barcode", label: "バーコード決済", items: ["PayPay", "d払い", "楽天ペイ", "au PAY", "メルペイ", "ゆうちょPay", "Alipay+", "WeChat Pay"] },
+  {
+    key: "transit",
+    label: "交通系IC",
+    items: ["nimoca", "SUGOCA", "はやかけん", "Suica", "PASMO", "ICOCA", "manaca", "TOICA", "Kitaca", "PiTaPa"],
+  },
+  { key: "emoney", label: "電子マネー", items: ["iD", "QUICPay", "楽天Edy", "WAON", "nanaco"] },
+] as const;
+export type PaymentGroupKey = (typeof PAYMENT_GROUPS)[number]["key"];
+export const PAYMENT_ITEMS = PAYMENT_GROUPS.flatMap((g) => g.items as readonly string[]) as [string, ...string[]];
+export const PAYMENT_KEYS = PAYMENT_GROUPS.map((g) => g.key) as [PaymentGroupKey, ...PaymentGroupKey[]];
+
+/** お店の写真の種類 */
+export const PHOTO_KINDS = ["外観", "店内", "客席", "料理・商品", "雑貨・グッズ", "メニュー表", "スタッフ", "その他"] as const;
+/** 写真の枚数（無料プラン / 有料プラン） */
+export const PHOTO_LIMIT = { free: 5, premium: 20 } as const;

@@ -33,12 +33,14 @@ import LocationAccuracy from "@/components/LocationAccuracy";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import Carousel from "@/components/customer/Carousel";
 import { AdCard, CouponCard, ShopCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
+import { type SlidePhoto } from "@/components/customer/PhotoSlider";
 import DetailSheet, { type DetailCoupon, type DetailShop, type MenuItem, type SheetFrom } from "@/components/customer/DetailSheet";
 import CouponUse, { type UseTarget } from "@/components/customer/CouponUse";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CATEGORIES } from "@/lib/config";
 import { formatDistance, haversineMeters } from "@/lib/geo";
 import { shopStatus } from "@/lib/open-status";
+import { paymentTags } from "@/lib/payment";
 import { api } from "@/lib/fetcher";
 
 type Shop = MapShop & DetailShop & { address: string; service_description: string };
@@ -95,7 +97,7 @@ function CustomerHome() {
   const toggleFilter = (f: string) => setFilters((xs) => (xs.includes(f) ? xs.filter((x) => x !== f) : [...xs, f]));
   const [preview, setPreview] = useState<number | null>(null);
   const [sheet, setSheet] = useState<{ id: number; from: SheetFrom } | null>(null);
-  const [detail, setDetail] = useState<{ id: number; business: Partial<DetailShop>; coupons: DetailCoupon[]; menu: MenuItem[] } | null>(null);
+  const [detail, setDetail] = useState<{ id: number; business: Partial<DetailShop>; coupons: DetailCoupon[]; menu: MenuItem[]; photos: SlidePhoto[] } | null>(null);
   const [useTarget, setUseTarget] = useState<UseTarget | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -154,8 +156,8 @@ function CustomerHome() {
     if (detail?.id === id) return;
     fetch(`/api/businesses/${id}`)
       .then((r) => r.json())
-      .then((d) => setDetail({ id, business: d.business ?? {}, coupons: d.coupons ?? [], menu: d.menu ?? [] }))
-      .catch(() => setDetail({ id, business: {}, coupons: [], menu: [] }));
+      .then((d) => setDetail({ id, business: d.business ?? {}, coupons: d.coupons ?? [], menu: d.menu ?? [], photos: d.photos ?? [] }))
+      .catch(() => setDetail({ id, business: {}, coupons: [], menu: [], photos: [] }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheet?.id]);
 
@@ -253,10 +255,11 @@ function CustomerHome() {
   const q = query.trim().toLowerCase();
   const visible = useMemo(() => {
     let xs = category ? shops.filter((s) => s.category === category) : shops;
-    if (q) xs = xs.filter((s) => `${s.name} ${s.category} ${s.service_description} ${s.address} ${(s.amenities ?? []).join(" ")}`.toLowerCase().includes(q));
+    if (q) xs = xs.filter((s) => `${s.name} ${s.category} ${s.service_description} ${s.address} ${(s.amenities ?? []).join(" ")} ${(s.payment_methods ?? []).join(" ")}`.toLowerCase().includes(q));
     for (const f of filters) {
       if (f === "営業中") xs = xs.filter((s) => shopStatus(s)?.open);
       else if (f === "クーポンあり") xs = xs.filter(hasCoupon);
+      else if (PAYMENT_FILTERS.includes(f)) xs = xs.filter((s) => paymentTags(s).includes(f));
       else xs = xs.filter((s) => s.amenities?.includes(f));
     }
     return xs;
@@ -593,6 +596,7 @@ function CustomerHome() {
           shop={sheetShop}
           coupons={sheetCoupons}
           menu={detail && detail.id === sheet?.id ? detail.menu : null}
+          photos={detail && detail.id === sheet?.id ? detail.photos : []}
           shopAds={ads.filter((a) => a.business_id === sheetShop.id)}
           from={sheet!.from}
           me={position}
@@ -779,7 +783,8 @@ function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | n
 }
 
 /** よく使う絞り込み（地図の上に並べる） */
-const QUICK_FILTERS = ["営業中", "クーポンあり", "駐車場あり", "テイクアウト", "子ども連れ歓迎", "カード払いOK"];
+const PAYMENT_FILTERS = ["カード払いOK", "バーコード決済OK", "交通系IC OK"];
+const QUICK_FILTERS = ["営業中", "クーポンあり", "駐車場あり", "テイクアウト", "子ども連れ歓迎", ...PAYMENT_FILTERS];
 
 function greeting() {
   const h = new Date().getHours();

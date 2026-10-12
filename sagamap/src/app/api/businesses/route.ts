@@ -17,7 +17,7 @@ export async function GET() {
             b.business_hours, b.closed_days, b.weekly_hours, ${SPECIAL_DAYS_SQL("b", -1, 0)} AS special_days,
             EXISTS (SELECT 1 FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS has_coupon,
             (SELECT max(c.discount_rate) FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount,
-            ${BEST_LABEL_SQL("b")} AS best_label, b.amenities
+            ${BEST_LABEL_SQL("b")} AS best_label, b.amenities, b.payment_methods
        FROM businesses b ORDER BY b.id`,
   );
   return NextResponse.json({ businesses: rows });
