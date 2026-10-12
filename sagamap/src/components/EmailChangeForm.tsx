@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/fetcher";
 
@@ -59,7 +60,7 @@ export default function EmailChangeForm({ onChanged }: { onChanged?: (email: str
         <>
           <input name="email" type="email" required placeholder="新しいメールアドレス" autoComplete="email" className="input" />
           <input name="email2" type="email" required placeholder="新しいメールアドレス（確認）" autoComplete="email" className="input" />
-          <input name="password" type="password" required placeholder="今のパスワード（本人確認のため）" autoComplete="current-password" className="input" />
+          <PasswordInput name="password" required placeholder="今のパスワード（本人確認のため）" autoComplete="current-password" className="input" />
           <p className="text-xs text-slate-500">変更すると、元のメールアドレスにもお知らせが届きます。ログインには新しいメールアドレスを使います。</p>
           {msg && <p className={`text-sm ${msg.ok ? "text-tea-700" : "text-red-600"}`}>{msg.text}</p>}
           <button disabled={saving} className="btn-primary w-full">

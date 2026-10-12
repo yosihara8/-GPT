@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
@@ -90,7 +91,7 @@ function CustomerRegisterForm() {
         </div>
         <div>
           <label className="label" htmlFor="password">パスワード（8 文字以上）</label>
-          <input id="password" name="password" type="password" required minLength={8} className="input" autoComplete="new-password" />
+          <PasswordInput id="password" name="password" required minLength={8} className="input" autoComplete="new-password" />
         </div>
         <fieldset>
           <legend className="label">興味のある業種（任意・複数選択可）</legend>

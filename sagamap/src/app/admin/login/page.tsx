@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -50,7 +51,7 @@ export default function AdminLoginPage() {
         </div>
         <div>
           <label className="label" htmlFor="password">パスワード</label>
-          <input id="password" name="password" type="password" required autoComplete="current-password" className="input" />
+          <PasswordInput id="password" name="password" required autoComplete="current-password" className="input" />
         </div>
         {needOtp && (
           <div>

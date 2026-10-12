@@ -140,10 +140,7 @@ body {
   color: #344054;
 }
 
-/* 淡色地図をサイトの白磁色に少しなじませる（航空写真には掛けない） */
-.sm-tiles-pale {
-  filter: sepia(0.12) saturate(0.9) brightness(1.02);
-}
+/* 地図はカラーのまま表示する（色を落とすフィルターは掛けない） */
 .leaflet-container {
   background: #f2efe8;
 }

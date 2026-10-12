@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
@@ -64,7 +65,7 @@ function LoginForm() {
         </div>
         <div>
           <label className="label" htmlFor="password">パスワード</label>
-          <input id="password" name="password" type="password" required autoComplete="current-password" className="input" />
+          <PasswordInput id="password" name="password" required autoComplete="current-password" className="input" />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <p className="text-right text-xs">
