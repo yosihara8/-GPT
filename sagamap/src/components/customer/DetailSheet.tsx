@@ -30,7 +30,9 @@ import { type Ad } from "@/components/AdBanner";
 import Carousel from "./Carousel";
 import { ShopCard, travelText, type CardShop } from "./Cards";
 import { PRICE_LEVEL_LABELS } from "@/lib/config";
-import { daysLeft, openStatus } from "@/lib/open-status";
+import { daysLeft, shopStatus } from "@/lib/open-status";
+import { type SpecialDay } from "@/lib/schedule";
+import HoursCard from "./HoursCard";
 import { CouponStub, type CouponInfo } from "@/components/CouponRow";
 import { couponBadge, couponRules, couponShort } from "@/lib/coupon";
 
@@ -43,6 +45,11 @@ export type DetailShop = CardShop & {
   contact?: string | null;
   instagram_url?: string | null;
   twitter_url?: string | null;
+  threads_url?: string | null;
+  facebook_url?: string | null;
+  weekly_hours?: unknown;
+  hours_note?: string | null;
+  special_days?: SpecialDay[] | null;
   business_hours?: string | null;
   closed_days?: string | null;
   amenities?: string[] | null;
@@ -114,7 +121,7 @@ export default function DetailSheet({
   }, [shop.id, from]);
 
   const tel = phoneOf(shop.contact);
-  const status = openStatus(shop.business_hours, shop.closed_days);
+  const status = shopStatus(shop);
   const gmapSearch = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${shop.name} ${shop.address ?? ""}`)}`;
   const gmapNav = `https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}&travelmode=${meters != null && meters > 2500 ? "driving" : "walking"}`;
   const focusCoupon = from.type === "coupon" ? coupons?.find((c) => c.id === from.couponId) : undefined;
@@ -122,6 +129,14 @@ export default function DetailSheet({
   const otherCoupons = (coupons ?? []).filter((c) => c.id !== focusCoupon?.id);
   const otherAds = shopAds.filter((a) => a.id !== focusAd?.id);
   const bestCoupon = focusCoupon ?? coupons?.[0];
+  const sns = (
+    [
+      ["Instagram", shop.instagram_url],
+      ["Threads", shop.threads_url],
+      ["Facebook", shop.facebook_url],
+      ["X（Twitter）", shop.twitter_url],
+    ] as [string, string | null | undefined][]
+  ).filter((x): x is [string, string] => Boolean(x[1]));
 
   return (
     <div
@@ -260,7 +275,16 @@ export default function DetailSheet({
           </section>
         )}
 
-        {/* ⑥ 基本情報 */}
+        {/* ⑥ 営業時間・カレンダー */}
+        <HoursCard
+          weeklyHours={shop.weekly_hours}
+          specials={shop.special_days}
+          note={shop.hours_note}
+          hoursText={shop.business_hours}
+          closedText={shop.closed_days}
+        />
+
+        {/* ⑦ 基本情報 */}
         <section className="mx-4 mt-5 rounded-3xl bg-white p-4 ring-1 ring-slate-200/70">
           <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
             <Store className="h-4 w-4 text-saga-600" aria-hidden />
@@ -268,7 +292,9 @@ export default function DetailSheet({
           </h2>
           <dl className="mt-3 space-y-3 text-[15px]">
             <Info icon={Clock} label="営業時間">
-              {shop.business_hours || shop.closed_days ? (
+              {status ? (
+                <span className={status.open ? "font-bold text-tea-700" : "text-slate-600"}>{status.label}</span>
+              ) : shop.business_hours || shop.closed_days ? (
                 <>
                   {shop.business_hours && <span className="block">{shop.business_hours}</span>}
                   {shop.closed_days && <span className="block text-slate-500">定休日：{shop.closed_days}</span>}
@@ -316,19 +342,14 @@ export default function DetailSheet({
                 </span>
               </Info>
             )}
-            {(shop.instagram_url || shop.twitter_url) && (
+            {sns.length > 0 && (
               <Info icon={ExternalLink} label="SNS">
-                <span className="flex flex-wrap gap-4">
-                  {shop.instagram_url && (
-                    <a href={shop.instagram_url} target="_blank" rel="noreferrer" className="font-bold text-saga-600">
-                      Instagram
+                <span className="flex flex-wrap gap-2">
+                  {sns.map(([label, href]) => (
+                    <a key={label} href={href} target="_blank" rel="noreferrer" className="rounded-full bg-saga-50 px-3 py-1 text-sm font-bold text-saga-700 ring-1 ring-saga-100">
+                      {label}
                     </a>
-                  )}
-                  {shop.twitter_url && (
-                    <a href={shop.twitter_url} target="_blank" rel="noreferrer" className="font-bold text-saga-600">
-                      X（Twitter）
-                    </a>
-                  )}
+                  ))}
                 </span>
               </Info>
             )}

@@ -19,6 +19,9 @@ import { AMENITIES } from "@/lib/config";
 import { couponShort, type CouponValue } from "@/lib/coupon";
 import ImagePicker, { type PickedImage } from "@/components/ImagePicker";
 import { blobToBase64 } from "@/lib/image";
+import ScheduleEditor from "@/components/business/ScheduleEditor";
+import SnsShare from "@/components/business/SnsShare";
+import { type SpecialDay } from "@/lib/schedule";
 
 type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number; plan_ends_at?: string | null };
 type Store = {
@@ -34,6 +37,11 @@ type Store = {
   crowd_level: number;
   instagram_url: string | null;
   twitter_url: string | null;
+  threads_url?: string | null;
+  facebook_url?: string | null;
+  weekly_hours?: unknown;
+  hours_note?: string;
+  special_days?: SpecialDay[];
   has_photo: boolean;
   photo_version: number | null;
   business_hours?: string;
@@ -262,8 +270,21 @@ function BusinessDashboard() {
         )}
       </section>
 
+      {store && <SnsShare key={`share-${store.id}`} storeId={store.id} storeName={store.name} />}
       {store && <PhotoUploader key={`photo-${store.id}`} shop={store} onChanged={load} />}
       {store && <StoreEditor key={store.id} store={store} premium={premium} onSaved={load} />}
+      {store && (
+        <ScheduleEditor
+          key={`sched-${store.id}`}
+          storeId={store.id}
+          weeklyHours={store.weekly_hours}
+          hoursNote={store.hours_note}
+          specials={store.special_days}
+          businessHours={store.business_hours}
+          closedDays={store.closed_days}
+          onSaved={load}
+        />
+      )}
       {store && <MenuEditor key={`menu-${store.id}`} storeId={store.id} />}
 
       {premium && <AddStore onAdded={load} />}
@@ -348,13 +369,13 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
       contact: f.contact,
       priceLevel: f.priceLevel,
       crowdLevel: f.crowdLevel,
-      businessHours: f.businessHours,
-      closedDays: f.closedDays,
       amenities: new FormData(e.currentTarget).getAll("amenities"),
     };
     if (premium) {
       body.instagramUrl = f.instagramUrl;
       body.twitterUrl = f.twitterUrl;
+      body.threadsUrl = f.threadsUrl;
+      body.facebookUrl = f.facebookUrl;
       body.websiteUrl = f.websiteUrl;
       body.reservationUrl = f.reservationUrl;
       body.lineUrl = f.lineUrl;
@@ -392,8 +413,6 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
           <textarea name="serviceDescription" defaultValue={store.service_description} rows={3} className="input" />
         </div>
         <Input label="連絡先（電話番号など）" name="contact" defaultValue={store.contact} />
-        <Input label="営業時間" name="businessHours" defaultValue={store.business_hours ?? ""} placeholder="例：11:00〜20:00（L.O. 19:30）" />
-        <Input label="定休日" name="closedDays" defaultValue={store.closed_days ?? ""} placeholder="例：水曜日・第3火曜日" />
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="label">価格帯</label>
@@ -432,14 +451,23 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
 
       <fieldset disabled={!premium} className="space-y-3 rounded-xl border border-slate-200 p-3 disabled:opacity-60">
         <legend className="px-1 text-sm font-semibold">
-          予約・LINE・ホームページ・SNS {!premium && <span className="text-xs font-normal text-amber-700">（有料プラン）</span>}
+          予約・LINE・ホームページ・SNS の連携 {!premium && <span className="text-xs font-normal text-amber-700">（有料プラン）</span>}
         </legend>
-        <p className="text-xs text-slate-500">入れたリンクは、お客さまのお店のページに「予約する」「LINE」などのボタンで表示されます。</p>
+        <p className="text-xs text-slate-500">
+          入れたリンクは、お客さまのお店のページに「予約する」「LINE」「ホームページ」のボタンと SNS のボタンで表示されます。お客さまはワンタップで予約・友だち追加・フォローができます。
+        </p>
         <Input label="予約ページの URL" name="reservationUrl" type="url" defaultValue={store.reservation_url ?? ""} placeholder="https://…（ホットペッパー・食べログ・自社予約など）" />
-        <Input label="LINE 公式アカウントの URL" name="lineUrl" type="url" defaultValue={store.line_url ?? ""} placeholder="https://lin.ee/…" />
+        <div>
+          <Input label="LINE 公式アカウント（URL または LINE ID）" name="lineUrl" defaultValue={store.line_url ?? ""} placeholder="https://lin.ee/… または @abc1234" />
+          <p className="mt-1 text-xs text-slate-500">LINE ID（@から始まる ID）を入れると、友だち追加のリンクに自動で変換します。</p>
+        </div>
         <Input label="ホームページの URL" name="websiteUrl" type="url" defaultValue={store.website_url ?? ""} placeholder="https://…" />
-        <Input label="Instagram の URL" name="instagramUrl" type="url" defaultValue={store.instagram_url ?? ""} placeholder="https://instagram.com/…" />
-        <Input label="X（Twitter）の URL" name="twitterUrl" type="url" defaultValue={store.twitter_url ?? ""} placeholder="https://x.com/…" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Input label="Instagram の URL" name="instagramUrl" type="url" defaultValue={store.instagram_url ?? ""} placeholder="https://instagram.com/…" />
+          <Input label="Threads の URL" name="threadsUrl" type="url" defaultValue={store.threads_url ?? ""} placeholder="https://www.threads.net/@…" />
+          <Input label="Facebook の URL" name="facebookUrl" type="url" defaultValue={store.facebook_url ?? ""} placeholder="https://www.facebook.com/…" />
+          <Input label="X（Twitter）の URL" name="twitterUrl" type="url" defaultValue={store.twitter_url ?? ""} placeholder="https://x.com/…" />
+        </div>
       </fieldset>
 
       {msg && <p className="text-sm text-saga-700">{msg}</p>}

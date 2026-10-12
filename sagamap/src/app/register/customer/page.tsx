@@ -21,6 +21,8 @@ function CustomerRegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
   const ref = Number(params.get("ref")) || undefined;
+  const nextRaw = params.get("next");
+  const next = nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
   const [referrer, setReferrer] = useState<string | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ function CustomerRegisterForm() {
         }),
       });
       await signIn("credentials", { email: f.email, password: f.password, role: "customer", redirect: false });
-      router.push("/");
+      router.push(next);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -117,13 +119,13 @@ function CustomerRegisterForm() {
           {loading ? "登録中…" : "無料で登録する"}
         </button>
         {googleAvailable && (
-          <button type="button" onClick={() => signIn("google", { callbackUrl: "/" })} className="btn-outline w-full">
+          <button type="button" onClick={() => signIn("google", { callbackUrl: next })} className="btn-outline w-full">
             Google で登録
           </button>
         )}
       </form>
       <p className="mt-4 text-center text-sm text-slate-600">
-        登録済みの方は <Link className="text-saga-600 underline" href="/login">ログイン</Link>
+        登録済みの方は <Link className="text-saga-600 underline" href={next === "/" ? "/login" : `/login?callbackUrl=${encodeURIComponent(next)}`}>ログイン</Link>
         {"　"}お店の方は <Link className="text-saga-600 underline" href="/register/business">事業主登録</Link>
       </p>
       </div>

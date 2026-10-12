@@ -322,3 +322,20 @@ ALTER TABLE businesses ADD COLUMN IF NOT EXISTS amenities TEXT[] NOT NULL DEFAUL
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS website_url TEXT;
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS reservation_url TEXT;
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS line_url TEXT;
+
+-- SNS（Threads・Facebook）
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS threads_url TEXT;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS facebook_url TEXT;
+
+-- 営業カレンダー: 曜日ごとの営業時間（日曜=0〜土曜=6。[["11:00","14:00"],["17:00","22:00"]] 等。空の配列は定休日）と補足
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS weekly_hours JSONB;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS hours_note TEXT NOT NULL DEFAULT '';
+-- 臨時休業・特別営業の日
+CREATE TABLE IF NOT EXISTS business_days (
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  day          DATE NOT NULL,
+  closed       BOOLEAN NOT NULL DEFAULT true,
+  ranges       JSONB,
+  note         TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (business_id, day)
+);

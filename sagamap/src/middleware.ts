@@ -12,7 +12,13 @@ export default withAuth(
     const path = req.nextUrl.pathname;
     if (isMemberMapPath(path)) {
       // ログインしていれば（お客さま・事業主・運営者）そのまま表示。未登録なら会員登録画面へ
-      if (!role) return NextResponse.redirect(new URL("/register/customer", req.url));
+      if (!role) {
+        // 共有されたお店のリンク（/?shop=ID など）は、登録・ログインのあとにそのお店を開く
+        const url = new URL("/register/customer", req.url);
+        const next = path + req.nextUrl.search;
+        if (next !== "/") url.searchParams.set("next", next);
+        return NextResponse.redirect(url);
+      }
       return;
     }
     if (path.startsWith("/admin")) {

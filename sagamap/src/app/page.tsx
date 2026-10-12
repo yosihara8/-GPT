@@ -38,7 +38,7 @@ import CouponUse, { type UseTarget } from "@/components/customer/CouponUse";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CATEGORIES } from "@/lib/config";
 import { formatDistance, haversineMeters } from "@/lib/geo";
-import { openStatus } from "@/lib/open-status";
+import { shopStatus } from "@/lib/open-status";
 import { api } from "@/lib/fetcher";
 
 type Shop = MapShop & DetailShop & { address: string; service_description: string };
@@ -255,7 +255,7 @@ function CustomerHome() {
     let xs = category ? shops.filter((s) => s.category === category) : shops;
     if (q) xs = xs.filter((s) => `${s.name} ${s.category} ${s.service_description} ${s.address} ${(s.amenities ?? []).join(" ")}`.toLowerCase().includes(q));
     for (const f of filters) {
-      if (f === "営業中") xs = xs.filter((s) => openStatus(s.business_hours, s.closed_days)?.open);
+      if (f === "営業中") xs = xs.filter((s) => shopStatus(s)?.open);
       else if (f === "クーポンあり") xs = xs.filter(hasCoupon);
       else xs = xs.filter((s) => s.amenities?.includes(f));
     }
@@ -541,7 +541,7 @@ function CustomerHome() {
                     key={shop.id}
                     shop={shop}
                     meters={dist(shop)}
-                    note={note ?? openStatus(shop.business_hours, shop.closed_days)?.label}
+                    note={note ?? shopStatus(shop)?.label}
                     favorite={favIds.has(shop.id)}
                     onOpen={() => openSheet(shop.id)}
                     onFavorite={isCustomer ? () => toggleFavorite(shop.id) : undefined}
@@ -556,7 +556,7 @@ function CustomerHome() {
                     key={shop.id}
                     shop={shop}
                     meters={dist(shop)}
-                    note={openStatus(shop.business_hours, shop.closed_days)?.label}
+                    note={shopStatus(shop)?.label}
                     favorite={favIds.has(shop.id)}
                     onOpen={() => openSheet(shop.id)}
                     onFavorite={isCustomer ? () => toggleFavorite(shop.id) : undefined}
@@ -637,7 +637,7 @@ function PreviewCard({
   onRoute: () => void;
   onClose: () => void;
 }) {
-  const status = openStatus(shop.business_hours, shop.closed_days);
+  const status = shopStatus(shop);
   return (
     <div className="overflow-hidden rounded-3xl bg-white shadow-[0_8px_24px_rgba(20,40,77,0.25)] ring-1 ring-slate-200/70">
       <button onClick={onOpen} className="flex w-full gap-3 p-3 text-left">
@@ -760,7 +760,7 @@ function RouteBar({
 
 /** 検索結果の 1 行 */
 function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | null; onOpen: () => void }) {
-  const status = openStatus(s.business_hours, s.closed_days);
+  const status = shopStatus(s);
   return (
     <button onClick={onOpen} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-slate-200/70">
       <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">

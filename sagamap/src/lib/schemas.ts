@@ -36,12 +36,18 @@ export const storeUpdateSchema = z
     crowdLevel: z.coerce.number().int().min(1).max(5),
     instagramUrl: optionalUrl,
     twitterUrl: optionalUrl,
+    threadsUrl: optionalUrl,
+    facebookUrl: optionalUrl,
     businessHours: z.string().trim().max(100),
     closedDays: z.string().trim().max(100),
     amenities: z.array(z.enum(AMENITIES)).max(AMENITIES.length),
     websiteUrl: optionalUrl,
     reservationUrl: optionalUrl,
-    lineUrl: optionalUrl,
+    // LINE は URL のほか「@abc1234」（LINE ID）でも入れられる
+    lineUrl: z.preprocess(
+      (v) => (typeof v === "string" && /^@[\w.\-]{2,40}$/.test(v.trim()) ? `https://line.me/R/ti/p/${encodeURIComponent(v.trim())}` : v),
+      optionalUrl,
+    ),
   })
   .partial();
 
