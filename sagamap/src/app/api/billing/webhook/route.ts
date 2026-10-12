@@ -6,7 +6,7 @@ import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
 
-/** Stripe Webhook: https://sagamap.jp/api/billing/webhook */
+/** Stripe Webhook: https://www.saga-kanko-map.com/api/billing/webhook */
 export async function POST(req: Request) {
   const signature = req.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
