@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { LogOut } from "lucide-react";
@@ -43,17 +44,17 @@ export default function PasswordChangeForm({ minLength = 8 }: { minLength?: numb
     <div className="card space-y-3">
       <form onSubmit={onSubmit} className="space-y-3">
         <h2 className="font-bold">パスワードの変更</h2>
-        <input name="current" type="password" required placeholder="現在のパスワード" autoComplete="current-password" className="input" />
-        <input
+        <PasswordInput name="current" required placeholder="現在のパスワード" autoComplete="current-password" className="input" />
+        <PasswordInput
           name="next"
-          type="password"
+         
           required
           minLength={minLength}
           placeholder={`新しいパスワード（${minLength} 文字以上）`}
           autoComplete="new-password"
           className="input"
         />
-        <input name="next2" type="password" required minLength={minLength} placeholder="新しいパスワード（確認）" autoComplete="new-password" className="input" />
+        <PasswordInput name="next2" required minLength={minLength} placeholder="新しいパスワード（確認）" autoComplete="new-password" className="input" />
         <p className="text-xs text-slate-500">ほかのサービスと同じパスワードは使わないでください（使い回しが乗っ取りのいちばんの原因です）。</p>
         {msg && <p className={`text-sm ${msg.ok ? "text-tea-700" : "text-red-600"}`}>{msg.text}</p>}
         <button className="btn-primary w-full">変更する</button>

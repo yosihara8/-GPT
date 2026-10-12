@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import { useCallback, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { api } from "@/lib/fetcher";
@@ -329,7 +330,7 @@ function TwoFactor() {
               if (await post({ action: "disable", password: f.password, code: f.code })) load();
             }}
           >
-            <input name="password" type="password" required placeholder="パスワード" autoComplete="current-password" className="input" />
+            <PasswordInput name="password" required placeholder="パスワード" autoComplete="current-password" className="input" />
             <input name="code" inputMode="numeric" maxLength={6} required placeholder="6 桁" className="input num" />
             <button className="btn-outline">解除する</button>
           </form>

@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { signIn } from "next-auth/react";
@@ -141,7 +142,7 @@ function Field({ label, name, ...props }: { label: string; name: string } & Reac
   return (
     <div>
       <label className="label" htmlFor={name}>{label}</label>
-      <input id={name} name={name} className="input" {...props} />
+      {props.type === "password" ? <PasswordInput id={name} name={name} {...props} /> : <input id={name} name={name} className="input" {...props} />}
     </div>
   );
 }

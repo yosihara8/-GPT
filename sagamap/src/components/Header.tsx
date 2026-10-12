@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { Eye, LogOut } from "lucide-react";
+import { Eye } from "lucide-react";
 import Logo from "./Logo";
 import { useTheme } from "./ThemeScope";
 
@@ -38,7 +38,11 @@ export default function Header() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
         <Link href={home} className="flex min-w-0 items-center gap-2 sm:gap-2.5" aria-label="佐賀観光マップ ホームへ">
           <Logo light={dark} className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
-          <span className={`whitespace-nowrap font-mincho text-[15px] font-bold sm:text-lg sm:tracking-wider ${dark ? "text-white" : "text-slate-900"}`}>佐賀観光マップ</span>
+          <span
+            className={`whitespace-nowrap font-mincho text-[14px] font-bold sm:text-lg sm:tracking-wider ${user ? "max-[374px]:hidden" : ""} ${dark ? "text-white" : "text-slate-900"}`}
+          >
+            佐賀観光マップ
+          </span>
           {area && (
             <span
               className={`whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-bold ${dark ? "bg-saga-500 text-white" : "bg-sun-400 text-saga-900"}`}
@@ -47,7 +51,7 @@ export default function Header() {
             </span>
           )}
         </Link>
-        <nav className="ml-2 flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-medium">
+        <nav className="ml-1 flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[13px] font-medium sm:ml-2 sm:gap-1 sm:text-sm">
           {user ? (
             <>
               {/* お客さまは「地図」と「マイページ」を切り替え。開いている方に色を付ける */}
@@ -68,11 +72,9 @@ export default function Header() {
               )}
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                aria-label="ログアウト"
-                className={`flex items-center gap-1 rounded-full px-2 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
+                className={`rounded-full px-2 py-1.5 sm:px-3 ${dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
               >
-                <LogOut className="h-4 w-4 sm:hidden" aria-hidden />
-                <span className="hidden sm:inline">ログアウト</span>
+                ログアウト
               </button>
             </>
           ) : (
@@ -93,6 +95,6 @@ export default function Header() {
 
 /** ヘッダーのリンク。開いているページは色つき（藍の背景・白い文字）にする */
 function tabClass(on: boolean, dark: boolean) {
-  if (on) return `rounded-full px-3 py-1.5 font-bold sm:px-3.5 ${dark ? "bg-white text-slate-900" : "bg-saga-600 text-white"}`;
-  return `rounded-full px-2.5 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`;
+  if (on) return `rounded-full px-2.5 py-1.5 font-bold sm:px-3.5 ${dark ? "bg-white text-slate-900" : "bg-saga-600 text-white"}`;
+  return `rounded-full px-2 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`;
 }

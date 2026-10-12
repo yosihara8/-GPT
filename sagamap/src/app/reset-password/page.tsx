@@ -1,5 +1,6 @@
 "use client";
 
+import PasswordInput from "@/components/PasswordInput";
 import { CircleCheck } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useState } from "react";
@@ -54,11 +55,11 @@ function ResetPasswordForm() {
         <form onSubmit={onSubmit} className="card mt-4 space-y-4">
           <div>
             <label className="label" htmlFor="password">新しいパスワード（8 文字以上）</label>
-            <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" className="input" />
+            <PasswordInput id="password" name="password" required minLength={8} autoComplete="new-password" className="input" />
           </div>
           <div>
             <label className="label" htmlFor="password2">新しいパスワード（確認）</label>
-            <input id="password2" name="password2" type="password" required minLength={8} autoComplete="new-password" className="input" />
+            <PasswordInput id="password2" name="password2" required minLength={8} autoComplete="new-password" className="input" />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button disabled={loading || !token} className="btn-primary w-full">

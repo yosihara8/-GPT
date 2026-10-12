@@ -87,12 +87,11 @@ export default function LeafletMapView({
     if (!divRef.current || mapRef.current) return;
     const map = L.map(divRef.current, { zoomControl: false }).setView(me ?? SAGA_CENTER, 15);
     L.control.zoom({ position: "topright" }).addTo(map);
-    // 国土地理院の淡色地図（日本語表記・すっきりした配色でピンが目立つ・商用利用可）
+    // 国土地理院の標準地図（カラー・日本語表記・商用利用可）。色はそのまま表示する
     base.current = {
-      map: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+      map: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
         maxZoom: 19,
         maxNativeZoom: 18,
-        className: "sm-tiles-pale",
         attribution: GSI_ATTRIBUTION,
       }),
       photo: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {

@@ -99,12 +99,8 @@ export function declutter<T>(items: { key: T; x: number; y: number; w: number; h
 }
 
 const GOOGLE_STYLES: google.maps.MapTypeStyle[] = [
+  // 色はそのまま（カラー）。他社のお店の名前・アイコンだけ消して、登録店のピンを目立たせる
   { featureType: "poi.business", stylers: [{ visibility: "off" }] },
-  { featureType: "poi", elementType: "labels.icon", stylers: [{ saturation: -60 }, { lightness: 20 }] },
-  { featureType: "transit", elementType: "labels.icon", stylers: [{ saturation: -70 }] },
-  { featureType: "landscape", stylers: [{ saturation: -30 }, { lightness: 8 }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ saturation: -40 }] },
-  { featureType: "water", stylers: [{ saturation: -20 }, { lightness: 10 }] },
 ];
 
 function GoogleMapView({
@@ -142,7 +138,7 @@ function GoogleMapView({
       center: me ?? SAGA_CENTER,
       zoom: 15,
       mapId: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || undefined,
-      // 地図 ID が無いときは、お店以外の情報（他社の店名・路線の記号など）を減らしてピンを目立たせる
+      // 地図 ID が無いときは、他社の店名を消して登録店のピンを目立たせる
       styles: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID ? undefined : GOOGLE_STYLES,
       gestureHandling: "greedy",
       mapTypeControl: false,
