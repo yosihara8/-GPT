@@ -141,7 +141,7 @@ async function runDigest() {
 
 function customerMail(c: Customer, relevant: Item[], others: Item[]) {
   const li = (i: Item) =>
-    `<li style="margin:6px 0"><a href="${APP_URL}${i.kind === "coupon" ? `/dashboard/customer/coupons/${i.id}` : `/dashboard/customer?shop=${i.business_id}`}">
+    `<li style="margin:6px 0"><a href="${APP_URL}${i.kind === "coupon" ? `/dashboard/customer/coupons/${i.id}` : `/?shop=${i.business_id}`}">
       ${i.kind === "coupon" ? "🎟️" : "📣"} <b>${escapeHtml(i.business_name)}</b>：${escapeHtml(i.title)}</a>
       ${i.detail ? `<br><span style="color:#666;font-size:13px">${escapeHtml(i.detail)}</span>` : ""}</li>`;
   return `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
@@ -149,6 +149,6 @@ function customerMail(c: Customer, relevant: Item[], others: Item[]) {
     <p>${escapeHtml(c.name)} さん、今週も佐賀のお店から新しいお知らせが届いています。</p>
     ${relevant.length ? `<h3>✨ あなたへのおすすめ</h3><ul style="padding-left:18px">${relevant.map(li).join("")}</ul>` : ""}
     ${others.length ? `<h3>📍 そのほかの新着</h3><ul style="padding-left:18px">${others.map(li).join("")}</ul>` : ""}
-    <p><a href="${APP_URL}/dashboard/customer" style="background:#ff6b4a;color:#fff;padding:10px 20px;border-radius:9999px;text-decoration:none">地図で近くのお店を見る</a></p>
+    <p><a href="${APP_URL}/" style="background:#ff6b4a;color:#fff;padding:10px 20px;border-radius:9999px;text-decoration:none">地図で近くのお店を見る</a></p>
     ${mailFooter(`${APP_URL}/unsubscribe?token=${c.unsubscribe_token}`)}</div>`;
 }

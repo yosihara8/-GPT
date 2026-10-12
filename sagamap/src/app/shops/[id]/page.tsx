@@ -103,7 +103,7 @@ export default async function ShopPage({ params }: { params: { id: string } }) {
           </div>
 
           {isCustomer ? (
-            <Link href={`/dashboard/customer?shop=${shop.id}`} className="btn-primary w-full">
+            <Link href={`/?shop=${shop.id}`} className="btn-primary w-full">
               {shop.has_coupon ? <Ticket className="h-4 w-4" aria-hidden /> : <Navigation className="h-4 w-4" aria-hidden />}
               {shop.has_coupon ? "クーポン・道順を見る" : "道順を見る"}
             </Link>

@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Landmark } from "lucide-react";
 import { categoryIcon } from "./CategoryIcon";
-import { MapLegend, hasCoupon, isHighlighted, type MapViewProps } from "./MapView";
+import { MapLegend, couponLabel, declutter, hasCoupon, isHighlighted, type MapViewProps } from "./MapView";
 import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER } from "@/lib/config";
 import { formatDistance, type LatLng } from "@/lib/geo";
 import { escapeHtml } from "@/lib/escape";
@@ -48,6 +48,7 @@ export default function LeafletMapView({
   onSelectShop,
   selectedId,
   className = "h-[62vh]",
+  legend = true,
 }: MapViewProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -112,6 +113,7 @@ export default function LeafletMapView({
   useEffect(() => {
     if (!mapRef.current) return;
     const g = layer("shops");
+    const labels: { shop: (typeof shops)[number]; marker: L.Marker }[] = [];
     for (const shop of shops) {
       const red = isHighlighted(shop, me, highlightRadius);
       const selected = shop.id === selectedId;
@@ -128,7 +130,8 @@ export default function LeafletMapView({
         .addTo(g);
       // クーポンを配信中のお店は、地図上に「クーポン発行中」を常に表示する（タップでお店とクーポンの内容へ）
       if (hasCoupon(shop)) {
-        marker.bindTooltip("クーポン発行中", {
+        labels.push({ shop, marker });
+        marker.bindTooltip(couponLabel(shop), {
           permanent: true,
           direction: "bottom",
           offset: [0, size / 2 - 2],
@@ -140,7 +143,38 @@ export default function LeafletMapView({
         marker.bindTooltip(escapeHtml(`${shop.name}（${shop.category}）`));
       }
     }
+    // 札が重なったら 1 つにまとめる（優先：選択中 → 割引率の大きい順）。地図を動かすたびに計算し直す
+    labels.sort((a, b) => Number(b.shop.id === selectedId) - Number(a.shop.id === selectedId) || (b.shop.best_discount ?? 0) - (a.shop.best_discount ?? 0));
+    const map = mapRef.current;
+    const relabel = () => {
+      const boxes = labels.map(({ shop, marker }) => {
+        const p = map.latLngToContainerPoint(marker.getLatLng());
+        return { key: shop.id, x: p.x, y: p.y, w: 64, h: 40 };
+      });
+      const { hidden, extra } = declutter(boxes);
+      for (const { shop, marker } of labels) {
+        const tip = marker.getTooltip();
+        if (!tip) continue;
+        const n = extra.get(shop.id) ?? 0;
+        tip.setContent(`${couponLabel(shop)}${n ? ` +${n}` : ""}`);
+        const el = tip.getElement();
+        if (el) el.style.display = hidden.has(shop.id) ? "none" : "";
+      }
+    };
+    map.on("zoomend moveend", relabel);
+    const t = setTimeout(relabel, 0);
+    return () => {
+      clearTimeout(t);
+      map.off("zoomend moveend", relabel);
+    };
   }, [shops, me, highlightRadius, selectedId]);
+
+  // 選んだお店を地図の中心に
+  useEffect(() => {
+    const shop = shops.find((s) => s.id === selectedId);
+    if (shop) mapRef.current?.panTo(shop, { animate: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   // 観光名所
   useEffect(() => {
@@ -243,7 +277,7 @@ export default function LeafletMapView({
   return (
     <div className={`relative ${className}`}>
       <div ref={divRef} className="absolute inset-0 z-0" aria-label="店舗マップ" />
-      <MapLegend />
+      {legend && <MapLegend />}
     </div>
   );
 }

@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="flex items-center gap-2">
           <Logo className="h-5 w-5" />
-          <b className="shrink-0 whitespace-nowrap font-mincho text-sm text-slate-800">佐賀観光マップ</b> — 佐賀の個人事業主とお客さんを結ぶ、地理空間 AI 観光マップ
+          <b className="shrink-0 whitespace-nowrap font-mincho text-sm text-slate-800">佐賀観光マップ</b> — 佐賀のお店と、旅する人をつなぐ観光マップ
         </p>
         <nav className="flex flex-wrap gap-x-5 gap-y-2">
           <Link href="/terms" className="hover:text-slate-900">利用規約</Link>

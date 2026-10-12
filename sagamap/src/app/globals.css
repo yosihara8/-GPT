@@ -121,7 +121,13 @@ body {
 
 /* 地図上部の広告バナーとズームボタンが重ならないようにする */
 .leaflet-top {
-  top: 72px;
+  top: 108px;
+}
+/* スマホは指で拡大・縮小できるので、＋−ボタンは出さない */
+@media (max-width: 1023px) {
+  .leaflet-control-zoom {
+    display: none;
+  }
 }
 .leaflet-touch .leaflet-bar,
 .leaflet-bar {

@@ -51,7 +51,7 @@ export default async function CouponPage({ params }: { params: { id: string } })
             <p className="mt-1 text-xs text-slate-500">{c.address}</p>
           </div>
         </div>
-        <Link href={`/dashboard/customer?shop=${c.business_id}`} className="btn mt-5 w-full bg-white py-3 text-saga-600 hover:bg-slate-50">
+        <Link href={`/?shop=${c.business_id}`} className="btn mt-5 w-full bg-white py-3 text-saga-600 hover:bg-slate-50">
           地図でお店を見る
         </Link>
       </div>

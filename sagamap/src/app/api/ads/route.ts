@@ -87,7 +87,7 @@ export async function POST(req: Request) {
         kind: "ad",
         title: d.headline,
         body: d.body || "地図でお店をチェックしてみてください。",
-        link: `/dashboard/customer?shop=${d.businessId}`,
+        link: `/?shop=${d.businessId}`,
       })
     : { notified: 0 };
   return NextResponse.json({ ad, warnings: check.warnings, ...announced }, { status: 201 });
