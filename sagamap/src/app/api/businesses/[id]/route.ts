@@ -6,6 +6,7 @@ import { ADDRESS_NOT_FOUND, geocodeAddress } from "@/lib/geocode";
 import { getOwnerPlan, getSessionUser, ownsBusiness, requireApiUser } from "@/lib/session";
 import { COUPON_PUBLIC_COLUMNS } from "@/lib/coupon";
 import { SPECIAL_DAYS_SQL } from "@/lib/schedule";
+import { PAYMENT_GROUPS } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ export async function GET(_req: Request, { params }: Ctx) {
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
             is_premium, instagram_url, twitter_url, threads_url, facebook_url, business_hours, closed_days,
             weekly_hours, hours_note, ${SPECIAL_DAYS_SQL("b", -1, 92)} AS special_days,
-            amenities, website_url, reservation_url, line_url,
+            amenities, payment_methods, payment_none, website_url, reservation_url, line_url,
             photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM photo_updated_at)::bigint AS photo_version
        FROM businesses b WHERE id = $1`,
     [id],
@@ -32,6 +33,8 @@ export async function GET(_req: Request, { params }: Ctx) {
         ORDER BY (c.coupon_type = 'percent') DESC, c.discount_rate DESC NULLS LAST, c.amount_yen DESC NULLS LAST, c.created_at DESC`,
       [id],
     );
+  const photos = () =>
+    query(`SELECT id, kind, caption FROM business_photos WHERE business_id = $1 ORDER BY sort, id LIMIT 30`, [id]);
   const menu = () =>
     query(
       `SELECT id, name, price, description, (image IS NOT NULL) AS has_image FROM menu_items WHERE business_id = $1 ORDER BY sort, id LIMIT 50`,
@@ -41,12 +44,12 @@ export async function GET(_req: Request, { params }: Ctx) {
   const user = await getSessionUser();
   if (user?.role !== "customer") {
     // 未ログインでもクーポンの内容は見られる（利用には会員登録が必要）
-    return NextResponse.json({ business: { ...biz, contact: undefined }, coupons: await activeCoupons(), menu: await menu(), loginRequired: true });
+    return NextResponse.json({ business: { ...biz, contact: undefined }, coupons: await activeCoupons(), menu: await menu(), photos: await photos(), loginRequired: true });
   }
 
   await query("UPDATE businesses SET view_count = view_count + 1 WHERE id = $1", [id]);
   await query("INSERT INTO usage_history (customer_id, business_id) VALUES ($1, $2)", [user.id, id]);
-  return NextResponse.json({ business: biz, coupons: await activeCoupons(), menu: await menu() });
+  return NextResponse.json({ business: biz, coupons: await activeCoupons(), menu: await menu(), photos: await photos() });
 }
 
 const columns: Record<string, string> = {
@@ -66,6 +69,8 @@ const columns: Record<string, string> = {
   businessHours: "business_hours",
   closedDays: "closed_days",
   amenities: "amenities",
+  paymentMethods: "payment_methods",
+  paymentNone: "payment_none",
   websiteUrl: "website_url",
   reservationUrl: "reservation_url",
   lineUrl: "line_url",
@@ -82,6 +87,11 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (!body.ok) return body.response;
   const d: Record<string, unknown> = { ...body.data };
 
+  // 「使えない」を選んだ種類の支払い方法は消す
+  if (Array.isArray(d.paymentMethods) && Array.isArray(d.paymentNone)) {
+    const none = new Set(d.paymentNone as string[]);
+    d.paymentMethods = (d.paymentMethods as string[]).filter((m) => !PAYMENT_GROUPS.some((g) => none.has(g.key) && (g.items as readonly string[]).includes(m)));
+  }
   // SNS・ホームページ・予約・LINE のリンクは有料プランのみ
   if ([d.instagramUrl, d.twitterUrl, d.threadsUrl, d.facebookUrl, d.websiteUrl, d.reservationUrl, d.lineUrl].some((v) => v !== undefined)) {
     const plan = await getOwnerPlan(auth.user.id);

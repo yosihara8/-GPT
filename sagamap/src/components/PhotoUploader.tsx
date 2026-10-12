@@ -35,7 +35,7 @@ export default function PhotoUploader({ shop, onChanged }: { shop: Shop; onChang
 
   return (
     <section className="card space-y-3">
-      <h2 className="font-bold">店舗写真</h2>
+      <h2 className="font-bold">メイン写真（一覧・お店のページの 1 枚目）</h2>
       <ShopPhoto shop={shop} className="h-48 w-full rounded-2xl" />
       <div className="flex flex-wrap gap-2">
         <label className={`btn-primary cursor-pointer ${busy ? "pointer-events-none opacity-50" : ""}`}>
@@ -58,7 +58,7 @@ export default function PhotoUploader({ shop, onChanged }: { shop: Shop; onChang
         )}
       </div>
       {msg && <p className="text-sm font-bold text-tea-700">{msg}</p>}
-      <p className="text-xs text-slate-500">お店の外観や看板メニューの写真がおすすめです。自動で縮小して保存します。</p>
+      <p className="text-xs text-slate-500">お店の外観や看板メニューの写真がおすすめです。一覧のカードに表示され、お店のページでは写真のスライドの 1 枚目になります。</p>
     </section>
   );
 }

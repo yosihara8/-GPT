@@ -21,6 +21,8 @@ import ImagePicker, { type PickedImage } from "@/components/ImagePicker";
 import { blobToBase64 } from "@/lib/image";
 import ScheduleEditor from "@/components/business/ScheduleEditor";
 import SnsShare from "@/components/business/SnsShare";
+import PaymentFieldset from "@/components/business/PaymentFieldset";
+import PhotoGallery from "@/components/business/PhotoGallery";
 import { type SpecialDay } from "@/lib/schedule";
 
 type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number; plan_ends_at?: string | null };
@@ -47,6 +49,8 @@ type Store = {
   business_hours?: string;
   closed_days?: string;
   amenities?: string[];
+  payment_methods?: string[];
+  payment_none?: string[];
   website_url?: string | null;
   reservation_url?: string | null;
   line_url?: string | null;
@@ -272,6 +276,7 @@ function BusinessDashboard() {
 
       {store && <SnsShare key={`share-${store.id}`} storeId={store.id} storeName={store.name} />}
       {store && <PhotoUploader key={`photo-${store.id}`} shop={store} onChanged={load} />}
+      {store && <PhotoGallery key={`gallery-${store.id}`} storeId={store.id} premium={premium} />}
       {store && <StoreEditor key={store.id} store={store} premium={premium} onSaved={load} />}
       {store && (
         <ScheduleEditor
@@ -370,6 +375,8 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
       priceLevel: f.priceLevel,
       crowdLevel: f.crowdLevel,
       amenities: new FormData(e.currentTarget).getAll("amenities"),
+      paymentMethods: new FormData(e.currentTarget).getAll("paymentMethods"),
+      paymentNone: new FormData(e.currentTarget).getAll("paymentNone"),
     };
     if (premium) {
       body.instagramUrl = f.instagramUrl;
@@ -448,6 +455,8 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
           ))}
         </div>
       </fieldset>
+
+      <PaymentFieldset methods={store.payment_methods} none={store.payment_none} />
 
       <fieldset disabled={!premium} className="space-y-3 rounded-xl border border-slate-200 p-3 disabled:opacity-60">
         <legend className="px-1 text-sm font-semibold">

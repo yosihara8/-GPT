@@ -22,6 +22,7 @@ import {
   Globe,
   UtensilsCrossed,
   BadgeCheck,
+  Wallet,
 } from "lucide-react";
 import MapView from "@/components/MapView";
 import ShopPhoto from "@/components/ShopPhoto";
@@ -33,6 +34,8 @@ import { PRICE_LEVEL_LABELS } from "@/lib/config";
 import { daysLeft, shopStatus } from "@/lib/open-status";
 import { type SpecialDay } from "@/lib/schedule";
 import HoursCard from "./HoursCard";
+import PhotoSlider, { type SlidePhoto } from "./PhotoSlider";
+import { paymentRows, paymentTags } from "@/lib/payment";
 import { CouponStub, type CouponInfo } from "@/components/CouponRow";
 import { couponBadge, couponRules, couponShort } from "@/lib/coupon";
 
@@ -53,6 +56,8 @@ export type DetailShop = CardShop & {
   business_hours?: string | null;
   closed_days?: string | null;
   amenities?: string[] | null;
+  payment_methods?: string[] | null;
+  payment_none?: string[] | null;
   website_url?: string | null;
   reservation_url?: string | null;
   line_url?: string | null;
@@ -77,6 +82,7 @@ export default function DetailSheet({
   shop,
   coupons,
   menu,
+  photos = [],
   shopAds,
   from,
   me,
@@ -97,6 +103,7 @@ export default function DetailSheet({
   shop: DetailShop;
   coupons: DetailCoupon[] | null;
   menu: MenuItem[] | null;
+  photos?: SlidePhoto[];
   shopAds: Ad[];
   from: SheetFrom;
   me: { lat: number; lng: number } | null;
@@ -129,6 +136,8 @@ export default function DetailSheet({
   const otherCoupons = (coupons ?? []).filter((c) => c.id !== focusCoupon?.id);
   const otherAds = shopAds.filter((a) => a.id !== focusAd?.id);
   const bestCoupon = focusCoupon ?? coupons?.[0];
+  const features = Array.from(new Set([...(shop.amenities ?? []), ...paymentTags(shop)]));
+  const payments = paymentRows(shop.payment_methods, shop.payment_none);
   const sns = (
     [
       ["Instagram", shop.instagram_url],
@@ -168,7 +177,12 @@ export default function DetailSheet({
 
         {/* ② お店の写真と名前 */}
         <section className="bg-white">
-          {shop.has_photo && <ShopPhoto shop={shop} className="h-52 w-full" />}
+          <PhotoSlider
+            main={shop.has_photo ? `/api/businesses/${shop.id}/photo?v=${shop.photo_version ?? 0}` : null}
+            photos={photos}
+            name={shop.name}
+            fallback={shop.has_photo ? <ShopPhoto shop={shop} className="h-52 w-full" /> : null}
+          />
           <div className="px-4 pb-4 pt-3">
             <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs font-medium text-slate-500">
               <CategoryIcon category={shop.category} className="h-3.5 w-3.5" />
@@ -188,9 +202,9 @@ export default function DetailSheet({
               )}
             </div>
             {shop.service_description && <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-slate-700">{shop.service_description}</p>}
-            {(shop.amenities?.length ?? 0) > 0 && (
+            {features.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="お店の特徴">
-                {shop.amenities!.map((a) => (
+                {features.map((a) => (
                   <li key={a} className="inline-flex items-center gap-1 rounded-full bg-saga-50 px-2.5 py-1 text-xs font-bold text-saga-700">
                     <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
                     {a}
@@ -339,6 +353,29 @@ export default function DetailSheet({
                       ホームページ
                     </a>
                   )}
+                </span>
+              </Info>
+            )}
+            {payments.length > 0 && (
+              <Info icon={Wallet} label="お支払い方法（現金以外）">
+                <span className="block space-y-2">
+                  <span className="block text-[15px] font-bold text-slate-800">お支払い方法（現金以外）</span>
+                  {payments.map((r) => (
+                    <span key={r.key} className="block">
+                      <span className="block text-xs font-bold text-slate-500">{r.label}</span>
+                      {r.none ? (
+                        <span className="text-slate-400">使えません</span>
+                      ) : (
+                        <span className="mt-1 flex flex-wrap gap-1">
+                          {r.items.map((m) => (
+                            <span key={m} className="rounded-md bg-slate-100 px-2 py-0.5 text-[13px] font-bold text-slate-700">
+                              {m}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </span>
+                  ))}
                 </span>
               </Info>
             )}

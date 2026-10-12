@@ -177,3 +177,13 @@ body {
   padding: 0 4px;
   border-radius: 4px;
 }
+
+@layer utilities {
+  /* 横スライドのスクロールバーを隠す */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AMENITIES, CATEGORIES } from "./config";
+import { AMENITIES, CATEGORIES, PAYMENT_ITEMS, PAYMENT_KEYS } from "./config";
 import { COUPON_TYPES } from "./coupon";
 
 const optionalUrl = z
@@ -41,6 +41,8 @@ export const storeUpdateSchema = z
     businessHours: z.string().trim().max(100),
     closedDays: z.string().trim().max(100),
     amenities: z.array(z.enum(AMENITIES)).max(AMENITIES.length),
+    paymentMethods: z.array(z.enum(PAYMENT_ITEMS)).max(PAYMENT_ITEMS.length),
+    paymentNone: z.array(z.enum(PAYMENT_KEYS)).max(PAYMENT_KEYS.length),
     websiteUrl: optionalUrl,
     reservationUrl: optionalUrl,
     // LINE は URL のほか「@abc1234」（LINE ID）でも入れられる
