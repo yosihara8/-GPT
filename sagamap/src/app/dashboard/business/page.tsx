@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapShop } from "@/components/MapView";
 import HourlyChart from "@/components/HourlyChart";
 import PhotoUploader from "@/components/PhotoUploader";
+import EmailChangeForm from "@/components/EmailChangeForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import CouponRow from "@/components/CouponRow";
@@ -239,6 +240,7 @@ function BusinessDashboard() {
 
       {premium && <AddStore onAdded={load} />}
 
+      <EmailChangeForm onChanged={load} />
       <PasswordChangeForm />
     </main>
   );

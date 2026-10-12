@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/fetcher";
+import EmailChangeForm from "@/components/EmailChangeForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import NotifySetting from "@/components/NotifySetting";
 
@@ -69,6 +70,7 @@ export default function HistoryPage() {
       )}
       <div className="mt-6 space-y-4">
         <NotifySetting />
+        <EmailChangeForm />
         <PasswordChangeForm />
       </div>
     </main>
