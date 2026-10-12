@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { Ticket, X } from "lucide-react";
 import { api } from "@/lib/fetcher";
+import { couponBadge, couponHeadline, type CouponValue } from "@/lib/coupon";
 
-export type UseTarget = { id: number; title: string; discount_rate: number; conditions?: string | null; shopName: string };
+export type UseTarget = CouponValue & { id: number; title: string; conditions?: string | null; shopName: string };
 
 /**
  * クーポンを使う流れ：①確認（誤タップ防止）→ ②画面いっぱいの「利用済」チケットを店員さんに見せる
@@ -53,10 +54,15 @@ export default function CouponUse({ target, onClose, onUsed }: { target: UseTarg
           <div className="px-6 pb-6 pt-6">
             <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">COUPON</p>
             <p className="mt-1 font-mincho text-lg font-bold text-slate-900">{target.shopName}</p>
-            <p className="mt-3 font-num font-extrabold leading-none text-coupon">
-              <span className="text-7xl tracking-tight">{target.discount_rate}</span>
-              <span className="text-3xl">%OFF</span>
-            </p>
+            {target.coupon_type === "gift" ? (
+              <p className="mt-3 text-3xl font-extrabold leading-snug text-tea-600">{target.benefit || "特典サービス"}</p>
+            ) : (
+              <p className={`mt-3 font-num font-extrabold leading-none ${couponBadge(target).tone === "gold" ? "text-sun-500" : "text-coupon"}`}>
+                {target.coupon_type === "price" && <span className="mr-1 align-middle text-lg font-bold">特別価格</span>}
+                <span className="text-7xl tracking-tight">{couponBadge(target).main}</span>
+                <span className="text-3xl">{couponBadge(target).sub}</span>
+              </p>
+            )}
             <p className="mt-3 font-mincho text-base font-bold">{target.title}</p>
             {target.conditions && <p className="mt-1 text-sm text-slate-600">{target.conditions}</p>}
             <div className="my-4 border-t-2 border-dashed border-slate-300" aria-hidden />
@@ -98,7 +104,7 @@ export default function CouponUse({ target, onClose, onUsed }: { target: UseTarg
         <div className="mt-3 rounded-2xl bg-coral-50 p-4">
           <p className="text-xs text-slate-600">{target.shopName}</p>
           <p className="mt-0.5 font-bold text-slate-900">
-            <span className="num mr-1.5 text-2xl font-extrabold text-coupon">{target.discount_rate}%OFF</span>
+            <span className="num mr-1.5 text-xl font-extrabold text-coupon">{couponHeadline(target)}</span>
             {target.title}
           </p>
           {target.conditions && <p className="mt-1 text-xs text-slate-600">{target.conditions}</p>}

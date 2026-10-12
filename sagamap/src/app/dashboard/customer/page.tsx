@@ -20,6 +20,7 @@ type Favorite = {
   lng: number;
   category: string;
   best_discount: number | null;
+  best_label?: string | null;
   has_photo?: boolean;
   photo_version?: number | null;
 };
@@ -33,6 +34,7 @@ type Row = {
   category: string;
   coupon_title: string | null;
   discount_rate: number | null;
+  coupon_label?: string | null;
 };
 
 export default function MyPage() {
@@ -217,7 +219,7 @@ function MyPageInner() {
                     <span className="block truncate font-bold">{r.business_name}</span>
                     <span className="block truncate text-xs text-slate-500">
                       {r.category}
-                      {r.coupon_title && `・${r.coupon_title}（${r.discount_rate}%OFF）`}
+                      {r.coupon_title && `・${r.coupon_title}（${r.coupon_label ?? `${r.discount_rate}%OFF`}）`}
                     </span>
                   </span>
                   <time className="shrink-0 text-xs text-slate-500">

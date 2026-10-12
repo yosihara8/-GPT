@@ -5,6 +5,7 @@ import { COUPON_HIGHLIGHT_RADIUS_M } from "@/lib/config";
 import { requireApiUser } from "@/lib/session";
 import { recordLocationPing } from "@/lib/flows";
 import { rateLimit } from "@/lib/rate-limit";
+import { BEST_LABEL_SQL } from "@/lib/coupon";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,8 @@ export async function GET(req: NextRequest) {
             b.photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM b.photo_updated_at)::bigint AS photo_version,
             ST_Distance(b.location, me.geog) AS distance_m,
             (SELECT max(discount_rate) FROM coupons c
-              WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount
+              WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now()) AS best_discount,
+            ${BEST_LABEL_SQL("b")} AS best_label
        FROM businesses b, me
       WHERE ${where.join(" AND ")}
       ORDER BY distance_m

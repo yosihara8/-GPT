@@ -17,6 +17,11 @@ import {
   Share2,
   Store,
   Ticket,
+  CalendarCheck,
+  MessageCircle,
+  Globe,
+  UtensilsCrossed,
+  BadgeCheck,
 } from "lucide-react";
 import MapView from "@/components/MapView";
 import ShopPhoto from "@/components/ShopPhoto";
@@ -26,6 +31,8 @@ import Carousel from "./Carousel";
 import { ShopCard, travelText, type CardShop } from "./Cards";
 import { PRICE_LEVEL_LABELS } from "@/lib/config";
 import { daysLeft, openStatus } from "@/lib/open-status";
+import { CouponStub, type CouponInfo } from "@/components/CouponRow";
+import { couponBadge, couponRules, couponShort } from "@/lib/coupon";
 
 export type DetailShop = CardShop & {
   lat: number;
@@ -38,8 +45,13 @@ export type DetailShop = CardShop & {
   twitter_url?: string | null;
   business_hours?: string | null;
   closed_days?: string | null;
+  amenities?: string[] | null;
+  website_url?: string | null;
+  reservation_url?: string | null;
+  line_url?: string | null;
 };
-export type DetailCoupon = { id: number; title: string; discount_rate: number; conditions?: string | null; expires_at: string; has_image?: boolean };
+export type DetailCoupon = CouponInfo;
+export type MenuItem = { id: number; name: string; price: number | null; description: string; has_image: boolean };
 /** どこから開いたか（クーポン・広告から開いたときは、その内容をいちばん上に大きく出す） */
 export type SheetFrom = { type: "coupon"; couponId: number } | { type: "ad"; ad: Ad } | { type: "shop" };
 
@@ -57,6 +69,7 @@ export const phoneOf = (s?: string | null) => {
 export default function DetailSheet({
   shop,
   coupons,
+  menu,
   shopAds,
   from,
   me,
@@ -76,6 +89,7 @@ export default function DetailSheet({
 }: {
   shop: DetailShop;
   coupons: DetailCoupon[] | null;
+  menu: MenuItem[] | null;
   shopAds: Ad[];
   from: SheetFrom;
   me: { lat: number; lng: number } | null;
@@ -159,13 +173,33 @@ export default function DetailSheet({
               )}
             </div>
             {shop.service_description && <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-slate-700">{shop.service_description}</p>}
+            {(shop.amenities?.length ?? 0) > 0 && (
+              <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="お店の特徴">
+                {shop.amenities!.map((a) => (
+                  <li key={a} className="inline-flex items-center gap-1 rounded-full bg-saga-50 px-2.5 py-1 text-xs font-bold text-saga-700">
+                    <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
+                    {a}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {/* ③ 行動ボタン（2 回目のタップで来店へ） */}
             <div className="mt-4 grid grid-cols-4 gap-2">
               <Action icon={Navigation} label="経路" onClick={onRoute} primary />
               {tel ? <Action icon={Phone} label="電話" href={`tel:${tel}`} onClick={onCall} /> : <Action icon={MapIcon} label="地図アプリ" href={gmapSearch} />}
-              <Action icon={Heart} label={favorite ? "保存済み" : "保存"} onClick={onFavorite} on={favorite} />
-              <Action icon={Share2} label="共有" onClick={onShare} />
+              {shop.reservation_url ? (
+                <Action icon={CalendarCheck} label="予約する" href={shop.reservation_url} onClick={onCall} />
+              ) : (
+                <Action icon={Heart} label={favorite ? "保存済み" : "保存"} onClick={onFavorite} on={favorite} />
+              )}
+              {shop.line_url ? (
+                <Action icon={MessageCircle} label="LINE" href={shop.line_url} onClick={onCall} />
+              ) : shop.website_url ? (
+                <Action icon={Globe} label="ホームページ" href={shop.website_url} />
+              ) : (
+                <Action icon={Share2} label="共有" onClick={onShare} />
+              )}
             </div>
           </div>
         </section>
@@ -187,6 +221,28 @@ export default function DetailSheet({
         )}
         {coupons !== null && coupons.length === 0 && (
           <p className="mx-4 mt-5 rounded-2xl bg-white px-4 py-3 text-sm text-slate-500 ring-1 ring-slate-200/70">このお店は、いまクーポンを配信していません。</p>
+        )}
+
+        {/* メニュー・商品（写真・価格） */}
+        {menu && menu.length > 0 && (
+          <Carousel title="メニュー・商品" eyebrow="MENU" icon={<UtensilsCrossed className="h-4 w-4 text-asa-500" aria-hidden />} count={menu.length}>
+            {menu.map((m) => (
+              <div key={m.id} className="w-[176px] shrink-0 snap-start overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/70">
+                {m.has_image ? (
+                  <img src={`/api/menu/${m.id}/image`} alt="" className="h-28 w-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="flex h-16 items-center justify-center bg-gradient-to-br from-[#F3EDE3] to-[#E9DCC6] text-[#B49F7E]">
+                    <UtensilsCrossed className="h-6 w-6" aria-hidden />
+                  </div>
+                )}
+                <div className="p-2.5">
+                  <p className="line-clamp-2 text-sm font-bold leading-snug">{m.name}</p>
+                  {m.price != null && <p className="num mt-0.5 text-base font-extrabold text-slate-900">¥{m.price.toLocaleString()}</p>}
+                  {m.description && <p className="mt-0.5 line-clamp-3 text-[11px] leading-snug text-slate-500">{m.description}</p>}
+                </div>
+              </div>
+            ))}
+          </Carousel>
         )}
 
         {/* ⑤ お店からのお知らせ（広告） */}
@@ -239,6 +295,27 @@ export default function DetailSheet({
                 )}
               </Info>
             )}
+            {(shop.reservation_url || shop.line_url || shop.website_url) && (
+              <Info icon={Globe} label="予約・LINE・ホームページ">
+                <span className="flex flex-wrap gap-4">
+                  {shop.reservation_url && (
+                    <a href={shop.reservation_url} target="_blank" rel="noreferrer" onClick={onCall} className="font-bold text-saga-600">
+                      予約ページ
+                    </a>
+                  )}
+                  {shop.line_url && (
+                    <a href={shop.line_url} target="_blank" rel="noreferrer" onClick={onCall} className="font-bold text-saga-600">
+                      LINE で問い合わせ
+                    </a>
+                  )}
+                  {shop.website_url && (
+                    <a href={shop.website_url} target="_blank" rel="noreferrer" className="font-bold text-saga-600">
+                      ホームページ
+                    </a>
+                  )}
+                </span>
+              </Info>
+            )}
             {(shop.instagram_url || shop.twitter_url) && (
               <Info icon={ExternalLink} label="SNS">
                 <span className="flex flex-wrap gap-4">
@@ -274,7 +351,7 @@ export default function DetailSheet({
 
         {/* ⑦ 3 回目のタップ：近くのお店（はしご・ついで寄りを提案） */}
         {nearby.length > 0 && (
-          <Carousel title="このお店の近くのお店" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="このお店からの距離・クーポン配信中のお店を先に表示">
+          <Carousel title="このお店の近くのお店" eyebrow="NEXT STOP" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="このお店からの距離・クーポン配信中のお店を先に表示">
             {nearby.map(({ shop: s, meters: m }) => (
               <ShopCard
                 key={s.id}
@@ -294,7 +371,7 @@ export default function DetailSheet({
         {bestCoupon && (
           <button onClick={() => onUseCoupon(bestCoupon)} className="btn flex-1 rounded-full bg-coupon py-3 text-white hover:bg-coral-600">
             <Ticket className="h-4 w-4" aria-hidden />
-            {bestCoupon.discount_rate}%OFFを使う
+            {bestCoupon.coupon_type === "gift" ? "特典を使う" : `${couponShort(bestCoupon)}を使う`}
           </button>
         )}
         <button onClick={onRoute} className="btn-accent flex-1 rounded-full py-3">
@@ -356,6 +433,8 @@ function Info({ icon: Icon, label, children }: { icon: typeof Clock; label: stri
 /** 押したクーポンを大きく（条件・期限・使い方まで） */
 function CouponHero({ coupon: c, shopName, onUse }: { coupon: DetailCoupon; shopName: string; onUse: () => void }) {
   const left = daysLeft(c.expires_at);
+  const badge = couponBadge(c);
+  const color = badge.tone === "green" ? "text-tea-600" : badge.tone === "gold" ? "text-sun-500" : "text-coupon";
   return (
     <section className="karakusa bg-saga-600 px-4 pb-5 pt-4">
       <div className="overflow-hidden rounded-3xl bg-[#FAF6EF] shadow-[0_12px_28px_rgba(10,20,40,0.3)]">
@@ -363,16 +442,33 @@ function CouponHero({ coupon: c, shopName, onUse }: { coupon: DetailCoupon; shop
         <div className="px-5 pb-5 pt-4 text-center">
           <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">COUPON</p>
           <p className="mt-0.5 text-sm font-bold text-slate-600">{shopName}</p>
-          <p className="mt-2 font-num font-extrabold leading-none text-coupon">
-            <span className="text-6xl tracking-tight">{c.discount_rate}</span>
-            <span className="text-2xl">%OFF</span>
-          </p>
+          {c.coupon_type === "gift" ? (
+            <p className={`mt-2 text-[26px] font-extrabold leading-snug ${color}`}>{c.benefit || "特典サービス"}</p>
+          ) : (
+            <p className={`mt-2 font-num font-extrabold leading-none ${color}`}>
+              {c.coupon_type === "price" && <span className="mr-1 align-middle text-base font-bold">特別価格</span>}
+              <span className="text-6xl tracking-tight">{badge.main}</span>
+              <span className="text-2xl">{badge.sub}</span>
+            </p>
+          )}
+          {c.coupon_type === "price" && c.regular_price && (
+            <p className="mt-1 text-sm text-slate-500">
+              通常 <s>{c.regular_price.toLocaleString()}円</s>
+            </p>
+          )}
           <p className="mt-2 text-lg font-bold text-slate-900">{c.title}</p>
           {c.conditions && <p className="mt-1 text-sm text-slate-600">条件：{c.conditions}</p>}
           <p className="mt-2 inline-flex items-center gap-1 text-sm text-slate-600">
             <CalendarClock className="h-4 w-4" aria-hidden />
             {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
             {left && <b className="ml-1 rounded-full bg-coral-50 px-2 py-0.5 text-xs text-coupon">{left}</b>}
+          </p>
+          <p className="mt-1 flex flex-wrap justify-center gap-1">
+            {couponRules(c).map((t) => (
+              <span key={t} className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-saga-600 ring-1 ring-saga-100">
+                {t}
+              </span>
+            ))}
           </p>
           <div className="my-4 border-t-2 border-dashed border-slate-300" aria-hidden />
           <ol className="grid grid-cols-3 gap-2 text-left text-[11px] leading-snug text-slate-600">
@@ -396,28 +492,29 @@ function CouponHero({ coupon: c, shopName, onUse }: { coupon: DetailCoupon; shop
   );
 }
 
-/** クーポンの 1 行（残り日数つき） */
+/** クーポンの 1 行（残り日数・使い方の条件つき） */
 function CouponLine({ coupon: c, onUse }: { coupon: DetailCoupon; onUse: () => void }) {
   const left = daysLeft(c.expires_at);
   return (
     <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/70">
       {c.has_image && <img src={`/api/coupons/${c.id}/image`} alt="" className="h-32 w-full object-cover" loading="lazy" />}
-      <div className="flex items-center gap-3 p-3">
-        <span className="num shrink-0 text-2xl font-extrabold text-coupon">
-          {c.discount_rate}
-          <span className="text-sm">%OFF</span>
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block font-bold">{c.title}</span>
-          <span className="block text-xs text-slate-500">
-            {c.conditions && `${c.conditions}・`}
-            {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
-            {left && <b className="ml-1 text-coupon">{left}</b>}
+      <div className="flex items-stretch">
+        <CouponStub coupon={c} />
+        <div className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-4 pr-3">
+          <span className="min-w-0 flex-1">
+            <span className="block font-bold">{c.title}</span>
+            {c.coupon_type === "gift" && c.benefit && <span className="block text-xs font-bold text-tea-700">{c.benefit}</span>}
+            <span className="block text-xs text-slate-500">
+              {c.conditions && `${c.conditions}・`}
+              {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
+              {left && <b className="ml-1 text-coupon">{left}</b>}
+            </span>
+            <span className="block text-[11px] text-slate-400">{couponRules(c).join("・")}</span>
           </span>
-        </span>
-        <button onClick={onUse} className="btn-primary shrink-0 rounded-full px-4 py-2">
-          使う
-        </button>
+          <button onClick={onUse} className="btn-primary shrink-0 rounded-full px-4 py-2">
+            使う
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { CATEGORIES } from "./config";
+import { AMENITIES, CATEGORIES } from "./config";
+import { COUPON_TYPES } from "./coupon";
 
 const optionalUrl = z
   .string()
@@ -37,6 +38,10 @@ export const storeUpdateSchema = z
     twitterUrl: optionalUrl,
     businessHours: z.string().trim().max(100),
     closedDays: z.string().trim().max(100),
+    amenities: z.array(z.enum(AMENITIES)).max(AMENITIES.length),
+    websiteUrl: optionalUrl,
+    reservationUrl: optionalUrl,
+    lineUrl: optionalUrl,
   })
   .partial();
 
@@ -49,16 +54,43 @@ export const customerRegisterSchema = z.object({
   notifyEnabled: z.boolean().default(true),
 });
 
-export const couponCreateSchema = z.object({
-  businessId: z.coerce.number().int().positive(),
-  title: z.string().trim().min(1, "タイトルは必須です").max(100),
-  discountRate: z.coerce.number().int().min(1, "割引率は 1〜100% です").max(100, "割引率は 1〜100% です"),
-  conditions: z.string().trim().max(300).default(""),
-  expiresAt: z.coerce.date().refine((d) => d.getTime() > Date.now(), "有効期限は未来の日時にしてください"),
-  notify: z.boolean().default(true),
-  /** クーポン画像（任意）。JPEG を base64 にしたもの（最大 1.5MB） */
-  imageBase64: z.string().max(2_100_000, "画像は 1.5MB 以下にしてください").optional(),
-});
+const optionalInt = (min: number, max: number, msg: string) =>
+  z.preprocess(
+    (v) => (v === "" || v == null ? undefined : v),
+    z.coerce.number().int().min(min, msg).max(max, msg).optional(),
+  ) as unknown as z.ZodOptional<z.ZodNumber>;
+
+export const couponCreateSchema = z
+  .object({
+    businessId: z.coerce.number().int().positive(),
+    title: z.string().trim().min(1, "タイトルは必須です").max(100),
+    couponType: z.enum(COUPON_TYPES).default("percent"),
+    discountRate: optionalInt(1, 100, "割引率は 1〜100% です"),
+    amountYen: optionalInt(1, 1_000_000, "値引きの金額は 1〜1,000,000 円です"),
+    specialPrice: optionalInt(0, 1_000_000, "特別価格は 0〜1,000,000 円です"),
+    regularPrice: optionalInt(1, 1_000_000, "通常価格は 1〜1,000,000 円です"),
+    benefit: z.string().trim().max(60).default(""),
+    conditions: z.string().trim().max(300).default(""),
+    expiresAt: z.coerce.date().refine((d) => d.getTime() > Date.now(), "有効期限は未来の日時にしてください"),
+    maxUses: optionalInt(1, 100_000, "先着の人数は 1 人以上にしてください"),
+    repeatable: z.boolean().default(false),
+    firstVisitOnly: z.boolean().default(false),
+    notify: z.boolean().default(true),
+    /** クーポン画像（任意）。JPEG を base64 にしたもの（最大 1.5MB） */
+    imageBase64: z.string().max(2_100_000, "画像は 1.5MB 以下にしてください").optional(),
+  })
+  .superRefine((d, ctx) => {
+    const need = (ok: unknown, path: string, message: string) => {
+      if (!ok) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [path], message });
+    };
+    if (d.couponType === "percent") need(d.discountRate, "discountRate", "割引率を入れてください");
+    if (d.couponType === "yen") need(d.amountYen, "amountYen", "値引きの金額を入れてください");
+    if (d.couponType === "price") {
+      need(d.specialPrice != null, "specialPrice", "特別価格を入れてください");
+      if (d.regularPrice != null && d.specialPrice != null) need(d.specialPrice < d.regularPrice, "specialPrice", "特別価格は通常価格より安くしてください");
+    }
+    if (d.couponType === "gift") need(d.benefit, "benefit", "特典の内容を入れてください（例：トッピング 1 品無料）");
+  });
 
 export const adCreateSchema = z.object({
   businessId: z.coerce.number().int().positive(),

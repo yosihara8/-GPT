@@ -4,6 +4,7 @@ import { parseBody } from "@/lib/http";
 import { storeUpdateSchema } from "@/lib/schemas";
 import { ADDRESS_NOT_FOUND, geocodeAddress } from "@/lib/geocode";
 import { getOwnerPlan, getSessionUser, ownsBusiness, requireApiUser } from "@/lib/session";
+import { COUPON_PUBLIC_COLUMNS } from "@/lib/coupon";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export async function GET(_req: Request, { params }: Ctx) {
   const biz = await queryOne(
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
             is_premium, instagram_url, twitter_url, business_hours, closed_days,
+            amenities, website_url, reservation_url, line_url,
             photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM photo_updated_at)::bigint AS photo_version
        FROM businesses WHERE id = $1`,
     [id],
@@ -23,20 +25,26 @@ export async function GET(_req: Request, { params }: Ctx) {
 
   const activeCoupons = () =>
     query(
-      `SELECT id, title, discount_rate, conditions, expires_at, (image IS NOT NULL) AS has_image FROM coupons
-        WHERE business_id = $1 AND is_active AND expires_at > now() ORDER BY discount_rate DESC`,
+      `SELECT ${COUPON_PUBLIC_COLUMNS("c")} FROM coupons c
+        WHERE c.business_id = $1 AND c.is_active AND c.expires_at > now()
+        ORDER BY (c.coupon_type = 'percent') DESC, c.discount_rate DESC NULLS LAST, c.amount_yen DESC NULLS LAST, c.created_at DESC`,
+      [id],
+    );
+  const menu = () =>
+    query(
+      `SELECT id, name, price, description, (image IS NOT NULL) AS has_image FROM menu_items WHERE business_id = $1 ORDER BY sort, id LIMIT 50`,
       [id],
     );
 
   const user = await getSessionUser();
   if (user?.role !== "customer") {
     // 未ログインでもクーポンの内容は見られる（利用には会員登録が必要）
-    return NextResponse.json({ business: { ...biz, contact: undefined }, coupons: await activeCoupons(), loginRequired: true });
+    return NextResponse.json({ business: { ...biz, contact: undefined }, coupons: await activeCoupons(), menu: await menu(), loginRequired: true });
   }
 
   await query("UPDATE businesses SET view_count = view_count + 1 WHERE id = $1", [id]);
   await query("INSERT INTO usage_history (customer_id, business_id) VALUES ($1, $2)", [user.id, id]);
-  return NextResponse.json({ business: biz, coupons: await activeCoupons() });
+  return NextResponse.json({ business: biz, coupons: await activeCoupons(), menu: await menu() });
 }
 
 const columns: Record<string, string> = {
@@ -53,6 +61,10 @@ const columns: Record<string, string> = {
   twitterUrl: "twitter_url",
   businessHours: "business_hours",
   closedDays: "closed_days",
+  amenities: "amenities",
+  websiteUrl: "website_url",
+  reservationUrl: "reservation_url",
+  lineUrl: "line_url",
 };
 
 export async function PATCH(req: Request, { params }: Ctx) {
@@ -66,11 +78,11 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (!body.ok) return body.response;
   const d: Record<string, unknown> = { ...body.data };
 
-  // SNS 連携は有料プランのみ
-  if (d.instagramUrl !== undefined || d.twitterUrl !== undefined) {
+  // SNS・ホームページ・予約・LINE のリンクは有料プランのみ
+  if ([d.instagramUrl, d.twitterUrl, d.websiteUrl, d.reservationUrl, d.lineUrl].some((v) => v !== undefined)) {
     const plan = await getOwnerPlan(auth.user.id);
     if (plan?.plan !== "premium") {
-      return NextResponse.json({ error: "SNS 連携は有料プランの機能です", upgradeUrl: "/upgrade" }, { status: 402 });
+      return NextResponse.json({ error: "SNS・予約・LINE などのリンクは有料プランの機能です", upgradeUrl: "/upgrade" }, { status: 402 });
     }
   }
   // 住所が変わったときは、住所から位置を調べ直す（見つからなければ入力し直してもらう）

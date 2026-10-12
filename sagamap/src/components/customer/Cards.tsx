@@ -7,6 +7,8 @@ import CategoryIcon from "@/components/CategoryIcon";
 import { estimateWalkMinutes, formatDistance } from "@/lib/geo";
 import type { Ad } from "@/components/AdBanner";
 import { daysLeft } from "@/lib/open-status";
+import { CouponStub } from "@/components/CouponRow";
+import { remainingUses, type CouponValue } from "@/lib/coupon";
 
 /** 距離と所要時間（2.5km までは徒歩、それより遠いと車の目安） */
 export function travelText(m: number | null) {
@@ -22,6 +24,7 @@ export type CardShop = {
   has_photo?: boolean;
   photo_version?: number | null;
   best_discount?: number | null;
+  best_label?: string | null;
   has_coupon?: boolean;
 };
 
@@ -41,18 +44,13 @@ export function ShopCard({
   onOpen: () => void;
   onFavorite?: () => void;
 }) {
-  const discount = shop.best_discount ?? 0;
+  const label = shop.best_label ?? (shop.best_discount ? `${shop.best_discount}%OFF` : null);
   return (
     <div className="relative w-[172px] shrink-0 snap-start overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgba(20,40,77,0.05),0_6px_16px_rgba(20,40,77,0.08)] ring-1 ring-slate-200/70 sm:w-[196px]">
       <button onClick={onOpen} className="block w-full text-left">
         <div className="relative h-[104px] bg-gradient-to-br from-saga-50 to-[#F3E6D2]">
           <ShopPhoto shop={shop} className="h-full w-full" />
-          {discount > 0 && (
-            <span className="absolute left-2 top-2 rounded-lg bg-coupon px-2 py-0.5 text-white shadow">
-              <span className="num text-base font-extrabold leading-none">{discount}</span>
-              <span className="num text-[10px] font-bold">%OFF</span>
-            </span>
-          )}
+          {label && <span className="num absolute left-2 top-2 rounded-lg bg-coupon px-2 py-0.5 text-[13px] font-extrabold text-white shadow">{label}</span>}
         </div>
         <div className="p-2.5">
           <p className="flex items-center gap-1 text-[11px] text-slate-500">
@@ -81,43 +79,44 @@ export function ShopCard({
   );
 }
 
-export type CardCoupon = {
+export type CardCoupon = CouponValue & {
   id: number;
   title: string;
-  discount_rate: number;
   expires_at: string;
   business_id: number;
   business_name: string;
   distance_m: number | null;
+  max_uses?: number | null;
+  used_count?: number | null;
+  repeatable?: boolean | null;
+  first_visit_only?: boolean | null;
 };
 
-/** クーポンのカード（小さなチケット） */
+/** クーポンのカード（小さなチケット。種類ごとに色が変わる） */
 export function CouponCard({ coupon: c, onOpen }: { coupon: CardCoupon; onOpen: () => void }) {
   const left = daysLeft(c.expires_at);
+  const remain = remainingUses(c);
   return (
     <button
       onClick={onOpen}
-      className="flex w-[264px] shrink-0 snap-start items-stretch overflow-hidden rounded-2xl bg-white text-left shadow-[0_1px_2px_rgba(20,40,77,0.05),0_6px_16px_rgba(20,40,77,0.08)] ring-1 ring-slate-200/70"
+      className="flex w-[272px] shrink-0 snap-start items-stretch overflow-hidden rounded-2xl bg-white text-left shadow-[0_1px_2px_rgba(20,40,77,0.05),0_6px_16px_rgba(20,40,77,0.08)] ring-1 ring-slate-200/70"
     >
-      <span className="relative flex w-[78px] shrink-0 flex-col items-center justify-center bg-coupon text-white">
-        <span className="num text-[26px] font-extrabold leading-none">
-          {c.discount_rate}
-          <span className="text-sm">%</span>
-        </span>
-        <span className="num mt-1 text-[10px] font-bold tracking-[0.2em]">OFF</span>
-        <span className="absolute -right-[5px] top-0 h-full w-[10px] bg-[radial-gradient(circle,#fff_3px,transparent_3.5px)] bg-[length:10px_12px] bg-repeat-y" aria-hidden />
-      </span>
+      <CouponStub coupon={c} />
       <span className="min-w-0 flex-1 py-2.5 pl-4 pr-3">
         <span className="line-clamp-2 text-sm font-bold leading-snug text-slate-900">{c.title}</span>
-        <span className="mt-1 block truncate text-xs text-slate-600">{c.business_name}</span>
+        {c.coupon_type === "gift" && c.benefit && <span className="block truncate text-xs font-bold text-tea-700">{c.benefit}</span>}
+        <span className="mt-0.5 block truncate text-xs text-slate-600">{c.business_name}</span>
         <span className="mt-0.5 block truncate text-[11px] text-slate-400">
           {travelText(c.distance_m)}
           {c.distance_m != null && "・"}
           {new Date(c.expires_at).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}まで
         </span>
         <span className="mt-1 flex items-center justify-between gap-2">
-          {left ? <b className="rounded-full bg-coral-50 px-2 py-0.5 text-[10px] text-coupon">{left}</b> : <span />}
-          <span className="text-[11px] font-bold text-saga-600">詳しく見る ›</span>
+          <span className="flex gap-1">
+            {left && <b className="rounded-full bg-coral-50 px-2 py-0.5 text-[10px] text-coupon">{left}</b>}
+            {remain != null && remain > 0 && <b className="rounded-full bg-sun-100 px-2 py-0.5 text-[10px] text-sun-500">残り{remain}名</b>}
+          </span>
+          <span className="shrink-0 text-[11px] font-bold text-saga-600">詳しく見る ›</span>
         </span>
       </span>
     </button>

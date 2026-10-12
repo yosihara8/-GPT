@@ -9,11 +9,11 @@ import ImagePicker, { type PickedImage } from "@/components/ImagePicker";
 import CouponRow from "@/components/CouponRow";
 import { api } from "@/lib/fetcher";
 import { blobToBase64 } from "@/lib/image";
+import { COUPON_TYPES, COUPON_TYPE_LABELS, type CouponType, type CouponValue } from "@/lib/coupon";
 
-type Coupon = {
+type Coupon = CouponValue & {
   id: number;
   title: string;
-  discount_rate: number;
   conditions: string;
   expires_at: string;
   business_name: string;
@@ -48,7 +48,7 @@ function HowToUse() {
           <li>
             <b className="text-saga-600">① 発行する</b>
             <br />
-            下のフォームでタイトル・割引率・有効期限・利用条件を入れて「発行する」を押します。写真を付けると目に留まりやすくなります。
+            下のフォームで<b>クーポンの種類</b>（％引き・円引き・特別価格・特典サービス）を選び、タイトル・有効期限・利用条件を入れて「発行する」を押します。写真を付けると目に留まりやすくなります。先着人数や「初めての方限定」「何度でも使える」も選べます。
           </li>
           <li>
             <b className="text-saga-600">② お客さまに届く</b>
@@ -58,7 +58,7 @@ function HowToUse() {
           <li>
             <b className="text-saga-600">③ お店で使ってもらう</b>
             <br />
-            お客さまはお店でクーポンの「使う」を押し、「クーポンを利用しました」の画面を店員さんに見せます。画面のクーポン名と割引率を確認して、割引してください。1 人 1 回まで使えます。
+            お客さまはお店でクーポンの「使う」を押し、「クーポンを利用しました」の画面を店員さんに見せます。画面のクーポン名と内容（割引・特典）を確認して、提供してください。ふつうは 1 人 1 回、「何度でも使える」にしたクーポンは 1 日 1 回まで使えます。
           </li>
           <li>
             <b className="text-saga-600">④ 結果を見る</b>
@@ -80,6 +80,7 @@ function Coupons() {
   const stores = useMyStores();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [image, setImage] = useState<PickedImage>(null);
+  const [type, setType] = useState<CouponType>("percent");
   const [sending, setSending] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [msgIsError, setMsgIsError] = useState(false);
@@ -100,7 +101,10 @@ function Coupons() {
         method: "POST",
         body: JSON.stringify({
           ...f,
+          couponType: type,
           notify: f.notify === "on",
+          repeatable: f.repeatable === "on",
+          firstVisitOnly: f.firstVisitOnly === "on",
           expiresAt: `${f.expiresAt}T23:59:59+09:00`,
           imageBase64: image ? await blobToBase64(image.blob) : undefined,
         }),
@@ -138,15 +142,62 @@ function Coupons() {
 
       <form onSubmit={onSubmit} className="card space-y-3">
         <StoreSelect stores={stores} />
+        <fieldset>
+          <legend className="label">クーポンの種類</legend>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {COUPON_TYPES.map((t) => (
+              <label
+                key={t}
+                className={`cursor-pointer rounded-xl border px-3 py-2.5 text-sm font-bold ${type === t ? "border-saga-600 bg-saga-50 text-saga-700 ring-2 ring-saga-100" : "border-slate-200 bg-white text-slate-700"}`}
+              >
+                <input type="radio" name="couponTypeRadio" value={t} checked={type === t} onChange={() => setType(t)} className="sr-only" />
+                {COUPON_TYPE_LABELS[t].name}
+                <span className="mt-0.5 block text-[11px] font-normal text-slate-500">{COUPON_TYPE_LABELS[t].example}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <div>
           <label className="label">タイトル</label>
-          <input name="title" required className="input" placeholder="ランチ 10% OFF" />
+          <input
+            name="title"
+            required
+            className="input"
+            placeholder={{ percent: "ランチ 10%OFF", yen: "お会計から 500円引き", price: "限定ランチセット", gift: "トッピング 1 品無料" }[type]}
+          />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="label">割引率（%）</label>
-            <input name="discountRate" type="number" min={1} max={100} defaultValue={10} required className="input" />
-          </div>
+          {type === "percent" && (
+            <div>
+              <label className="label">割引率（%）</label>
+              <input name="discountRate" type="number" min={1} max={100} defaultValue={10} required className="input" />
+            </div>
+          )}
+          {type === "yen" && (
+            <div>
+              <label className="label">値引きの金額（円）</label>
+              <input name="amountYen" type="number" min={1} defaultValue={500} required className="input" />
+            </div>
+          )}
+          {type === "price" && (
+            <>
+              <div>
+                <label className="label">特別価格（円・税込）</label>
+                <input name="specialPrice" type="number" min={0} required className="input" placeholder="980" />
+              </div>
+              <div>
+                <label className="label">通常価格（円・任意）</label>
+                <input name="regularPrice" type="number" min={1} className="input" placeholder="1200" />
+                <p className="mt-1 text-[11px] text-slate-500">実際にふだん売っている価格だけを書いてください（景品表示法）。</p>
+              </div>
+            </>
+          )}
+          {type === "gift" && (
+            <div className="col-span-2">
+              <label className="label">特典の内容</label>
+              <input name="benefit" required maxLength={60} className="input" placeholder="例：トッピング 1 品無料／1 ドリンクサービス／デザート付き" />
+            </div>
+          )}
           <div>
             <label className="label">有効期限</label>
             <input name="expiresAt" type="date" defaultValue={defaultExpiry} required className="input" />
@@ -156,6 +207,29 @@ function Coupons() {
           <label className="label">利用条件</label>
           <input name="conditions" className="input" placeholder="平日 11:00-14:00、1 会計 1 回まで" />
         </div>
+        <details className="rounded-xl bg-slate-50 px-3 py-2">
+          <summary className="cursor-pointer text-sm font-bold text-saga-600">使い方の設定（先着人数・初めての方限定・何度でも）</summary>
+          <div className="mt-2 space-y-2 pb-1">
+            <div>
+              <label className="label">先着の人数（任意）</label>
+              <input name="maxUses" type="number" min={1} className="input" placeholder="例：30（空欄なら人数の制限なし）" />
+            </div>
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" name="firstVisitOnly" className="mt-0.5 h-5 w-5 accent-saga-600" />
+              <span>
+                <b>初めての方限定</b>
+                <span className="block text-xs text-slate-500">このお店のクーポンを使ったことがない人だけが使えます。</span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" name="repeatable" className="mt-0.5 h-5 w-5 accent-saga-600" />
+              <span>
+                <b>何度でも使える（1 日 1 回まで）</b>
+                <span className="block text-xs text-slate-500">常連さん向けのサービスに。チェックしないときは 1 人 1 回です。</span>
+              </span>
+            </label>
+          </div>
+        </details>
         <ImagePicker value={image} onChange={setImage} hint="クーポン対象の料理・商品の写真など。自動で縮小して保存します。" />
         <NotifyCheckbox />
         {msg && <p className={`whitespace-pre-line text-sm font-bold ${msgIsError ? "text-red-600" : "text-tea-700"}`}>{msg}</p>}

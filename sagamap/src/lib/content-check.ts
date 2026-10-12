@@ -51,8 +51,8 @@ export function checkPromoText(text: string, discountRate?: number): CheckResult
   return { blocked, warnings };
 }
 
-export const checkCoupon = (c: { title: string; conditions?: string | null; discount_rate: number }) =>
-  checkPromoText(`${c.title}\n${c.conditions ?? ""}`, c.discount_rate);
+export const checkCoupon = (c: { title: string; conditions?: string | null; discount_rate?: number | null }) =>
+  checkPromoText(`${c.title}\n${c.conditions ?? ""}`, c.discount_rate ?? undefined);
 
 export const checkAd = (a: { headline: string; body?: string | null }) => checkPromoText(`${a.headline}\n${a.body ?? ""}`);
 

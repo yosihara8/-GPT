@@ -14,6 +14,8 @@ export type MapShop = {
   category: string;
   has_coupon?: boolean;
   best_discount?: number | null;
+  /** いちばん目を引くクーポンの短い表示（例「30%OFF」「500円引」「特典あり」） */
+  best_label?: string | null;
 };
 
 export type MapSpot = { id: number; name: string; lat: number; lng: number };
@@ -67,7 +69,7 @@ function pinIcon(color: string, scale = 1): google.maps.Icon {
   };
 }
 
-export const hasCoupon = (shop: MapShop) => Boolean(shop.has_coupon || (shop.best_discount ?? 0) > 0);
+export const hasCoupon = (shop: MapShop) => Boolean(shop.has_coupon || shop.best_label || (shop.best_discount ?? 0) > 0);
 
 export function isHighlighted(shop: MapShop, me: { lat: number; lng: number } | null | undefined, radius: number) {
   if (radius === Number.POSITIVE_INFINITY) return hasCoupon(shop);
@@ -75,7 +77,7 @@ export function isHighlighted(shop: MapShop, me: { lat: number; lng: number } | 
 }
 
 /** 地図の札に出す短い文字（割引率があれば「10%OFF」） */
-export const couponLabel = (shop: MapShop) => (shop.best_discount ? `${shop.best_discount}%OFF` : "クーポン");
+export const couponLabel = (shop: MapShop) => shop.best_label ?? (shop.best_discount ? `${shop.best_discount}%OFF` : "クーポン");
 
 /**
  * 重なった札をまとめる。優先度の高い札だけ残し、重なった数を「+2」のように付ける。
