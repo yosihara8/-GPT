@@ -36,6 +36,7 @@ describe("ledger（Stripe あり）", () => {
       { id: "txn_2", type: "payout", amount: -3837, fee: 0, created: 1757000000, description: null, source: null },
     ];
     vi.doMock("@/lib/stripe", () => ({
+      stripeEnv: () => "sk_test_mock",
       getStripe: () => ({ balanceTransactions: { list: () => ({ async *[Symbol.asyncIterator]() { yield* txs; } }) } }),
     }));
     const { query } = await import("@/lib/db");

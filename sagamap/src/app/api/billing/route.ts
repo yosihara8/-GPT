@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { queryOne } from "@/lib/db";
 import { APP_URL, PRICE_DISCOUNT } from "@/lib/config";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, stripeEnv } from "@/lib/stripe";
 import { requireApiUser } from "@/lib/session";
 import { logServerError } from "@/lib/server-error";
 
@@ -28,7 +28,7 @@ export async function POST() {
     return NextResponse.json({ error: "特別プランのため、お支払いの手続きは不要です" }, { status: 400 });
   }
 
-  if (!process.env.STRIPE_SECRET_KEY) {
+  if (!stripeEnv("STRIPE_SECRET_KEY")) {
     return NextResponse.json({ error: "決済（Stripe）が未設定です。管理者にお問い合わせください" }, { status: 503 });
   }
   const stripe = getStripe();
@@ -50,7 +50,7 @@ export async function POST() {
 
     // 紹介 10 名を達成済みなら最初から割引価格で契約
     const price =
-      owner.monthly_price === PRICE_DISCOUNT ? process.env.STRIPE_PRICE_DISCOUNT : process.env.STRIPE_PRICE_STANDARD;
+      owner.monthly_price === PRICE_DISCOUNT ? stripeEnv("STRIPE_PRICE_DISCOUNT") : stripeEnv("STRIPE_PRICE_STANDARD");
     if (!price) return NextResponse.json({ error: "Stripe の Price ID が未設定です" }, { status: 503 });
 
     const session = await stripe.checkout.sessions.create(

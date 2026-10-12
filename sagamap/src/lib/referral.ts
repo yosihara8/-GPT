@@ -1,6 +1,6 @@
 import { query, queryOne } from "./db";
 import { PRICE_DISCOUNT, PRICE_STANDARD, REFERRAL_GOAL } from "./config";
-import { getStripe } from "./stripe";
+import { getStripe, stripeEnv } from "./stripe";
 
 /**
  * 紹介プログラム
@@ -70,7 +70,7 @@ export async function applyMonthlyReferralPricing() {
     if (achieved) discounted++;
     if (o.monthly_price === price) continue;
 
-    const priceId = achieved ? process.env.STRIPE_PRICE_DISCOUNT : process.env.STRIPE_PRICE_STANDARD;
+    const priceId = achieved ? stripeEnv("STRIPE_PRICE_DISCOUNT") : stripeEnv("STRIPE_PRICE_STANDARD");
     if (o.stripe_subscription_id && priceId) {
       const stripe = getStripe();
       const sub = await stripe.subscriptions.retrieve(o.stripe_subscription_id);
