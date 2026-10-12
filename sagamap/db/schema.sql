@@ -278,3 +278,13 @@ ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS plan_ends_at TIMESTAMPTZ;
 -- 営業時間・定休日（事業主が自由に入力。例「11:00〜20:00」「水曜日」）
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS business_hours TEXT NOT NULL DEFAULT '';
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS closed_days TEXT NOT NULL DEFAULT '';
+
+-- お客さまの「行動」の記録（事業主向けの統計：経路を調べた・電話した・保存した・共有した・クーポンを見た）
+CREATE TABLE IF NOT EXISTS shop_events (
+  id           BIGSERIAL PRIMARY KEY,
+  business_id  INTEGER NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  customer_id  INTEGER REFERENCES customers(id) ON DELETE CASCADE,
+  kind         TEXT NOT NULL CHECK (kind IN ('route', 'call', 'save', 'share', 'coupon_view')),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS shop_events_biz_idx ON shop_events (business_id, kind, created_at);

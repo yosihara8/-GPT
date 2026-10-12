@@ -6,6 +6,7 @@ import ShopPhoto from "@/components/ShopPhoto";
 import CategoryIcon from "@/components/CategoryIcon";
 import { estimateWalkMinutes, formatDistance } from "@/lib/geo";
 import type { Ad } from "@/components/AdBanner";
+import { daysLeft } from "@/lib/open-status";
 
 /** 距離と所要時間（2.5km までは徒歩、それより遠いと車の目安） */
 export function travelText(m: number | null) {
@@ -92,6 +93,7 @@ export type CardCoupon = {
 
 /** クーポンのカード（小さなチケット） */
 export function CouponCard({ coupon: c, onOpen }: { coupon: CardCoupon; onOpen: () => void }) {
+  const left = daysLeft(c.expires_at);
   return (
     <button
       onClick={onOpen}
@@ -113,6 +115,10 @@ export function CouponCard({ coupon: c, onOpen }: { coupon: CardCoupon; onOpen: 
           {c.distance_m != null && "・"}
           {new Date(c.expires_at).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}まで
         </span>
+        <span className="mt-1 flex items-center justify-between gap-2">
+          {left ? <b className="rounded-full bg-coral-50 px-2 py-0.5 text-[10px] text-coupon">{left}</b> : <span />}
+          <span className="text-[11px] font-bold text-saga-600">詳しく見る ›</span>
+        </span>
       </span>
     </button>
   );
@@ -131,7 +137,11 @@ export function AdCard({ ad, onOpen }: { ad: Ad; onOpen: () => void }) {
       </div>
       <div className="p-2.5">
         <p className="line-clamp-2 text-sm font-bold leading-snug text-slate-900">{ad.headline}</p>
-        <p className="mt-1 truncate text-xs text-slate-500">{ad.business_name}</p>
+        {ad.body && <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-slate-600">{ad.body}</p>}
+        <p className="mt-1 flex items-center justify-between gap-2 text-xs text-slate-500">
+          <span className="truncate">{ad.business_name}</span>
+          <span className="shrink-0 font-bold text-saga-600">詳しく見る ›</span>
+        </p>
       </div>
     </button>
   );

@@ -36,7 +36,7 @@ type Store = {
   closed_days?: string;
 };
 type Stats = {
-  stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number }[];
+  stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number; route_30d?: number; call_30d?: number; save_30d?: number; coupon_view_30d?: number }[];
   insights: {
     businessId: number;
     area: string;
@@ -118,6 +118,18 @@ function BusinessDashboard() {
         <StatTile label="直近 7 日の閲覧" value={storeStats?.views_7d} />
         <StatTile label="クーポン利用数" value={storeStats?.coupon_uses} />
       </div>
+
+      {/* お客さまの行動（来店につながる動き。直近 30 日） */}
+      <section className="card">
+        <h2 className="font-bold">お店に来ようとしたお客さま（直近 30 日）</h2>
+        <p className="text-xs text-slate-500">佐賀観光マップでお客さまが押したボタンの数です（同じ人の同じ操作は 1 時間に 1 回まで数えます）。</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <MiniStat label="経路を調べた" value={storeStats?.route_30d} />
+          <MiniStat label="電話をかけた" value={storeStats?.call_30d} />
+          <MiniStat label="お気に入りに保存" value={storeStats?.save_30d} />
+          <MiniStat label="クーポンを見た" value={storeStats?.coupon_view_30d} />
+        </div>
+      </section>
 
       <VerifyEmailBanner />
       {params.get("welcome") && (
@@ -284,6 +296,15 @@ function StatTile({ label, value }: { label: string; value?: number }) {
     <div className="card px-3 py-3 sm:px-4">
       <p className="text-[11px] font-bold text-slate-500 sm:text-xs">{label}</p>
       <p className="num mt-1 text-[28px] font-extrabold leading-none text-slate-900 sm:text-4xl">{value?.toLocaleString() ?? "—"}</p>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value?: number }) {
+  return (
+    <div className="rounded-xl bg-saga-50 px-3 py-2.5">
+      <p className="num text-2xl font-extrabold leading-none text-saga-700">{value?.toLocaleString() ?? "—"}</p>
+      <p className="mt-1 text-[11px] font-bold text-slate-600">{label}</p>
     </div>
   );
 }
