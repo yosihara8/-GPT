@@ -6,6 +6,10 @@
 - サイト名は **「佐賀観光マップ」**。画面・メール・規約で他の名前（SagaMap、佐賀おでかけマップ等）を表示しない。
   - `OPERATOR.serviceName`（src/lib/config.ts）が正。コード内の識別子・Cookie 名・ドメイン（sagamap）は変えない。
 
+## 本番のアドレス
+- 正式なアドレスは **https://www.saga-kanko-map.com**（Vercel で購入。saga-kanko-map.com は www へ転送）。
+- Vercel の環境変数 `NEXT_PUBLIC_APP_URL` と `NEXTAUTH_URL` に同じアドレスを設定済み。メールの送信元は `noreply@saga-kanko-map.com`。
+
 ## お客さまの画面（トップ `/` とマイページ `/dashboard/customer`）
 - 未登録の方には最初に会員登録画面を出す（middleware で `/` と `/shops/*` は未ログインなら `/register/customer` へ）。
 - ログイン後の画面では会員登録の勧誘（「無料の会員登録で〜」等）を出さない。

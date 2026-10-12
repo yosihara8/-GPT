@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-/** 紹介リンク: https://sagamap.jp/ref?biz_id=123 → 紹介元を Cookie に保存して顧客登録へ */
+/** 紹介リンク: https://www.saga-kanko-map.com/ref?biz_id=123 → 紹介元を Cookie に保存して顧客登録へ */
 export function GET(req: NextRequest) {
   const bizId = Number(req.nextUrl.searchParams.get("biz_id"));
   const target = new URL("/register/customer", req.nextUrl.origin);

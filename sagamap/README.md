@@ -45,7 +45,7 @@ Docker を使わない場合は、PostGIS 入りの PostgreSQL を用意して `
 4. デプロイ時に `vercel-build`（`scripts/migrate.mjs`）がスキーマを自動で適用し、観光名所を投入します。架空の店舗・デモアカウントは `SEED_DEMO_DATA=true` のときだけ投入され、それ以外では削除されます。
 5. Google の「ブラウザ用キー」のウェブサイト制限に、Vercel のドメイン（例: `https://sagamap.vercel.app/*`）を追加します。
 
-`NEXT_PUBLIC_APP_URL` と `NEXTAUTH_URL` は未設定でも、Vercel の本番ドメインが自動で使われます。独自ドメイン（sagamap.jp）を追加すると、そちらに切り替わります。週 1 回のメール通知は `vercel.json` の Cron（毎週金曜 9:00 JST）で実行されます。
+`NEXT_PUBLIC_APP_URL` と `NEXTAUTH_URL` は未設定でも、Vercel の本番ドメインが自動で使われます。独自ドメイン（www.saga-kanko-map.com）を追加すると、そちらに切り替わります。週 1 回のメール通知は `vercel.json` の Cron（毎週金曜 9:00 JST）で実行されます。
 
 ## 運営者管理画面（/admin）
 
@@ -81,7 +81,7 @@ GitHub Actions（`.github/workflows/sagamap-ci.yml`）で、Lint・型チェッ�
 
 ## URL 一覧
 
-ベース URL は `NEXT_PUBLIC_APP_URL`（既定 `https://sagamap.jp`）の 1 か所で変更できます。
+ベース URL は `NEXT_PUBLIC_APP_URL`（既定 `https://www.saga-kanko-map.com`）の 1 か所で変更できます。
 
 ### 画面
 
@@ -106,11 +106,11 @@ GitHub Actions（`.github/workflows/sagamap-ci.yml`）で、Lint・型チェッ�
 
 | 用途 | URL |
 |---|---|
-| Stripe Webhook | `https://sagamap.jp/api/billing/webhook` |
-| Stripe 決済成功時 | `https://sagamap.jp/dashboard/business?upgraded=1` |
-| Stripe 決済キャンセル時 | `https://sagamap.jp/upgrade?canceled=1` |
-| Google OAuth リダイレクト URI | `https://sagamap.jp/api/auth/callback/google` |
-| 週次メール（Cron） | `GET https://sagamap.jp/api/cron/weekly-digest`（`Authorization: Bearer $CRON_SECRET`） |
+| Stripe Webhook | `https://www.saga-kanko-map.com/api/billing/webhook` |
+| Stripe 決済成功時 | `https://www.saga-kanko-map.com/dashboard/business?upgraded=1` |
+| Stripe 決済キャンセル時 | `https://www.saga-kanko-map.com/upgrade?canceled=1` |
+| Google OAuth リダイレクト URI | `https://www.saga-kanko-map.com/api/auth/callback/google` |
+| 週次メール（Cron） | `GET https://www.saga-kanko-map.com/api/cron/weekly-digest`（`Authorization: Bearer $CRON_SECRET`） |
 
 ---
 
@@ -191,14 +191,14 @@ GitHub Actions（`.github/workflows/sagamap-ci.yml`）で、Lint・型チェッ�
 - **Directions API / Distance Matrix API** は Google 側で「レガシー」扱いになり、新しい Cloud プロジェクトでは有効化できない場合があります。その場合は Routes API（`computeRoutes` / `computeRouteMatrix`）への置き換えを検討してください。本 MVP では、Distance Matrix が使えないとき直線距離からの概算（`徒歩約○分`）を表示します。
 - **Heatmap Layer**（`visualization` ライブラリ）は Google が非推奨を発表しています。使えない環境では、半透明の円を重ねる代替表示に自動で切り替わります。
 - 店舗のピンは `google.maps.Marker` で描画しています。Map ID を設定して Advanced Markers に移行することもできます。
-- ブラウザ用の API キーは HTTP リファラで `sagamap.jp/*` に制限してください。
+- ブラウザ用の API キーは HTTP リファラで `www.saga-kanko-map.com/*` に制限してください。
 
 ---
 
 ## Stripe の設定
 
 1. 月額 3,980 円と 2,980 円の Price（recurring / monthly / JPY）を作成し、`STRIPE_PRICE_STANDARD` と `STRIPE_PRICE_DISCOUNT` に設定します。
-2. Webhook エンドポイント `https://sagamap.jp/api/billing/webhook` を追加し、次のイベントを選択します。
+2. Webhook エンドポイント `https://www.saga-kanko-map.com/api/billing/webhook` を追加し、次のイベントを選択します。
    `checkout.session.completed`、`customer.subscription.updated`、`customer.subscription.deleted`
 3. カスタマーポータルを有効にします（解約・カード変更用）。
 
