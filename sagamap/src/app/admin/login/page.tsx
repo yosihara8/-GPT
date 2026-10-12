@@ -10,6 +10,8 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // 二段階認証を設定済みなら、パスワードのあとに認証アプリの 6 桁を聞く
+  const [needOtp, setNeedOtp] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -20,10 +22,17 @@ export default function AdminLoginPage() {
       email: f.get("email"),
       password: f.get("password"),
       role: "admin",
+      otp: f.get("otp") ?? "",
       redirect: false,
     });
     setLoading(false);
-    if (res?.error) {
+    if (res?.error === "OTP_REQUIRED") {
+      setNeedOtp(true);
+      setError("認証アプリに表示されている 6 桁の数字を入れてください");
+    } else if (res?.error === "OTP_INVALID") {
+      setNeedOtp(true);
+      setError("6 桁の数字が違うか、時間切れです。最新の数字を入れてください");
+    } else if (res?.error) {
       setError(res.error === "CredentialsSignin" ? "メールアドレスまたはパスワードが正しくありません" : res.error);
     } else {
       router.push("/admin");
@@ -43,6 +52,24 @@ export default function AdminLoginPage() {
           <label className="label" htmlFor="password">パスワード</label>
           <input id="password" name="password" type="password" required autoComplete="current-password" className="input" />
         </div>
+        {needOtp && (
+          <div>
+            <label className="label" htmlFor="otp">
+              確認コード（認証アプリの 6 桁）
+            </label>
+            <input
+              id="otp"
+              name="otp"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              required
+              autoFocus
+              className="input num text-center text-2xl tracking-[0.4em]"
+            />
+          </div>
+        )}
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button disabled={loading} className="btn-primary w-full">
           {loading ? "ログイン中…" : "ログイン"}

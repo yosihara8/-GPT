@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { imageResponse } from "@/lib/http";
 import { queryOne } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -9,11 +10,5 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     Number(params.id),
   ]);
   if (!row?.image) return new NextResponse(null, { status: 404 });
-  return new NextResponse(new Uint8Array(row.image), {
-    headers: {
-      "Content-Type": row.image_type ?? "image/jpeg",
-      "Cache-Control": "public, max-age=3600",
-      "X-Content-Type-Options": "nosniff",
-    },
-  });
+  return imageResponse(row.image, row.image_type, true);
 }

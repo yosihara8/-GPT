@@ -23,6 +23,7 @@ import ScheduleEditor from "@/components/business/ScheduleEditor";
 import SnsShare from "@/components/business/SnsShare";
 import PaymentFieldset from "@/components/business/PaymentFieldset";
 import PhotoGallery from "@/components/business/PhotoGallery";
+import ProfileScore from "@/components/business/ProfileScore";
 import { type SpecialDay } from "@/lib/schedule";
 
 type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number; plan_ends_at?: string | null };
@@ -49,6 +50,9 @@ type Store = {
   business_hours?: string;
   closed_days?: string;
   amenities?: string[];
+  gallery_count?: number;
+  menu_count?: number;
+  active_coupons?: number;
   payment_methods?: string[];
   payment_none?: string[];
   website_url?: string | null;
@@ -202,7 +206,7 @@ function BusinessDashboard() {
               title={owner?.complimentary ? "有料プラン（特別招待）" : "有料プラン"}
               price={owner?.complimentary ? "0 円（特別招待・お支払い不要）" : `月額 ${(premium ? owner!.monthly_price : PRICE_STANDARD).toLocaleString()} 円（税込）`}
               tone="coral"
-              features={["クーポン発行", "広告出稿（月 2 回まで）", "SNS 連携（Instagram・X）", "紹介割引（月 10 名で翌月 2,980 円）", "複数店舗の登録"]}
+              features={["クーポン発行", "広告出稿（月 2 回まで）", "予約・LINE・SNS 連携（Instagram・Threads・Facebook・X）", "お店の写真 20 枚まで", "紹介割引（月 10 名で翌月 2,980 円）", "複数店舗の登録"]}
             />
           </div>
           {!owner?.complimentary && (
@@ -219,6 +223,9 @@ function BusinessDashboard() {
         <FeatureLink href="/dashboard/business/ads" label="広告出稿（月2回）" locked={!premium} />
         <FeatureLink href="/dashboard/business/referrals" label="紹介プログラム" locked={!premium} />
       </div>
+
+      {/* お店のページの充実度（足りない情報へ 1 タップで） */}
+      {store && <ProfileScore store={store} premium={premium} />}
 
       {/* いま出しているクーポン・広告 */}
       {premium && <RunningPromotions />}
@@ -275,9 +282,10 @@ function BusinessDashboard() {
       </section>
 
       {store && <SnsShare key={`share-${store.id}`} storeId={store.id} storeName={store.name} />}
-      {store && <PhotoUploader key={`photo-${store.id}`} shop={store} onChanged={load} />}
-      {store && <PhotoGallery key={`gallery-${store.id}`} storeId={store.id} premium={premium} />}
-      {store && <StoreEditor key={store.id} store={store} premium={premium} onSaved={load} />}
+      <div id="sec-main-photo" className="scroll-mt-20">{store && <PhotoUploader key={`photo-${store.id}`} shop={store} onChanged={load} />}</div>
+      <div id="sec-photos" className="scroll-mt-20">{store && <PhotoGallery key={`gallery-${store.id}`} storeId={store.id} premium={premium} onChanged={load} />}</div>
+      <div id="sec-store" className="scroll-mt-20">{store && <StoreEditor key={store.id} store={store} premium={premium} onSaved={load} />}</div>
+      <div id="sec-schedule" className="scroll-mt-20" />
       {store && (
         <ScheduleEditor
           key={`sched-${store.id}`}
@@ -290,7 +298,7 @@ function BusinessDashboard() {
           onSaved={load}
         />
       )}
-      {store && <MenuEditor key={`menu-${store.id}`} storeId={store.id} />}
+      <div id="sec-menu" className="scroll-mt-20">{store && <MenuEditor key={`menu-${store.id}`} storeId={store.id} onChanged={load} />}</div>
 
       {premium && <AddStore onAdded={load} />}
 
@@ -490,7 +498,7 @@ function StoreEditor({ store, premium, onSaved }: { store: Store; premium: boole
 type MenuRow = { id: number; name: string; price: number | null; description: string; has_image: boolean };
 
 /** メニュー・商品の登録（写真・価格。お客さまのお店のページに横スライドで表示） */
-function MenuEditor({ storeId }: { storeId: number }) {
+function MenuEditor({ storeId, onChanged }: { storeId: number; onChanged?: () => void }) {
   const [items, setItems] = useState<MenuRow[]>([]);
   const [image, setImage] = useState<PickedImage>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -516,6 +524,7 @@ function MenuEditor({ storeId }: { storeId: number }) {
       setImage(null);
       setMsg("追加しました");
       load();
+      onChanged?.();
     } catch (err) {
       setMsg((err as Error).message);
     } finally {
@@ -526,6 +535,7 @@ function MenuEditor({ storeId }: { storeId: number }) {
     if (!confirm("このメニュー・商品を削除しますか？")) return;
     await api(`/api/businesses/${storeId}/menu?itemId=${id}`, { method: "DELETE" });
     load();
+    onChanged?.();
   }
 
   return (

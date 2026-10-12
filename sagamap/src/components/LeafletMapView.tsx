@@ -2,9 +2,9 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Landmark } from "lucide-react";
+import { Landmark, Layers } from "lucide-react";
 import { categoryIcon } from "./CategoryIcon";
 import { MapLegend, couponLabel, declutter, hasCoupon, isHighlighted, type MapViewProps } from "./MapView";
 import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER } from "@/lib/config";
@@ -13,10 +13,17 @@ import { escapeHtml } from "@/lib/escape";
 import type { RouteResult } from "@/lib/routing";
 
 /** 道順は OpenStreetMap の道路データ（ODbL）を使うため、ルート表示中は出典を地図に表示する */
-const OSM_ATTRIBUTION =
-  '道順 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>';
+const OSM_ATTRIBUTION = '道順 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>';
 
-const COLORS = { coupon: "#C43D2B", shop: "#1E3A6E", spot: "#B9832A", me: "#2e90fa", route: "#EE6A3A" };
+const GSI_ATTRIBUTION = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">国土地理院</a>';
+
+const COLORS = {
+  coupon: "#C43D2B",
+  shop: "#1E3A6E",
+  spot: "#B9832A",
+  me: "#2e90fa",
+  route: "#EE6A3A",
+};
 
 /** アイコンの SVG 文字列（業種ごとに 1 回だけ作る） */
 const iconSvgCache = new Map<string, string>();
@@ -49,10 +56,21 @@ export default function LeafletMapView({
   selectedId,
   className = "h-[62vh]",
   legend = true,
+  layerToggle = true,
 }: MapViewProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layers = useRef<Record<string, L.LayerGroup>>({});
+  const base = useRef<{ map: L.TileLayer; photo: L.TileLayer } | null>(null);
+  const [photo, setPhoto] = useState(false);
+  const toggleBase = () => {
+    const map = mapRef.current;
+    if (!map || !base.current) return;
+    const next = !photo;
+    base.current[next ? "map" : "photo"].remove();
+    base.current[next ? "photo" : "map"].addTo(map).bringToBack();
+    setPhoto(next);
+  };
   const onSelectRef = useRef(onSelectShop);
   onSelectRef.current = onSelectShop;
   const onRouteRef = useRef(onRoute);
@@ -69,11 +87,21 @@ export default function LeafletMapView({
     if (!divRef.current || mapRef.current) return;
     const map = L.map(divRef.current, { zoomControl: false }).setView(me ?? SAGA_CENTER, 15);
     L.control.zoom({ position: "topright" }).addTo(map);
-    // 国土地理院の標準地図（日本語表記・はっきりした配色・商用利用可）
-    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noreferrer">地理院タイル</a>',
-    }).addTo(map);
+    // 国土地理院の淡色地図（日本語表記・すっきりした配色でピンが目立つ・商用利用可）
+    base.current = {
+      map: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        maxNativeZoom: 18,
+        className: "sm-tiles-pale",
+        attribution: GSI_ATTRIBUTION,
+      }),
+      photo: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
+        maxZoom: 19,
+        maxNativeZoom: 18,
+        attribution: GSI_ATTRIBUTION,
+      }),
+    };
+    base.current.map.addTo(map);
     mapRef.current = map;
     return () => {
       map.remove();
@@ -101,9 +129,24 @@ export default function LeafletMapView({
       mapRef.current.fitBounds(circle.getBounds(), { padding: [16, 16] });
     }
     if (meAccuracy && meAccuracy > 15) {
-      L.circle(me, { radius: meAccuracy, stroke: false, fillColor: COLORS.me, fillOpacity: 0.12, interactive: false }).addTo(g);
+      L.circle(me, {
+        radius: meAccuracy,
+        stroke: false,
+        fillColor: COLORS.me,
+        fillOpacity: 0.12,
+        interactive: false,
+      }).addTo(g);
     }
-    L.circleMarker(me, { radius: 8, color: "#fff", weight: 3, fillColor: COLORS.me, fillOpacity: 1 })
+    L.marker(me, {
+      icon: L.divIcon({
+        className: "",
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+        html: '<div class="sm-me"><span></span></div>',
+      }),
+      zIndexOffset: 2000,
+      keyboard: false,
+    })
       .bindTooltip(meAccuracy ? `現在地（誤差 約${meAccuracy}m）` : "現在地")
       .addTo(g);
     if (!searchRadius) mapRef.current.panTo(me);
@@ -117,15 +160,25 @@ export default function LeafletMapView({
     for (const shop of shops) {
       const red = isHighlighted(shop, me, highlightRadius);
       const selected = shop.id === selectedId;
-      const size = selected ? 40 : red ? 34 : 30;
+      const size = selected ? 42 : red ? 34 : 30;
+      // しずく形のピン（先端がお店の場所）
+      const tip = Math.round(size * 1.2);
       const icon = L.divIcon({
         className: "",
         iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
-        tooltipAnchor: [0, -size / 2],
-        html: `<div class="sm-pin" style="width:${size}px;height:${size}px;background:${red ? COLORS.coupon : COLORS.shop}${selected ? ";box-shadow:0 0 0 4px rgba(31,77,63,.25),0 4px 10px rgba(16,24,40,.2)" : ""}">${iconSvg(shop.category, Math.round(size * 0.48))}</div>`,
+        iconAnchor: [size / 2, tip],
+        tooltipAnchor: [0, -tip + size / 2],
+        html: `<div class="sm-drop${selected ? " sm-drop-on" : ""}" style="width:${size}px;height:${size}px;background:${red ? COLORS.coupon : COLORS.shop}">${iconSvg(
+          shop.category,
+          Math.round(size * 0.5),
+        )}</div>`,
       });
-      const marker = L.marker(shop, { icon, zIndexOffset: selected ? 1000 : red ? 500 : 0, keyboard: true, title: shop.name })
+      const marker = L.marker(shop, {
+        icon,
+        zIndexOffset: selected ? 1000 : red ? 500 : 0,
+        keyboard: true,
+        title: shop.name,
+      })
         .on("click", () => onSelectRef.current?.(shop.id))
         .addTo(g);
       // クーポンを配信中のお店は、地図上に「クーポン発行中」を常に表示する（タップでお店とクーポンの内容へ）
@@ -133,8 +186,8 @@ export default function LeafletMapView({
         labels.push({ shop, marker });
         marker.bindTooltip(couponLabel(shop), {
           permanent: true,
-          direction: "bottom",
-          offset: [0, size / 2 - 2],
+          direction: "right",
+          offset: [size / 2 - 2, 0],
           className: "sm-coupon-label",
           interactive: true,
         });
@@ -144,12 +197,15 @@ export default function LeafletMapView({
       }
     }
     // 札が重なったら 1 つにまとめる（優先：選択中 → 割引率の大きい順）。地図を動かすたびに計算し直す
-    labels.sort((a, b) => Number(b.shop.id === selectedId) - Number(a.shop.id === selectedId) || (b.shop.best_discount ?? 0) - (a.shop.best_discount ?? 0));
+    labels.sort(
+      (a, b) => Number(b.shop.id === selectedId) - Number(a.shop.id === selectedId) || (b.shop.best_discount ?? 0) - (a.shop.best_discount ?? 0),
+    );
     const map = mapRef.current;
     const relabel = () => {
       const boxes = labels.map(({ shop, marker }) => {
         const p = map.latLngToContainerPoint(marker.getLatLng());
-        return { key: shop.id, x: p.x, y: p.y, w: 64, h: 40 };
+        // 札はピンの右に出る
+        return { key: shop.id, x: p.x + 40, y: p.y - 22, w: 80, h: 30 };
       });
       const { hidden, extra } = declutter(boxes);
       for (const { shop, marker } of labels) {
@@ -183,9 +239,9 @@ export default function LeafletMapView({
     for (const s of spots) {
       const icon = L.divIcon({
         className: "",
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
-        html: `<div class="sm-pin" style="width:26px;height:26px;border-radius:7px;background:${COLORS.spot}">${spotSvg}</div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        html: `<div class="sm-pin" style="width:24px;height:24px;border-radius:8px;background:${COLORS.spot}">${spotSvg}</div>`,
       });
       L.marker(s, { icon, title: s.name }).bindTooltip(escapeHtml(s.name)).addTo(g);
     }
@@ -219,7 +275,10 @@ export default function LeafletMapView({
     fetch("/api/route", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode: routeMode, points: stops.map(({ lat, lng }) => ({ lat, lng })) }),
+      body: JSON.stringify({
+        mode: routeMode,
+        points: stops.map(({ lat, lng }) => ({ lat, lng })),
+      }),
     })
       .then(async (res) => {
         const data = await res.json();
@@ -278,6 +337,17 @@ export default function LeafletMapView({
     <div className={`relative ${className}`}>
       <div ref={divRef} className="absolute inset-0 z-0" aria-label="店舗マップ" />
       {legend && <MapLegend />}
+      {layerToggle && (
+        <button
+          type="button"
+          onClick={toggleBase}
+          aria-pressed={photo}
+          className="absolute bottom-6 left-2 z-[500] flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-pop ring-1 ring-slate-200"
+        >
+          <Layers className="h-3.5 w-3.5" aria-hidden />
+          {photo ? "地図" : "航空写真"}
+        </button>
+      )}
     </div>
   );
 }

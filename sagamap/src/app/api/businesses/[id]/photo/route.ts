@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { imageResponse } from "@/lib/http";
 import { query, queryOne } from "@/lib/db";
 import { ownsBusiness, requireApiUser } from "@/lib/session";
 
@@ -8,19 +9,14 @@ type Ctx = { params: { id: string } };
 const MAX_BYTES = 1.5 * 1024 * 1024;
 
 /** 店舗写真の表示 */
-export async function GET(_req: Request, { params }: Ctx) {
+export async function GET(req: Request, { params }: Ctx) {
   const row = await queryOne<{ photo: Buffer | null; photo_type: string | null }>(
     "SELECT photo, photo_type FROM businesses WHERE id = $1",
     [Number(params.id)],
   );
   if (!row?.photo) return new NextResponse(null, { status: 404 });
-  return new NextResponse(new Uint8Array(row.photo), {
-    headers: {
-      "Content-Type": row.photo_type ?? "image/jpeg",
-      "Cache-Control": "public, max-age=300",
-      "X-Content-Type-Options": "nosniff",
-    },
-  });
+  // ?v=（写真を変えた日時）つきの URL は中身が変わらないので長く置く
+  return imageResponse(row.photo, row.photo_type, new URL(req.url).searchParams.has("v"));
 }
 
 /** 店舗写真の登録（ブラウザ側で縮小した JPEG を送る） */

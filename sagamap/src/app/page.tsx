@@ -3,9 +3,10 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
+  CircleHelp,
   Bell,
   Clock,
   Car,
@@ -41,6 +42,9 @@ import { CATEGORIES } from "@/lib/config";
 import { formatDistance, haversineMeters } from "@/lib/geo";
 import { shopStatus } from "@/lib/open-status";
 import { paymentTags } from "@/lib/payment";
+import { useNotifications } from "@/hooks/useNotifications";
+import NoticeSheet from "@/components/customer/NoticeSheet";
+import GuideTour, { guideUnseen, type TourStep } from "@/components/customer/GuideTour";
 import { api } from "@/lib/fetcher";
 
 type Shop = MapShop & DetailShop & { address: string; service_description: string };
@@ -87,7 +91,11 @@ function CustomerHome() {
   const [coupons, setCoupons] = useState<CardCoupon[]>([]);
   const [recs, setRecs] = useState<Rec[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [unread, setUnread] = useState(0);
+  const notes = useNotifications(isCustomer);
+  const unread = notes.unread;
+  const [noticeOpen, setNoticeOpen] = useState(false);
+  // 初めてログインしたら、地図の画面で使い方ガイドを出す（端末ごとに 1 回。あとから「使い方」でもう一度見られる）
+  const [guideOpen, setGuideOpen] = useState(false);
   const ads = useActiveAds();
 
   const [query, setQuery] = useState("");
@@ -120,9 +128,6 @@ function CustomerHome() {
   useEffect(() => {
     if (!isCustomer) return;
     loadFavorites();
-    api<{ notifications: { read_at: string | null }[] }>("/api/notifications")
-      .then((d) => setUnread(d.notifications.filter((n) => !n.read_at).length))
-      .catch(() => setUnread(0));
   }, [isCustomer, loadFavorites]);
 
   useEffect(() => {
@@ -195,6 +200,28 @@ function CustomerHome() {
     if (pushed.current) window.history.back();
     else setSheet(null);
   }, []);
+
+  useEffect(() => {
+    if (!isCustomer || shops.length === 0 || !guideUnseen()) return;
+    const t = setTimeout(() => setGuideOpen(true), 900);
+    return () => clearTimeout(t);
+  }, [isCustomer, shops.length]);
+
+  // お知らせを押したら：お店のお知らせはこの画面でお店のページ、クーポンは近くのクーポンにあればそのクーポンを上に出して開く
+  const router = useRouter();
+  const openNotice = useCallback(
+    (n: { link: string | null }) => {
+      if (!n.link) return;
+      setNoticeOpen(false);
+      const shopId = Number(n.link.match(/[?&]shop=(\d+)/)?.[1]);
+      const couponId = Number(n.link.match(/\/coupons\/(\d+)/)?.[1]);
+      const c = couponId ? coupons.find((x) => x.id === couponId) : undefined;
+      if (c) openSheet(c.business_id, { type: "coupon", couponId: c.id });
+      else if (shopId && shops.some((s) => s.id === shopId)) openSheet(shopId);
+      else router.push(n.link);
+    },
+    [coupons, shops, openSheet, router],
+  );
 
   // メール・お知らせのリンク（?shop=ID）から来たら、そのお店のページを開く
   const opened = useRef(false);
@@ -332,7 +359,7 @@ function CustomerHome() {
   return (
     <main className="lg:flex lg:h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
       {/* 地図（スマホは上に固定。パソコンは右側いっぱい） */}
-      <div className="sticky top-14 z-20 h-[42dvh] min-h-[280px] lg:relative lg:top-0 lg:order-2 lg:h-full lg:flex-1">
+      <div data-tour="map" className="sticky top-14 z-20 h-[42dvh] min-h-[280px] lg:relative lg:top-0 lg:order-2 lg:h-full lg:flex-1">
         <MapView
           shops={visible}
           me={position}
@@ -353,7 +380,7 @@ function CustomerHome() {
         />
         {/* 検索と業種（地図の上） */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[600] space-y-2 p-3">
-          <label className="pointer-events-auto flex h-11 items-center gap-2 rounded-full bg-white px-4 shadow-[0_2px_10px_rgba(20,40,77,0.18)] ring-1 ring-slate-200/70 lg:max-w-lg">
+          <label data-tour="search" className="pointer-events-auto flex h-11 items-center gap-2 rounded-full bg-white px-4 shadow-[0_2px_10px_rgba(20,40,77,0.18)] ring-1 ring-slate-200/70 lg:max-w-lg">
             <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
             <input
               value={query}
@@ -369,7 +396,7 @@ function CustomerHome() {
               </button>
             )}
           </label>
-          <div className="pointer-events-auto -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 lg:mr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div data-tour="filters" className="pointer-events-auto -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 lg:mr-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {QUICK_FILTERS.map((f) => (
               <button key={f} onClick={() => toggleFilter(f)} aria-pressed={filters.includes(f)} className={`${filters.includes(f) ? "chip bg-asa-500 text-white" : "chip-off"} shadow-pop`}>
                 {f === "営業中" ? <Clock className="h-4 w-4" aria-hidden /> : f === "クーポンあり" ? <Ticket className="h-4 w-4" aria-hidden /> : null}
@@ -474,6 +501,30 @@ function CustomerHome() {
               <div className="relative overflow-hidden rounded-3xl bg-[#1F3D73] shadow-[0_10px_28px_rgba(20,40,77,0.18)]">
                 <img src="/art/panorama.svg" alt="" className="absolute inset-0 h-full w-full object-cover object-[60%_45%]" aria-hidden />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#14284D]/85 via-[#14284D]/45 to-transparent" aria-hidden />
+                {isCustomer && (
+                  <button
+                    type="button"
+                    onClick={() => setGuideOpen(true)}
+                    className="absolute right-[3.75rem] top-3 z-10 flex h-10 items-center gap-1 rounded-full bg-white/15 px-3 text-xs font-bold text-white ring-1 ring-white/30 backdrop-blur"
+                  >
+                    <CircleHelp className="h-4 w-4" aria-hidden />
+                    使い方
+                  </button>
+                )}
+                {isCustomer && (
+                  <button
+                    type="button"
+                    onClick={() => setNoticeOpen(true)}
+                    aria-label={unread > 0 ? `お知らせ（新着 ${unread} 件）` : "お知らせ"}
+                    data-tour="bell"
+                    className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur"
+                  >
+                    <Bell className="h-5 w-5" aria-hidden />
+                    {unread > 0 && (
+                      <span className="num absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-asa-500 px-1 text-[11px] font-bold">{unread}</span>
+                    )}
+                  </button>
+                )}
                 <div className="relative px-5 py-5 text-white">
                   <p className="text-xs font-bold text-white/80">{hello}</p>
                   <h1 className="mt-1 text-[21px] font-extrabold leading-snug drop-shadow">
@@ -501,15 +552,20 @@ function CustomerHome() {
                 </div>
               </div>
               {unread > 0 && (
-                <Link href="/dashboard/customer#news" className="mt-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-sm ring-1 ring-slate-200/70">
+                <button
+                  type="button"
+                  onClick={() => setNoticeOpen(true)}
+                  className="mt-3 flex w-full items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-left text-sm ring-1 ring-asa-500/40"
+                >
                   <Bell className="h-4 w-4 text-asa-500" aria-hidden />
                   新しいお知らせが <b className="num text-asa-500">{unread}</b> 件あります
                   <ChevronRight className="ml-auto h-4 w-4 text-slate-400" aria-hidden />
-                </Link>
+                </button>
               )}
             </section>
 
             {isCustomer && couponList.length > 0 && (
+              <div data-tour="coupons">
               <Carousel title="近くのクーポン" eyebrow="COUPON" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップで、クーポンの条件・お店の情報・行き方を表示" count={coupons.length}>
                 {couponList.map((c) => (
                   <CouponCard
@@ -522,6 +578,7 @@ function CustomerHome() {
                   />
                 ))}
               </Carousel>
+              </div>
             )}
             {ads.length > 0 && (
               <Carousel title="PR・お店からのお知らせ" eyebrow="NEWS" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} note="タップで、お知らせの全文とお店の情報を表示">
@@ -617,6 +674,17 @@ function CustomerHome() {
       )}
 
       <CouponUse target={useTarget} onClose={() => setUseTarget(null)} onUsed={loadRecs} />
+      <GuideTour steps={GUIDE_STEPS} open={guideOpen} onClose={() => setGuideOpen(false)} />
+      <NoticeSheet
+        open={noticeOpen}
+        items={notes.items}
+        freshIds={notes.freshIds}
+        onSeen={notes.markSeen}
+        onClose={() => setNoticeOpen(false)}
+        onOpenNotice={openNotice}
+        onDelete={notes.remove}
+        onDeleteRead={notes.removeRead}
+      />
 
       {toast && (
         <div className="fixed inset-x-0 bottom-24 z-[2100] flex justify-center px-4" role="status">
@@ -783,6 +851,17 @@ function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | n
 }
 
 /** よく使う絞り込み（地図の上に並べる） */
+const GUIDE_STEPS: TourStep[] = [
+  { title: "佐賀観光マップへようこそ", body: "近くのお店のクーポンを見つけて、地図で行き方まで調べられます。使い方を 1 分でご案内します。" },
+  { target: "search", title: "さがす", body: "お店の名前・料理・地名（例：ランチ、嬉野）で検索できます。" },
+  { target: "filters", title: "しぼりこむ", body: "「営業中」「クーポンあり」「駐車場あり」「PayPay などのバーコード決済」などで、今すぐ行けるお店だけを表示します。" },
+  { target: "map", title: "地図のピン", body: "赤いピンはクーポン配信中のお店です。ピンを押すと写真・割引・距離が出て、もう 1 回押すとお店のページが開きます。" },
+  { target: "coupons", title: "近くのクーポン", body: "近い順に並んでいます。押すと条件・使い方・お店の情報・行き方がすべて見られます。" },
+  { target: "bell", title: "お知らせ", body: "近くのお店が新しいクーポンを出すとここに届きます。見たら自動で既読になります。" },
+  { target: "mypage", title: "マイページ", body: "お気に入りのお店、使ったクーポン、お知らせメールの設定はここから。" },
+  { title: "お店では", body: "お店のページの「クーポンを使う」を押して、表示された画面を店員さんに見せるだけ。「ここへ行く」で道順も出ます。" },
+];
+
 const PAYMENT_FILTERS = ["カード払いOK", "バーコード決済OK", "交通系IC OK"];
 const QUICK_FILTERS = ["営業中", "クーポンあり", "駐車場あり", "テイクアウト", "子ども連れ歓迎", ...PAYMENT_FILTERS];
 

@@ -17,7 +17,10 @@ export async function GET() {
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
             instagram_url, twitter_url, threads_url, facebook_url, business_hours, closed_days, amenities, payment_methods, payment_none,
             weekly_hours, hours_note, ${SPECIAL_DAYS_SQL("b", -1, 400)} AS special_days, website_url, reservation_url, line_url,
-            photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM photo_updated_at)::bigint AS photo_version
+            photo IS NOT NULL AS has_photo,
+            (SELECT count(*) FROM business_photos p WHERE p.business_id = b.id)::int AS gallery_count,
+            (SELECT count(*) FROM menu_items m WHERE m.business_id = b.id)::int AS menu_count,
+            (SELECT count(*) FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now() AND c.deleted_at IS NULL)::int AS active_coupons, EXTRACT(EPOCH FROM photo_updated_at)::bigint AS photo_version
        FROM businesses b WHERE owner_id = $1 ORDER BY id`,
     [auth.user.id],
   );

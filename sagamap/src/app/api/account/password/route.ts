@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { query, queryOne } from "@/lib/db";
 import { parseBody } from "@/lib/http";
-import { ACCOUNT_TABLE, passwordRule } from "@/lib/accounts";
+import { ACCOUNT_TABLE, passwordRule, weakPasswordReason } from "@/lib/accounts";
 import { rateLimit, tooManyRequestsMessage } from "@/lib/rate-limit";
 import { requireApiUser } from "@/lib/session";
 
@@ -25,12 +25,15 @@ export async function POST(req: Request) {
   if (body.data.next.length < min) {
     return NextResponse.json({ error: `新しいパスワードは ${min} 文字以上にしてください` }, { status: 400 });
   }
+  const weak = weakPasswordReason(body.data.next, auth.user.email ?? undefined);
+  if (weak) return NextResponse.json({ error: weak }, { status: 400 });
   const table = ACCOUNT_TABLE[role];
   const row = await queryOne<{ password_hash: string | null }>(`SELECT password_hash FROM ${table} WHERE id = $1`, [id]);
   if (!row?.password_hash || !(await bcrypt.compare(body.data.current, row.password_hash))) {
     return NextResponse.json({ error: "現在のパスワードが正しくありません" }, { status: 400 });
   }
-  await query(`UPDATE ${table} SET password_hash = $1 WHERE id = $2`, [
+  // session_version を上げると、ほかの端末（盗まれたかもしれないログイン）もすべてログアウトになる
+  await query(`UPDATE ${table} SET password_hash = $1, session_version = session_version + 1 WHERE id = $2`, [
     await bcrypt.hash(body.data.next, role === "admin" ? 12 : 10),
     id,
   ]);

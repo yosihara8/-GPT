@@ -23,6 +23,7 @@ export type CardShop = {
   category: string;
   has_photo?: boolean;
   photo_version?: number | null;
+  cover_photo_id?: number | null;
   best_discount?: number | null;
   best_label?: string | null;
   has_coupon?: boolean;

@@ -8,6 +8,8 @@ import { recordReferral } from "./referral";
 import { AUTH_SECRET } from "./config";
 import { clientIp, rateLimit, resetRateLimit, tooManyRequestsMessage } from "./rate-limit";
 import { consumeToken } from "./tokens";
+import { verifyTotp } from "./totp";
+import { mailEnabled, mailFooter, sendMail } from "./mail";
 
 export type Role = "business" | "customer" | "admin";
 
@@ -24,6 +26,7 @@ const providers: NextAuthOptions["providers"] = [
       password: { label: "パスワード", type: "password" },
       role: { label: "種別", type: "text" },
       impersonate: { label: "代理ログイン", type: "text" },
+      otp: { label: "確認コード", type: "text" },
     },
     async authorize(credentials, req) {
       // 管理者の代理ログイン（管理画面で発行した 1 回限り・2 分間有効のトークン）
@@ -31,11 +34,11 @@ const providers: NextAuthOptions["providers"] = [
         const target = await consumeToken("impersonate", credentials.impersonate);
         if (!target || target.role === "admin") return null;
         const table = target.role === "business" ? "business_owners" : "customers";
-        const row = await queryOne<{ id: number; name: string; email: string }>(
-          `SELECT id, name, email FROM ${table} WHERE id = $1`,
+        const row = await queryOne<{ id: number; name: string; email: string; session_version: number }>(
+          `SELECT id, name, email, session_version FROM ${table} WHERE id = $1`,
           [target.user_id],
         );
-        return row ? { id: String(row.id), name: row.name, email: row.email, role: target.role, impersonated: true } : null;
+        return row ? { id: String(row.id), name: row.name, email: row.email, role: target.role, impersonated: true, sv: row.session_version } : null;
       }
 
       const email = credentials?.email?.trim().toLowerCase();
@@ -56,13 +59,29 @@ const providers: NextAuthOptions["providers"] = [
       }
 
       const table = { business: "business_owners", customer: "customers", admin: "admins" }[role];
-      const row = await queryOne<{ id: number; name: string; email: string; password_hash: string | null }>(
-        `SELECT id, name, email, password_hash FROM ${table} WHERE email = $1`,
+      const row = await queryOne<{ id: number; name: string; email: string; password_hash: string | null; session_version: number }>(
+        `SELECT id, name, email, password_hash, session_version FROM ${table} WHERE email = $1`,
         [email],
       );
       if (!row?.password_hash || !(await bcrypt.compare(password, row.password_hash))) return null;
+
+      // 運営者は、二段階認証を設定していれば認証アプリの 6 桁も確認する（パスワードが漏れても入られない）
+      if (role === "admin") {
+        const tf = await queryOne<{ totp_secret: string | null; totp_enabled_at: string | null; totp_last_step: string | null }>(
+          "SELECT totp_secret, totp_enabled_at, totp_last_step FROM admins WHERE id = $1",
+          [row.id],
+        );
+        if (tf?.totp_enabled_at && tf.totp_secret) {
+          if (!credentials?.otp) throw new Error("OTP_REQUIRED");
+          const step = verifyTotp(tf.totp_secret, credentials.otp);
+          // 同じ 6 桁の使い回し（盗み見・再送）も断る
+          if (step === null || (tf.totp_last_step && step <= Number(tf.totp_last_step))) throw new Error("OTP_INVALID");
+          await queryOne("UPDATE admins SET totp_last_step = $1 WHERE id = $2", [step, row.id]);
+        }
+        await notifyAdminLogin(row.email, ip);
+      }
       await resetRateLimit(accountKey);
-      return { id: String(row.id), name: row.name, email: row.email, role };
+      return { id: String(row.id), name: row.name, email: row.email, role, sv: row.session_version };
     },
   }),
 ];
@@ -92,6 +111,15 @@ export const authOptions: NextAuthOptions = {
          ON CONFLICT (email) DO NOTHING RETURNING id`,
         [user.name ?? email.split("@")[0], email],
       );
+      if (!inserted) {
+        // 第三者が先にこのメールアドレスでパスワード登録していた場合（メール未確認）の乗っ取りを防ぐ：
+        // Google で本人確認できたので、確認済みにし、未確認のまま付けられたパスワードと古いログインを無効にする
+        await queryOne(
+          `UPDATE customers SET password_hash = NULL, email_verified_at = now(), session_version = session_version + 1
+            WHERE email = $1 AND email_verified_at IS NULL AND password_hash IS NOT NULL`,
+          [email],
+        );
+      }
       if (inserted) {
         const bizId = Number(cookies().get("sagamap_ref")?.value);
         if (bizId) await recordReferral(inserted.id, bizId);
@@ -100,19 +128,34 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user, account }) {
       if (account?.provider === "google" && token.email) {
-        const row = await queryOne<{ id: number }>("SELECT id FROM customers WHERE email = $1", [
+        const row = await queryOne<{ id: number; session_version: number }>("SELECT id, session_version FROM customers WHERE email = $1", [
           token.email.toLowerCase(),
         ]);
         token.uid = row?.id;
         token.role = "customer";
-      } else if (user) {
+        token.sv = row?.session_version ?? 0;
+        return token;
+      }
+      if (user) {
         token.uid = Number(user.id);
         token.role = (user as { role?: Role }).role ?? "customer";
         token.impersonated = Boolean((user as { impersonated?: boolean }).impersonated);
+        token.sv = (user as { sv?: number }).sv ?? 0;
+        return token;
+      }
+      // ログイン後の確認：パスワード変更・「すべての端末からログアウト」・アカウント削除のあとは、古いログインを使えなくする
+      if (token.uid && token.role) {
+        const table = { business: "business_owners", customer: "customers", admin: "admins" }[token.role as Role];
+        const row = await queryOne<{ session_version: number }>(`SELECT session_version FROM ${table} WHERE id = $1`, [token.uid]).catch(
+          () => undefined,
+        );
+        // DB に一時的につながらないときは、ログインを切らずにそのまま（row === undefined）
+        if (row === null || (row && row.session_version !== (token.sv ?? 0))) return { revoked: true };
       }
       return token;
     },
     async session({ session, token }) {
+      if (token.revoked || !token.uid) return { ...session, user: undefined as unknown as typeof session.user };
       session.user.id = token.uid as number;
       session.user.role = token.role as Role;
       session.user.impersonated = Boolean(token.impersonated);
@@ -120,3 +163,17 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+/** 運営者がログインしたらメールで知らせる（身に覚えのないログインにすぐ気づけるように） */
+async function notifyAdminLogin(email: string, ip: string) {
+  if (!mailEnabled()) return;
+  const at = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+  await sendMail(
+    email,
+    "【佐賀観光マップ】管理画面にログインしました",
+    `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
+      <p>管理画面にログインがありました。</p>
+      <ul><li>日時：${at}</li><li>接続元：${ip.replace(/[<>&"]/g, "")}</li></ul>
+      <p style="color:#b45309">心当たりがない場合は、すぐにパスワードを変更し、二段階認証を設定してください。</p>${mailFooter()}</div>`,
+  ).catch(() => undefined);
+}

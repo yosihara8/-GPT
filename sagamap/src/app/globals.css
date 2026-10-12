@@ -140,9 +140,72 @@ body {
   color: #344054;
 }
 
-/* 地図の色を落ち着かせ、ピンを引き立たせる */
-.leaflet-tile-pane {
-  filter: sepia(0.22) saturate(0.6) brightness(1.03);
+/* 淡色地図をサイトの白磁色に少しなじませる（航空写真には掛けない） */
+.sm-tiles-pale {
+  filter: sepia(0.12) saturate(0.9) brightness(1.02);
+}
+.leaflet-container {
+  background: #f2efe8;
+}
+
+/* しずく形のピン（先端がお店の場所） */
+.sm-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2.5px solid #fff;
+  box-shadow: -2px 3px 6px rgba(20, 30, 50, 0.28);
+  transition: transform 0.15s ease;
+}
+.sm-drop svg {
+  transform: rotate(45deg);
+  display: block;
+}
+.sm-drop-on {
+  box-shadow: 0 0 0 5px rgba(238, 106, 58, 0.35), -2px 3px 8px rgba(20, 30, 50, 0.35);
+}
+.leaflet-marker-icon:hover .sm-drop {
+  transform: rotate(-45deg) scale(1.08);
+}
+
+/* 現在地（青い点と広がる輪） */
+.sm-me {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+.sm-me::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 9999px;
+  background: rgba(46, 144, 250, 0.25);
+  animation: sm-me-pulse 2s ease-out infinite;
+}
+.sm-me span {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: #2e90fa;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.35);
+}
+@keyframes sm-me-pulse {
+  from {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sm-me::before {
+    animation: none;
+  }
 }
 .leaflet-container {
   font-family: inherit;
@@ -157,13 +220,14 @@ body {
 
 /* 地図上の「クーポン発行中」ラベル */
 .leaflet-tooltip.sm-coupon-label {
-  padding: 1px 6px;
-  border-radius: 6px;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  border: 1.5px solid #fff;
   background: #c43d2b;
   color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 16px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 18px;
   white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.25);

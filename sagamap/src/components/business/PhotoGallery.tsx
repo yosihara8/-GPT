@@ -14,7 +14,7 @@ type Photo = { id: number; kind: string; caption: string };
  * お店の写真（外観・店内・客席・商品・雑貨など）。
  * まとめて選んで追加でき、並び順・種類を変えられる。お客さまのお店のページで横にスライドして見られる。
  */
-export default function PhotoGallery({ storeId, premium }: { storeId: number; premium: boolean }) {
+export default function PhotoGallery({ storeId, premium, onChanged }: { storeId: number; premium: boolean; onChanged?: () => void }) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [kind, setKind] = useState<string>("外観");
   const [caption, setCaption] = useState("");
@@ -55,6 +55,7 @@ export default function PhotoGallery({ storeId, premium }: { storeId: number; pr
       setBusy(null);
       if (fileRef.current) fileRef.current.value = "";
       load();
+      onChanged?.();
     }
   }
 
@@ -84,6 +85,7 @@ export default function PhotoGallery({ storeId, premium }: { storeId: number; pr
     if (!confirm("この写真を削除しますか？")) return;
     await api(`/api/businesses/${storeId}/photos?photoId=${p.id}`, { method: "DELETE" });
     load();
+    onChanged?.();
   }
 
   return (

@@ -34,9 +34,10 @@ export default function BusinessNav({ children }: { children: React.ReactNode })
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 font-bold transition ${on ? "bg-white/15 text-white ring-1 ring-sun-400/60" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
+                  aria-current={on ? "page" : undefined}
+                  className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 font-bold transition ${on ? "bg-sun-400 text-saga-900 shadow" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
                 >
-                  <Icon className={`h-4 w-4 ${on ? "text-sun-400" : ""}`} aria-hidden />
+                  <Icon className="h-4 w-4" aria-hidden />
                   {label}
                 </Link>
               );
@@ -54,10 +55,13 @@ export default function BusinessNav({ children }: { children: React.ReactNode })
                 <Link
                   key={href}
                   href={href}
-                  className={`relative flex flex-1 flex-col items-center gap-0.5 pb-2 pt-2.5 text-[10.5px] ${on ? "font-bold text-saga-600" : "text-slate-400"}`}
+                  aria-current={on ? "page" : undefined}
+                  className={`relative flex flex-1 flex-col items-center gap-0.5 pb-2 pt-1.5 text-[10.5px] ${on ? "font-bold text-saga-700" : "text-slate-500"}`}
                 >
-                  {on && <span className="absolute top-0 h-[3px] w-6 rounded-b bg-sun-400" aria-hidden />}
-                  <Icon className="h-5 w-5" aria-hidden />
+                  {/* 開いているタブは色つきの丸い背景で示す */}
+                  <span className={`grid h-7 w-14 place-items-center rounded-full transition ${on ? "bg-saga-600 text-sun-400" : ""}`}>
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </span>
                   {label}
                 </Link>
               );

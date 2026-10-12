@@ -356,3 +356,12 @@ CREATE TABLE IF NOT EXISTS business_photos (
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS business_photos_biz_idx ON business_photos (business_id, sort, id);
+
+-- ログインの無効化（パスワード変更・「すべての端末からログアウト」で番号を上げると、古いログインは使えなくなる）
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS session_version INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS session_version INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS session_version INTEGER NOT NULL DEFAULT 0;
+-- 運営者の二段階認証（認証アプリの 6 桁の数字）
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS totp_secret TEXT;
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS totp_enabled_at TIMESTAMPTZ;
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS totp_last_step BIGINT;

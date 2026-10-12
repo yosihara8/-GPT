@@ -22,7 +22,7 @@ function CustomerRegisterForm() {
   const params = useSearchParams();
   const ref = Number(params.get("ref")) || undefined;
   const nextRaw = params.get("next");
-  const next = nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
+  const next = nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//") && !nextRaw.includes("\\") ? nextRaw : "/";
   const [referrer, setReferrer] = useState<string | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
