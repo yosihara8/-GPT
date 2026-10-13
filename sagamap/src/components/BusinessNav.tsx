@@ -3,18 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { CreditCard, Home, Megaphone, TicketPercent, Users } from "lucide-react";
+import { Home, Megaphone, Settings, Store, TicketPercent, Users } from "lucide-react";
 
 const ITEMS = [
   { href: "/dashboard/business", label: "ホーム", icon: Home },
+  { href: "/dashboard/business/store", label: "お店", icon: Store },
   { href: "/dashboard/business/coupons", label: "クーポン", icon: TicketPercent },
   { href: "/dashboard/business/ads", label: "広告", icon: Megaphone },
   { href: "/dashboard/business/referrals", label: "紹介", icon: Users },
-  { href: "/upgrade", label: "プラン", icon: CreditCard },
+  { href: "/dashboard/business/settings", label: "設定", icon: Settings },
 ];
 
+/** 開いているタブ（レポート・ポスターはホームの中、プランの画面は設定の中） */
 function isOn(pathname: string, href: string) {
-  return href === "/dashboard/business" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+  if (href === "/dashboard/business") return pathname === href || pathname.startsWith("/dashboard/business/report") || pathname.startsWith("/dashboard/business/poster");
+  if (href === "/dashboard/business/settings") return pathname.startsWith(href) || pathname === "/upgrade";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 /** 事業主のメニュー（パソコンは左側に常に表示、スマホは画面下のタブ） */
@@ -59,7 +63,7 @@ export default function BusinessNav({ children }: { children: React.ReactNode })
                   className={`relative flex flex-1 flex-col items-center gap-0.5 pb-2 pt-1.5 text-[10.5px] ${on ? "font-bold text-saga-700" : "text-slate-500"}`}
                 >
                   {/* 開いているタブは色つきの丸い背景で示す */}
-                  <span className={`grid h-7 w-14 place-items-center rounded-full transition ${on ? "bg-saga-600 text-sun-400" : ""}`}>
+                  <span className={`grid h-7 w-12 place-items-center rounded-full transition ${on ? "bg-saga-600 text-sun-400" : ""}`}>
                     <Icon className="h-5 w-5" aria-hidden />
                   </span>
                   {label}

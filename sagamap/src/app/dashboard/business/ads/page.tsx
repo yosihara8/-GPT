@@ -11,6 +11,7 @@ import PremiumGate from "@/components/PremiumGate";
 import StoreSelect, { useMyStores } from "@/components/StoreSelect";
 import NotifyCheckbox from "@/components/NotifyCheckbox";
 import { api } from "@/lib/fetcher";
+import SectionTitle from "@/components/ui/SectionTitle";
 import { blobToBase64, resizeToJpeg } from "@/lib/image";
 
 type Ad = {
@@ -30,7 +31,7 @@ type Done = { headline: string; endsAt: string; notified: number; warnings: stri
 
 export default function AdsPage() {
   return (
-    <PremiumGate title="広告出稿">
+    <PremiumGate eyebrow="ADS" title="広告出稿" lead="地図の画面の PR 枠に、お店のお知らせを出せます。">
       <Ads />
     </PremiumGate>
   );
@@ -196,9 +197,13 @@ function Ads() {
       </form>
 
       {ads.length > 0 && (
-        <section className="space-y-2">
-          <h2 className="text-sm font-semibold text-slate-700">出稿した広告</h2>
-          <p className="text-xs text-slate-500">タップすると、お客さまに見えている広告の内容と、見られた回数を表示します。内容の修正もできます（出稿回数は使いません）。</p>
+        <section className="space-y-2 pt-2">
+          <SectionTitle
+            eyebrow="POSTED"
+            title="出稿した広告"
+            count={ads.length}
+            note="タップすると、お客さまに見えている広告の内容と、見られた回数を表示します。内容の修正もできます（出稿回数は使いません）。"
+          />
           <ul className="space-y-2">
             {ads.map((a) => {
               const live = a.is_active && new Date(a.ends_at).getTime() > Date.now();

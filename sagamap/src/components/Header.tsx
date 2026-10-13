@@ -19,7 +19,8 @@ export default function Header() {
   // ロゴ（ホーム）は今いる画面の種類の中にとどまる
   const home =
     theme === "business" && user?.role === "business" ? "/dashboard/business" : theme === "admin" && user?.role === "admin" ? "/admin" : "/";
-  const showDashboardLink = user && (user.role !== "admin" || theme === "admin");
+  // 事業主の画面では、左（スマホは下）のメニューがあるので「マイページ」は出さない
+  const showDashboardLink = user && user.role !== "admin" && !(user.role === "business" && theme === "business");
 
   return (
     <header className={`sticky top-0 z-30 border-b backdrop-blur ${dark ? "border-slate-800 bg-slate-900/95" : "border-slate-200/80 bg-[#FFFDF9]/95"}`}>
@@ -35,7 +36,7 @@ export default function Header() {
           </button>
         </div>
       )}
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
+      <div className={`mx-auto flex h-14 items-center justify-between gap-2 px-3 sm:px-4 ${(theme === "business" && user?.role === "business") || pathname === "/" ? "lg:max-w-none lg:px-5" : "max-w-6xl"}`}>
         <Link href={home} className="flex min-w-0 items-center gap-2 sm:gap-2.5" aria-label="佐賀観光マップ ホームへ">
           <Logo light={dark} className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
           <span
@@ -67,7 +68,7 @@ export default function Header() {
                   aria-current={pathname.startsWith(user.role === "admin" ? "/admin" : dashboard) ? "page" : undefined}
                   className={tabClass(pathname.startsWith(user.role === "admin" ? "/admin" : dashboard), dark)}
                 >
-                  {user.role === "admin" ? "管理画面" : "マイページ"}
+                  {user.role === "business" ? "ダッシュボード" : "マイページ"}
                 </Link>
               )}
               <button
@@ -79,12 +80,15 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Link href="/login" className={`rounded-lg px-2 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}>
+              <Link href={theme === "business" ? "/login?role=business" : "/login"} className={`rounded-full px-2 py-1.5 sm:px-3 ${dark ? "text-slate-200 hover:bg-slate-800" : "text-slate-700 hover:bg-slate-100"}`}>
                 ログイン
               </Link>
-              <Link href="/register/customer" className="btn-primary px-3.5 py-1.5">
-                無料登録
-              </Link>
+              {/* 事業主の画面（事業主登録など）では、お客さまの登録ではなく事業主のログインを案内する */}
+              {theme !== "business" && (
+                <Link href="/register/customer" className="btn-primary px-3.5 py-1.5">
+                  無料登録
+                </Link>
+              )}
             </>
           )}
         </nav>

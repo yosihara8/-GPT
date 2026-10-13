@@ -85,11 +85,11 @@ export default function ScheduleEditor({ storeId, weeklyHours, hoursNote, specia
 
       {/* ① 曜日ごとの営業時間 */}
       <div className="rounded-xl border border-slate-200 p-3">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold">① いつもの営業時間</p>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          <p className="whitespace-nowrap text-sm font-bold">① いつもの営業時間</p>
           <button type="button" onClick={copyMonday} className="flex items-center gap-1 text-xs font-bold text-saga-700">
             <Copy className="h-3.5 w-3.5" aria-hidden />
-            月曜の時間を営業日すべてにコピー
+            月曜の時間を全部にコピー
           </button>
         </div>
         <ul className="divide-y divide-slate-100">
@@ -167,7 +167,7 @@ export default function ScheduleEditor({ storeId, weeklyHours, hoursNote, specia
 
       {/* ② 臨時休業・特別営業 */}
       <div className="rounded-xl border border-slate-200 p-3">
-        <p className="text-sm font-semibold">② 臨時休業・特別営業の日</p>
+        <p className="text-sm font-bold">② 臨時休業・特別営業の日</p>
         <p className="mb-3 mt-0.5 text-xs text-slate-500">日付をタップして、お休みや営業時間が変わる日を登録します（約 1 年先まで）。</p>
         <MonthCalendar weekly={weekly} specials={days} selected={picked} onSelect={setPicked} maxMonths={12} />
         {picked && (

@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { Bell, ChevronRight, Clock, Heart, Map as MapIcon, Route as RouteIcon, Settings } from "lucide-react";
 import { api } from "@/lib/fetcher";
 import Carousel from "@/components/customer/Carousel";
+import SectionTitle from "@/components/ui/SectionTitle";
 import { ShopCard } from "@/components/customer/Cards";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import EmailChangeForm from "@/components/EmailChangeForm";
@@ -134,7 +135,7 @@ function MyPageInner() {
         </Link>
       </section>
 
-      <nav className="sticky top-14 z-10 flex border-b border-slate-200 bg-[#FFFDF9]/95 backdrop-blur">
+      <nav className="sticky top-14 z-10 flex border-b border-slate-200 bg-[#FFFDF9]/95 backdrop-blur sm:mx-4 sm:mt-3 sm:rounded-2xl sm:border sm:shadow-pop">
         {nav.map((n) => (
           <a
             key={n.href}
@@ -157,12 +158,7 @@ function MyPageInner() {
 
       {/* お知らせ */}
       <section id="news" ref={newsRef} className="scroll-mt-28 px-4 pt-5">
-        <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
-            <Bell className="h-4 w-4 text-asa-500" aria-hidden />
-            お知らせ
-          </h2>
-        </div>
+        <SectionTitle eyebrow="NEWS" title="お知らせ" icon={<Bell className="h-4 w-4 text-asa-500" aria-hidden />} />
         <div className="mt-2">
           <NotificationList
             items={notes.items}
@@ -178,17 +174,14 @@ function MyPageInner() {
       <section id="favorites" className="scroll-mt-28 pt-3">
         {favorites.length === 0 ? (
           <div className="px-4 pt-2">
-            <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
-              <Heart className="h-4 w-4 text-coupon" aria-hidden />
-              お気に入り
-            </h2>
+            <SectionTitle eyebrow="FAVORITE" title="お気に入り" icon={<Heart className="h-4 w-4 text-coupon" aria-hidden />} />
             <p className="mt-2 rounded-2xl bg-white p-4 text-sm text-slate-500 ring-1 ring-slate-200/70">
               まだありません。地図のお店のカードや、お店の画面の「保存」を押すと、ここに集まります。
             </p>
           </div>
         ) : (
           <>
-            <Carousel title="お気に入り" icon={<Heart className="h-4 w-4 text-coupon" aria-hidden />} count={favorites.length}>
+            <Carousel title="お気に入り" eyebrow="FAVORITE" icon={<Heart className="h-4 w-4 text-coupon" aria-hidden />} count={favorites.length}>
               {favorites.map((f) => (
                 <ShopCard key={f.id} shop={f} meters={null} favorite onOpen={() => router.push(`/?shop=${f.id}`)} onFavorite={() => removeFavorite(f.id)} />
               ))}
@@ -207,11 +200,12 @@ function MyPageInner() {
 
       {/* 利用履歴 */}
       <section id="history" className="scroll-mt-28 px-4 pt-6">
-        <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
-          <Clock className="h-4 w-4 text-saga-600" aria-hidden />
-          利用履歴
-        </h2>
-        <p className="text-xs text-slate-500">見たお店と使ったクーポンです。おすすめを選ぶときの参考にしています。</p>
+        <SectionTitle
+          eyebrow="HISTORY"
+          title="利用履歴"
+          icon={<Clock className="h-4 w-4 text-saga-600" aria-hidden />}
+          note="見たお店と使ったクーポンです。おすすめを選ぶときの参考にしています。"
+        />
         <div className="mt-2 flex gap-2">
           <button onClick={() => setFilter("all")} className={filter === "all" ? "chip-on" : "chip-off"}>
             すべて
@@ -251,10 +245,7 @@ function MyPageInner() {
 
       {/* 設定 */}
       <section id="settings" className="scroll-mt-28 space-y-4 px-4 pt-6">
-        <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
-          <Settings className="h-4 w-4 text-saga-600" aria-hidden />
-          設定
-        </h2>
+        <SectionTitle eyebrow="SETTINGS" title="設定" icon={<Settings className="h-4 w-4 text-saga-600" aria-hidden />} />
         <NotifySetting />
         <EmailChangeForm />
         <PasswordChangeForm />

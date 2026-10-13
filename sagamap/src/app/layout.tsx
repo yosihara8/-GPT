@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Header />
             </SiteChrome>
             <div className="flex-1">{children}</div>
-            <SiteChrome>
+            <SiteChrome footer>
               <Footer />
             </SiteChrome>
           </ThemeScope>

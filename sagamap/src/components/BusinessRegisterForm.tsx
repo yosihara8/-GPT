@@ -1,6 +1,7 @@
 "use client";
 
 import PasswordInput from "@/components/PasswordInput";
+import SagaHero from "@/components/SagaHero";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { signIn } from "next-auth/react";
@@ -55,9 +56,9 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
   }
 
   return (
-    <main className="mx-auto max-w-lg p-4">
+    <main className="mx-auto max-w-lg sm:p-4">
       {inviteCode ? (
-        <div className="mt-4 overflow-hidden rounded-2xl bg-saga-600 p-5 text-white">
+        <div className="karakusa overflow-hidden bg-saga-600 p-5 pb-8 text-white sm:rounded-3xl">
           <p className="text-xs font-bold tracking-widest text-sun-100">SPECIAL INVITATION</p>
           <h1 className="mt-1 text-2xl font-bold">特別招待 事業主登録</h1>
           <p className="mt-2 text-sm font-bold leading-6">
@@ -70,14 +71,19 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
           <p className="mt-2 text-xs opacity-90">※ お支払い情報の登録は不要です。</p>
         </div>
       ) : (
-        <>
-          <h1 className="mt-4 text-2xl font-bold">事業主登録（無料）</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            無料プランで 1 店舗を地図に掲載できます。クーポン発行・広告出稿は登録後に有料プラン（月額 3,980 円）へ変更できます。
-          </p>
-        </>
+        <SagaHero
+          className="sm:rounded-3xl"
+          eyebrow="FOR BUSINESS"
+          title={
+            <>
+              事業主登録<span className="text-lg">（無料）</span>
+            </>
+          }
+          lead="無料で 1 店舗を地図に掲載できます。クーポン・広告は登録後に有料プラン（月額 3,980 円）で使えます。"
+        />
       )}
-      <form onSubmit={onSubmit} className="card mt-4 space-y-4">
+      <div className="relative -mt-4 px-4 sm:px-0">
+      <form onSubmit={onSubmit} className="card space-y-4">
         <Field label="店舗名" name="name" required />
         <div>
           <label className="label" htmlFor="address">住所</label>
@@ -127,10 +133,11 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
           <Link href="/privacy" className="underline">プライバシーポリシー</Link>に同意したものとみなします。
         </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button disabled={loading} className="btn-accent w-full">
+        <button disabled={loading} className="btn-accent btn-lg">
           {loading ? "登録中…" : inviteCode ? "特別プランで登録する" : "無料で登録する"}
         </button>
       </form>
+      </div>
       <p className="mt-4 text-center text-sm text-slate-600">
         登録済みの方は <Link className="text-saga-600 underline" href="/login?role=business">ログイン</Link>
       </p>

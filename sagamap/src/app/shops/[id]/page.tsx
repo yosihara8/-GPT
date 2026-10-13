@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { queryOne } from "@/lib/db";
 import { PRICE_LEVEL_LABELS } from "@/lib/config";
 import CategoryIcon from "@/components/CategoryIcon";
@@ -51,7 +51,9 @@ export default async function ShopPage({ params }: { params: { id: string } }) {
   const shop = await getShop(Number(params.id));
   if (!shop) notFound();
   const user = await getSessionUser();
-  const isCustomer = user?.role === "customer";
+  // お客さまは、いつもの「お店のページ」（地図の画面）で開く。どこから来ても同じ画面にする
+  if (user?.role === "customer") redirect(`/?shop=${shop.id}`);
+  const isCustomer = false;
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${shop.lat},${shop.lng}`;
 
   return (

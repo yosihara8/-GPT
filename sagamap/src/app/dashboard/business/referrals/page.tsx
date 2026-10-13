@@ -61,7 +61,7 @@ async function saveQrImage(storeId: number, storeName: string) {
 
 export default function ReferralsPage() {
   return (
-    <PremiumGate title="紹介プログラム">
+    <PremiumGate eyebrow="REFERRAL" title="紹介プログラム" lead="お客さまを紹介すると、翌月の月額が安くなります。">
       <Referrals />
     </PremiumGate>
   );

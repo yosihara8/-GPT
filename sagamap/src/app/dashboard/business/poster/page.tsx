@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { ArrowLeft, Printer } from "lucide-react";
+import { Printer } from "lucide-react";
 import Logo from "@/components/Logo";
 import { useMyStores } from "@/components/StoreSelect";
 import { api } from "@/lib/fetcher";
@@ -43,15 +42,14 @@ export default function PosterPage() {
   const S = SIZES[size];
 
   return (
-    <main className="mx-auto max-w-5xl space-y-4 p-4 print:m-0 print:max-w-none print:p-0">
+    <main className="mx-auto max-w-4xl space-y-4 p-4 pb-10 print:m-0 print:max-w-none print:p-0">
       {/* 印刷するときは、ポスターだけを用紙いっぱいに出す */}
       <style>{`@media print { @page { size: ${size} portrait; margin: 0; } }`}</style>
       <div className="space-y-4 print:hidden">
-        <Link href="/dashboard/business" className="inline-flex items-center gap-1 text-sm text-slate-600">
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          ダッシュボード
-        </Link>
-        <h1 className="text-2xl font-bold">レジ横 QR ポスター</h1>
+        <div className="karakusa -mx-4 -mt-4 bg-saga-600 px-5 pb-6 pt-6 text-white sm:mx-0 sm:mt-0 sm:rounded-3xl">
+          <p className="num text-[10px] font-bold tracking-[0.3em] text-sun-400">QR POSTER</p>
+          <h1 className="mt-1 text-2xl font-extrabold">レジ横 QR ポスター</h1>
+        </div>
         <p className="text-sm text-slate-600">
           印刷してレジ横・入口・テーブルに置くだけ。お客さまがスマホのカメラで読み取ると、無料登録（30 秒）してすぐにクーポンを使えます。
           読み取られた回数はダッシュボードと月次レポートに出ます。登録した方は紹介プログラムにも数えます。
@@ -95,7 +93,7 @@ export default function PosterPage() {
             </div>
             <p className="mt-1 text-xs text-slate-500">{S.label}</p>
           </div>
-          <button type="button" onClick={() => window.print()} className="btn-accent sm:col-span-3">
+          <button type="button" onClick={() => window.print()} className="btn-accent btn-lg sm:col-span-3">
             <Printer className="h-4 w-4" aria-hidden />
             印刷する（PDF に保存もできます）
           </button>
