@@ -53,7 +53,7 @@ export default function AdminForgotPage() {
             <input id="email" name="email" type="email" required autoComplete="username" className="input" />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button disabled={loading} className="btn-primary w-full">
+          <button disabled={loading} className="btn-primary btn-lg">
             {loading ? "送信中…" : "再設定のリンクを送る"}
           </button>
           <p className="text-right text-sm">

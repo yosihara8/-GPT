@@ -8,6 +8,7 @@ import NotifyCheckbox from "@/components/NotifyCheckbox";
 import ImagePicker, { type PickedImage } from "@/components/ImagePicker";
 import CouponRow from "@/components/CouponRow";
 import { api } from "@/lib/fetcher";
+import SectionTitle from "@/components/ui/SectionTitle";
 import { eventPeriod, type SagaEvent } from "@/lib/events";
 import { blobToBase64 } from "@/lib/image";
 import { COUPON_TYPES, COUPON_TYPE_LABELS, type CouponType, type CouponValue } from "@/lib/coupon";
@@ -24,7 +25,7 @@ type Coupon = CouponValue & {
 
 export default function CouponsPage() {
   return (
-    <PremiumGate title="クーポン発行">
+    <PremiumGate eyebrow="COUPON" title="クーポン発行" lead="％引き・円引き・特別価格・特典など、自由に作れます。">
       <Coupons />
     </PremiumGate>
   );
@@ -277,8 +278,8 @@ function Coupons() {
       </form>
 
       {coupons.length > 0 && (
-        <section className="space-y-1">
-          <h2 className="text-sm font-semibold text-slate-700">発行したクーポン</h2>
+        <section className="space-y-2 pt-2">
+          <SectionTitle eyebrow="ISSUED" title="発行したクーポン" count={coupons.length} />
           {coupons.map((c) => {
             const expired = new Date(c.expires_at).getTime() < Date.now();
             return (

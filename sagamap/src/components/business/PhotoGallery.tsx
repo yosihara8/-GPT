@@ -168,8 +168,9 @@ export default function PhotoGallery({ storeId, premium, onChanged }: { storeId:
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => add(e.target.files)} aria-label="写真を選ぶ" />
         <button type="button" disabled={!!busy || photos.length >= limit} onClick={() => fileRef.current?.click()} className="btn-primary w-full">
           <ImagePlus className="h-4 w-4" aria-hidden />
-          {busy ?? (photos.length >= limit ? `上限の ${limit} 枚です` : `「${kind}」の写真を選ぶ（まとめて選べます）`)}
+          {busy ?? (photos.length >= limit ? `上限の ${limit} 枚です` : `「${kind}」の写真を選ぶ`)}
         </button>
+        <p className="text-center text-xs text-slate-500">何枚かまとめて選べます。自動で縮小して保存します。</p>
         {msg && <p className="text-sm font-bold text-saga-700">{msg}</p>}
       </div>
     </section>

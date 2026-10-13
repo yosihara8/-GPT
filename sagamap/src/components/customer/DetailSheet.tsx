@@ -29,6 +29,7 @@ import ShopPhoto from "@/components/ShopPhoto";
 import CategoryIcon from "@/components/CategoryIcon";
 import { type Ad } from "@/components/AdBanner";
 import Carousel from "./Carousel";
+import SectionTitle from "@/components/ui/SectionTitle";
 import { ShopCard, travelText, type CardShop } from "./Cards";
 import { PRICE_LEVEL_LABELS } from "@/lib/config";
 import { daysLeft, shopStatus } from "@/lib/open-status";
@@ -141,6 +142,12 @@ export default function DetailSheet({
     ] as [string, string, boolean][]
   ).filter((t) => t[2]);
   const [activeTab, setActiveTab] = useState("top");
+  const tabNav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = tabNav.current;
+    const btn = nav?.querySelector<HTMLElement>(`[data-tab="${activeTab}"]`);
+    if (nav && btn) nav.scrollTo({ left: btn.offsetLeft - nav.clientWidth / 2 + btn.clientWidth / 2, behavior: "smooth" });
+  }, [activeTab]);
   const jump = (key: string) => {
     const box = scroller.current;
     if (!box) return;
@@ -270,12 +277,14 @@ export default function DetailSheet({
 
         {/* お店のページの目次（食べログ・ホットペッパーのように、見たい情報へ 1 タップで） */}
         <nav
+          ref={tabNav}
           aria-label="お店のページの目次"
           className="no-scrollbar sticky top-0 z-20 flex gap-1 overflow-x-auto border-b border-slate-200/80 bg-[#FFFDF9]/95 px-3 py-2 backdrop-blur"
         >
           {tabs.map(([key, label]) => (
             <button
               key={key}
+              data-tab={key}
               type="button"
               onClick={() => jump(key)}
               aria-current={activeTab === key ? "true" : undefined}
@@ -292,10 +301,12 @@ export default function DetailSheet({
         <div data-sec="coupon" />
         {(otherCoupons.length > 0 || (!focusCoupon && coupons === null)) && (
           <section className="px-4 pt-5">
-            <h2 className="flex items-center gap-1.5 text-[15px] font-bold text-coupon">
-              <Ticket className="h-4 w-4" aria-hidden />
-              {focusCoupon ? "このお店のほかのクーポン" : "このお店で使えるクーポン"}
-            </h2>
+            <SectionTitle
+              eyebrow="COUPON"
+              tone="coupon"
+              title={focusCoupon ? "このお店のほかのクーポン" : "このお店で使えるクーポン"}
+              icon={<Ticket className="h-4 w-4" aria-hidden />}
+            />
             {coupons === null && <div className="mt-2 h-20 animate-pulse rounded-2xl bg-white" />}
             <div className="mt-2 space-y-2">
               {otherCoupons.map((c) => (
@@ -334,10 +345,7 @@ export default function DetailSheet({
         {/* ⑤ お店からのお知らせ（広告） */}
         {otherAds.length > 0 && (
           <section className="px-4 pt-5">
-            <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
-              <Megaphone className="h-4 w-4 text-slate-500" aria-hidden />
-              お店からのお知らせ
-            </h2>
+            <SectionTitle eyebrow="NEWS" title="お店からのお知らせ" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} />
             <div className="mt-2 space-y-3">
               {otherAds.map((ad) => (
                 <AdHero key={ad.id} ad={ad} compact />

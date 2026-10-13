@@ -73,6 +73,10 @@ body {
   .btn-accent {
     @apply btn bg-asa-500 text-white shadow-[0_6px_16px_rgba(238,106,58,0.32)] hover:bg-asa-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-asa-100;
   }
+  /* フォームのいちばん下の大きなボタン（ログイン・登録・送信など。全画面で同じ大きさ） */
+  .btn-lg {
+    @apply w-full rounded-full py-3 text-base;
+  }
   .btn-outline {
     @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
   }

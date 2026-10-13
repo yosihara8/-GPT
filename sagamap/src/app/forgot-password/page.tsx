@@ -42,13 +42,14 @@ export default function ForgotPasswordPage() {
         </div>
       ) : (
         <form onSubmit={onSubmit} className="card mt-4 space-y-4">
-          <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-bold">
+          <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-sm">
             {(["customer", "business"] as const).map((r) => (
               <button
                 type="button"
                 key={r}
                 onClick={() => setRole(r)}
-                className={`rounded-md py-2 ${role === r ? "bg-white text-saga-700 shadow" : "text-slate-500"}`}
+                aria-pressed={role === r}
+                className={`rounded-lg py-2 ${role === r ? "bg-saga-600 font-bold text-white" : "text-slate-500"}`}
               >
                 {r === "customer" ? "お客さま" : "事業主"}
               </button>
@@ -59,7 +60,7 @@ export default function ForgotPasswordPage() {
             <input id="email" name="email" type="email" required autoComplete="email" className="input" />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button disabled={loading} className="btn-primary w-full">
+          <button disabled={loading} className="btn-primary btn-lg">
             {loading ? "送信中…" : "再設定用のリンクを送る"}
           </button>
         </form>

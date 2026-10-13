@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
             {error}
           </p>
         )}
-        <button disabled={loading} className="btn-primary w-full">
+        <button disabled={loading} className="btn-primary btn-lg">
           {loading ? "ログイン中…" : "ログイン"}
         </button>
         <p className="text-right text-sm">

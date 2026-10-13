@@ -73,7 +73,7 @@ function LoginForm() {
             パスワードを忘れた方
           </Link>
         </p>
-        <button disabled={loading} className="btn-primary w-full">
+        <button disabled={loading} className="btn-primary btn-lg">
           {loading ? "ログイン中…" : "ログイン"}
         </button>
         {role === "customer" && googleAvailable && (

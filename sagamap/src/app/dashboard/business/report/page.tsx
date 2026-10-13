@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Lightbulb, Mail, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lightbulb, Mail, TrendingDown, TrendingUp } from "lucide-react";
 import { api } from "@/lib/fetcher";
+import BizPage from "@/components/business/BizPage";
 import { METRIC_LABELS, monthLabel, prevMonth, type OwnerReport } from "@/lib/owner-report-shared";
 
 const nextMonth = (m: string) => {
@@ -27,7 +28,7 @@ export default function ReportPage() {
     load(null);
   }, [load]);
 
-  if (!data) return <main className="mx-auto max-w-3xl p-4"><div className="h-60 animate-pulse rounded-2xl bg-white" /></main>;
+  if (!data) return <main className="mx-auto max-w-4xl p-4"><div className="h-60 animate-pulse rounded-3xl bg-white" /></main>;
   const r = data.report;
   const isCurrent = month === data.current;
 
@@ -53,16 +54,7 @@ export default function ReportPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl space-y-4 p-4">
-      <Link href="/dashboard/business" className="inline-flex items-center gap-1 text-sm text-slate-600">
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        ダッシュボード
-      </Link>
-      <div>
-        <p className="num text-[11px] font-bold tracking-[0.3em] text-saga-600">MONTHLY REPORT</p>
-        <h1 className="text-2xl font-bold">月次レポート</h1>
-        <p className="text-sm text-slate-600">佐賀観光マップで、お店に来ようとしたお客さまの動きです。毎月 1 日に先月分をメールでもお届けします。</p>
-      </div>
+    <BizPage eyebrow="MONTHLY REPORT" title="月次レポート" lead="お店に来ようとしたお客さまの動きです。毎月 1 日に先月分をメールでもお届けします。">
 
       {month && (
         <div className="flex items-center justify-between rounded-2xl bg-white p-2 ring-1 ring-slate-200">
@@ -148,6 +140,6 @@ export default function ReportPage() {
         </button>
         {msg && <p className="text-sm font-bold text-saga-700">{msg}</p>}
       </section>
-    </main>
+    </BizPage>
   );
 }

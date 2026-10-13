@@ -62,7 +62,7 @@ function ResetPasswordForm() {
             <PasswordInput id="password2" name="password2" required minLength={8} autoComplete="new-password" className="input" />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button disabled={loading || !token} className="btn-primary w-full">
+          <button disabled={loading || !token} className="btn-primary btn-lg">
             {loading ? "設定中…" : "パスワードを設定する"}
           </button>
           {!token && <p className="text-sm text-red-600">リンクが正しくありません。メールのリンクから開いてください。</p>}

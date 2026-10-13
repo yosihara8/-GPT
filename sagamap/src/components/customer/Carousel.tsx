@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import SectionTitle from "@/components/ui/SectionTitle";
 
 /** 横にスライドして見る一覧（スマホは指で、パソコンは左右のボタンで動かす） */
 export default function Carousel({
@@ -25,15 +26,7 @@ export default function Carousel({
   return (
     <section className="py-3">
       <div className="mb-2 flex items-end justify-between gap-2 px-4">
-        <div className="min-w-0">
-          {eyebrow && <p className="num text-[10px] font-bold tracking-[0.28em] text-asa-500">{eyebrow}</p>}
-          <h2 className="flex items-center gap-1.5 font-mincho text-[17px] font-bold text-slate-900">
-            {icon}
-            {title}
-            {count != null && <span className="num text-xs font-semibold text-slate-400">{count}</span>}
-          </h2>
-          {note && <p className="mt-0.5 text-xs text-slate-500">{note}</p>}
-        </div>
+        <SectionTitle title={title} eyebrow={eyebrow} icon={icon} count={count} note={note} className="min-w-0 flex-1" />
         <div className="hidden shrink-0 gap-1 sm:flex">
           <button onClick={() => move(-1)} aria-label="前へ" className="rounded-full border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-slate-50">
             <ChevronLeft className="h-4 w-4" aria-hidden />

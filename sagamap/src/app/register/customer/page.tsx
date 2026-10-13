@@ -74,7 +74,7 @@ function CustomerRegisterForm() {
             会員登録<span className="text-lg">（無料）</span>
           </>
         }
-        lead="クーポン検索・AI おすすめ・徒歩ルート案内が使えるようになります。"
+        lead="近くのクーポン・お店さがし・道順の案内が、すべて無料で使えます。"
       />
       <div className="relative -mt-4 px-4 sm:px-0">
       {referrer && (
@@ -116,7 +116,7 @@ function CustomerRegisterForm() {
           <Link href="/privacy" className="underline">プライバシーポリシー</Link>に同意したものとみなします。
         </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button disabled={loading} className="btn-accent w-full rounded-full py-3 text-base">
+        <button disabled={loading} className="btn-accent btn-lg">
           {loading ? "登録中…" : "無料で登録する"}
         </button>
         {googleAvailable && (
