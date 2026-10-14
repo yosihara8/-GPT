@@ -185,6 +185,7 @@ function Referrals() {
 
       <section className="card">
         <h2 className="font-bold">紹介で登録したお客さま</h2>
+        <p className="mt-1 text-xs text-slate-500">お客さまの個人情報を守るため、メールアドレスは一部を伏せて表示しています。</p>
         {data.customers.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">まだ紹介はありません。</p>
         ) : (

@@ -463,13 +463,21 @@ function PaidPlanConfirm({ price }: { price: number }) {
         >
           利用規約
         </Link>
-        と
+        ・
         <Link
           href="/tokushoho"
           target="_blank"
           className="mx-0.5 font-bold text-saga-700 underline"
         >
           特定商取引法に基づく表記
+        </Link>
+        ・
+        <Link
+          href="/privacy"
+          target="_blank"
+          className="mx-0.5 font-bold text-saga-700 underline"
+        >
+          プライバシーポリシー
         </Link>
         をご確認ください。申し込みボタンを押すと、Stripe
         のお支払い画面に移ります。

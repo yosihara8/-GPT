@@ -24,12 +24,14 @@ export async function GET() {
        FROM businesses b WHERE b.owner_id = $1 ORDER BY b.id`,
     [ownerId],
   );
-  const customers = await query(
+  // 紹介した事業者には、メールアドレスの一部を伏せて見せる（個人情報を第三者に渡さない）
+  const rows = await query<{ email: string; registered_at: string; business_name: string }>(
     `SELECT c.email, r.created_at AS registered_at, b.name AS business_name
        FROM referrals r JOIN customers c ON c.id = r.customer_id JOIN businesses b ON b.id = r.business_id
       WHERE b.owner_id = $1 ORDER BY r.created_at DESC LIMIT 200`,
     [ownerId],
   );
+  const customers = rows.map((r) => ({ ...r, email: maskEmail(r.email) }));
   const period = await queryOne<{ start: string; end: string; next: string }>(
     `SELECT to_char(m, 'FMMM"月"FMDD"日"') AS start,
             to_char(m + interval '1 month' - interval '1 day', 'FMMM"月"FMDD"日"') AS end,
@@ -57,4 +59,11 @@ export async function POST(req: Request) {
   const biz = await queryOne("SELECT id, name FROM businesses WHERE id = $1", [Number(bizId)]);
   if (!biz) return NextResponse.json({ error: "紹介元の店舗が見つかりません" }, { status: 404 });
   return NextResponse.json({ business: biz });
+}
+
+/** taro.yamada@gmail.com → ta*******@gmail.com */
+function maskEmail(email: string) {
+  const [local, domain] = email.split("@");
+  if (!domain) return "***";
+  return `${local.slice(0, 2)}${"*".repeat(Math.max(3, local.length - 2))}@${domain}`;
 }
