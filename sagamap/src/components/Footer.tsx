@@ -13,6 +13,7 @@ export default function Footer() {
           <Link href="/terms" className="hover:text-slate-900">利用規約</Link>
           <Link href="/privacy" className="hover:text-slate-900">プライバシーポリシー</Link>
           <Link href="/tokushoho" className="hover:text-slate-900">特定商取引法に基づく表記</Link>
+          <Link href="/contact" className="hover:text-slate-900">お問い合わせ</Link>
           <Link href="/register/business" className="hover:text-slate-900">お店の方へ</Link>
         </nav>
       </div>

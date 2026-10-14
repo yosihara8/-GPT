@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, CreditCard, FileBarChart } from "lucide-react";
+import { ChevronRight, CreditCard, FileBarChart, Mail } from "lucide-react";
 import BizPage from "@/components/business/BizPage";
 import { useOwnerData } from "@/components/business/useOwnerData";
 import EmailChangeForm from "@/components/EmailChangeForm";
@@ -42,6 +42,15 @@ export default function BusinessSettingsPage() {
         <span className="min-w-0 flex-1">
           <span className="block font-bold">月次レポートのメール</span>
           <span className="block text-xs text-slate-500">毎月 1 日に先月のレポートが届きます（受け取りの設定）</span>
+        </span>
+        <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
+      </Link>
+
+      <Link href="/dashboard/business/contact" className="card flex items-center gap-3 hover:bg-slate-50">
+        <Mail className="h-5 w-5 shrink-0 text-saga-600" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="block font-bold">お問い合わせ</span>
+          <span className="block text-xs text-slate-500">掲載・クーポン・広告・プラン・不具合のご報告など</span>
         </span>
         <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
       </Link>

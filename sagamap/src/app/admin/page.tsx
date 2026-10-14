@@ -4,6 +4,7 @@ import PasswordInput from "@/components/PasswordInput";
 import { useCallback, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { api } from "@/lib/fetcher";
+import { INQUIRY_ROLE, INQUIRY_STATUS, type InquiryStatus } from "@/lib/inquiry";
 import EmailChangeForm from "@/components/EmailChangeForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { QRCodeSVG } from "qrcode.react";
@@ -24,6 +25,7 @@ type Row = Record<string, string | number | boolean | null>;
 
 const TABS = [
   { key: "overview", label: "概要" },
+  { key: "inquiries", label: "お問い合わせ" },
   { key: "owners", label: "事業者" },
   { key: "stores", label: "店舗" },
   { key: "customers", label: "顧客" },
@@ -69,7 +71,8 @@ export default function AdminPage() {
       {tab === "invites" && <Invites />}
       {tab === "events" && <EventsAdmin />}
       {tab === "reviews" && <Reviews />}
-      {tab !== "overview" && tab !== "admins" && tab !== "invites" && tab !== "events" && tab !== "reviews" && <List key={tab} type={tab} />}
+      {tab === "inquiries" && <Inquiries />}
+      {tab !== "overview" && tab !== "admins" && tab !== "invites" && tab !== "events" && tab !== "reviews" && tab !== "inquiries" && <List key={tab} type={tab} />}
     </main>
   );
 }
@@ -550,6 +553,123 @@ function Reviews() {
             </button>
           </div>
         </section>
+      ))}
+    </div>
+  );
+}
+
+type Inquiry = {
+  id: number;
+  role: keyof typeof INQUIRY_ROLE;
+  name: string;
+  email: string;
+  category: string;
+  body: string;
+  status: InquiryStatus;
+  admin_note: string;
+  created_at: string;
+};
+
+/** お問い合わせの一覧（対応状況・メモ・Excel 書き出し） */
+function Inquiries() {
+  const [filter, setFilter] = useState<InquiryStatus | "all">("all");
+  const [rows, setRows] = useState<Inquiry[] | null>(null);
+  const [counts, setCounts] = useState<Record<InquiryStatus, number> | null>(null);
+  // 開いているお問い合わせ（最初は未対応のものを開く。状況を変えても閉じない）
+  const [openIds, setOpenIds] = useState<Set<number> | null>(null);
+  const load = useCallback(
+    () =>
+      api<{ inquiries: Inquiry[]; counts: Record<InquiryStatus, number> }>(`/api/admin/inquiries${filter === "all" ? "" : `?status=${filter}`}`).then((d) => {
+        setRows(d.inquiries);
+        setCounts(d.counts);
+        setOpenIds((cur) => cur ?? new Set(d.inquiries.filter((q) => q.status === "new").map((q) => q.id)));
+      }),
+    [filter],
+  );
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function update(id: number, patch: { status?: InquiryStatus; adminNote?: string }) {
+    await api("/api/admin/inquiries", { method: "PATCH", body: JSON.stringify({ id, ...patch }) });
+    load();
+  }
+
+  const total = counts ? counts.new + counts.in_progress + counts.done : 0;
+  const chips: [InquiryStatus | "all", string, number][] = [
+    ["all", "すべて", total],
+    ["new", "未対応", counts?.new ?? 0],
+    ["in_progress", "対応中", counts?.in_progress ?? 0],
+    ["done", "対応済み", counts?.done ?? 0],
+  ];
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        {chips.map(([k, label, n]) => (
+          <button key={k} onClick={() => setFilter(k)} aria-pressed={filter === k} className={filter === k ? "chip-on" : "chip-off"}>
+            {label} <span className="num">{n}</span>
+          </button>
+        ))}
+        <a href={`/api/admin/inquiries/export${filter === "all" ? "" : `?status=${filter}`}`} download className="btn-primary ml-auto">
+          Excel でダウンロード
+        </a>
+      </div>
+      <p className="text-xs text-slate-500">お客さま・事業主の「お問い合わせ」フォームから届いた内容です。新しいお問い合わせは運営者のメールにも届きます。</p>
+      {rows === null && <p className="text-sm text-slate-500">読み込み中…</p>}
+      {rows?.length === 0 && <p className="text-sm text-slate-500">お問い合わせはありません。</p>}
+      {rows?.map((q) => (
+        <details
+          key={q.id}
+          className="card group"
+          open={openIds?.has(q.id) ?? false}
+          onToggle={(e) => {
+            const isOpen = (e.currentTarget as HTMLDetailsElement).open;
+            setOpenIds((cur) => {
+              const next = new Set(cur ?? []);
+              if (isOpen) next.add(q.id);
+              else next.delete(q.id);
+              return next;
+            });
+          }}
+        >
+          <summary className="flex cursor-pointer list-none flex-wrap items-center gap-2 [&::-webkit-details-marker]:hidden">
+            <span className={`rounded-md px-2 py-0.5 text-xs font-bold ${q.status === "new" ? "bg-coral-50 text-coral-700" : q.status === "in_progress" ? "bg-sun-100 text-sun-500" : "bg-tea-50 text-tea-700"}`}>
+              {INQUIRY_STATUS[q.status]}
+            </span>
+            <span className="num text-xs text-slate-500">#{q.id}</span>
+            <span className="font-bold">{q.category}</span>
+            <span className="text-sm text-slate-600">
+              {q.name}（{INQUIRY_ROLE[q.role]}）
+            </span>
+            <span className="ml-auto text-xs text-slate-500">{new Date(q.created_at).toLocaleString("ja-JP")}</span>
+          </summary>
+          <div className="mt-3 space-y-3 border-t border-slate-100 pt-3 text-sm">
+            <p className="whitespace-pre-wrap rounded-xl bg-slate-50 p-3">{q.body}</p>
+            <p>
+              返信先：
+              <a className="font-bold text-saga-700 underline" href={`mailto:${q.email}?subject=${encodeURIComponent(`【佐賀観光マップ】お問い合わせ #${q.id} について`)}`}>
+                {q.email}
+              </a>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(INQUIRY_STATUS) as InquiryStatus[]).map((st) => (
+                <button key={st} onClick={() => update(q.id, { status: st })} disabled={q.status === st} className={q.status === st ? "chip-on" : "chip-off"}>
+                  {INQUIRY_STATUS[st]}にする
+                </button>
+              ))}
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                update(q.id, { adminNote: String(new FormData(e.currentTarget).get("note") ?? "") });
+              }}
+              className="flex gap-2"
+            >
+              <input name="note" defaultValue={q.admin_note} maxLength={2000} placeholder="対応メモ（Excel にも出ます）" className="input" aria-label="対応メモ" />
+              <button className="btn-outline shrink-0">保存</button>
+            </form>
+          </div>
+        </details>
       ))}
     </div>
   );

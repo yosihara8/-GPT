@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Bell, ChevronRight, Clock, Heart, Map as MapIcon, Route as RouteIcon, Settings } from "lucide-react";
+import { Bell, ChevronRight, Clock, Heart, Mail, Map as MapIcon, Route as RouteIcon, Settings } from "lucide-react";
 import { api } from "@/lib/fetcher";
 import Carousel from "@/components/customer/Carousel";
 import SectionTitle from "@/components/ui/SectionTitle";
@@ -249,6 +249,14 @@ function MyPageInner() {
         <NotifySetting />
         <EmailChangeForm />
         <PasswordChangeForm />
+        <Link href="/contact" className="card flex items-center gap-3 hover:bg-slate-50">
+          <Mail className="h-5 w-5 shrink-0 text-saga-600" aria-hidden />
+          <span className="min-w-0 flex-1">
+            <span className="block font-bold">お問い合わせ</span>
+            <span className="block text-xs text-slate-500">使い方・クーポン・退会・個人情報のご請求など</span>
+          </span>
+          <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
+        </Link>
       </section>
     </main>
   );

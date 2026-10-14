@@ -133,6 +133,21 @@
 - 新しい外部サービス・保存する情報・自動削除の期間を増やしたら、このページも同時に直す。実装していない機能（AI 等）は書かない。
 - 紹介で登録したお客さまのメールは、事業者には一部を伏せて見せる（/api/referrals の maskEmail）。
 
+## お問い合わせ
+- フォーム：お客さま・未登録の方は `/contact`（フッター・マイページ「設定」から）、事業主は `/dashboard/business/contact`（「設定」から。事業主が /contact を開くとこちらへ転送）。種類は src/lib/inquiry.ts。
+- 送信は inquiries に保存し、運営者へ通知メール・送った方へ受付メール（受付番号）。1 時間に 5 回まで・見えない欄でいたずら防止・プライバシーポリシーへの同意が必須。
+- 管理画面「お問い合わせ」：未対応／対応中／対応済み・対応メモ・返信リンク・「Excel でダウンロード」（/api/admin/inquiries/export）。月次バックアップにも含める。
+
+## 自動保守（オーナー承認済み：毎朝、Claude が自動で点検・修正・公開）
+- アプリ：毎日の自動処理（cron daily, 0:10 JST）が直近 24 時間のエラーをまとめ、「【佐賀観光マップ】エラー報告 日付（N 件）」を運営者のメールへ送る（src/lib/error-report.ts。個人情報は伏せ字）。エラーがなければ送らない。
+- Claude の Routine（毎朝 6:47 JST）の手順:
+  1. Gmail で `from:noreply@saga-kanko-map.com subject:エラー報告 newer_than:2d` を読む（読むだけ。送信・削除はしない）。
+  2. 既定ブランチ（claude/zealous-fermi-7iQ0C）の最新コミットの Vercel のデプロイ状態（GitHub のコミットステータス）を確認。
+  3. `npm ci` → `npx tsc --noEmit`・`npx next lint`・`npx vitest run`・`npx next build`・`npm audit --omit=dev`（high 以上）。
+  4. 原因が分かり小さく直せるものだけ修正し、テストを追加。上の確認が全部通ったときだけ、開発ブランチ claude/sagamap-mvp-oddfol に push → `sagamap/` を既定ブランチに同期（本番に反映）。
+  5. 直せないもの・仕様の判断が要るもの・大きな変更（DB の構造・決済・認証・個人情報の扱い）は公開せず、内容と提案をまとめて報告する。何もなければ何もしない。
+- このファイルの仕様（オーナー確認済み）を崩す修正はしない。テストを消す・飛ばすことで通さない。秘密の値をコードやコミットに書かない。
+
 ## 変更時の注意
 - 自動処理（毎週金曜メール、毎晩の掲載チェック、毎月のバックアップ・帳簿・紹介割引）・決済・DB の設定を壊さない。
 - 変更後は `npx tsc --noEmit`、`npx next lint`、`npx vitest run`、`npx next build` を通す。
