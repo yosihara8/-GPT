@@ -34,6 +34,8 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // next/image は使っていないため、画像の最適化（/_next/image）を止める（Next 14 の DoS の脆弱性の入口を閉じる）
+  images: { unoptimized: true },
   ...(appUrl ? { env: { NEXT_PUBLIC_APP_URL: appUrl } } : {}),
   async headers() {
     return [
