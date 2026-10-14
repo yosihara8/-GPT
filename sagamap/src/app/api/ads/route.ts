@@ -31,7 +31,18 @@ export async function GET() {
               (a.image IS NOT NULL) AS has_image, b.name AS business_name,
               (SELECT count(*) FROM ad_events e WHERE e.ad_id = a.id AND e.kind = 'view')::int AS view_count,
               (SELECT count(*) FROM ad_events e WHERE e.ad_id = a.id AND e.kind = 'click')::int AS click_count,
-              (SELECT count(DISTINCT e.customer_id) FROM ad_events e WHERE e.ad_id = a.id)::int AS viewer_count
+              -- 見た人（同じ人は 1 人。タップした人も含む）・タップした人
+              (SELECT count(DISTINCT e.customer_id) FROM ad_events e WHERE e.ad_id = a.id)::int AS viewer_count,
+              (SELECT count(DISTINCT e.customer_id) FROM ad_events e WHERE e.ad_id = a.id AND e.kind = 'click')::int AS tapper_count,
+              -- 広告をタップしてから 14 日以内に、道案内・電話・クーポン利用をした人
+              (SELECT count(DISTINCT e.customer_id) FROM ad_events e
+                WHERE e.ad_id = a.id AND e.kind = 'click' AND e.customer_id IS NOT NULL
+                  AND (EXISTS (SELECT 1 FROM shop_events s
+                                WHERE s.business_id = a.business_id AND s.customer_id = e.customer_id AND s.kind IN ('route', 'call')
+                                  AND s.created_at BETWEEN e.created_at AND e.created_at + interval '14 days')
+                    OR EXISTS (SELECT 1 FROM usage_history u
+                                WHERE u.business_id = a.business_id AND u.customer_id = e.customer_id AND u.coupon_used
+                                  AND u.viewed_at BETWEEN e.created_at AND e.created_at + interval '14 days')))::int AS visitor_count
          FROM ads a JOIN businesses b ON b.id = a.business_id
         WHERE b.owner_id = $1 ORDER BY a.created_at DESC`,
       [user.id],
