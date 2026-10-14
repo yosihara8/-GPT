@@ -145,14 +145,16 @@
 - Claude の Routine（毎朝 6:47 JST）の手順:
   1. Gmail で `from:noreply@saga-kanko-map.com subject:エラー報告 newer_than:2d` を読む（読むだけ。送信・削除はしない）。
   2. 既定ブランチ（claude/zealous-fermi-7iQ0C）の最新コミットの Vercel のデプロイ状態（GitHub のコミットステータス）を確認。
-  3. `npm ci` → `npx tsc --noEmit`・`npx next lint`・`npx vitest run`・`npx next build`・`npm audit --omit=dev`（high 以上）。
+  3. `npm ci` → `npx tsc --noEmit`・`npm run lint`・`npx vitest run`・`npx next build`・`npm audit --omit=dev`（high 以上）。
   4. 原因が分かり小さく直せるものだけ修正し、テストを追加。上の確認が全部通ったときだけ、開発ブランチ claude/sagamap-mvp-oddfol に push → `sagamap/` を既定ブランチに同期（本番に反映）。
   5. 直せないもの・仕様の判断が要るもの・大きな変更（DB の構造・決済・認証・個人情報の扱い）は公開せず、内容と提案をまとめて報告する。何もなければ何もしない。
 - このファイルの仕様（オーナー確認済み）を崩す修正はしない。テストを消す・飛ばすことで通さない。秘密の値をコードやコミットに書かない。
 
 ## 変更時の注意
 - 自動処理（毎週金曜メール、毎晩の掲載チェック、毎月のバックアップ・帳簿・紹介割引）・決済・DB の設定を壊さない。
-- 変更後は `npx tsc --noEmit`、`npx next lint`、`npx vitest run`、`npx next build` を通す。
+- 変更後は `npx tsc --noEmit`、`npm run lint`（ESLint。Next 16 で `next lint` は廃止）、`npx vitest run`、`npx next build` を通す。
+- Next.js 16（React 18 のまま）。params・searchParams・cookies() は await する。middleware.ts は 16 でも動く（proxy への改名は今後）。eslint.config.mjs は React Compiler 向けの規則を止めている（使っていないため）。
+- 問題が出たら docs/ROLLBACK.md の手順で元に戻せる（Vercel の Instant Rollback、またはコミットを指定してコードごと戻す）。
 - 反映は開発ブランチに push し、`sagamap/` を既定ブランチ（Vercel が本番に使う）にも同期する。
 
 ## 今後の予定（利用者が増えてから導入）

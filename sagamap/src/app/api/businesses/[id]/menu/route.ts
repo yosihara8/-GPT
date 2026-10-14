@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 const MAX_ITEMS = 50;
 
 /** メニュー・商品の一覧（だれでも見られる） */
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const items = await query(
     `SELECT id, name, price, description, (image IS NOT NULL) AS has_image FROM menu_items WHERE business_id = $1 ORDER BY sort, id LIMIT ${MAX_ITEMS}`,
     [Number(params.id)],
@@ -27,7 +28,8 @@ const schema = z.object({
 });
 
 /** メニュー・商品を追加（事業主。無料プランでも使える） */
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const id = Number(params.id);
@@ -55,7 +57,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 }
 
 /** メニュー・商品を削除: DELETE /api/businesses/[id]/menu?itemId= */
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const id = Number(params.id);

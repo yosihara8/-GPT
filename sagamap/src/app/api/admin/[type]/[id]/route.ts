@@ -8,7 +8,7 @@ import { logServerError } from "@/lib/server-error";
 
 export const dynamic = "force-dynamic";
 
-type Ctx = { params: { type: string; id: string } };
+type Ctx = { params: Promise<{ type: string; id: string }> };
 
 const DELETE_TARGETS: Record<string, { table: string; label: string; nameSql: string }> = {
   owners: { table: "business_owners", label: "事業者", nameSql: "email" },
@@ -17,7 +17,8 @@ const DELETE_TARGETS: Record<string, { table: string; label: string; nameSql: st
 };
 
 /** 削除（迷惑な登録の削除など）。事業者を削除するとその店舗・クーポン・広告も削除される */
-export async function DELETE(_req: Request, { params }: Ctx) {
+export async function DELETE(_req: Request, props: Ctx) {
+  const params = await props.params;
   const auth = await requireApiUser("admin");
   if (!auth.ok) return auth.response;
   const target = DELETE_TARGETS[params.type];
@@ -36,7 +37,8 @@ export async function DELETE(_req: Request, { params }: Ctx) {
 const planSchema = z.object({ plan: z.enum(["free", "premium", "special"]) });
 
 /** 事業者のプランを手動で変更（Stripe を使わない請求書払いなどの場合） */
-export async function PATCH(req: Request, { params }: Ctx) {
+export async function PATCH(req: Request, props: Ctx) {
+  const params = await props.params;
   const auth = await requireApiUser("admin");
   if (!auth.ok) return auth.response;
   if (params.type !== "owners") return NextResponse.json({ error: "変更できない対象です" }, { status: 400 });

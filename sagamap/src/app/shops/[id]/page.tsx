@@ -43,13 +43,15 @@ async function getShop(id: number) {
   );
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const shop = await getShop(Number(params.id));
   return shop ? { title: shop.name, description: shop.service_description } : { title: "店舗が見つかりません" };
 }
 
 /** 店舗情報ページ（会員登録なしで見られる） */
-export default async function ShopPage({ params }: { params: { id: string } }) {
+export default async function ShopPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const shop = await getShop(Number(params.id));
   if (!shop) notFound();
   const user = await getSessionUser();

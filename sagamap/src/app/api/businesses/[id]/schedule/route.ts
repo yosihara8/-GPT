@@ -7,7 +7,7 @@ import { addDays, isTime, jstParts, summarizeWeekly, type Weekly } from "@/lib/s
 
 export const dynamic = "force-dynamic";
 
-type Ctx = { params: { id: string } };
+type Ctx = { params: Promise<{ id: string }> };
 
 const range = z.tuple([z.string().refine(isTime, "時刻の形式が正しくありません"), z.string().refine(isTime, "時刻の形式が正しくありません")]);
 const ranges = z.array(range).max(2, "営業時間は 1 日 2 つまでです");
@@ -38,7 +38,8 @@ async function guard(id: number) {
 }
 
 /** 曜日ごとの営業時間（定休日）を保存。お客さまの「営業中」表示・カレンダーに使う */
-export async function PUT(req: Request, { params }: Ctx) {
+export async function PUT(req: Request, props: Ctx) {
+  const params = await props.params;
   const id = Number(params.id);
   const denied = await guard(id);
   if (denied) return denied;
@@ -54,7 +55,8 @@ export async function PUT(req: Request, { params }: Ctx) {
 }
 
 /** 臨時休業・特別営業の日を登録（同じ日は上書き） */
-export async function POST(req: Request, { params }: Ctx) {
+export async function POST(req: Request, props: Ctx) {
+  const params = await props.params;
   const id = Number(params.id);
   const denied = await guard(id);
   if (denied) return denied;
@@ -70,7 +72,8 @@ export async function POST(req: Request, { params }: Ctx) {
 }
 
 /** 臨時休業・特別営業を取り消す（通常どおりに戻す） */
-export async function DELETE(req: Request, { params }: Ctx) {
+export async function DELETE(req: Request, props: Ctx) {
+  const params = await props.params;
   const id = Number(params.id);
   const denied = await guard(id);
   if (denied) return denied;

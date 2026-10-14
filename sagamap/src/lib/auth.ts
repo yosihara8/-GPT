@@ -105,7 +105,7 @@ export const authOptions: NextAuthOptions = {
         );
       }
       if (inserted) {
-        const bizId = Number(cookies().get("sagamap_ref")?.value);
+        const bizId = Number((await cookies()).get("sagamap_ref")?.value);
         if (bizId) await recordReferral(inserted.id, bizId);
       }
       return true;

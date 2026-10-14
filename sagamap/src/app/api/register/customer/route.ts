@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   }
 
   // 紹介リンク（/ref?biz_id=）経由なら紹介として記録
-  const refBizId = d.ref ?? Number(cookies().get("sagamap_ref")?.value);
+  const refBizId = d.ref ?? Number((await cookies()).get("sagamap_ref")?.value);
   if (customer && refBizId) await recordReferral(customer.id, refBizId);
   if (customer) {
     await sendVerificationMail("customer", customer.id, d.email, d.name).catch((e) =>

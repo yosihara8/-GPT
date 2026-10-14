@@ -5,7 +5,8 @@ import { requireApiUser } from "@/lib/session";
 export const dynamic = "force-dynamic";
 
 /** 一覧: GET /api/admin/owners|stores|customers|logs?q=検索語 */
-export async function GET(req: NextRequest, { params }: { params: { type: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ type: string }> }) {
+  const params = await props.params;
   const auth = await requireApiUser("admin");
   if (!auth.ok) return auth.response;
   if (!ADMIN_LIST_TYPES.includes(params.type as AdminListType)) {

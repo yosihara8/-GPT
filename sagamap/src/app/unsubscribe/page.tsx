@@ -17,7 +17,8 @@ async function unsubscribe(formData: FormData) {
  * メール配信停止: /unsubscribe?token=...
  * メールソフトのリンク先読みで誤って停止されないよう、ボタン押下（POST）で確定する。
  */
-export default function UnsubscribePage({ searchParams }: { searchParams: { token?: string; done?: string } }) {
+export default async function UnsubscribePage(props: { searchParams: Promise<{ token?: string; done?: string }> }) {
+  const searchParams = await props.searchParams;
   if (searchParams.done !== undefined) {
     const ok = searchParams.done === "1";
     return (

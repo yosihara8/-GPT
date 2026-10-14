@@ -260,7 +260,6 @@ function Completed({ done }: { done: Done }) {
       </div>
       <div className="mx-auto flex max-w-sm items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left">
         {done.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={done.imageUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
         )}
         <span className="shrink-0 rounded border border-slate-300 px-1.5 py-px text-[10px] font-semibold tracking-wide text-slate-500">PR</span>

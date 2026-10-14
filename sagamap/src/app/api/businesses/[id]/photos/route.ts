@@ -9,10 +9,11 @@ import { PHOTO_KINDS, PHOTO_LIMIT } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-type Ctx = { params: { id: string } };
+type Ctx = { params: Promise<{ id: string }> };
 
 /** お店の写真の一覧（だれでも見られる） */
-export async function GET(_req: Request, { params }: Ctx) {
+export async function GET(_req: Request, props: Ctx) {
+  const params = await props.params;
   const photos = await query("SELECT id, kind, caption FROM business_photos WHERE business_id = $1 ORDER BY sort, id", [Number(params.id)]);
   return NextResponse.json({ photos });
 }
@@ -31,7 +32,8 @@ const addSchema = z.object({
 });
 
 /** 写真を追加（無料プラン 5 枚・有料プラン 20 枚まで） */
-export async function POST(req: Request, { params }: Ctx) {
+export async function POST(req: Request, props: Ctx) {
+  const params = await props.params;
   const id = Number(params.id);
   const g = await guard(id);
   if (g.denied) return g.denied;
@@ -72,7 +74,8 @@ const patchSchema = z.object({
 });
 
 /** 並べ替え・種類や説明の変更 */
-export async function PATCH(req: Request, { params }: Ctx) {
+export async function PATCH(req: Request, props: Ctx) {
+  const params = await props.params;
   const id = Number(params.id);
   const g = await guard(id);
   if (g.denied) return g.denied;
@@ -102,7 +105,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
 }
 
 /** 写真を削除: DELETE /api/businesses/[id]/photos?photoId= */
-export async function DELETE(req: Request, { params }: Ctx) {
+export async function DELETE(req: Request, props: Ctx) {
+  const params = await props.params;
   const id = Number(params.id);
   const g = await guard(id);
   if (g.denied) return g.denied;

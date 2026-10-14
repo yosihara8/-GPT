@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { CalendarDays, ExternalLink, MapPin, Share2, Ticket } from "lucide-react";
@@ -32,7 +32,8 @@ type EventCoupon = CouponValue & {
 };
 
 /** イベント特集のページ（だれでも見られる。クーポンを使うときに会員登録） */
-export default function EventPage({ params }: { params: { slug: string } }) {
+export default function EventPage(props: { params: Promise<{ slug: string }> }) {
+  const params = use(props.params);
   const router = useRouter();
   const { data: session } = useSession();
   const [data, setData] = useState<{ event: SagaEvent; coupons: EventCoupon[] } | null | "missing">(null);

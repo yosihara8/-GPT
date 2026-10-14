@@ -21,7 +21,8 @@ const schema = z.object({
  * 出稿した広告の修正（事業主）。月 2 回の出稿回数は使わない。掲載期間は変わらない。
  * 修正後も自動チェックを行い、要確認なら運営者の確認待ちに戻す。
  */
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const body = await parseBody(req, schema);

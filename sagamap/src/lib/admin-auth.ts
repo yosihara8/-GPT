@@ -8,7 +8,7 @@ export type AdminUser = { id: number; name: string; email: string; role: "admin"
 
 /** いまの運営者（管理画面の Cookie を確かめ、パスワード変更などで無効になっていないかも DB で確認） */
 export async function getAdmin(): Promise<AdminUser | null> {
-  const claims = await verifyAdmin(cookies().get(ADMIN_COOKIE)?.value, AUTH_SECRET ?? "");
+  const claims = await verifyAdmin((await cookies()).get(ADMIN_COOKIE)?.value, AUTH_SECRET ?? "");
   if (!claims) return null;
   const row = await queryOne<{ id: number; name: string; email: string; session_version: number }>(
     "SELECT id, name, email, session_version FROM admins WHERE id = $1",

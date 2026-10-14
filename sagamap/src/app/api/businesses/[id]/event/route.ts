@@ -12,7 +12,8 @@ const schema = z.object({ kind: z.enum(["route", "call", "save", "share", "coupo
  * お客さまの行動を記録する（事業主の統計用）。
  * 会員のお客さまだけを数え、同じ人の同じ行動は 1 時間に 1 回まで（事業主・運営者は数えない）
  */
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const body = await parseBody(req, schema);
   if (!body.ok) return body.response;
   const user = await getSessionUser();

@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic";
  *  - 先着の人数に達したら使えない
  *  - 「初めての方限定」は、そのお店のクーポンを使ったことがない人だけ
  */
-export async function POST(_req: Request, { params }: { params: { id: string } }) {
+export async function POST(_req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireApiUser("customer");
   if (!auth.ok) return auth.response;
   const couponId = Number(params.id);
