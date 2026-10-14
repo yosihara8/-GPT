@@ -51,13 +51,24 @@ const DISCLOSE_ON_REQUEST = "請求があった場合には、遅滞なく電子
  */
 export const OPERATOR_ADDRESS = process.env.OPERATOR_ADDRESS?.trim() || null;
 
+/**
+ * 特定商取引法に基づく表記の事業者情報（Vercel の環境変数で設定。個人情報をコードに書かない）
+ *  - OPERATOR_LEGAL_NAME: 戸籍上の氏名（個人事業主）または登記上の商号・名称。屋号だけでは足りない
+ *  - OPERATOR_REPRESENTATIVE: 運営統括責任者（未設定なら OPERATOR_LEGAL_NAME）
+ *  - OPERATOR_PHONE: 実際に連絡が取れる電話番号
+ */
+export const OPERATOR_LEGAL_NAME = process.env.OPERATOR_LEGAL_NAME?.trim() || null;
+export const OPERATOR_PHONE = process.env.OPERATOR_PHONE?.trim() || null;
+const OPERATOR_REPRESENTATIVE = process.env.OPERATOR_REPRESENTATIVE?.trim() || OPERATOR_LEGAL_NAME;
+
 /** 運営者情報（利用規約・特定商取引法に基づく表記で使用） */
 export const OPERATOR = {
   serviceName: "佐賀観光マップ",
   name: "JapanAI研修",
-  representative: DISCLOSE_ON_REQUEST,
+  legalName: OPERATOR_LEGAL_NAME,
+  representative: OPERATOR_REPRESENTATIVE ?? DISCLOSE_ON_REQUEST,
   address: OPERATOR_ADDRESS ?? DISCLOSE_ON_REQUEST,
-  phone: DISCLOSE_ON_REQUEST,
+  phone: OPERATOR_PHONE ?? DISCLOSE_ON_REQUEST,
   email: "ai.prompt.biz@gmail.com",
 };
 

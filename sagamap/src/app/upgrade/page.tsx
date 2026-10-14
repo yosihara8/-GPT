@@ -10,7 +10,9 @@ import {
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AlertTriangle, Check } from "lucide-react";
+import Link from "next/link";
 import { api } from "@/lib/fetcher";
+import { PAID_PLAN_TERMS } from "@/lib/contract-terms";
 import { PRICE_DISCOUNT, PRICE_STANDARD, REFERRAL_GOAL } from "@/lib/config";
 
 type PlanKey = "free" | "premium" | "special";
@@ -231,6 +233,9 @@ function Upgrade() {
             })}
           </div>
 
+          {special && selected === "premium" && (
+            <PaidPlanConfirm price={price} />
+          )}
           {leavingSpecial && (
             <section
               ref={warnRef}
@@ -314,6 +319,9 @@ function Upgrade() {
             )}
           </section>
 
+          {!special && owner?.plan === "free" && selected === "premium" && (
+            <PaidPlanConfirm price={price} />
+          )}
           {!special && owner && (
             <Action
               owner={owner}
@@ -418,5 +426,54 @@ function Action({
             : "お支払い方法の変更（Stripe）")}
       </button>
     </div>
+  );
+}
+
+/** 申し込み直前の最終確認（特定商取引法：料金・支払時期・提供時期・自動更新・解約・返金を申し込みボタンの前に表示） */
+function PaidPlanConfirm({ price }: { price: number }) {
+  const T = PAID_PLAN_TERMS;
+  const rows: [string, string][] = [
+    ["料金", `月額 ${price.toLocaleString()} 円（税込）。${T.extraCost}`],
+    ["お支払い", `${T.payment}。${T.paymentTiming}`],
+    ["ご利用開始", T.delivery],
+    ["自動更新", `${T.renewal}。${T.cancelDeadline}`],
+    ["解約", `${T.cancelHow}。${T.afterCancel}`],
+    ["返金", T.refund],
+  ];
+  return (
+    <section
+      aria-label="お申し込み内容の確認"
+      className="card space-y-2 border-saga-600/40"
+    >
+      <h2 className="font-bold">お申し込み内容の確認</h2>
+      <dl className="divide-y divide-slate-100 text-xs leading-5">
+        {rows.map(([k, v]) => (
+          <div key={k} className="grid grid-cols-[4.5rem_1fr] gap-2 py-2">
+            <dt className="font-bold text-slate-700">{k}</dt>
+            <dd className="text-slate-600">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="text-xs text-slate-500">
+        お申し込みの前に
+        <Link
+          href="/terms"
+          target="_blank"
+          className="mx-0.5 font-bold text-saga-700 underline"
+        >
+          利用規約
+        </Link>
+        と
+        <Link
+          href="/tokushoho"
+          target="_blank"
+          className="mx-0.5 font-bold text-saga-700 underline"
+        >
+          特定商取引法に基づく表記
+        </Link>
+        をご確認ください。申し込みボタンを押すと、Stripe
+        のお支払い画面に移ります。
+      </p>
+    </section>
   );
 }
