@@ -392,3 +392,12 @@ CREATE INDEX IF NOT EXISTS coupons_event_idx ON coupons (event_id) WHERE event_i
 
 -- 事業主への月 1 回のレポートメール（ダッシュボードで止められる）
 ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS report_enabled BOOLEAN NOT NULL DEFAULT true;
+
+-- 特別招待リンクは人数無制限（max_uses が NULL）・3 日間有効
+ALTER TABLE invite_codes ALTER COLUMN max_uses DROP NOT NULL;
+ALTER TABLE invite_codes DROP CONSTRAINT IF EXISTS invite_codes_max_uses_check;
+DO $$ BEGIN
+  ALTER TABLE invite_codes ADD CONSTRAINT invite_codes_max_uses_check CHECK (max_uses IS NULL OR max_uses > 0);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+-- 特別招待プランをやめた日（一度やめると戻れない）
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS special_ended_at TIMESTAMPTZ;

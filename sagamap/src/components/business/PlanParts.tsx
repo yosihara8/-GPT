@@ -13,6 +13,13 @@ export const PREMIUM_FEATURES = [
   "複数店舗の登録",
 ];
 
+export const SPECIAL_FEATURES = [
+  "有料プランのすべての機能（クーポン・広告・写真 20 枚・連携ボタン・複数店舗）",
+  "お支払いは不要（月額 0 円）",
+  "期限なし。ずっと使えます",
+  "ほかのプランに変更すると、特別招待プランには戻れません",
+];
+
 export function PlanCard(props: { current: boolean; title: string; price: string; note?: string; features: string[]; tone: "tea" | "coral" }) {
   return (
     <div className={`card relative ${props.current ? "border-saga-600 ring-2 ring-saga-600" : props.tone === "coral" ? "ring-1 ring-asa-500/40" : ""}`}>

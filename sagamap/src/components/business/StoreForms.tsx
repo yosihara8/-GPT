@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Req } from "@/components/FormMarks";
 import { api } from "@/lib/fetcher";
 import { AMENITIES, CATEGORIES, PRICE_OPTIONS } from "@/lib/config";
 import ImagePicker, { type PickedImage } from "@/components/ImagePicker";
@@ -323,6 +324,7 @@ export function Input({ label, className = "", ...props }: { label: string } & R
     <div className={className}>
       <label className="label" htmlFor={props.name}>
         {label}
+        {props.required && <Req />}
       </label>
       <input id={props.name} className="input" {...props} />
     </div>

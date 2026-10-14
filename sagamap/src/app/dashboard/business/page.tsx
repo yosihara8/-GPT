@@ -185,7 +185,7 @@ function BusinessDashboard() {
         <span className="min-w-0">
           <span className="block text-xs text-slate-500">現在のプラン</span>
           <span className="block truncate font-bold">
-            {premium ? (owner?.complimentary ? "有料プラン（特別招待）" : "有料プラン") : "無料プラン"}
+            {premium ? (owner?.complimentary ? "特別招待プラン" : "有料プラン") : "無料プラン"}
             <span className="ml-2 text-sm font-normal text-slate-500">
               {premium ? (owner?.complimentary ? "お支払い不要" : `月額 ${owner?.monthly_price.toLocaleString()} 円（税込）`) : "0 円"}
             </span>

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ChevronRight, CreditCard, FileBarChart } from "lucide-react";
 import BizPage from "@/components/business/BizPage";
 import { useOwnerData } from "@/components/business/useOwnerData";
-import { FREE_FEATURES, PREMIUM_FEATURES, PlanCard } from "@/components/business/PlanParts";
 import EmailChangeForm from "@/components/EmailChangeForm";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import { PRICE_STANDARD } from "@/lib/config";
@@ -24,21 +23,18 @@ export default function BusinessSettingsPage() {
             解約手続き済み・{new Date(owner.plan_ends_at).toLocaleDateString("ja-JP")}まで有料プランを使えます
           </p>
         )}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <PlanCard current={!premium} title="無料プラン" price="0 円" tone="tea" features={FREE_FEATURES} />
-          <PlanCard
-            current={premium}
-            title={owner?.complimentary ? "有料プラン（特別招待）" : "有料プラン"}
-            price={owner?.complimentary ? "0 円（特別招待）" : `月額 ${(premium ? (owner?.monthly_price ?? PRICE_STANDARD) : PRICE_STANDARD).toLocaleString()} 円（税込）`}
-            tone="coral"
-            features={PREMIUM_FEATURES}
-          />
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+          <span className="min-w-0">
+            <span className="block text-xs text-slate-500">ご利用中のプラン</span>
+            <span className="block font-bold">{owner ? (owner.complimentary ? "特別招待プラン" : premium ? "有料プラン" : "無料プラン") : "…"}</span>
+          </span>
+          <span className="num shrink-0 text-right font-bold">
+            {owner?.complimentary ? "0 円・期限なし" : premium ? `月額 ${(owner?.monthly_price ?? PRICE_STANDARD).toLocaleString()} 円` : "0 円"}
+          </span>
         </div>
-        {!owner?.complimentary && (
-          <Link href="/upgrade" className={premium ? "btn-outline w-full" : "btn-accent btn-lg"}>
-            {premium ? "お支払い方法の変更・解約" : "有料プランにする"}
-          </Link>
-        )}
+        <Link href="/upgrade" className={premium || owner?.complimentary ? "btn-outline btn-lg" : "btn-accent btn-lg"}>
+          {premium || owner?.complimentary ? "プランを変更する" : "プランを変更する（有料プランにする）"}
+        </Link>
       </section>
 
       <Link href="/dashboard/business/report#settings" className="card flex items-center gap-3 hover:bg-slate-50">

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const row = code
     ? await queryOne(
         `SELECT 1 FROM invite_codes
-          WHERE code = $1 AND is_active AND used_count < max_uses AND (expires_at IS NULL OR expires_at > now())`,
+          WHERE code = $1 AND is_active AND (max_uses IS NULL OR used_count < max_uses) AND (expires_at IS NULL OR expires_at > now())`,
         [code],
       )
     : null;

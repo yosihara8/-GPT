@@ -2,6 +2,7 @@
 
 import PasswordInput from "@/components/PasswordInput";
 import SagaHero from "@/components/SagaHero";
+import { Opt, RegisterNotice, Req } from "@/components/FormMarks";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { signIn } from "next-auth/react";
@@ -62,13 +63,13 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
           <p className="text-xs font-bold tracking-widest text-sun-100">SPECIAL INVITATION</p>
           <h1 className="mt-1 text-2xl font-bold">特別招待 事業主登録</h1>
           <p className="mt-2 text-sm font-bold leading-6">
-            運営からのご紹介で、<span className="rounded bg-white/25 px-1">有料プランのすべての機能を無料</span>でご利用いただけます。
+            運営からのご紹介で、<span className="rounded bg-white/25 px-1">有料プランのすべての機能を無料</span>で、期限なしでずっとご利用いただけます。
           </p>
           <ul className="mt-2 space-y-0.5 text-sm">
             <li>✓ クーポン発行　✓ 広告出稿（月 2 回）</li>
             <li>✓ SNS 連携　✓ 紹介プログラム　✓ 複数店舗の登録</li>
           </ul>
-          <p className="mt-2 text-xs opacity-90">※ お支払い情報の登録は不要です。</p>
+          <p className="mt-2 text-xs opacity-90">※ お支払い情報の登録は不要です。あとから無料プラン・有料プランに変えることもできます（変更後は特別招待プランに戻れません）。</p>
         </div>
       ) : (
         <SagaHero
@@ -84,9 +85,10 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
       )}
       <div className="relative -mt-4 px-4 sm:px-0">
       <form onSubmit={onSubmit} className="card space-y-4">
+        <RegisterNotice business />
         <Field label="店舗名" name="name" required />
         <div>
-          <label className="label" htmlFor="address">住所</label>
+          <label className="label" htmlFor="address">住所<Req /></label>
           <input
             id="address"
             name="address"
@@ -104,7 +106,7 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
           )}
         </div>
         <div>
-          <label className="label" htmlFor="category">業種</label>
+          <label className="label" htmlFor="category">業種<Req /></label>
           <select id="category" name="category" required className="input">
             {CATEGORIES.map((c) => (
               <option key={c}>{c}</option>
@@ -112,11 +114,11 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
           </select>
         </div>
         <div>
-          <label className="label" htmlFor="serviceDescription">サービス内容</label>
+          <label className="label" htmlFor="serviceDescription">サービス内容<Opt /></label>
           <textarea id="serviceDescription" name="serviceDescription" rows={3} className="input" />
         </div>
         <div>
-          <label className="label" htmlFor="priceLevel">価格帯</label>
+          <label className="label" htmlFor="priceLevel">価格帯<Opt /></label>
           <select id="priceLevel" name="priceLevel" defaultValue="2" className="input">
             {PRICE_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -134,7 +136,7 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
         </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button disabled={loading} className="btn-accent btn-lg">
-          {loading ? "登録中…" : inviteCode ? "特別プランで登録する" : "無料で登録する"}
+          {loading ? "登録中…" : inviteCode ? "特別招待プランで登録する" : "無料で登録する"}
         </button>
       </form>
       </div>
@@ -148,7 +150,10 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
 function Field({ label, name, ...props }: { label: string; name: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
-      <label className="label" htmlFor={name}>{label}</label>
+      <label className="label" htmlFor={name}>
+        {label}
+        {props.required ? <Req /> : <Opt />}
+      </label>
       {props.type === "password" ? <PasswordInput id={name} name={name} {...props} /> : <input id={name} name={name} className="input" {...props} />}
     </div>
   );

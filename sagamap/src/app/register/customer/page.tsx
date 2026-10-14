@@ -1,5 +1,6 @@
 "use client";
 
+import { Opt, RegisterNotice, Req } from "@/components/FormMarks";
 import PasswordInput from "@/components/PasswordInput";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
@@ -81,20 +82,21 @@ function CustomerRegisterForm() {
         <p className="mb-3 rounded-xl bg-white px-3 py-2 text-sm font-bold text-saga-700 shadow-pop">「{referrer}」からのご紹介です</p>
       )}
       <form onSubmit={onSubmit} className="card space-y-4 p-5">
+        <RegisterNotice />
         <div>
-          <label className="label" htmlFor="name">名前</label>
+          <label className="label" htmlFor="name">名前<Req /></label>
           <input id="name" name="name" required className="input" autoComplete="name" />
         </div>
         <div>
-          <label className="label" htmlFor="email">メールアドレス</label>
+          <label className="label" htmlFor="email">メールアドレス<Req /></label>
           <input id="email" name="email" type="email" required className="input" autoComplete="email" />
         </div>
         <div>
-          <label className="label" htmlFor="password">パスワード（8 文字以上）</label>
+          <label className="label" htmlFor="password">パスワード（8 文字以上）<Req /></label>
           <PasswordInput id="password" name="password" required minLength={8} className="input" autoComplete="new-password" />
         </div>
         <fieldset>
-          <legend className="label">興味のある業種（任意・複数選択可）</legend>
+          <legend className="label">興味のある業種（複数選択可）<Opt /></legend>
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((c) => (
               <button type="button" key={c} onClick={() => toggle(c)} className={interests.includes(c) ? "chip-on" : "chip-off"}>
