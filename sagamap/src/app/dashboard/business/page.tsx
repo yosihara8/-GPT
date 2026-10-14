@@ -273,7 +273,7 @@ function RunningPromotions() {
     <section className="card space-y-4">
       <div>
         <h2 className="font-bold">いま配信中のクーポン・広告</h2>
-        <p className="text-xs text-slate-500">タップすると、お客さまに見えている内容を表示します。</p>
+        <p className="text-xs text-slate-500">タップすると開きます。お客さまに見えている内容と、広告の効果（見た人・タップした人・お店に行こうとした人）を確認できます。</p>
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -330,11 +330,16 @@ function RunningPromotions() {
             <div className="mt-2">
               <AdDetail ad={{ ...a, business_id: 0 }} />
             </div>
-            <Link href="/dashboard/business/ads" className="mt-2 inline-block text-xs font-medium text-saga-600">
+            <Link href="/dashboard/business/ads#results" className="mt-2 inline-block text-xs font-medium text-saga-600">
               広告の内容を修正する
             </Link>
           </Expandable>
         ))}
+        {ads && ads.length > liveAds.length && (
+          <Link href="/dashboard/business/ads#results" className="block text-right text-xs font-medium text-saga-600">
+            終了した広告の効果も見る →
+          </Link>
+        )}
       </div>
     </section>
   );

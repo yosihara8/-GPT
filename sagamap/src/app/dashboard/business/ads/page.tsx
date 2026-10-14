@@ -120,6 +120,51 @@ function Ads() {
           </p>
         </div>
       )}
+      {ads.length > 0 && (
+        <section id="results" className="scroll-mt-20 space-y-2">
+          <SectionTitle
+            eyebrow="POSTED"
+            title="出稿した広告と効果"
+            count={ads.length}
+            note="広告をタップすると開きます。見た人・タップした人・お店に行こうとした人の数と、お客さまに見えている広告の内容を確認できます。内容の修正もできます（出稿回数は使いません）。"
+          />
+          <ul className="space-y-2">
+            {ads.map((a) => {
+              const live = a.is_active && new Date(a.ends_at).getTime() > Date.now();
+              return (
+                <li key={a.id}>
+                  <details className="group rounded-2xl border border-slate-200 bg-white">
+                    <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
+                      {a.has_image && <img src={`/api/ads/${a.id}/image`} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold">{a.headline}</span>
+                        <span className="block text-xs text-slate-500">
+                          {a.business_name}・{new Date(a.ends_at).toLocaleDateString("ja-JP")}まで
+                        </span>
+                        <AdStats ad={a} compact />
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${live ? "bg-tea-50 text-tea-700" : "bg-slate-100 text-slate-500"}`}
+                      >
+                        {live ? "配信中" : "終了"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-180" aria-hidden />
+                    </summary>
+                    <div className="space-y-3 border-t border-slate-100 p-3">
+                      <AdStats ad={a} />
+                      <AdDetail ad={{ ...a, business_id: 0 }} />
+                      {a.updated_at && <p className="text-xs text-slate-400">{new Date(a.updated_at).toLocaleString("ja-JP")} に修正</p>}
+                      {live && <AdEditor ad={a} onSaved={load} />}
+                    </div>
+                  </details>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <SectionTitle eyebrow="NEW" title="新しく出稿する" />
       <div>
         <p className="mb-1 text-xs text-slate-500">プレビュー（地図上部に表示されます）</p>
         <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-pop">
@@ -198,49 +243,6 @@ function Ads() {
         </button>
       </form>
 
-      {ads.length > 0 && (
-        <section className="space-y-2 pt-2">
-          <SectionTitle
-            eyebrow="POSTED"
-            title="出稿した広告"
-            count={ads.length}
-            note="タップすると、お客さまに見えている広告の内容と、見た人・タップした人・お店に行こうとした人の数を表示します。内容の修正もできます（出稿回数は使いません）。"
-          />
-          <ul className="space-y-2">
-            {ads.map((a) => {
-              const live = a.is_active && new Date(a.ends_at).getTime() > Date.now();
-              return (
-                <li key={a.id}>
-                  <details className="group rounded-2xl border border-slate-200 bg-white">
-                    <summary className="flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
-                      {a.has_image && <img src={`/api/ads/${a.id}/image`} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />}
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-semibold">{a.headline}</span>
-                        <span className="block text-xs text-slate-500">
-                          {a.business_name}・{new Date(a.ends_at).toLocaleDateString("ja-JP")}まで
-                        </span>
-                        <AdStats ad={a} compact />
-                      </span>
-                      <span
-                        className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${live ? "bg-tea-50 text-tea-700" : "bg-slate-100 text-slate-500"}`}
-                      >
-                        {live ? "配信中" : "終了"}
-                      </span>
-                      <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-180" aria-hidden />
-                    </summary>
-                    <div className="space-y-3 border-t border-slate-100 p-3">
-                      <AdStats ad={a} />
-                      <AdDetail ad={{ ...a, business_id: 0 }} />
-                      {a.updated_at && <p className="text-xs text-slate-400">{new Date(a.updated_at).toLocaleString("ja-JP")} に修正</p>}
-                      {live && <AdEditor ad={a} onSaved={load} />}
-                    </div>
-                  </details>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }

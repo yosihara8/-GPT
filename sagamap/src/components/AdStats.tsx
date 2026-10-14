@@ -14,8 +14,10 @@ export default function AdStats({ ad, compact = false }: { ad: AdStatsData; comp
   const visitors = ad.visitor_count ?? 0;
   if (compact) {
     return (
-      <span className="text-xs text-slate-500">
-        見た {viewers.toLocaleString()}人・タップ {tappers.toLocaleString()}人・お店へ {visitors.toLocaleString()}人
+      <span className="mt-1 flex flex-wrap gap-1 text-[11px] font-bold" aria-label="広告の効果">
+        <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-slate-600">見た {viewers.toLocaleString()}人</span>
+        <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-slate-600">タップ {tappers.toLocaleString()}人</span>
+        <span className="rounded-md bg-tea-50 px-1.5 py-0.5 text-tea-700">お店へ {visitors.toLocaleString()}人</span>
       </span>
     );
   }
