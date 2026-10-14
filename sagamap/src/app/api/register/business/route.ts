@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     if (d.inviteCode) {
       const r = await client.query<{ id: number }>(
         `UPDATE invite_codes SET used_count = used_count + 1
-          WHERE code = $1 AND is_active AND used_count < max_uses AND (expires_at IS NULL OR expires_at > now())
+          WHERE code = $1 AND is_active AND (max_uses IS NULL OR used_count < max_uses) AND (expires_at IS NULL OR expires_at > now())
           RETURNING id`,
         [d.inviteCode.toUpperCase()],
       );

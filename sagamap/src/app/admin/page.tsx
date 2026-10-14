@@ -392,7 +392,7 @@ type Invite = {
   id: number;
   code: string;
   label: string;
-  max_uses: number;
+  max_uses: number | null;
   used_count: number;
   expires_at: string | null;
   is_active: boolean;
@@ -435,25 +435,16 @@ function Invites() {
       <section className="card space-y-3">
         <h2 className="text-lg font-bold">特別招待リンクの発行</h2>
         <p className="text-sm text-slate-600">
-          運営から紹介する事業者に送るリンクです。このリンクから事業主登録すると、<b>有料プランのすべての機能を無料</b>で使えます（お支払い不要）。
+          運営から紹介する事業者に送るリンクです。このリンクから事業主登録すると、<b>有料プランのすべての機能を無料</b>で使えます（お支払い不要・期限なし）。
         </p>
+        <ul className="grid gap-2 text-sm sm:grid-cols-3">
+          <li className="rounded-2xl bg-saga-50 px-3 py-2 font-bold text-saga-700">人数：無制限（何人でも登録できます）</li>
+          <li className="rounded-2xl bg-saga-50 px-3 py-2 font-bold text-saga-700">有効期限：発行から 3 日間</li>
+          <li className="rounded-2xl bg-saga-50 px-3 py-2 font-bold text-saga-700">発行できるのは管理者のみ</li>
+        </ul>
         <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-4">
           <input name="label" placeholder="メモ（例：〇〇商店街の紹介）" className="input sm:col-span-2" maxLength={60} />
-          <select name="maxUses" defaultValue="1" className="input" aria-label="使える人数">
-            {[1, 3, 5, 10, 30].map((n) => (
-              <option key={n} value={n}>
-                {n} 人まで
-              </option>
-            ))}
-          </select>
-          <select name="days" defaultValue="30" className="input" aria-label="有効期限">
-            {[7, 30, 90, 365].map((n) => (
-              <option key={n} value={n}>
-                {n} 日間有効
-              </option>
-            ))}
-          </select>
-          <button className="btn-primary sm:col-span-4">招待リンクを発行する</button>
+          <button className="btn-primary sm:col-span-2">招待リンクを発行する</button>
         </form>
         {message && <p className="rounded-2xl bg-tea-50 px-3 py-2 text-sm font-bold text-tea-700">{message}</p>}
       </section>
@@ -473,7 +464,7 @@ function Invites() {
             </p>
             <p className="break-all rounded-xl bg-slate-50 px-3 py-2 font-mono text-xs">{i.url}</p>
             <p className="text-xs text-slate-500">
-              利用 {i.used_count} / {i.max_uses} 人
+              利用 {i.used_count} 人{i.max_uses ? `（上限 ${i.max_uses} 人）` : "（人数無制限）"}
               {i.expires_at && `・${new Date(i.expires_at).toLocaleDateString("ja-JP")} まで`}
               {!i.is_active && "・停止済み"}
             </p>

@@ -11,8 +11,10 @@ export const dynamic = "force-dynamic";
  * POST /api/billing
  *  - 無料プラン: Stripe Checkout（サブスクリプション）の URL を返す
  *  - 有料プラン: Stripe カスタマーポータル（解約・カード変更）の URL を返す
+ *  - 特別招待プラン: { leaveSpecial: true } のときだけ申し込みに進める（お支払いが済むまでは特別招待のまま。
+ *    完了すると Webhook で特別招待が外れ、二度と戻れない）
  */
-export async function POST() {
+export async function POST(req: Request) {
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const owner = await queryOne<{
@@ -24,8 +26,9 @@ export async function POST() {
     complimentary: boolean;
   }>("SELECT id, email, plan, monthly_price, stripe_customer_id, complimentary FROM business_owners WHERE id = $1", [auth.user.id]);
   if (!owner) return NextResponse.json({ error: "アカウントが見つかりません" }, { status: 404 });
-  if (owner.complimentary) {
-    return NextResponse.json({ error: "特別プランのため、お支払いの手続きは不要です" }, { status: 400 });
+  const body = (await req.json().catch(() => ({}))) as { leaveSpecial?: unknown };
+  if (owner.complimentary && body.leaveSpecial !== true) {
+    return NextResponse.json({ error: "特別招待プランのため、お支払いの手続きは不要です" }, { status: 400 });
   }
 
   if (!stripeEnv("STRIPE_SECRET_KEY")) {
@@ -35,7 +38,7 @@ export async function POST() {
 
   try {
     // 有料プラン中、または Stripe 側に有効な契約が残っている場合はポータルへ（二重契約を防ぐ）
-    let hasActive = owner.plan === "premium";
+    let hasActive = owner.plan === "premium" && !owner.complimentary;
     if (!hasActive && owner.stripe_customer_id) {
       const subs = await stripe.subscriptions.list({ customer: owner.stripe_customer_id, status: "all", limit: 10 });
       hasActive = subs.data.some((s) => ["active", "trialing", "past_due"].includes(s.status));

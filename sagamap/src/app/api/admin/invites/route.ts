@@ -23,18 +23,17 @@ export async function GET() {
   if (!auth.ok) return auth.response;
   const rows = await query<{ code: string }>(
     `SELECT i.id, i.code, i.label, i.max_uses, i.used_count, i.expires_at, i.is_active, i.created_at,
-            (i.is_active AND i.used_count < i.max_uses AND (i.expires_at IS NULL OR i.expires_at > now())) AS usable,
+            (i.is_active AND (i.max_uses IS NULL OR i.used_count < i.max_uses) AND (i.expires_at IS NULL OR i.expires_at > now())) AS usable,
             coalesce((SELECT string_agg(o.email, '、') FROM business_owners o WHERE o.invite_code_id = i.id), '') AS used_by
        FROM invite_codes i ORDER BY i.created_at DESC LIMIT 200`,
   );
   return NextResponse.json({ invites: rows.map((r) => ({ ...r, url: inviteUrl(r.code) })) });
 }
 
-const createSchema = z.object({
-  label: z.string().trim().max(60).default(""),
-  maxUses: z.coerce.number().int().min(1).max(100).default(1),
-  days: z.coerce.number().int().min(1).max(365).default(30),
-});
+const createSchema = z.object({ label: z.string().trim().max(60).default("") });
+
+/** 特別招待リンクは人数無制限・発行から 3 日間有効（運営者だけが発行できる） */
+const INVITE_DAYS = 3;
 
 /** 特別招待リンクの発行（有料プランを無料で使える事業者登録用） */
 export async function POST(req: Request) {
@@ -45,10 +44,10 @@ export async function POST(req: Request) {
   const d = body.data;
   const row = await queryOne<{ id: number; code: string }>(
     `INSERT INTO invite_codes (code, label, max_uses, expires_at, created_by)
-     VALUES ($1, $2, $3, now() + make_interval(days => $4), $5) RETURNING id, code`,
-    [newCode(), d.label ?? "", d.maxUses ?? 1, d.days ?? 30, auth.user.id],
+     VALUES ($1, $2, NULL, now() + make_interval(days => $3), $4) RETURNING id, code`,
+    [newCode(), d.label ?? "", INVITE_DAYS, auth.user.id],
   );
-  await auditLog(auth.user.id, "特別招待リンクを発行", `invites#${row!.id}`, `${d.label ?? ""}（${d.maxUses ?? 1} 人まで・${d.days ?? 30} 日間）`);
+  await auditLog(auth.user.id, "特別招待リンクを発行", `invites#${row!.id}`, `${d.label ?? ""}（人数無制限・${INVITE_DAYS} 日間）`);
   return NextResponse.json({ code: row!.code, url: inviteUrl(row!.code) }, { status: 201 });
 }
 

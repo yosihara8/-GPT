@@ -29,6 +29,7 @@ export async function POST(req: Request) {
           customerId: String(s.customer),
           subscriptionId: String(s.subscription),
           endsAt: null,
+          leaveSpecial: true,
         });
       }
       break;
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
 async function setPlan(
   ownerId: number,
   plan: "free" | "premium",
-  stripeIds: { customerId: string; subscriptionId: string | null; endsAt: Date | null },
+  stripeIds: { customerId: string; subscriptionId: string | null; endsAt: Date | null; leaveSpecial?: boolean },
 ) {
   const client = await pool.connect();
   try {
@@ -63,6 +64,16 @@ async function setPlan(
       `UPDATE business_owners SET plan = $1, stripe_customer_id = $2, stripe_subscription_id = $3, plan_ends_at = $4 WHERE id = $5`,
       [plan, stripeIds.customerId, stripeIds.subscriptionId, stripeIds.endsAt, ownerId],
     );
+    // 特別招待の事業主が有料プランを申し込んだら、特別招待は終了（戻れない）
+    if (stripeIds.leaveSpecial) {
+      await client.query(
+        `UPDATE business_owners
+            SET complimentary = false, special_ended_at = COALESCE(special_ended_at, now()),
+                monthly_price = CASE WHEN monthly_price = 0 THEN 3980 ELSE monthly_price END
+          WHERE id = $1 AND complimentary`,
+        [ownerId],
+      );
+    }
     await client.query("UPDATE businesses SET is_premium = $1 WHERE owner_id = $2", [plan === "premium", ownerId]);
     await client.query("COMMIT");
   } catch (e) {
