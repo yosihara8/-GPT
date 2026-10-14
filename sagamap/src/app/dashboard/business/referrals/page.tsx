@@ -15,7 +15,7 @@ type Data = {
   lastMonth: { count: number; achieved: boolean };
   history: { month: string; count: number; achieved: boolean }[];
   stores: { id: number; name: string; count: number; url: string }[];
-  customers: { email: string; registered_at: string; business_name: string }[];
+  customers: { registered_at: string; business_name: string }[];
 };
 
 /**
@@ -185,22 +185,22 @@ function Referrals() {
 
       <section className="card">
         <h2 className="font-bold">紹介で登録したお客さま</h2>
-        <p className="mt-1 text-xs text-slate-500">お客さまの個人情報を守るため、メールアドレスは一部を伏せて表示しています。</p>
+        <p className="mt-1 text-xs text-slate-500">お客さまの個人情報を守るため、お名前・メールアドレスは表示しません（登録日と、どのお店の紹介かだけを表示します）。</p>
         {data.customers.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">まだ紹介はありません。</p>
         ) : (
           <table className="mt-2 w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-slate-500">
-                <th className="py-1 font-normal">メールアドレス</th>
                 <th className="py-1 font-normal">登録日</th>
+                <th className="py-1 font-normal">紹介したお店</th>
               </tr>
             </thead>
             <tbody>
               {data.customers.map((c, i) => (
                 <tr key={i} className="border-t">
-                  <td className="truncate py-2 pr-2">{c.email}</td>
-                  <td className="py-2 tabular-nums">{new Date(c.registered_at).toLocaleDateString("ja-JP")}</td>
+                  <td className="py-2 pr-2 tabular-nums">{new Date(c.registered_at).toLocaleDateString("ja-JP")}</td>
+                  <td className="truncate py-2">{c.business_name}</td>
                 </tr>
               ))}
             </tbody>

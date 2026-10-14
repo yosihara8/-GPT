@@ -10,7 +10,7 @@ export async function GET() {
   if (!auth.ok) return auth.response;
   const stats = await queryOne(
     `SELECT
-       (SELECT count(*) FROM customers)::int AS customers,
+       (SELECT count(*) FROM customers WHERE deleted_at IS NULL)::int AS customers,
        (SELECT count(*) FROM customers WHERE created_at > now() - interval '7 days')::int AS customers_7d,
        (SELECT count(*) FROM business_owners)::int AS owners,
        (SELECT count(*) FROM business_owners WHERE plan = 'premium')::int AS premium_owners,

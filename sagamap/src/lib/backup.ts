@@ -26,6 +26,7 @@ const TABLES: Record<string, string> = {
   invite_codes: "SELECT * FROM invite_codes ORDER BY id",
   tourist_spots: "SELECT * FROM tourist_spots ORDER BY id",
   admin_audit_logs: "SELECT * FROM admin_audit_logs ORDER BY id",
+  inquiries: "SELECT * FROM inquiries ORDER BY id",
 };
 
 export async function exportBackup() {

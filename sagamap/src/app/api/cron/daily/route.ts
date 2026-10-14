@@ -8,6 +8,7 @@ import { backupAttachment } from "@/lib/backup";
 import { buildMonthlyLedger } from "@/lib/ledger";
 import { mailEnabled, mailFooter, sendMail } from "@/lib/mail";
 import { logServerError } from "@/lib/server-error";
+import { errorReportHtml, recentErrorGroups } from "@/lib/error-report";
 import { sendOwnerReports } from "@/lib/owner-report";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,17 @@ async function adminEmails() {
 const wrap = (title: string, body: string) =>
   `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
     <p style="font-size:20px;font-weight:bold">佐賀観光マップ ${title}</p>${body}${mailFooter()}</div>`;
+
+/** 毎日：エラー報告（エラーがなければ送らない） */
+async function dailyErrorReport() {
+  const groups = await recentErrorGroups(24);
+  if (groups.length === 0) return { errors: 0 };
+  const total = groups.reduce((n, g) => n + g.count, 0);
+  for (const to of await adminEmails()) {
+    await sendMail(to, `【佐賀観光マップ】エラー報告 ${jstDate()}（${total} 件）`, wrap("エラー報告", errorReportHtml(groups, `${APP_URL}/admin`)));
+  }
+  return { errors: total, kinds: groups.length };
+}
 
 /** 月 1 回：データベースのバックアップをメールで送る */
 async function monthlyBackup() {
@@ -97,6 +109,8 @@ export async function GET(req: Request) {
     ownerReport: async () =>
       mailEnabled() ? runOnce("monthly-owner-report", month, () => sendOwnerReports((to, subject, html) => sendMail(to, subject, html))) : { skipped: "メール未設定" },
     ledger: async () => (mailEnabled() ? runOnce("monthly-ledger", month, monthlyLedger) : { skipped: "メール未設定" }),
+    // 毎日：直近 24 時間のエラーをまとめて運営者へ（自動保守の Claude がこのメールを読んで修正する）
+    errorReport: async () => (mailEnabled() ? runOnce("daily-error-report", jstDate(), dailyErrorReport) : { skipped: "メール未設定" }),
   };
   const results: Record<string, unknown> = {};
   for (const [name, run] of Object.entries(tasks)) {

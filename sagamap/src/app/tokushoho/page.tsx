@@ -7,11 +7,21 @@ import { PAID_PLAN_TERMS as T } from "@/lib/contract-terms";
 export const metadata: Metadata = { title: "特定商取引法に基づく表記" };
 
 const rows: [string, React.ReactNode][] = [
-  ["販売事業者", OPERATOR.legalName ? `${OPERATOR.legalName}（屋号：${OPERATOR.name}）` : `${OPERATOR.name}（氏名は、請求があった場合には遅滞なく電子メールにて開示いたします）`],
+  ["販売事業者", `${OPERATOR.name}（屋号）。氏名は、請求があった場合には遅滞なく電子メールにて開示いたします`],
   ["運営統括責任者", OPERATOR.representative],
   ["所在地", OPERATOR.address],
   ["電話番号", OPERATOR.phone],
   ["メールアドレス", OPERATOR.email],
+  [
+    "開示のご請求",
+    <>
+      氏名・運営統括責任者・所在地・電話番号は、
+      <Link href="/contact" className="underline">
+        お問い合わせフォーム
+      </Link>
+      または上記メールアドレスからご請求ください。遅滞なく電子メールにてお知らせします
+    </>,
+  ],
   ["サービスの名称", `${OPERATOR.serviceName}（事業者向けの店舗掲載・集客サービス）`],
   [
     "販売価格",
@@ -51,7 +61,7 @@ const rows: [string, React.ReactNode][] = [
   ["返品・返金", T.refund],
   [
     "サービスに不具合があった場合",
-    "有料プランの機能が正しく動かない・利用できない場合は、上記メールアドレスへご連絡ください。原因を調査のうえ、速やかに復旧・対応します。運営者の責めに帰すべき事由により利用できなかった期間がある場合は、その期間に応じた返金または翌月以降の料金からの減額により対応します",
+    "有料プランの機能が正しく動かない・利用できない場合は、お問い合わせフォームまたは上記メールアドレスへご連絡ください。原因を調査のうえ、速やかに復旧いたします",
   ],
   ["動作環境", "最新版の Google Chrome / Safari / Microsoft Edge / Firefox（スマートフォン・パソコン）。JavaScript と Cookie を有効にしてご利用ください"],
 ];
