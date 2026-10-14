@@ -24,7 +24,8 @@ function CustomerRegisterForm() {
   const params = useSearchParams();
   const ref = Number(params.get("ref")) || undefined;
   const nextRaw = params.get("next");
-  const next = nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//") && !nextRaw.includes("\\") ? nextRaw : "/";
+  // お店からの紹介（SNS の投稿・紹介リンク）で来た方は、登録後にそのお店のページを開く
+  const next = nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//") && !nextRaw.includes("\\") ? nextRaw : ref ? `/?shop=${ref}` : "/";
   const [referrer, setReferrer] = useState<string | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);

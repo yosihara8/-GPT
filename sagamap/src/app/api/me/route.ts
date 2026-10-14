@@ -15,7 +15,7 @@ export async function GET() {
   );
   const stores = await query(
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
-            instagram_url, twitter_url, threads_url, facebook_url, business_hours, closed_days, amenities, payment_methods, payment_none,
+            instagram_url, twitter_url, threads_url, facebook_url, youtube_url, tiktok_url, business_hours, closed_days, amenities, payment_methods, payment_none,
             weekly_hours, hours_note, ${SPECIAL_DAYS_SQL("b", -1, 400)} AS special_days, website_url, reservation_url, line_url,
             photo IS NOT NULL AS has_photo,
             (SELECT count(*) FROM business_photos p WHERE p.business_id = b.id)::int AS gallery_count,

@@ -38,6 +38,8 @@ export const storeUpdateSchema = z
     twitterUrl: optionalUrl,
     threadsUrl: optionalUrl,
     facebookUrl: optionalUrl,
+    youtubeUrl: optionalUrl,
+    tiktokUrl: optionalUrl,
     businessHours: z.string().trim().max(100),
     closedDays: z.string().trim().max(100),
     amenities: z.array(z.enum(AMENITIES)).max(AMENITIES.length),
