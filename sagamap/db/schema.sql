@@ -421,3 +421,6 @@ CREATE TABLE IF NOT EXISTS inquiries (
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS inquiries_created_idx ON inquiries (created_at DESC);
+
+-- お客さまの退会（自分で退会できる。氏名・メールアドレスなどは消し、お店の集計（クーポンの利用回数など）は人が分からない形で残す）
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;

@@ -58,6 +58,11 @@ function LoginForm() {
           </button>
         ))}
       </div>
+      {params.get("deleted") && (
+        <p role="status" className="mt-4 rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">
+          退会の手続きが完了しました。これまでご利用いただき、ありがとうございました。
+        </p>
+      )}
       <form onSubmit={onSubmit} className="card mt-4 space-y-4">
         <div>
           <label className="label" htmlFor="email">メールアドレス</label>

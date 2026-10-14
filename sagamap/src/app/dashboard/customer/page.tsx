@@ -11,6 +11,7 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import { ShopCard } from "@/components/customer/Cards";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import EmailChangeForm from "@/components/EmailChangeForm";
+import DeleteAccount from "@/components/DeleteAccount";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import NotifySetting from "@/components/NotifySetting";
 import NotificationList from "@/components/customer/NotificationList";
@@ -257,6 +258,7 @@ function MyPageInner() {
           </span>
           <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
         </Link>
+        <DeleteAccount />
       </section>
     </main>
   );
