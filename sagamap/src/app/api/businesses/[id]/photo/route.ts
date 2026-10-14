@@ -5,11 +5,12 @@ import { ownsBusiness, requireApiUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-type Ctx = { params: { id: string } };
+type Ctx = { params: Promise<{ id: string }> };
 const MAX_BYTES = 1.5 * 1024 * 1024;
 
 /** 店舗写真の表示 */
-export async function GET(req: Request, { params }: Ctx) {
+export async function GET(req: Request, props: Ctx) {
+  const params = await props.params;
   const row = await queryOne<{ photo: Buffer | null; photo_type: string | null }>(
     "SELECT photo, photo_type FROM businesses WHERE id = $1",
     [Number(params.id)],
@@ -20,7 +21,8 @@ export async function GET(req: Request, { params }: Ctx) {
 }
 
 /** 店舗写真の登録（ブラウザ側で縮小した JPEG を送る） */
-export async function PUT(req: Request, { params }: Ctx) {
+export async function PUT(req: Request, props: Ctx) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const id = Number(params.id);
@@ -38,7 +40,8 @@ export async function PUT(req: Request, { params }: Ctx) {
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_req: Request, { params }: Ctx) {
+export async function DELETE(_req: Request, props: Ctx) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const id = Number(params.id);

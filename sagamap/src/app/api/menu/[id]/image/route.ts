@@ -5,7 +5,8 @@ import { queryOne } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 /** メニュー・商品の写真 */
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const row = await queryOne<{ image: Buffer | null; image_type: string | null }>("SELECT image, image_type FROM menu_items WHERE id = $1", [
     Number(params.id),
   ]);

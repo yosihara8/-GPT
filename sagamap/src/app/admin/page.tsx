@@ -282,6 +282,7 @@ function Admins() {
         <p className="text-sm text-slate-600">
           全データを JSON ファイルで保存します。月に 1 回程度の保存をおすすめします（パスワードと写真は含みません）。
         </p>
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- ファイルのダウンロードなので通常のリンク */}
         <a href="/api/admin/backup" className="btn-primary w-full">
           バックアップをダウンロード
         </a>

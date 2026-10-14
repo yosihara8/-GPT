@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   async function logout() {
     await fetch("/api/admin/auth/logout", { method: "POST" });
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- ログインの Cookie を確実に反映させるため、画面を読み込み直す
     window.location.href = "/admin/login";
   }
 

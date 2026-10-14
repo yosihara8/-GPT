@@ -10,10 +10,11 @@ import { PAYMENT_GROUPS } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-type Ctx = { params: { id: string } };
+type Ctx = { params: Promise<{ id: string }> };
 
 /** 店舗詳細とクーポン。顧客がログイン中なら閲覧履歴を記録する */
-export async function GET(_req: Request, { params }: Ctx) {
+export async function GET(_req: Request, props: Ctx) {
+  const params = await props.params;
   const id = Number(params.id);
   const biz = await queryOne(
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
@@ -78,7 +79,8 @@ const columns: Record<string, string> = {
   lineUrl: "line_url",
 };
 
-export async function PATCH(req: Request, { params }: Ctx) {
+export async function PATCH(req: Request, props: Ctx) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const id = Number(params.id);
@@ -128,7 +130,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
   return NextResponse.json({ ok: true, matched });
 }
 
-export async function DELETE(_req: Request, { params }: Ctx) {
+export async function DELETE(_req: Request, props: Ctx) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const id = Number(params.id);

@@ -25,6 +25,7 @@ export default function AdminLoginPage() {
       });
       const d = await res.json().catch(() => ({}));
       if (res.ok) {
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- ログインの Cookie を確実に反映させるため、画面を読み込み直す
         window.location.href = "/admin";
         return;
       }

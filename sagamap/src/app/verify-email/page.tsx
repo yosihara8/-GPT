@@ -19,7 +19,8 @@ async function verify(formData: FormData) {
 }
 
 /** メールアドレスの確認（メールソフトのリンク先読みで確定しないよう、ボタンで確定） */
-export default function VerifyEmailPage({ searchParams }: { searchParams: { token?: string; done?: string } }) {
+export default async function VerifyEmailPage(props: { searchParams: Promise<{ token?: string; done?: string }> }) {
+  const searchParams = await props.searchParams;
   if (searchParams.done !== undefined) {
     const ok = searchParams.done === "1";
     return (

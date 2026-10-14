@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
  * クーポンの削除（事業主）。お客さまの画面からすぐ消える。
  * 利用回数・帳簿のため、データは消さずに「削除済み」にする。
  */
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const auth = await requireApiUser("business");
   if (!auth.ok) return auth.response;
   const row = await queryOne(
