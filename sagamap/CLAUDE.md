@@ -123,6 +123,11 @@
 - お客さまはどこから開いても同じ「お店のページ」（DetailSheet）：`/shops/ID`・`/dashboard/customer/coupons/ID` は `/?shop=ID(&coupon=ID)` に転送。
 - パソコンの地図の画面と事業主の画面は、ヘッダーを画面幅いっぱいにして左端をそろえる。地図の画面のパソコン表示ではフッターを出さない。
 
+## 特定商取引法（通信販売）
+- /tokushoho は必須項目をすべて出す：事業者の氏名（屋号だけは不可）・責任者・住所・電話・メール・価格・価格以外の費用（送料・手数料なし）・支払方法/時期・提供時期・申込期限・継続契約（自動更新・更新日・解約期限）・解約方法・返金・不具合時の対応・動作環境。
+- 氏名・責任者・電話・住所は Vercel の環境変数（OPERATOR_LEGAL_NAME・OPERATOR_REPRESENTATIVE・OPERATOR_PHONE・OPERATOR_ADDRESS）。コードに個人情報を書かない。変えたら再デプロイ。
+- 契約条件の文言は src/lib/contract-terms.ts が正。/upgrade で有料プランを選ぶと、申し込みボタンの前に「お申し込み内容の確認」（同じ文言＋利用規約・特商法へのリンク）を出す。
+
 ## 変更時の注意
 - 自動処理（毎週金曜メール、毎晩の掲載チェック、毎月のバックアップ・帳簿・紹介割引）・決済・DB の設定を壊さない。
 - 変更後は `npx tsc --noEmit`、`npx next lint`、`npx vitest run`、`npx next build` を通す。
