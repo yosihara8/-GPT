@@ -401,3 +401,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- 特別招待プランをやめた日（一度やめると戻れない）
 ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS special_ended_at TIMESTAMPTZ;
+
+-- YouTube・TikTok のリンク（有料プラン）
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS youtube_url TEXT;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS tiktok_url TEXT;

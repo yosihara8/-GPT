@@ -51,6 +51,8 @@ export type DetailShop = CardShop & {
   twitter_url?: string | null;
   threads_url?: string | null;
   facebook_url?: string | null;
+  youtube_url?: string | null;
+  tiktok_url?: string | null;
   weekly_hours?: unknown;
   hours_note?: string | null;
   special_days?: SpecialDay[] | null;
@@ -186,6 +188,8 @@ export default function DetailSheet({
       ["Threads", shop.threads_url],
       ["Facebook", shop.facebook_url],
       ["X（Twitter）", shop.twitter_url],
+      ["YouTube", shop.youtube_url],
+      ["TikTok", shop.tiktok_url],
     ] as [string, string | null | undefined][]
   ).filter((x): x is [string, string] => Boolean(x[1]));
 

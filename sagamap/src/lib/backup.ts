@@ -9,7 +9,7 @@ const TABLES: Record<string, string> = {
   business_owners:
     "SELECT id, name, email, plan, monthly_price, complimentary, invite_code_id, stripe_customer_id, stripe_subscription_id, email_verified_at, created_at FROM business_owners ORDER BY id",
   businesses:
-    "SELECT id, owner_id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level, is_premium, instagram_url, twitter_url, threads_url, facebook_url, business_hours, closed_days, weekly_hours, hours_note, amenities, payment_methods, payment_none, website_url, reservation_url, line_url, view_count, created_at FROM businesses ORDER BY id",
+    "SELECT id, owner_id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level, is_premium, instagram_url, twitter_url, threads_url, facebook_url, youtube_url, tiktok_url, business_hours, closed_days, weekly_hours, hours_note, amenities, payment_methods, payment_none, website_url, reservation_url, line_url, view_count, created_at FROM businesses ORDER BY id",
   customers: "SELECT id, name, email, interests, notify_enabled, email_verified_at, created_at FROM customers ORDER BY id",
   coupons: "SELECT id, business_id, event_id, title, coupon_type, discount_rate, amount_yen, special_price, regular_price, benefit, max_uses, repeatable, first_visit_only, conditions, expires_at, is_active, created_at, review_flags, reviewed_at, deleted_at, (image IS NOT NULL) AS has_image FROM coupons ORDER BY id",
   referrals: "SELECT * FROM referrals ORDER BY id",

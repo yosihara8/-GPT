@@ -26,6 +26,8 @@ export type Store = {
   twitter_url: string | null;
   threads_url?: string | null;
   facebook_url?: string | null;
+  youtube_url?: string | null;
+  tiktok_url?: string | null;
   weekly_hours?: unknown;
   hours_note?: string;
   special_days?: SpecialDay[];
@@ -70,6 +72,8 @@ export function StoreEditor({ store, premium, onSaved }: { store: Store; premium
       body.twitterUrl = f.twitterUrl;
       body.threadsUrl = f.threadsUrl;
       body.facebookUrl = f.facebookUrl;
+      body.youtubeUrl = f.youtubeUrl;
+      body.tiktokUrl = f.tiktokUrl;
       body.websiteUrl = f.websiteUrl;
       body.reservationUrl = f.reservationUrl;
       body.lineUrl = f.lineUrl;
@@ -163,6 +167,8 @@ export function StoreEditor({ store, premium, onSaved }: { store: Store; premium
           <Input label="Threads の URL" name="threadsUrl" type="url" defaultValue={store.threads_url ?? ""} placeholder="https://www.threads.net/@…" />
           <Input label="Facebook の URL" name="facebookUrl" type="url" defaultValue={store.facebook_url ?? ""} placeholder="https://www.facebook.com/…" />
           <Input label="X（Twitter）の URL" name="twitterUrl" type="url" defaultValue={store.twitter_url ?? ""} placeholder="https://x.com/…" />
+          <Input label="YouTube の URL" name="youtubeUrl" type="url" defaultValue={store.youtube_url ?? ""} placeholder="https://www.youtube.com/@…" />
+          <Input label="TikTok の URL" name="tiktokUrl" type="url" defaultValue={store.tiktok_url ?? ""} placeholder="https://www.tiktok.com/@…" />
         </div>
       </fieldset>
 

@@ -17,7 +17,7 @@ export async function GET(_req: Request, { params }: Ctx) {
   const id = Number(params.id);
   const biz = await queryOne(
     `SELECT id, name, address, lat, lng, category, service_description, contact, price_level, crowd_level,
-            is_premium, instagram_url, twitter_url, threads_url, facebook_url, business_hours, closed_days,
+            is_premium, instagram_url, twitter_url, threads_url, facebook_url, youtube_url, tiktok_url, business_hours, closed_days,
             weekly_hours, hours_note, ${SPECIAL_DAYS_SQL("b", -1, 92)} AS special_days,
             amenities, payment_methods, payment_none, website_url, reservation_url, line_url,
             photo IS NOT NULL AS has_photo, EXTRACT(EPOCH FROM photo_updated_at)::bigint AS photo_version
@@ -66,6 +66,8 @@ const columns: Record<string, string> = {
   twitterUrl: "twitter_url",
   threadsUrl: "threads_url",
   facebookUrl: "facebook_url",
+  youtubeUrl: "youtube_url",
+  tiktokUrl: "tiktok_url",
   businessHours: "business_hours",
   closedDays: "closed_days",
   amenities: "amenities",
@@ -93,7 +95,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     d.paymentMethods = (d.paymentMethods as string[]).filter((m) => !PAYMENT_GROUPS.some((g) => none.has(g.key) && (g.items as readonly string[]).includes(m)));
   }
   // SNS・ホームページ・予約・LINE のリンクは有料プランのみ
-  if ([d.instagramUrl, d.twitterUrl, d.threadsUrl, d.facebookUrl, d.websiteUrl, d.reservationUrl, d.lineUrl].some((v) => v !== undefined)) {
+  if ([d.instagramUrl, d.twitterUrl, d.threadsUrl, d.facebookUrl, d.youtubeUrl, d.tiktokUrl, d.websiteUrl, d.reservationUrl, d.lineUrl].some((v) => v !== undefined)) {
     const plan = await getOwnerPlan(auth.user.id);
     if (plan?.plan !== "premium") {
       return NextResponse.json({ error: "SNS・予約・LINE などのリンクは有料プランの機能です", upgradeUrl: "/upgrade" }, { status: 402 });
