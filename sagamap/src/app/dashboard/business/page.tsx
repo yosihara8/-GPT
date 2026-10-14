@@ -239,6 +239,8 @@ type MyAd = {
   view_count?: number;
   click_count?: number;
   viewer_count?: number;
+  tapper_count?: number;
+  visitor_count?: number;
 };
 
 /** タップで開く項目（画面を変えずに内容を表示） */

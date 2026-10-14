@@ -53,6 +53,7 @@
 - ダッシュボードの「いま配信中のクーポン・広告」はタップで内容（写真・本文）を画面を変えずに表示。
 - 解約: Stripe のカスタマーポータルで「請求期間の終了時」に解約。支払い済みの最終日（business_owners.plan_ends_at）までは有料プランのまま使え、ダッシュボードと /upgrade に「〇月〇日まで有料プランを使えます」と表示。最終日に subscription.deleted で無料に戻る。
 - Stripe の Managed Payments は使わない（テスト・本番とも既定で無効にする）。
+- 広告の効果（AdStats）は人数で出す：見た人（表示 〇回）⊇ タップした人 ⊇ お店に行こうとした人（タップ後 14 日以内に道案内・電話・クーポン利用）。地図は会員専用なので「会員」とは書かない。「数字の見方」を必ず添える。
 - 特別招待（business_owners.complimentary）: リンクは管理者だけが発行（/admin の「特別招待」）。人数無制限・発行から 3 日間有効（invite_codes.max_uses は NULL）。登録した事業主は有料プランの機能を期限なし・0 円で使える。
   - /upgrade はプランをタッチで選ぶ（radiogroup）。特別招待の方には「特別招待プラン・無料プラン・有料プラン」の 3 つ、それ以外は 2 つ。
   - 特別招待プランをやめる操作は取り消せない（戻れない）。赤い注意枠＋確認のチェック＋確認ダイアログを必ず通す。無料へは POST /api/billing/leave-special、有料へは POST /api/billing { leaveSpecial: true }（お支払い完了の Webhook で complimentary=false。それまでは特別招待のまま）。special_ended_at に終了日時。

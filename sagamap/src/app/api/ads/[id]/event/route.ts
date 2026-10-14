@@ -15,8 +15,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (kind !== "view" && kind !== "click") return NextResponse.json({ error: "kind が正しくありません" }, { status: 400 });
 
   const user = await getSessionUser();
-  const customerId = user?.role === "customer" ? user.id : null;
-  // 事業主・運営者の閲覧は数えない
+  const customerId = user?.role === "customer" && !user.impersonated ? user.id : null;
+  // 事業主・運営者（代理ログイン中を含む）の閲覧は数えない
   if (user && !customerId) return NextResponse.json({ ok: true, counted: false });
 
   const who = customerId ? `c${customerId}` : clientIp(req.headers);

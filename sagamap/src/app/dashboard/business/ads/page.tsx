@@ -26,6 +26,8 @@ type Ad = {
   view_count?: number;
   click_count?: number;
   viewer_count?: number;
+  tapper_count?: number;
+  visitor_count?: number;
 };
 type Done = { headline: string; endsAt: string; notified: number; warnings: string[]; imageUrl: string | null };
 
@@ -202,7 +204,7 @@ function Ads() {
             eyebrow="POSTED"
             title="出稿した広告"
             count={ads.length}
-            note="タップすると、お客さまに見えている広告の内容と、見られた回数を表示します。内容の修正もできます（出稿回数は使いません）。"
+            note="タップすると、お客さまに見えている広告の内容と、見た人・タップした人・お店に行こうとした人の数を表示します。内容の修正もできます（出稿回数は使いません）。"
           />
           <ul className="space-y-2">
             {ads.map((a) => {
