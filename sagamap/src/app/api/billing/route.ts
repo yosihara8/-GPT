@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { query, queryOne } from "@/lib/db";
 import { APP_URL, PRICE_DISCOUNT } from "@/lib/config";
 import { getStripe, stripeEnv } from "@/lib/stripe";
@@ -61,21 +62,31 @@ export async function POST(req: Request) {
       owner.monthly_price === PRICE_DISCOUNT ? stripeEnv("STRIPE_PRICE_DISCOUNT") : stripeEnv("STRIPE_PRICE_STANDARD");
     if (!price) return NextResponse.json({ error: "Stripe の Price ID が未設定です" }, { status: 503 });
 
-    const session = await stripe.checkout.sessions.create(
-      {
-        mode: "subscription",
-        line_items: [{ price, quantity: 1 }],
-        ...(owner.stripe_customer_id ? { customer: owner.stripe_customer_id } : { customer_email: owner.email }),
-        client_reference_id: String(owner.id),
-        metadata: { owner_id: String(owner.id) },
-        subscription_data: { metadata: { owner_id: String(owner.id) } },
-        success_url: `${APP_URL}/dashboard/business?upgraded=1`,
-        cancel_url: `${APP_URL}/upgrade?canceled=1`,
-        locale: "ja",
-      },
-      // 短時間にボタンを 2 回押しても、申し込み画面は 1 つだけ作る
-      { idempotencyKey: `checkout-${owner.id}-${price}-${Math.floor(Date.now() / 60000)}` },
-    );
+    const params: Stripe.Checkout.SessionCreateParams & { managed_payments?: { enabled: boolean } } = {
+      mode: "subscription",
+      line_items: [{ price, quantity: 1 }],
+      ...(owner.stripe_customer_id ? { customer: owner.stripe_customer_id } : { customer_email: owner.email }),
+      client_reference_id: String(owner.id),
+      metadata: { owner_id: String(owner.id) },
+      subscription_data: { metadata: { owner_id: String(owner.id) } },
+      success_url: `${APP_URL}/dashboard/business?upgraded=1`,
+      cancel_url: `${APP_URL}/upgrade?canceled=1`,
+      locale: "ja",
+      // Stripe の「Managed Payments」（Stripe が販売者になる仕組み）は使わない。
+      // 本番アカウントでは初期状態で有効になっていて、そのままだと商品の税コードが無いため申し込み画面を作れない
+      managed_payments: { enabled: false },
+    };
+    // 短時間にボタンを 2 回押しても、申し込み画面は 1 つだけ作る
+    const key = `checkout-${owner.id}-${price}-${Math.floor(Date.now() / 60000)}`;
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await stripe.checkout.sessions.create(params, { idempotencyKey: `${key}-nmp` });
+    } catch (e) {
+      // この設定を受け付けない Stripe のバージョンでは、外して作り直す
+      if ((e as { param?: string }).param !== "managed_payments") throw e;
+      delete params.managed_payments;
+      session = await stripe.checkout.sessions.create(params, { idempotencyKey: key });
+    }
     return NextResponse.json({ url: session.url });
   } catch (e) {
     await logServerError("billing", e);
