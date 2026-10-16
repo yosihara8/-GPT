@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, ChevronRight, FileBarChart, Megaphone, QrCode, Store, TicketPercent, Users } from "lucide-react";
+import { BadgeCheck, ChevronDown, ChevronRight, Loader2, X, FileBarChart, Megaphone, QrCode, Store, TicketPercent, Users } from "lucide-react";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MapView, { type HeatPoint, type MapShop } from "@/components/MapView";
@@ -15,6 +15,7 @@ import { couponShort, type CouponValue } from "@/lib/coupon";
 import { profileChecklist, profilePercent } from "@/lib/profile";
 import BizPage, { StorePicker } from "@/components/business/BizPage";
 import { useOwnerData } from "@/components/business/useOwnerData";
+import type { Owner } from "@/components/business/StoreForms";
 
 type Stats = {
   stores: { id: number; name: string; view_count: number; coupon_uses: number; views_7d: number; route_30d?: number; call_30d?: number; save_30d?: number; coupon_view_30d?: number; qr_scan_30d?: number }[];
@@ -41,7 +42,7 @@ export default function BusinessDashboardPage() {
 
 function BusinessDashboard() {
   const params = useSearchParams();
-  const { owner, stores, store, storeId, setStoreId, premium } = useOwnerData();
+  const { owner, stores, store, storeId, setStoreId, premium, load } = useOwnerData();
   const [stats, setStats] = useState<Stats | null>(null);
   const [heatMode, setHeatMode] = useState<"density" | "flow">("flow");
   const [hour, setHour] = useState(() => new Date().getHours());
@@ -77,6 +78,7 @@ function BusinessDashboard() {
       title="事業主ダッシュボード"
       lead={store?.name ?? owner?.email}
       overlap
+      notice={<PremiumNotice owner={owner} premium={premium} upgraded={Boolean(params.get("upgraded"))} reload={load} />}
       aside={<StorePicker stores={stores} value={storeId} onChange={setStoreId} />}
     >
       {/* 基本の数字（帯の上に重ねる） */}
@@ -89,9 +91,6 @@ function BusinessDashboard() {
       <VerifyEmailBanner />
       {params.get("welcome") && (
         <p className="rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">ご登録ありがとうございます！店舗が地図に掲載されました。まずは「お店の情報」で写真と営業時間を入れましょう。</p>
-      )}
-      {params.get("upgraded") && (
-        <p className="rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">有料プランへのお申し込みありがとうございます。反映まで数秒かかる場合があります。</p>
       )}
 
       {/* お客さまの行動（来店につながる動き。直近 30 日） */}
@@ -342,5 +341,73 @@ function RunningPromotions() {
         )}
       </div>
     </section>
+  );
+}
+
+/**
+ * お支払いが済んだら、画面のいちばん上に 1 回だけ「有料プランになりました」と出す。
+ * Stripe からの知らせ（Webhook）が届くまで数秒かかるので、お申し込み直後は届くまで待つ。
+ * 表示したら消す（次に開いたときは出ない）。知らせが遅れて届いた場合は、次に開いたときに出る。
+ */
+function PremiumNotice({ owner, premium, upgraded, reload }: { owner: Owner | null; premium: boolean; upgraded: boolean; reload: () => Promise<void> }) {
+  const [state, setState] = useState<"none" | "waiting" | "done" | "late">(upgraded ? "waiting" : "none");
+  const pending = Boolean(owner?.premium_notice_pending);
+
+  // アドレスの「?upgraded=1」は消す（開き直しても「確認中」が出ないように）
+  useEffect(() => {
+    if (upgraded) window.history.replaceState(null, "", window.location.pathname);
+  }, [upgraded]);
+
+  useEffect(() => {
+    if (!pending) return;
+    if (premium) setState("done");
+    fetch("/api/me/premium-notice", { method: "POST" }).catch(() => {});
+  }, [pending, premium]);
+
+  // お申し込み直後：知らせが届くまで 3 秒ごとに確かめる（最大 1 分）
+  useEffect(() => {
+    if (state !== "waiting") return;
+    let n = 0;
+    const t = setInterval(() => {
+      n += 1;
+      if (n > 20) {
+        clearInterval(t);
+        setState("late");
+        return;
+      }
+      reload().catch(() => {});
+    }, 3000);
+    return () => clearInterval(t);
+  }, [state, reload]);
+
+  if (state === "waiting") {
+    return (
+      <div role="status" className="flex items-center gap-3 rounded-2xl border-2 border-saga-300 bg-white px-4 py-4 text-sm font-bold text-saga-700">
+        <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
+        お支払いを確認しています。そのままお待ちください（数秒〜1 分ほど）。
+      </div>
+    );
+  }
+  if (state === "late") {
+    return (
+      <div role="status" className="rounded-2xl border-2 border-sun-400 bg-sun-100 px-4 py-4 text-sm font-bold text-slate-800">
+        お支払いの確認に時間がかかっています。しばらくしてから、この画面を開き直してください。数分たっても有料プランにならないときは、お問い合わせからご連絡ください。
+      </div>
+    );
+  }
+  if (state !== "done") return null;
+  return (
+    <div role="status" data-testid="premium-notice" className="relative rounded-2xl bg-tea-600 px-5 py-5 text-white shadow-lg">
+      <button type="button" onClick={() => setState("none")} aria-label="閉じる" className="absolute right-2 top-2 rounded-full p-2 text-white/80 hover:bg-white/10">
+        <X className="h-5 w-5" aria-hidden />
+      </button>
+      <p className="flex items-center gap-2 text-xl font-extrabold">
+        <BadgeCheck className="h-7 w-7 shrink-0" aria-hidden />
+        有料プランになりました
+      </p>
+      <p className="mt-2 pr-6 text-sm text-white/90">
+        お申し込みありがとうございます。クーポン・広告・紹介などの機能が使えるようになりました。
+      </p>
+    </div>
   );
 }

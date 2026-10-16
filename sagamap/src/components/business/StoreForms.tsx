@@ -10,7 +10,7 @@ import PaymentFieldset from "@/components/business/PaymentFieldset";
 import { type SpecialDay } from "@/lib/schedule";
 
 /** 事業主：お店の情報の入力（店舗情報・メニュー・店舗の追加） */
-export type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number; plan_ends_at?: string | null };
+export type Owner = { id: number; name: string; email: string; plan: "free" | "premium"; complimentary?: boolean; monthly_price: number; plan_ends_at?: string | null; premium_notice_pending?: boolean };
 export type Store = {
   id: number;
   name: string;
