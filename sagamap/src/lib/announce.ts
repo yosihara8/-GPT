@@ -27,7 +27,8 @@ export async function announceToCustomers(a: Announcement) {
   const recipients = await query<{ id: number }>(
     `SELECT c.id
        FROM customers c
-      WHERE (SELECT count(*) FROM notifications n
+      WHERE c.deleted_at IS NULL
+        AND (SELECT count(*) FROM notifications n
               WHERE n.customer_id = c.id AND n.kind IN ('coupon', 'ad') AND n.created_at > now() - interval '24 hours') < $1
       ORDER BY c.id`,
     [DAILY_LIMIT],
