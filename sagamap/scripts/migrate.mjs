@@ -63,6 +63,10 @@ try {
     console.log("[migrate] 観光名所（spots.sql）を投入しました");
   }
 
+  // 観光スポット・宿・交通の基本情報（名前が無いものだけ追加）と、住所からの緯度経度の求め直し
+  await client.query(await readFile(new URL("../db/listings.sql", import.meta.url), "utf8"));
+  await geocodeSpots(client);
+
   if (process.env.SEED_DEMO_DATA === "true") {
     // 動作確認用: DB が空なら架空の店舗・デモアカウントを投入
     const { rows } = await client.query("SELECT count(*)::int AS n FROM business_owners");
@@ -80,4 +84,59 @@ try {
   }
 } finally {
   await client.end();
+}
+
+/**
+ * geocoded = false の観光スポット・宿などの緯度経度を、住所から求め直す。
+ * Google（GOOGLE_MAPS_SERVER_KEY がある場合）→ 国土地理院の順。仮の位置から 10km 以上離れた結果は採らない。
+ * 求められなかった行は仮の位置のまま残し、次のデプロイでもう一度試す。
+ */
+async function geocodeSpots(db) {
+  const { rows } = await db.query("SELECT id, name, kind, address, lat, lng FROM tourist_spots WHERE NOT geocoded AND address IS NOT NULL ORDER BY id LIMIT 100");
+  if (!rows.length) return;
+  const near = (a, b) => {
+    const k = Math.PI / 180;
+    const x = (b.lng - a.lng) * k * Math.cos(((a.lat + b.lat) / 2) * k);
+    const y = (b.lat - a.lat) * k;
+    return Math.sqrt(x * x + y * y) * 6371000 < 10000;
+  };
+  const google = async (q) => {
+    if (!env.GOOGLE_MAPS_SERVER_KEY) return null;
+    const u = new URL("https://maps.googleapis.com/maps/api/geocode/json");
+    u.searchParams.set("address", q);
+    u.searchParams.set("region", "jp");
+    u.searchParams.set("language", "ja");
+    u.searchParams.set("key", env.GOOGLE_MAPS_SERVER_KEY);
+    const d = await (await fetch(u, { signal: AbortSignal.timeout(5000) })).json();
+    const loc = d?.results?.[0]?.geometry?.location;
+    return loc ? { lat: loc.lat, lng: loc.lng } : null;
+  };
+  const gsi = async (q) => {
+    const u = new URL("https://msearch.gsi.go.jp/address-search/AddressSearch");
+    u.searchParams.set("q", q);
+    const d = await (await fetch(u, { signal: AbortSignal.timeout(5000) })).json();
+    const c = Array.isArray(d) ? d[0]?.geometry?.coordinates : null;
+    return c ? { lat: Number(c[1]), lng: Number(c[0]) } : null;
+  };
+  let done = 0;
+  // デプロイが長引かないよう、全体で 90 秒まで（残りは次のデプロイで）
+  const until = Date.now() + 90_000;
+  for (const r of rows) {
+    if (Date.now() > until) break;
+    // 観光スポットは名前で探すほうが正確（住所は大字までのものがある）。宿などは番地まで分かる住所で探す
+    const tries = r.kind === "sight" ? [() => google(`${r.address} ${r.name}`), () => gsi(r.address)] : [() => google(r.address), () => gsi(r.address)];
+    for (const t of tries) {
+      try {
+        const p = await t();
+        if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng) && near(r, p)) {
+          await db.query("UPDATE tourist_spots SET lat = $1, lng = $2, geocoded = true WHERE id = $3", [p.lat, p.lng, r.id]);
+          done += 1;
+          break;
+        }
+      } catch {
+        /* 次の方法で試す */
+      }
+    }
+  }
+  console.log(`[migrate] 観光スポット・宿などの位置を住所から求めました（${done} / ${rows.length} 件）`);
 }

@@ -4,9 +4,9 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Landmark, Layers } from "lucide-react";
+import { BedDouble, Bus, Landmark, Layers, UtensilsCrossed } from "lucide-react";
 import { categoryIcon } from "./CategoryIcon";
-import { MapLegend, couponLabel, declutter, hasCoupon, isHighlighted, type MapViewProps } from "./MapView";
+import { MapLegend, couponLabel, declutter, hasCoupon, isHighlighted, isListing, type MapViewProps } from "./MapView";
 import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER } from "@/lib/config";
 import { formatDistance, type LatLng } from "@/lib/geo";
 import { escapeHtml } from "@/lib/escape";
@@ -21,6 +21,7 @@ const COLORS = {
   coupon: "#C43D2B",
   shop: "#1E3A6E",
   spot: "#B9832A",
+  listing: "#5F7F35",
   me: "#2e90fa",
   route: "#EE6A3A",
 };
@@ -36,6 +37,11 @@ function iconSvg(category: string, size: number) {
   return iconSvgCache.get(key)!;
 }
 const spotSvg = renderToStaticMarkup(<Landmark size={14} strokeWidth={2.2} color="#fff" aria-hidden />);
+const listingSvg: Record<string, string> = {
+  stay: renderToStaticMarkup(<BedDouble size={14} strokeWidth={2.2} color="#fff" aria-hidden />),
+  transport: renderToStaticMarkup(<Bus size={14} strokeWidth={2.2} color="#fff" aria-hidden />),
+  food: renderToStaticMarkup(<UtensilsCrossed size={14} strokeWidth={2.2} color="#fff" aria-hidden />),
+};
 
 /**
  * Google Maps の API キーが無いときの代替地図（OpenStreetMap + Leaflet）。
@@ -53,6 +59,7 @@ export default function LeafletMapView({
   routeMode = "foot",
   onRoute,
   onSelectShop,
+  onSelectSpot,
   selectedId,
   className = "h-[62vh]",
   legend = true,
@@ -73,6 +80,8 @@ export default function LeafletMapView({
   };
   const onSelectRef = useRef(onSelectShop);
   onSelectRef.current = onSelectShop;
+  const onSpotRef = useRef(onSelectSpot);
+  onSpotRef.current = onSelectSpot;
   const onRouteRef = useRef(onRoute);
   onRouteRef.current = onRoute;
 
@@ -240,9 +249,14 @@ export default function LeafletMapView({
         className: "",
         iconSize: [24, 24],
         iconAnchor: [12, 12],
-        html: `<div class="sm-pin" style="width:24px;height:24px;border-radius:8px;background:${COLORS.spot}">${spotSvg}</div>`,
+        html: isListing(s)
+          ? `<div class="sm-pin" style="width:24px;height:24px;border-radius:999px;background:${COLORS.listing}">${listingSvg[s.kind ?? "stay"]}</div>`
+          : `<div class="sm-pin" style="width:24px;height:24px;border-radius:8px;background:${COLORS.spot}">${spotSvg}</div>`,
       });
-      L.marker(s, { icon, title: s.name }).bindTooltip(escapeHtml(s.name)).addTo(g);
+      L.marker(s, { icon, title: s.name })
+        .bindTooltip(escapeHtml(s.name))
+        .on("click", () => onSpotRef.current?.(s.id))
+        .addTo(g);
     }
   }, [spots]);
 

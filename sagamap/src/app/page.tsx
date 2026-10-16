@@ -20,20 +20,24 @@ import {
   MapPin,
   Megaphone,
   Navigation,
+  Phone,
   Search,
   Sparkles,
   Store,
+  BedDouble,
   Ticket,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
-import MapView, { hasCoupon, type MapShop, type MapSpot, type RouteSummary } from "@/components/MapView";
+import MapView, { hasCoupon, isListing, type MapShop, type MapSpot, type RouteSummary } from "@/components/MapView";
 import { trackAd, useActiveAds, type Ad } from "@/components/AdBanner";
 import CategoryIcon from "@/components/CategoryIcon";
 import ShopPhoto from "@/components/ShopPhoto";
 import LocationAccuracy from "@/components/LocationAccuracy";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import Carousel from "@/components/customer/Carousel";
-import { AdCard, CouponCard, ShopCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
+import { AdCard, CouponCard, LISTING_LABEL, ListingCard, ShopCard, SpecialtyCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
+import { SPECIALTIES } from "@/lib/specialties";
 import { type SlidePhoto } from "@/components/customer/PhotoSlider";
 import DetailSheet, { type DetailCoupon, type DetailShop, type MenuItem, type SheetFrom } from "@/components/customer/DetailSheet";
 import CouponUse, { type UseTarget } from "@/components/customer/CouponUse";
@@ -49,10 +53,10 @@ import GuideTour, { guideUnseen, type TourStep } from "@/components/customer/Gui
 import { api } from "@/lib/fetcher";
 
 type Shop = MapShop & DetailShop & { address: string; service_description: string };
-type Spot = MapSpot & { description?: string };
+type Spot = MapSpot & { description?: string; area?: string; address?: string | null; tel?: string | null };
 type Rec = { id: number; reasons?: string[] };
 type Favorite = { id: number; name: string; lat: number; lng: number };
-type RouteTarget = { id: number; name: string; lat: number; lng: number; kind: "shop" | "spot"; description?: string };
+type RouteTarget = { id: number; name: string; lat: number; lng: number; kind: "shop" | "spot"; description?: string; tel?: string | null };
 type ShopEvent = "route" | "call" | "save" | "share" | "coupon_view";
 
 export default function HomePage() {
@@ -322,7 +326,22 @@ function CustomerHome() {
   }, [recs, visible, byDistance]);
   const recIds = useMemo(() => new Set(recList.map((r) => r.shop.id)), [recList]);
   const nearList = useMemo(() => byDistance(visible.filter((s) => !recIds.has(s.id))).slice(0, 12), [visible, recIds, byDistance]);
-  const spotList = useMemo(() => byDistance(spots).slice(0, 12), [spots, byDistance]);
+  const spotList = useMemo(() => byDistance(spots.filter((s) => !isListing(s))).slice(0, 12), [spots, byDistance]);
+  const listingList = useMemo(() => byDistance(spots.filter(isListing)).slice(0, 15), [spots, byDistance]);
+  // 観光スポット・宿などへの行き方（宿などは種類と住所を添える）
+  const spotRoute = useCallback(
+    (s: Spot) =>
+      startRoute({
+        id: s.id,
+        name: s.name,
+        lat: s.lat,
+        lng: s.lng,
+        kind: "spot",
+        description: isListing(s) ? [LISTING_LABEL[s.kind ?? ""], s.description, s.address?.replace(/^佐賀県/, "")].filter(Boolean).join("・") : s.description,
+        tel: s.tel,
+      }),
+    [startRoute],
+  );
 
   // PR は表示された時点で「表示」として記録（この画面を開いている間は 1 広告 1 回）
   const seenAds = useRef(new Set<number>());
@@ -371,6 +390,10 @@ function CustomerHome() {
           highlightRadius={Number.POSITIVE_INFINITY}
           selectedId={sheet?.id ?? preview ?? routeShop?.id ?? null}
           onSelectShop={(id) => setPreview(id)}
+          onSelectSpot={(id) => {
+            const s = spots.find((x) => x.id === id);
+            if (s) spotRoute(s);
+          }}
           routeStops={routeStops}
           routeMode={routeMode}
           onRoute={(r, err) => {
@@ -458,6 +481,7 @@ function CustomerHome() {
               }
               onNav={() => routeTo?.kind === "shop" && trackShop(routeTo.id, "route")}
               onInfo={routeTo?.kind === "shop" ? () => openSheet(routeTo.id) : undefined}
+              tel={routeTo?.kind === "spot" ? routeTo.tel : null}
               onClose={() => {
                 setRouteTo(null);
                 setFavRoute(false);
@@ -632,10 +656,22 @@ function CustomerHome() {
             {spotList.length > 0 && (
               <Carousel title="観光スポット" eyebrow="SIGHTSEEING" icon={<Landmark className="h-4 w-4 text-sun-500" aria-hidden />} note="タップで、地図に行き方を表示">
                 {spotList.map((s) => (
-                  <SpotCard key={s.id} name={s.name} description={s.description} meters={dist(s)} onOpen={() => startRoute({ ...s, kind: "spot" })} />
+                  <SpotCard key={s.id} name={s.name} description={s.description} meters={dist(s)} onOpen={() => spotRoute(s)} />
                 ))}
               </Carousel>
             )}
+            {listingList.length > 0 && (
+              <Carousel title="宿・交通" eyebrow="STAY & TRAVEL" icon={<BedDouble className="h-4 w-4 text-tea-600" aria-hidden />} note="2023 年 3 月時点の公開資料の基本情報です。最新の情報は各施設にご確認ください">
+                {listingList.map((s) => (
+                  <ListingCard key={s.id} name={s.name} kind={s.kind ?? "stay"} area={s.area} tel={s.tel} meters={dist(s)} onOpen={() => spotRoute(s)} />
+                ))}
+              </Carousel>
+            )}
+            <Carousel title="佐賀の美味いもの" eyebrow="LOCAL FOOD" icon={<UtensilsCrossed className="h-4 w-4 text-sun-500" aria-hidden />} note="地域ごとの名物">
+              {SPECIALTIES.map((f) => (
+                <SpecialtyCard key={f.name} {...f} />
+              ))}
+            </Carousel>
             {shops.length === 0 && <p className="px-4 pt-6 text-sm text-slate-500">掲載店舗を準備中です。</p>}
             {isCustomer && (
               <div className="px-4 pt-2">
@@ -763,6 +799,7 @@ function RouteBar({
   navUrl,
   onNav,
   onInfo,
+  tel,
   onClose,
 }: {
   title: string;
@@ -775,6 +812,8 @@ function RouteBar({
   navUrl: string | null;
   onNav: () => void;
   onInfo?: () => void;
+  /** 宿などの基本情報の電話番号 */
+  tel?: string | null;
   onClose: () => void;
 }) {
   return (
@@ -809,7 +848,13 @@ function RouteBar({
           <X className="h-4 w-4" aria-hidden />
         </button>
       </div>
-      <div className={`mt-2 grid gap-2 ${onInfo && navUrl ? "grid-cols-2" : "grid-cols-1"}`}>
+      <div className={`mt-2 grid gap-2 ${(onInfo || tel) && navUrl ? "grid-cols-2" : "grid-cols-1"}`}>
+        {tel && (
+          <a href={`tel:${tel.replace(/[^\d+]/g, "")}`} className="btn-outline rounded-full py-2">
+            <Phone className="h-4 w-4" aria-hidden />
+            電話する
+          </a>
+        )}
         {onInfo && (
           <button onClick={onInfo} className="btn-outline rounded-full py-2">
             <Store className="h-4 w-4" aria-hidden />

@@ -427,3 +427,13 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
 
 -- 有料プランのお支払いが済んだことを、次にダッシュボードを開いたとき 1 回だけ知らせる
 ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS premium_notice_pending BOOLEAN NOT NULL DEFAULT false;
+
+-- 観光スポットに、宿・交通・飲食の基本情報（名前・電話・住所）も入れる
+ALTER TABLE tourist_spots ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'sight';
+ALTER TABLE tourist_spots ADD COLUMN IF NOT EXISTS area TEXT NOT NULL DEFAULT '';
+ALTER TABLE tourist_spots ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE tourist_spots ADD COLUMN IF NOT EXISTS tel TEXT;
+-- false の行は、migrate のときに住所から緯度経度を求め直す
+ALTER TABLE tourist_spots ADD COLUMN IF NOT EXISTS geocoded BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE tourist_spots ADD COLUMN IF NOT EXISTS hidden BOOLEAN NOT NULL DEFAULT false;
+CREATE UNIQUE INDEX IF NOT EXISTS tourist_spots_name_key ON tourist_spots (name);

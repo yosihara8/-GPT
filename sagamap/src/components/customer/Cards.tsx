@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { Heart, Landmark, MapPin } from "lucide-react";
+import { BedDouble, Bus, Heart, Landmark, MapPin, Phone, UtensilsCrossed } from "lucide-react";
 import ShopPhoto from "@/components/ShopPhoto";
 import CategoryIcon from "@/components/CategoryIcon";
 import { estimateWalkMinutes, formatDistance } from "@/lib/geo";
@@ -167,5 +167,63 @@ export function SpotCard({ name, description, meters, onOpen }: { name: string; 
         <p className="mt-1 truncate text-[11px] text-slate-500">{travelText(meters)}</p>
       </div>
     </button>
+  );
+}
+
+export const LISTING_LABEL: Record<string, string> = { stay: "宿", transport: "交通", food: "飲食・おみやげ" };
+const LISTING_ICON = { stay: BedDouble, transport: Bus, food: UtensilsCrossed } as const;
+
+/** 宿・交通・飲食の基本情報（名前・地域・電話）。押すと地図に行き方を出す */
+export function ListingCard({
+  name,
+  kind,
+  area,
+  tel,
+  meters,
+  onOpen,
+}: {
+  name: string;
+  kind: string;
+  area?: string;
+  tel?: string | null;
+  meters: number | null;
+  onOpen: () => void;
+}) {
+  const Icon = LISTING_ICON[kind as keyof typeof LISTING_ICON] ?? BedDouble;
+  return (
+    <div className="w-[200px] shrink-0 snap-start overflow-hidden rounded-2xl bg-white text-left shadow-[0_1px_2px_rgba(20,40,77,0.05),0_6px_16px_rgba(20,40,77,0.08)] ring-1 ring-slate-200/70">
+      <button onClick={onOpen} className="block w-full text-left">
+        <div className="flex h-[56px] items-center gap-2 bg-gradient-to-br from-tea-50 to-tea-100 px-3 text-tea-700">
+          <Icon className="h-6 w-6 shrink-0" strokeWidth={1.6} aria-hidden />
+          <span className="text-[11px] font-bold">
+            {LISTING_LABEL[kind] ?? ""}
+            {area ? `・${area}` : ""}
+          </span>
+        </div>
+        <div className="px-2.5 pt-2">
+          <p className="truncate text-sm font-bold text-slate-900">{name}</p>
+          <p className="mt-0.5 truncate text-[11px] text-slate-500">{travelText(meters) || "タップで行き方を表示"}</p>
+        </div>
+      </button>
+      {tel ? (
+        <a href={`tel:${tel.replace(/[^\d+]/g, "")}`} className="m-2.5 mt-1.5 flex items-center gap-1 text-xs font-bold text-saga-600">
+          <Phone className="h-3.5 w-3.5" aria-hidden />
+          <span className="num">{tel}</span>
+        </a>
+      ) : (
+        <div className="h-2.5" />
+      )}
+    </div>
+  );
+}
+
+/** 佐賀の名物（見るだけのカード） */
+export function SpecialtyCard({ name, area, note }: { name: string; area: string; note: string }) {
+  return (
+    <div className="w-[160px] shrink-0 snap-start rounded-2xl bg-white p-3 ring-1 ring-slate-200/70">
+      <p className="text-[10px] font-bold text-sun-500">{area}</p>
+      <p className="mt-0.5 text-sm font-bold text-slate-900">{name}</p>
+      <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-slate-500">{note}</p>
+    </div>
   );
 }
