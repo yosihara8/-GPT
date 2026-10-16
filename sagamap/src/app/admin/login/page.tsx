@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Lock } from "lucide-react";
 import PasswordInput from "@/components/PasswordInput";
 
@@ -9,6 +9,8 @@ import PasswordInput from "@/components/PasswordInput";
 export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [expired, setExpired] = useState(false);
+  useEffect(() => setExpired(new URLSearchParams(window.location.search).has("expired")), []);
   // 二段階認証を設定済みなら、パスワードのあとに認証アプリの 6 桁を聞く
   const [needOtp, setNeedOtp] = useState(false);
 
@@ -44,6 +46,11 @@ export default function AdminLoginPage() {
         運営者ログイン
       </h1>
       <p className="mt-1 text-sm text-slate-500">この画面は運営者専用です。</p>
+      {expired && (
+        <p role="status" className="mt-3 rounded-xl bg-sun-100 px-3 py-2 text-sm font-bold text-amber-900">
+          ログインの有効期限（12 時間）が切れました。もう一度ログインしてください。
+        </p>
+      )}
       <form onSubmit={onSubmit} className="card mt-4 space-y-4">
         <div>
           <label className="label" htmlFor="email">
