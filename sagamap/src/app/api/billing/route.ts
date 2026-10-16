@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { queryOne } from "@/lib/db";
+import { query, queryOne } from "@/lib/db";
 import { APP_URL, PRICE_DISCOUNT } from "@/lib/config";
 import { getStripe, stripeEnv } from "@/lib/stripe";
 import { requireApiUser } from "@/lib/session";
@@ -37,8 +37,13 @@ export async function POST(req: Request) {
   const stripe = getStripe();
 
   try {
+    // テスト環境から本番に切り替えたあとなど、保存している顧客番号が Stripe に無い（削除済み）ときは忘れて作り直す
+    if (owner.stripe_customer_id && !(await customerExists(stripe, owner.stripe_customer_id))) {
+      await query("UPDATE business_owners SET stripe_customer_id = NULL, stripe_subscription_id = NULL WHERE id = $1", [owner.id]);
+      owner.stripe_customer_id = null;
+    }
     // 有料プラン中、または Stripe 側に有効な契約が残っている場合はポータルへ（二重契約を防ぐ）
-    let hasActive = owner.plan === "premium" && !owner.complimentary;
+    let hasActive = owner.plan === "premium" && !owner.complimentary && Boolean(owner.stripe_customer_id);
     if (!hasActive && owner.stripe_customer_id) {
       const subs = await stripe.subscriptions.list({ customer: owner.stripe_customer_id, status: "all", limit: 10 });
       hasActive = subs.data.some((s) => ["active", "trialing", "past_due"].includes(s.status));
@@ -75,6 +80,16 @@ export async function POST(req: Request) {
   } catch (e) {
     await logServerError("billing", e);
     return NextResponse.json({ error: stripeErrorMessage(e) }, { status: 502 });
+  }
+}
+
+async function customerExists(stripe: ReturnType<typeof getStripe>, id: string) {
+  try {
+    const c = await stripe.customers.retrieve(id);
+    return !("deleted" in c && c.deleted);
+  } catch (e) {
+    if ((e as { code?: string }).code === "resource_missing") return false;
+    throw e;
   }
 }
 
