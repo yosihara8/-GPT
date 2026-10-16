@@ -424,3 +424,6 @@ CREATE INDEX IF NOT EXISTS inquiries_created_idx ON inquiries (created_at DESC);
 
 -- お客さまの退会（自分で退会できる。氏名・メールアドレスなどは消し、お店の集計（クーポンの利用回数など）は人が分からない形で残す）
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+
+-- 有料プランのお支払いが済んだことを、次にダッシュボードを開いたとき 1 回だけ知らせる
+ALTER TABLE business_owners ADD COLUMN IF NOT EXISTS premium_notice_pending BOOLEAN NOT NULL DEFAULT false;

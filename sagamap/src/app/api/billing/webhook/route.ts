@@ -30,6 +30,7 @@ export async function POST(req: Request) {
           subscriptionId: String(s.subscription),
           endsAt: null,
           leaveSpecial: true,
+          notice: true,
         });
       }
       break;
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
 async function setPlan(
   ownerId: number,
   plan: "free" | "premium",
-  stripeIds: { customerId: string; subscriptionId: string | null; endsAt: Date | null; leaveSpecial?: boolean },
+  stripeIds: { customerId: string; subscriptionId: string | null; endsAt: Date | null; leaveSpecial?: boolean; notice?: boolean },
 ) {
   const client = await pool.connect();
   try {
@@ -64,6 +65,8 @@ async function setPlan(
       `UPDATE business_owners SET plan = $1, stripe_customer_id = $2, stripe_subscription_id = $3, plan_ends_at = $4 WHERE id = $5`,
       [plan, stripeIds.customerId, stripeIds.subscriptionId, stripeIds.endsAt, ownerId],
     );
+    // お申し込みが済んだら、ダッシュボードで 1 回だけ「有料プランになりました」と知らせる
+    if (stripeIds.notice) await client.query("UPDATE business_owners SET premium_notice_pending = true WHERE id = $1", [ownerId]);
     // 特別招待の事業主が有料プランを申し込んだら、特別招待は終了（戻れない）
     if (stripeIds.leaveSpecial) {
       await client.query(

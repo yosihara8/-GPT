@@ -8,6 +8,7 @@ export default function BizPage({
   lead,
   aside,
   overlap = false,
+  notice,
   children,
 }: {
   eyebrow: string;
@@ -17,10 +18,13 @@ export default function BizPage({
   aside?: React.ReactNode;
   /** 帯の下に数字のカードを重ねるとき */
   overlap?: boolean;
+  /** 帯よりも上（画面のいちばん上）に出すお知らせ */
+  notice?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <main className="mx-auto max-w-4xl space-y-4 p-4 pb-10">
+      {notice}
       <div
         className={`karakusa -mx-4 -mt-4 flex flex-wrap items-end justify-between gap-3 bg-saga-600 px-5 pt-6 text-white sm:mx-0 sm:mt-0 sm:rounded-3xl ${
           overlap ? "pb-16" : "pb-6"
