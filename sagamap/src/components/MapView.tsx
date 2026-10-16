@@ -18,7 +18,10 @@ export type MapShop = {
   best_label?: string | null;
 };
 
-export type MapSpot = { id: number; name: string; lat: number; lng: number };
+/** 観光スポット（sight）と、宿（stay）・交通（transport）・飲食（food）の基本情報 */
+export type MapSpot = { id: number; name: string; lat: number; lng: number; kind?: string };
+/** 宿・交通・飲食の基本情報（緑）。観光スポットは黄土色 */
+export const isListing = (s: { kind?: string }) => s.kind === "stay" || s.kind === "transport" || s.kind === "food";
 export type HeatPoint = { lat: number; lng: number; weight: number };
 
 export type RouteLeg = { from: string; to: string; distance: string; duration: string };
@@ -50,6 +53,8 @@ export type MapViewProps = {
   routeMode?: "foot" | "car";
   onRoute?: (summary: RouteSummary | null, error?: string) => void;
   onSelectShop?: (id: number) => void;
+  /** 観光スポット・宿などのピンを押したとき */
+  onSelectSpot?: (id: number) => void;
   selectedId?: number | null;
   className?: string;
   /** 凡例を表示するか（お客さまの地図では出さない） */
@@ -58,7 +63,7 @@ export type MapViewProps = {
   layerToggle?: boolean;
 };
 
-const COLORS = { coupon: "#C43D2B", shop: "#1E3A6E", spot: "#B9832A", me: "#2e90fa" };
+const COLORS = { coupon: "#C43D2B", shop: "#1E3A6E", spot: "#B9832A", listing: "#5F7F35", me: "#2e90fa" };
 
 function pinIcon(color: string, scale = 1): google.maps.Icon {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40">
@@ -113,6 +118,7 @@ function GoogleMapView({
   routeStops,
   onRoute,
   onSelectShop,
+  onSelectSpot,
   selectedId,
   className = "h-[62vh]",
   legend = true,
@@ -130,6 +136,8 @@ function GoogleMapView({
   onRouteRef.current = onRoute;
   const onSelectRef = useRef(onSelectShop);
   onSelectRef.current = onSelectShop;
+  const onSpotRef = useRef(onSelectSpot);
+  onSpotRef.current = onSelectSpot;
 
   // 地図の初期化
   useEffect(() => {
@@ -246,22 +254,23 @@ function GoogleMapView({
     const map = mapRef.current;
     if (!ready || !map) return;
     spotMarkers.current.forEach((m) => m.setMap(null));
-    spotMarkers.current = spots.map(
-      (s) =>
-        new google.maps.Marker({
-          map,
-          position: s,
-          title: s.name,
-          icon: {
-            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-            scale: 5,
-            fillColor: COLORS.spot,
-            fillOpacity: 1,
-            strokeColor: "#fff",
-            strokeWeight: 1.5,
-          },
-        }),
-    );
+    spotMarkers.current = spots.map((s) => {
+      const m = new google.maps.Marker({
+        map,
+        position: s,
+        title: s.name,
+        icon: {
+          path: isListing(s) ? google.maps.SymbolPath.CIRCLE : google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+          scale: isListing(s) ? 6 : 5,
+          fillColor: isListing(s) ? COLORS.listing : COLORS.spot,
+          fillOpacity: 1,
+          strokeColor: "#fff",
+          strokeWeight: 1.5,
+        },
+      });
+      m.addListener("click", () => onSpotRef.current?.(s.id));
+      return m;
+    });
   }, [ready, spots]);
 
   // ヒートマップ（Heatmap Layer。使えない環境では円で代替表示）
@@ -380,6 +389,10 @@ export function MapLegend() {
       <div className="flex items-center gap-1.5">
         <span className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#B9832A]" />
         観光名所
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#5F7F35]" />
+        宿・交通
       </div>
     </div>
   );
