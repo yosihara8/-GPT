@@ -8,6 +8,7 @@
 
 ## 本番のアドレス
 - 正式なアドレスは **https://www.saga-kanko-map.com**（Vercel で購入。saga-kanko-map.com は www へ転送）。
+- 作業用の枝 claude/sagamap-mvp-oddfol はお試し版（プレビュー）を作らない（vercel.json の git.deploymentEnabled。オーナー決定）。本番は claude/zealous-fermi-7iQ0C。
 - Vercel の環境変数 `NEXT_PUBLIC_APP_URL` と `NEXTAUTH_URL` に同じアドレスを設定済み。メールの送信元は `noreply@saga-kanko-map.com`。
 
 ## お客さまの画面（地図はトップ `/` の 1 画面。マイページ `/dashboard/customer` はお知らせ・お気に入り・利用履歴・設定）
