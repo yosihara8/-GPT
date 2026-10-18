@@ -39,6 +39,9 @@ import Carousel from "@/components/customer/Carousel";
 import { AdCard, CouponCard, LISTING_LABEL, ListingCard, ShopCard, SpecialtyCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
 import { SPECIALTIES } from "@/lib/specialties";
 import ListingSheet from "@/components/customer/ListingSheet";
+import { AreaMark } from "@/components/customer/Carousel";
+import { AREA_LIST, areaOf } from "@/lib/areas";
+import AreaTag from "@/components/customer/AreaTag";
 import { type SlidePhoto } from "@/components/customer/PhotoSlider";
 import DetailSheet, { type DetailCoupon, type DetailShop, type MenuItem, type SheetFrom } from "@/components/customer/DetailSheet";
 import CouponUse, { type UseTarget } from "@/components/customer/CouponUse";
@@ -106,6 +109,8 @@ function CustomerHome() {
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  // エリアからさがす（北西部・西部・中部・東部・南部）
+  const [areaKey, setAreaKey] = useState<string | null>(null);
   // すぐに行けるお店の絞り込み（営業中・クーポンあり・お店の特徴）
   const [filters, setFilters] = useState<string[]>([]);
   const toggleFilter = (f: string) => setFilters((xs) => (xs.includes(f) ? xs.filter((x) => x !== f) : [...xs, f]));
@@ -292,6 +297,7 @@ function CustomerHome() {
   const q = query.trim().toLowerCase();
   const visible = useMemo(() => {
     let xs = category ? shops.filter((s) => s.category === category) : shops;
+    if (areaKey) xs = xs.filter((s) => areaOf(s.address)?.area.key === areaKey);
     if (q) xs = xs.filter((s) => `${s.name} ${s.category} ${s.service_description} ${s.address} ${(s.amenities ?? []).join(" ")} ${(s.payment_methods ?? []).join(" ")}`.toLowerCase().includes(q));
     for (const f of filters) {
       if (f === "営業中") xs = xs.filter((s) => shopStatus(s)?.open);
@@ -300,7 +306,7 @@ function CustomerHome() {
       else xs = xs.filter((s) => s.amenities?.includes(f));
     }
     return xs;
-  }, [shops, category, q, filters]);
+  }, [shops, category, q, filters, areaKey]);
   const byDistance = useCallback(<T extends { lat: number; lng: number }>(xs: T[]) => [...xs].sort((a, b) => (dist(a) ?? 0) - (dist(b) ?? 0)), [dist]);
 
   // 経路の行き先：選んだお店／観光スポット／お気に入りを巡るルート
@@ -498,18 +504,24 @@ function CustomerHome() {
       </div>
 
       {/* 一覧パネル（スマホは地図の下、パソコンは左側） */}
-      <div id="home-panel" className="relative z-10 bg-cream pb-8 lg:order-1 lg:w-[480px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-slate-200">
+      <div id="home-panel" className="relative z-10 bg-white pb-8 lg:order-1 lg:w-[480px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-slate-200">
         <div className="space-y-2 px-4 pt-3 empty:hidden">
           <VerifyEmailBanner />
           <LocationAccuracy status={status} accuracy={accuracy} />
           {isFallback && <p className="rounded-xl bg-sun-100 px-3 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>}
         </div>
 
-        {q || filters.length > 0 ? (
+        {q || filters.length > 0 || areaKey ? (
           /* 検索の結果 */
           <section className="px-4 pt-3">
             <h2 className="text-[15px] font-bold">
-              {q ? `「${query.trim()}」のお店` : `${filters.join("・")}のお店`} <span className="num text-sm text-slate-400">{visible.length}</span>
+              {q ? `「${query.trim()}」のお店` : areaKey ? `${AREA_LIST.find((a) => a.key === areaKey)?.name}エリアのお店` : `${filters.join("・")}のお店`}{" "}
+              <span className="num text-sm text-slate-400">{visible.length}</span>
+              {areaKey && (
+                <button onClick={() => setAreaKey(null)} className="ml-2 text-xs font-bold text-saga-600">
+                  エリアを解除
+                </button>
+              )}
               {filters.length > 0 && (
                 <button onClick={() => setFilters([])} className="ml-2 text-xs font-bold text-saga-600">
                   絞り込みを解除
@@ -517,7 +529,7 @@ function CustomerHome() {
               )}
             </h2>
             {visible.length === 0 && <p className="mt-2 text-sm text-slate-500">見つかりませんでした。別の言葉でさがしてみてください。</p>}
-            <ul className="mt-2 space-y-2">
+            <ul className="mt-2">
               {byDistance(visible)
                 .slice(0, 30)
                 .map((s) => (
@@ -530,7 +542,7 @@ function CustomerHome() {
         ) : (
           <>
             <section className="px-4 pt-4">
-              <div className="relative overflow-hidden rounded-3xl bg-[#1F3D73] shadow-[0_10px_28px_rgba(20,40,77,0.18)]">
+              <div className="relative overflow-hidden rounded-xl bg-[#1F3D73]">
                 <img src="/art/panorama.svg" alt="" className="absolute inset-0 h-full w-full object-cover object-[60%_45%]" aria-hidden />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#14284D]/85 via-[#14284D]/45 to-transparent" aria-hidden />
                 {isCustomer && (
@@ -598,9 +610,39 @@ function CustomerHome() {
 
             <EventBanners />
 
+            {/* エリアからさがす */}
+            <section className="px-5 pt-7">
+              <AreaMark className="mb-2" />
+              <p className="font-mincho text-[26px] font-bold leading-none tracking-[0.08em] text-slate-900">AREA</p>
+              <h2 className="mt-1.5 text-[15px] font-bold tracking-[0.14em] text-slate-800">エリアからさがす</h2>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {AREA_LIST.map((a) => (
+                  <button
+                    key={a.key}
+                    onClick={() => {
+                      setAreaKey(a.key);
+                      // 結果の一覧の見出し（地図のすぐ下）が見える位置へ
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      document.getElementById("home-panel")?.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="flex items-center justify-between rounded-lg border-2 bg-white px-3 py-2.5 text-left transition hover:bg-slate-50"
+                    style={{ borderColor: a.border }}
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-bold tracking-[0.12em]" style={{ color: a.border }}>
+                        {a.name}エリア
+                      </span>
+                      <span className="mt-0.5 block truncate text-[10px] text-slate-500">{a.towns.slice(0, 3).join("・")}{a.towns.length > 3 ? " ほか" : ""}</span>
+                    </span>
+                    <ChevronRight className="h-4 w-4 shrink-0" style={{ color: a.border }} aria-hidden />
+                  </button>
+                ))}
+              </div>
+            </section>
+
             {isCustomer && couponList.length > 0 && (
               <div data-tour="coupons">
-              <Carousel title="近くのクーポン" eyebrow="COUPON" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップで、クーポンの条件・お店の情報・行き方を表示" count={coupons.length}>
+              <Carousel band title="近くのクーポン" eyebrow="COUPON" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップで、クーポンの条件・お店の情報・行き方を表示" count={coupons.length}>
                 {couponList.map((c) => (
                   <CouponCard
                     key={c.id}
@@ -644,7 +686,7 @@ function CustomerHome() {
               </Carousel>
             )}
             {nearList.length > 0 && (
-              <Carousel title="近くのお店" eyebrow="NEARBY" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="現在地から近い順">
+              <Carousel band title="近くのお店" eyebrow="NEARBY" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="現在地から近い順">
                 {nearList.map((shop) => (
                   <ShopCard
                     key={shop.id}
@@ -668,11 +710,11 @@ function CustomerHome() {
             {listingList.length > 0 && (
               <Carousel title="宿・交通" eyebrow="STAY & TRAVEL" icon={<BedDouble className="h-4 w-4 text-tea-600" aria-hidden />} note="2023 年 3 月時点の公開資料の基本情報です。最新の情報は各施設にご確認ください">
                 {listingList.map((s) => (
-                  <ListingCard key={s.id} name={s.name} kind={s.kind ?? "stay"} area={s.area} tel={s.tel} meters={dist(s)} onOpen={() => setListingId(s.id)} />
+                  <ListingCard key={s.id} name={s.name} kind={s.kind ?? "stay"} area={s.area} address={s.address} tel={s.tel} meters={dist(s)} onOpen={() => setListingId(s.id)} />
                 ))}
               </Carousel>
             )}
-            <Carousel title="佐賀の美味いもの" eyebrow="LOCAL FOOD" icon={<UtensilsCrossed className="h-4 w-4 text-sun-500" aria-hidden />} note="地域ごとの名物">
+            <Carousel band title="佐賀の美味いもの" eyebrow="LOCAL FOOD" icon={<UtensilsCrossed className="h-4 w-4 text-sun-500" aria-hidden />} note="地域ごとの名物">
               {SPECIALTIES.map((f) => (
                 <SpecialtyCard key={f.name} {...f} />
               ))}
@@ -680,7 +722,7 @@ function CustomerHome() {
             {shops.length === 0 && <p className="px-4 pt-6 text-sm text-slate-500">掲載店舗を準備中です。</p>}
             {isCustomer && (
               <div className="px-4 pt-2">
-                <Link href="/dashboard/customer" className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-sm font-bold text-saga-600 ring-1 ring-slate-200/70">
+                <Link href="/dashboard/customer" className="flex items-center justify-between rounded-lg bg-white px-4 py-3 text-sm font-bold text-saga-600 ring-1 ring-slate-200">
                   <span className="flex items-center gap-2">
                     <Heart className="h-4 w-4" aria-hidden />
                     お気に入り・利用履歴・設定
@@ -902,12 +944,13 @@ function RouteBar({
 function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | null; onOpen: () => void }) {
   const status = shopStatus(s);
   return (
-    <button onClick={onOpen} className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-slate-200/70">
-      <span className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+    <button onClick={onOpen} className="flex w-full items-center gap-3 border-b border-slate-100 py-3 text-left">
+      <span className="h-[68px] w-[90px] shrink-0 overflow-hidden rounded-lg">
         <ShopPhoto shop={s} className="h-full w-full" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate font-bold">{s.name}</span>
+        <AreaTag address={s.address} className="my-0.5" />
         <span className="block truncate text-xs text-slate-500">
           {s.category}・{travelText(meters)}
         </span>

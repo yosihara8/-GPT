@@ -4,6 +4,7 @@ import { ArrowLeft, BedDouble, Bus, ExternalLink, Footprints, MapPin, Navigation
 import Link from "next/link";
 import MapView from "@/components/MapView";
 import { LISTING_LABEL, travelText } from "./Cards";
+import AreaTag from "./AreaTag";
 
 export type Listing = { id: number; name: string; lat: number; lng: number; kind?: string; description?: string; area?: string; address?: string | null; tel?: string | null };
 
@@ -22,7 +23,7 @@ export default function ListingSheet({ listing, meters, onClose, onRoute }: { li
 
   return (
     <div
-      className="fixed inset-0 z-[1500] flex flex-col bg-cream lg:inset-auto lg:bottom-0 lg:left-0 lg:top-14 lg:w-[480px] lg:border-r lg:border-slate-200 lg:shadow-[8px_0_24px_rgba(20,40,77,0.12)]"
+      className="fixed inset-0 z-[1500] flex flex-col bg-mizu-50 lg:inset-auto lg:bottom-0 lg:left-0 lg:top-14 lg:w-[480px] lg:border-r lg:border-slate-200 lg:shadow-[8px_0_24px_rgba(20,40,77,0.12)]"
       role="dialog"
       aria-modal="true"
       aria-label={`${listing.name}の詳細`}
@@ -46,6 +47,7 @@ export default function ListingSheet({ listing, meters, onClose, onRoute }: { li
               {listing.area ? `・${listing.area}` : ""}
             </p>
             <h1 className="mt-1 text-[24px] font-bold leading-snug text-slate-900">{listing.name}</h1>
+            <AreaTag address={listing.address} className="mt-1.5" />
             {listing.description && <p className="mt-1 text-[15px] text-slate-600">{listing.description}</p>}
             {meters != null && (
               <p className="mt-2 inline-flex items-center gap-1 text-sm text-slate-600">

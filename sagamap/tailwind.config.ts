@@ -52,6 +52,8 @@ const config: Config = {
           700: "#8E2A1E",
         },
         sun: { 100: "#FBF3DF", 300: "#F0D290", 400: "#E3B04B", 500: "#B9832A" },
+        // 水色（お客さまの画面の帯。透明感のある背景）
+        mizu: { 50: "#F3F8F9", 100: "#E7F1F3", 200: "#D3E6EA" },
         tea: { 50: "#F2F5EA", 100: "#E3EBD3", 500: "#5F7F35", 600: "#4E6B2A", 700: "#3E5622" },
         cream: "rgb(var(--page-bg) / <alpha-value>)",
         coupon: "#C43D2B",
