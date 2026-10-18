@@ -12,6 +12,8 @@ export async function GET() {
     `SELECT s.id, s.name, s.description, s.lat, s.lng, s.kind, s.area, s.address, s.tel
        FROM tourist_spots s
       WHERE NOT s.hidden
+        -- 観光名所は写真も詳しい情報も無いため出さない（オーナー決定）。宿・交通・飲食の基本情報だけ
+        AND s.kind <> 'sight'
         AND (s.tel IS NULL OR NOT EXISTS (
               SELECT 1 FROM businesses b
                WHERE regexp_replace(b.contact, '\\D', '', 'g') LIKE '%' || regexp_replace(s.tel, '\\D', '', 'g') || '%'))

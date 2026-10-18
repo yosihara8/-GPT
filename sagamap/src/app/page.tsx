@@ -38,6 +38,7 @@ import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import Carousel from "@/components/customer/Carousel";
 import { AdCard, CouponCard, LISTING_LABEL, ListingCard, ShopCard, SpecialtyCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
 import { SPECIALTIES } from "@/lib/specialties";
+import ListingSheet from "@/components/customer/ListingSheet";
 import { type SlidePhoto } from "@/components/customer/PhotoSlider";
 import DetailSheet, { type DetailCoupon, type DetailShop, type MenuItem, type SheetFrom } from "@/components/customer/DetailSheet";
 import CouponUse, { type UseTarget } from "@/components/customer/CouponUse";
@@ -109,6 +110,8 @@ function CustomerHome() {
   const [filters, setFilters] = useState<string[]>([]);
   const toggleFilter = (f: string) => setFilters((xs) => (xs.includes(f) ? xs.filter((x) => x !== f) : [...xs, f]));
   const [preview, setPreview] = useState<number | null>(null);
+  // 宿・交通などの基本情報のページ
+  const [listingId, setListingId] = useState<number | null>(null);
   const [sheet, setSheet] = useState<{ id: number; from: SheetFrom } | null>(null);
   const [detail, setDetail] = useState<{ id: number; business: Partial<DetailShop>; coupons: DetailCoupon[]; menu: MenuItem[]; photos: SlidePhoto[] } | null>(null);
   const [useTarget, setUseTarget] = useState<UseTarget | null>(null);
@@ -376,6 +379,7 @@ function CustomerHome() {
       .slice(0, 10);
   }, [sheetBase, shops]);
   const previewShop = preview ? shops.find((s) => s.id === preview) : undefined;
+  const listingSheet = listingId ? spots.find((s) => s.id === listingId) : undefined;
   const routeShop = routeTo?.kind === "shop" ? shops.find((s) => s.id === routeTo.id) : undefined;
 
   return (
@@ -392,7 +396,8 @@ function CustomerHome() {
           onSelectShop={(id) => setPreview(id)}
           onSelectSpot={(id) => {
             const s = spots.find((x) => x.id === id);
-            if (s) spotRoute(s);
+            if (s && isListing(s)) setListingId(s.id);
+            else if (s) spotRoute(s);
           }}
           routeStops={routeStops}
           routeMode={routeMode}
@@ -663,7 +668,7 @@ function CustomerHome() {
             {listingList.length > 0 && (
               <Carousel title="宿・交通" eyebrow="STAY & TRAVEL" icon={<BedDouble className="h-4 w-4 text-tea-600" aria-hidden />} note="2023 年 3 月時点の公開資料の基本情報です。最新の情報は各施設にご確認ください">
                 {listingList.map((s) => (
-                  <ListingCard key={s.id} name={s.name} kind={s.kind ?? "stay"} area={s.area} tel={s.tel} meters={dist(s)} onOpen={() => spotRoute(s)} />
+                  <ListingCard key={s.id} name={s.name} kind={s.kind ?? "stay"} area={s.area} tel={s.tel} meters={dist(s)} onOpen={() => setListingId(s.id)} />
                 ))}
               </Carousel>
             )}
@@ -687,6 +692,19 @@ function CustomerHome() {
           </>
         )}
       </div>
+
+      {/* 宿・交通などの基本情報のページ */}
+      {listingSheet && (
+        <ListingSheet
+          listing={listingSheet}
+          meters={dist(listingSheet)}
+          onClose={() => setListingId(null)}
+          onRoute={() => {
+            setListingId(null);
+            spotRoute(listingSheet);
+          }}
+        />
+      )}
 
       {/* お店のページ（画面いっぱい。パソコンは左側。戻るボタンで閉じる） */}
       {sheetShop && (
