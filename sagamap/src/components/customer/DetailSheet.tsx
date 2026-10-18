@@ -29,6 +29,7 @@ import ShopPhoto from "@/components/ShopPhoto";
 import CategoryIcon from "@/components/CategoryIcon";
 import { type Ad } from "@/components/AdBanner";
 import Carousel from "./Carousel";
+import AreaTag from "./AreaTag";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { ShopCard, travelText, type CardShop } from "./Cards";
 import { PRICE_LEVEL_LABELS } from "@/lib/config";
@@ -195,7 +196,7 @@ export default function DetailSheet({
 
   return (
     <div
-      className="fixed inset-0 z-[1500] flex flex-col bg-cream lg:inset-auto lg:bottom-0 lg:left-0 lg:top-14 lg:w-[480px] lg:border-r lg:border-slate-200 lg:shadow-[8px_0_24px_rgba(20,40,77,0.12)]"
+      className="fixed inset-0 z-[1500] flex flex-col bg-mizu-50 lg:inset-auto lg:bottom-0 lg:left-0 lg:top-14 lg:w-[480px] lg:border-r lg:border-slate-200 lg:shadow-[8px_0_24px_rgba(20,40,77,0.12)]"
       role="dialog"
       aria-modal="true"
       aria-label={`${shop.name}の詳細`}
@@ -236,6 +237,7 @@ export default function DetailSheet({
               {shop.price_level ? <span>・{PRICE_LEVEL_LABELS[shop.price_level]}</span> : null}
             </p>
             <h1 className="mt-1 text-[24px] font-bold leading-snug text-slate-900">{shop.name}</h1>
+            <AreaTag address={shop.address} className="mt-1.5" />
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
               {status && (
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${status.open ? "bg-tea-100 text-tea-700" : "bg-slate-100 text-slate-600"}`}>{status.label}</span>
