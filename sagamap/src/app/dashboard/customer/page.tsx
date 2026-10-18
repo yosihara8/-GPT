@@ -4,16 +4,12 @@ import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Bell, ChevronRight, Clock, Heart, Mail, Map as MapIcon, Route as RouteIcon, Settings } from "lucide-react";
+import { Bell, ChevronRight, Clock, Heart, Map as MapIcon, Route as RouteIcon, Settings } from "lucide-react";
 import { api } from "@/lib/fetcher";
 import Carousel from "@/components/customer/Carousel";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { ShopCard } from "@/components/customer/Cards";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import EmailChangeForm from "@/components/EmailChangeForm";
-import DeleteAccount from "@/components/DeleteAccount";
-import PasswordChangeForm from "@/components/PasswordChangeForm";
-import NotifySetting from "@/components/NotifySetting";
 import NotificationList from "@/components/customer/NotificationList";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -75,14 +71,15 @@ function MyPageInner() {
   // いま見ている欄（下のメニューで色を付ける）
   const [activeSection, setActiveSection] = useState("news");
   useEffect(() => {
-    const ids = ["news", "favorites", "history", "settings"];
+    // 設定は別ページなので、いちばん下まで来たら「利用履歴」に色を付ける
+    const ids = ["news", "favorites", "history"];
     const onScroll = () => {
       let cur = "news";
       for (const id of ids) {
         const el = document.getElementById(id);
         if (el && el.getBoundingClientRect().top <= 140) cur = id;
       }
-      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) cur = "settings";
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) cur = "history";
       setActiveSection(cur);
     };
     onScroll();
@@ -117,7 +114,7 @@ function MyPageInner() {
     { href: "#news", label: "お知らせ", icon: Bell, badge: unread },
     { href: "#favorites", label: "お気に入り", icon: Heart, badge: 0 },
     { href: "#history", label: "利用履歴", icon: Clock, badge: 0 },
-    { href: "#settings", label: "設定", icon: Settings, badge: 0 },
+    { href: "/dashboard/customer/settings", label: "設定", icon: Settings, badge: 0 },
   ];
 
   return (
@@ -244,21 +241,16 @@ function MyPageInner() {
         )}
       </section>
 
-      {/* 設定 */}
-      <section id="settings" className="scroll-mt-28 space-y-4 px-4 pt-6">
-        <SectionTitle eyebrow="SETTINGS" title="設定" icon={<Settings className="h-4 w-4 text-saga-600" aria-hidden />} />
-        <NotifySetting />
-        <EmailChangeForm />
-        <PasswordChangeForm />
-        <Link href="/contact" className="card flex items-center gap-3 hover:bg-slate-50">
-          <Mail className="h-5 w-5 shrink-0 text-saga-600" aria-hidden />
+      {/* 設定（別ページにまとめる。項目は押したときだけ開く） */}
+      <section id="settings" className="scroll-mt-28 px-4 pt-8">
+        <Link href="/dashboard/customer/settings" className="flex items-center gap-3 rounded-lg bg-white px-4 py-3.5 ring-1 ring-slate-200 hover:bg-slate-50">
+          <Settings className="h-5 w-5 shrink-0 text-saga-600" aria-hidden />
           <span className="min-w-0 flex-1">
-            <span className="block font-bold">お問い合わせ</span>
-            <span className="block text-xs text-slate-500">使い方・クーポン・退会・個人情報のご請求など</span>
+            <span className="block font-bold">設定</span>
+            <span className="block text-xs text-slate-500">お知らせメール・メールアドレス・パスワード・お問い合わせ</span>
           </span>
           <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
         </Link>
-        <DeleteAccount />
       </section>
     </main>
   );

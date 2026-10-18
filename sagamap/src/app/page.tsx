@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
+  ArrowLeft,
   CircleHelp,
   Bell,
   Clock,
@@ -37,7 +38,8 @@ import LocationAccuracy from "@/components/LocationAccuracy";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import Carousel from "@/components/customer/Carousel";
 import { AdCard, CouponCard, LISTING_LABEL, ListingCard, ShopCard, SpecialtyCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
-import { SPECIALTIES } from "@/lib/specialties";
+import { SPECIALTIES, type Specialty } from "@/lib/specialties";
+import SpecialtySheet from "@/components/customer/SpecialtySheet";
 import ListingSheet from "@/components/customer/ListingSheet";
 import { AreaMark } from "@/components/customer/Carousel";
 import { AREA_LIST, areaOf } from "@/lib/areas";
@@ -117,6 +119,8 @@ function CustomerHome() {
   const [preview, setPreview] = useState<number | null>(null);
   // 宿・交通などの基本情報のページ
   const [listingId, setListingId] = useState<number | null>(null);
+  // 佐賀の名物の説明
+  const [food, setFood] = useState<Specialty | null>(null);
   const [sheet, setSheet] = useState<{ id: number; from: SheetFrom } | null>(null);
   const [detail, setDetail] = useState<{ id: number; business: Partial<DetailShop>; coupons: DetailCoupon[]; menu: MenuItem[]; photos: SlidePhoto[] } | null>(null);
   const [useTarget, setUseTarget] = useState<UseTarget | null>(null);
@@ -307,6 +311,14 @@ function CustomerHome() {
     }
     return xs;
   }, [shops, category, q, filters, areaKey]);
+  // 検索・絞り込み・エリアをまとめてやめて、トップの一覧に戻る
+  const backToTop = useCallback(() => {
+    setAreaKey(null);
+    setFilters([]);
+    setQuery("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("home-panel")?.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   const byDistance = useCallback(<T extends { lat: number; lng: number }>(xs: T[]) => [...xs].sort((a, b) => (dist(a) ?? 0) - (dist(b) ?? 0)), [dist]);
 
   // 経路の行き先：選んだお店／観光スポット／お気に入りを巡るルート
@@ -514,19 +526,22 @@ function CustomerHome() {
         {q || filters.length > 0 || areaKey ? (
           /* 検索の結果 */
           <section className="px-4 pt-3">
-            <h2 className="text-[15px] font-bold">
-              {q ? `「${query.trim()}」のお店` : areaKey ? `${AREA_LIST.find((a) => a.key === areaKey)?.name}エリアのお店` : `${filters.join("・")}のお店`}{" "}
+            {/* 戻る（エリア・絞り込み・検索をまとめてやめて、トップの一覧に戻る） */}
+            <button
+              onClick={backToTop}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-saga-700 py-3 text-sm font-bold text-white shadow-sm hover:bg-saga-600"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              トップに戻る（すべてのお店を見る）
+            </button>
+            <h2 className="mt-4 flex flex-wrap items-center gap-2 text-[15px] font-bold">
+              {areaKey && !q && filters.length === 0 ? (
+                <span className="rounded-full px-2.5 py-0.5 text-sm text-white" style={{ background: AREA_LIST.find((a) => a.key === areaKey)?.border }}>
+                  {AREA_LIST.find((a) => a.key === areaKey)?.name}エリア
+                </span>
+              ) : null}
+              {q ? `「${query.trim()}」のお店` : areaKey ? "のお店" : `${filters.join("・")}のお店`}
               <span className="num text-sm text-slate-400">{visible.length}</span>
-              {areaKey && (
-                <button onClick={() => setAreaKey(null)} className="ml-2 text-xs font-bold text-saga-600">
-                  エリアを解除
-                </button>
-              )}
-              {filters.length > 0 && (
-                <button onClick={() => setFilters([])} className="ml-2 text-xs font-bold text-saga-600">
-                  絞り込みを解除
-                </button>
-              )}
             </h2>
             {visible.length === 0 && <p className="mt-2 text-sm text-slate-500">見つかりませんでした。別の言葉でさがしてみてください。</p>}
             <ul className="mt-2">
@@ -538,6 +553,12 @@ function CustomerHome() {
                   </li>
                 ))}
             </ul>
+            {visible.length > 3 && (
+              <button onClick={backToTop} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-bold text-saga-700 ring-1 ring-saga-300">
+                <ArrowLeft className="h-4 w-4" aria-hidden />
+                トップに戻る
+              </button>
+            )}
           </section>
         ) : (
           <>
@@ -716,7 +737,7 @@ function CustomerHome() {
             )}
             <Carousel band title="佐賀の美味いもの" eyebrow="LOCAL FOOD" icon={<UtensilsCrossed className="h-4 w-4 text-sun-500" aria-hidden />} note="地域ごとの名物">
               {SPECIALTIES.map((f) => (
-                <SpecialtyCard key={f.name} {...f} />
+                <SpecialtyCard key={f.name} name={f.name} area={f.area} note={f.note} onOpen={() => setFood(f)} />
               ))}
             </Carousel>
             {shops.length === 0 && <p className="px-4 pt-6 text-sm text-slate-500">掲載店舗を準備中です。</p>}
@@ -734,6 +755,21 @@ function CustomerHome() {
           </>
         )}
       </div>
+
+      {/* 佐賀の名物の説明 */}
+      {food && (
+        <SpecialtySheet
+          item={food}
+          shopCount={shops.filter((s) => `${s.name} ${s.service_description}`.includes(food.keyword)).length}
+          onClose={() => setFood(null)}
+          onSearch={() => {
+            setQuery(food.keyword);
+            setFood(null);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            document.getElementById("home-panel")?.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
+      )}
 
       {/* 宿・交通などの基本情報のページ */}
       {listingSheet && (
