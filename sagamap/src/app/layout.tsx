@@ -11,7 +11,7 @@ import { APP_URL } from "@/lib/config";
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: { default: "佐賀観光マップ", template: "%s｜佐賀観光マップ" },
-  description: "佐賀のお店と、旅する人をつなぐ観光マップ。近くのクーポン・おすすめのお店・観光スポットを地図で見つけよう。",
+  description: "佐賀のお店と、旅する人をつなぐ観光マップ。近くのクーポン・おすすめのお店・宿や交通を地図で見つけよう。",
 };
 
 export const viewport: Viewport = {

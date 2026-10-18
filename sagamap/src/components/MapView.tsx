@@ -53,6 +53,8 @@ export type MapViewProps = {
   routeMode?: "foot" | "car";
   onRoute?: (summary: RouteSummary | null, error?: string) => void;
   onSelectShop?: (id: number) => void;
+  /** 最初に表示する中心（省略時は現在地、無ければ佐賀市） */
+  center?: { lat: number; lng: number } | null;
   /** 観光スポット・宿などのピンを押したとき */
   onSelectSpot?: (id: number) => void;
   selectedId?: number | null;
@@ -119,6 +121,7 @@ function GoogleMapView({
   onRoute,
   onSelectShop,
   onSelectSpot,
+  center,
   selectedId,
   className = "h-[62vh]",
   legend = true,
@@ -143,7 +146,7 @@ function GoogleMapView({
   useEffect(() => {
     if (!ready || !divRef.current || mapRef.current) return;
     mapRef.current = new google.maps.Map(divRef.current, {
-      center: me ?? SAGA_CENTER,
+      center: center ?? me ?? SAGA_CENTER,
       zoom: 15,
       mapId: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || undefined,
       // 地図 ID が無いときは、他社の店名を消して登録店のピンを目立たせる
@@ -154,6 +157,8 @@ function GoogleMapView({
       fullscreenControl: false,
       clickableIcons: false,
     });
+    // 最初の 1 回だけ作る（中心はその時点の値）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, me]);
 
   // 現在地 + 検索範囲の円
@@ -385,10 +390,6 @@ export function MapLegend() {
       <div className="flex items-center gap-1.5">
         <span className="inline-block h-2.5 w-2.5 rounded-full bg-shop" />
         お店
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-[3px] bg-[#B9832A]" />
-        観光名所
       </div>
       <div className="flex items-center gap-1.5">
         <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#5F7F35]" />
