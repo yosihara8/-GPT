@@ -206,13 +206,14 @@ export function ListingCard({
   );
 }
 
-/** 佐賀の名物（見るだけのカード） */
-export function SpecialtyCard({ name, area, note }: { name: string; area: string; note: string }) {
+/** 佐賀の名物のカード（押すと説明を開く） */
+export function SpecialtyCard({ name, area, note, onOpen }: { name: string; area: string; note: string; onOpen: () => void }) {
   return (
-    <div className="w-[164px] shrink-0 snap-start rounded-lg border-t-[3px] border-sun-400 bg-white p-3.5 ring-1 ring-slate-200">
+    <button onClick={onOpen} className="w-[164px] shrink-0 snap-start rounded-lg border-t-[3px] border-sun-400 bg-white p-3.5 text-left ring-1 ring-slate-200 hover:bg-slate-50">
       <p className="text-[10px] font-bold tracking-widest text-sun-500">{area}</p>
       <p className="mt-0.5 text-sm font-bold text-slate-900">{name}</p>
       <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-slate-500">{note}</p>
-    </div>
+      <p className="mt-2 text-[11px] font-bold text-saga-600">詳しく見る ›</p>
+    </button>
   );
 }

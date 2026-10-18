@@ -55,7 +55,7 @@ export default function NoticeSheet({
         </div>
         <div className="overflow-y-auto px-4 pb-4">
           <NotificationList items={items} freshIds={freshIds} onOpen={onOpenNotice} onDelete={onDelete} onDeleteRead={onDeleteRead} />
-          <Link href="/dashboard/customer#settings" className="mt-3 block text-center text-xs text-slate-500 underline">
+          <Link href="/dashboard/customer/settings?open=notify" className="mt-3 block text-center text-xs text-slate-500 underline">
             お知らせメールの設定
           </Link>
         </div>
