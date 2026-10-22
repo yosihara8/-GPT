@@ -10,6 +10,8 @@ import { APP_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
+  // 正規のアドレス（?ref= や ?next= 付きのアドレスを、同じページの重複として扱わせない）
+  alternates: { canonical: "./" },
   title: { default: "佐賀観光マップ", template: "%s｜佐賀観光マップ" },
   description: "佐賀のお店と、旅する人をつなぐ観光マップ。近くのクーポン・おすすめのお店・宿や交通を地図で見つけよう。",
 };
