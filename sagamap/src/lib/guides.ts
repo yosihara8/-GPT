@@ -84,3 +84,60 @@ export const AREA_SLUGS: Record<string, { slug: string; label: string }> = {
 export const guideOf = (slug: string) => GUIDES.find((g) => g.slug === slug);
 export const guideOfCategory = (category: string) => GUIDES.find((g) => g.category === category);
 export const areaKeyOfSlug = (slug: string) => Object.entries(AREA_SLUGS).find(([, v]) => v.slug === slug)?.[0];
+
+/** 英語の表示（題・ひとこと・説明） */
+export const GUIDE_EN: Record<string, { title: string; lead: string; intro: string }> = {
+  lunch: {
+    title: "Lunch & Local Food in Saga",
+    lead: "Places for lunch and dinner in Saga",
+    intro: "Saga beef, Sicilian Rice, Yobuko squid, Ureshino’s hot-spring tofu — Saga is full of local flavors. Here are the restaurants on Saga Kanko Map, by area.",
+  },
+  cafe: {
+    title: "Cafés in Saga",
+    lead: "Cafés and coffee shops in Saga",
+    intro: "From the castle town of Saga to the pottery towns of Arita and Imari and the hot-spring towns of Takeo and Ureshino, Saga has lovely cafés that match each town’s mood — some serve Ureshino tea or use Arita ware. Find a place to take a break.",
+  },
+  sweets: {
+    title: "Sweets & Japanese Confectionery in Saga",
+    lead: "Sweets shops in Saga",
+    intro: "From marubouro to Ogi yokan, Saga has a long tradition of sweets. Great for souvenirs or snacking as you stroll.",
+  },
+  bar: {
+    title: "Bars & Izakaya in Saga",
+    lead: "Places to enjoy the evening in Saga",
+    intro: "Saga is a sake region with many breweries. Enjoy local sake, craft beer and dishes made with Saga ingredients.",
+  },
+  shopping: {
+    title: "Shops & Souvenirs in Saga",
+    lead: "Gift and souvenir shops in Saga",
+    intro: "Find Saga-made goods and gifts from local makers — perfect souvenirs of your trip.",
+  },
+  craft: {
+    title: "Pottery & Crafts in Saga",
+    lead: "Arita, Imari and Karatsu ware",
+    intro: "Saga is one of Japan’s great pottery regions — Arita ware, Imari ware and Karatsu ware. Visit kilns, galleries and tableware shops.",
+  },
+  stay: {
+    title: "Hotels & Hot Springs in Saga",
+    lead: "Ryokan, hotels and onsen inns in Saga",
+    intro: "Saga has famous hot springs such as Ureshino, Takeo and Furuyu. Find a ryokan or hotel as your base.",
+  },
+  activity: {
+    title: "Experiences & Activities in Saga",
+    lead: "Things to do in Saga",
+    intro: "Pottery making, tea experiences, sake brewery tours, and outdoor activities by the sea and mountains — make memories in Saga.",
+  },
+  beauty: {
+    title: "Beauty & Relaxation in Saga",
+    lead: "Beauty and wellness in Saga",
+    intro: "Starting with Ureshino, known for its “skin-beautifying” hot springs, relax and recharge at Saga’s beauty and wellness spots.",
+  },
+};
+
+export const AREA_LABEL_EN: Record<string, string> = {
+  nw: "Karatsu · Genkai",
+  w: "Imari · Arita",
+  c: "Saga · Ogi · Taku",
+  e: "Tosu · Kanzaki · Yoshinogari",
+  s: "Takeo · Ureshino · Kashima",
+};

@@ -1,10 +1,13 @@
 "use client";
 
 import { Search, UtensilsCrossed, X } from "lucide-react";
-import type { Specialty } from "@/lib/specialties";
+import { SPECIALTY_EN, type Specialty } from "@/lib/specialties";
+import { useLang } from "@/components/LangProvider";
 
 /** 佐賀の名物の説明（下から開く小さな画面）。掲載店があれば、そのお店をさがせる */
-export default function SpecialtySheet({ item, shopCount, onSearch, onClose }: { item: Specialty; shopCount: number; onSearch: () => void; onClose: () => void }) {
+export default function SpecialtySheet({ item: raw, shopCount, onSearch, onClose }: { item: Specialty; shopCount: number; onSearch: () => void; onClose: () => void }) {
+  const { lang, t } = useLang();
+  const item = lang === "en" && SPECIALTY_EN[raw.name] ? { ...raw, ...SPECIALTY_EN[raw.name] } : raw;
   return (
     <div className="fixed inset-0 z-[1600] flex items-end justify-center bg-slate-900/40 sm:items-center" onClick={onClose} role="dialog" aria-modal="true" aria-label={item.name}>
       <div className="w-full max-w-md rounded-t-2xl bg-white p-5 pb-8 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
@@ -13,7 +16,7 @@ export default function SpecialtySheet({ item, shopCount, onSearch, onClose }: {
             <p className="text-[11px] font-bold tracking-widest text-sun-500">{item.area}</p>
             <h2 className="mt-0.5 font-mincho text-[22px] font-bold text-slate-900">{item.name}</h2>
           </div>
-          <button onClick={onClose} aria-label="閉じる" className="rounded-full p-2 text-slate-400 hover:bg-slate-100">
+          <button onClick={onClose} aria-label={t("閉じる")} className="rounded-full p-2 text-slate-400 hover:bg-slate-100">
             <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
@@ -24,11 +27,11 @@ export default function SpecialtySheet({ item, shopCount, onSearch, onClose }: {
         {shopCount > 0 ? (
           <button onClick={onSearch} className="btn-accent mt-5 w-full rounded-full py-3">
             <Search className="h-4 w-4" aria-hidden />
-            「{item.keyword}」のお店をさがす（{shopCount} 件）
+            {t("「{k}」のお店をさがす（{n} 件）", { k: raw.keyword, n: shopCount })}
           </button>
         ) : (
           <p className="mt-5 rounded-lg bg-mizu-50 px-3 py-2.5 text-xs leading-relaxed text-slate-500">
-            佐賀観光マップには、まだこの名物のお店が載っていません。お店が登録されると、ここからさがせるようになります。
+            {t("佐賀観光マップには、まだこの名物のお店が載っていません。お店が登録されると、ここからさがせるようになります。")}
           </p>
         )}
       </div>

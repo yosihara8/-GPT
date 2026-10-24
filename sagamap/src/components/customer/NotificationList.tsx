@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Ticket, Megaphone, Bell, X } from "lucide-react";
+import { useT } from "@/components/LangProvider";
 
 export type Notice = { id: number; title: string; body: string; link: string | null; created_at: string; read_at: string | null; kind?: string };
 
@@ -33,19 +34,20 @@ export default function NotificationList({
   onDeleteRead: () => void;
 }) {
   const [showOld, setShowOld] = useState(false);
+  const t = useT();
   const fresh = items.filter((n) => freshIds.has(n.id));
   const old = items.filter((n) => !freshIds.has(n.id));
 
   if (items.length === 0) {
     return (
       <p className="rounded-2xl bg-white p-4 text-sm text-slate-500 ring-1 ring-slate-200/70">
-        新しいお知らせはありません。近くのお店がクーポンを出すと、ここに届きます。
+        {t("新しいお知らせはありません。近くのお店がクーポンを出すと、ここに届きます。")}
       </p>
     );
   }
   return (
     <div className="space-y-2">
-      {fresh.length === 0 && <p className="rounded-2xl bg-white p-4 text-sm text-slate-500 ring-1 ring-slate-200/70">新しいお知らせはありません。</p>}
+      {fresh.length === 0 && <p className="rounded-2xl bg-white p-4 text-sm text-slate-500 ring-1 ring-slate-200/70">{t("新しいお知らせはありません。")}</p>}
       {fresh.map((n) => (
         <Row key={n.id} n={n} fresh onOpen={onOpen} onDelete={onDelete} />
       ))}
@@ -57,7 +59,7 @@ export default function NotificationList({
             aria-expanded={showOld}
             className="flex w-full items-center gap-1 py-2 text-sm font-bold text-slate-500"
           >
-            以前のお知らせ（{old.length}件）
+            {t("以前のお知らせ（{n}件）", { n: old.length })}
             <ChevronDown className={`h-4 w-4 transition ${showOld ? "rotate-180" : ""}`} aria-hidden />
           </button>
           {showOld && (
@@ -66,7 +68,7 @@ export default function NotificationList({
                 <Row key={n.id} n={n} onOpen={onOpen} onDelete={onDelete} />
               ))}
               <button type="button" onClick={onDeleteRead} className="w-full py-2 text-xs font-bold text-slate-500 underline">
-                以前のお知らせをすべて消す
+                {t("以前のお知らせをすべて消す")}
               </button>
             </div>
           )}
@@ -77,6 +79,7 @@ export default function NotificationList({
 }
 
 function Row({ n, fresh, onOpen, onDelete }: { n: Notice; fresh?: boolean; onOpen: (n: Notice) => void; onDelete: (n: Notice) => void }) {
+  const t = useT();
   const Icon = n.link?.includes("/coupons/") ? Ticket : n.link?.includes("shop=") ? Megaphone : Bell;
   return (
     <div className={`relative flex gap-3 rounded-2xl bg-white p-3 pr-10 ring-1 ${fresh ? "ring-asa-500/50" : "ring-slate-200/70 opacity-80"}`}>
@@ -89,15 +92,15 @@ function Row({ n, fresh, onOpen, onDelete }: { n: Notice; fresh?: boolean; onOpe
           {ago(n.created_at)}
         </span>
         <span className="mt-0.5 block font-bold leading-snug">{n.title}</span>
-        <span className="mt-0.5 line-clamp-2 block whitespace-pre-line text-sm text-slate-600">{n.body}</span>
+        <span className="mt-0.5 line-clamp-2 block whitespace-pre-line text-sm text-slate-600">{t(n.body)}</span>
         {n.link && (
           <span className="mt-1 inline-flex items-center text-sm font-bold text-saga-600">
-            {n.link.includes("/coupons/") ? "クーポンを見る" : "お店を見る"}
+            {t(n.link.includes("/coupons/") ? "クーポンを見る" : "お店を見る")}
             <ChevronRight className="h-4 w-4" aria-hidden />
           </span>
         )}
       </button>
-      <button type="button" onClick={() => onDelete(n)} aria-label="このお知らせを消す" className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
+      <button type="button" onClick={() => onDelete(n)} aria-label={t("このお知らせを消す")} className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
         <X className="h-4 w-4" />
       </button>
     </div>

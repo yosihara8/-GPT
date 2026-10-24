@@ -10,6 +10,7 @@ import { MapLegend, couponLabel, declutter, hasCoupon, isHighlighted, isListing,
 import { COUPON_HIGHLIGHT_RADIUS_M, SAGA_CENTER } from "@/lib/config";
 import { formatDistance, type LatLng } from "@/lib/geo";
 import { escapeHtml } from "@/lib/escape";
+import { useT } from "@/components/LangProvider";
 import type { RouteResult } from "@/lib/routing";
 
 /** 道順は OpenStreetMap の道路データ（ODbL）を使うため、ルート表示中は出典を地図に表示する */
@@ -66,6 +67,7 @@ export default function LeafletMapView({
   legend = true,
   layerToggle = true,
 }: MapViewProps) {
+  const t = useT();
   const divRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layers = useRef<Record<string, L.LayerGroup>>({});
@@ -359,7 +361,7 @@ export default function LeafletMapView({
           className="absolute bottom-6 left-2 z-[500] flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-pop ring-1 ring-slate-200"
         >
           <Layers className="h-3.5 w-3.5" aria-hidden />
-          {photo ? "地図" : "航空写真"}
+          {t(photo ? "地図" : "航空写真")}
         </button>
       )}
     </div>

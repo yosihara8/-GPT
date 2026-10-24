@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CATEGORIES } from "@/lib/config";
 import { api } from "@/lib/fetcher";
 import SagaHero from "@/components/SagaHero";
+import { useT } from "@/components/LangProvider";
 
 export default function CustomerRegisterPage() {
   return (
@@ -20,6 +21,7 @@ export default function CustomerRegisterPage() {
 }
 
 function CustomerRegisterForm() {
+  const t = useT();
   const router = useRouter();
   const params = useSearchParams();
   const ref = Number(params.get("ref")) || undefined;
@@ -70,38 +72,39 @@ function CustomerRegisterForm() {
   return (
     <main className="mx-auto max-w-lg sm:p-4">
       <SagaHero
+        eyebrow={t("佐賀観光マップ")}
         className="sm:rounded-3xl"
         title={
           <>
-            会員登録<span className="text-lg">（無料）</span>
+            {t("会員登録")}<span className="text-lg">{t("（無料）")}</span>
           </>
         }
-        lead="近くのクーポン・お店さがし・道順の案内が、すべて無料で使えます。"
+        lead={t("近くのクーポン・お店さがし・道順の案内が、すべて無料で使えます。")}
       />
       <div className="relative -mt-4 px-4 sm:px-0">
       {referrer && (
-        <p className="mb-3 rounded-xl bg-white px-3 py-2 text-sm font-bold text-saga-700 shadow-pop">「{referrer}」からのご紹介です</p>
+        <p className="mb-3 rounded-xl bg-white px-3 py-2 text-sm font-bold text-saga-700 shadow-pop">{t("「{r}」からのご紹介です", { r: referrer })}</p>
       )}
       <form onSubmit={onSubmit} className="card space-y-4 p-5">
         <RegisterNotice />
         <div>
-          <label className="label" htmlFor="name">名前<Req /></label>
+          <label className="label" htmlFor="name">{t("名前")}<Req /></label>
           <input id="name" name="name" required className="input" autoComplete="name" />
         </div>
         <div>
-          <label className="label" htmlFor="email">メールアドレス<Req /></label>
+          <label className="label" htmlFor="email">{t("メールアドレス")}<Req /></label>
           <input id="email" name="email" type="email" required className="input" autoComplete="email" />
         </div>
         <div>
-          <label className="label" htmlFor="password">パスワード（8 文字以上）<Req /></label>
+          <label className="label" htmlFor="password">{t("パスワード（8 文字以上）")}<Req /></label>
           <PasswordInput id="password" name="password" required minLength={8} className="input" autoComplete="new-password" />
         </div>
         <fieldset>
-          <legend className="label">興味のある業種（複数選択可）<Opt /></legend>
+          <legend className="label">{t("興味のある業種（複数選択可）")}<Opt /></legend>
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((c) => (
               <button type="button" key={c} onClick={() => toggle(c)} className={interests.includes(c) ? "chip-on" : "chip-off"}>
-                {c}
+                {t(c)}
               </button>
             ))}
           </div>
@@ -109,28 +112,28 @@ function CustomerRegisterForm() {
         <label className="flex items-start gap-2 rounded-2xl bg-saga-50 p-3 text-sm">
           <input type="checkbox" name="notifyEnabled" defaultChecked className="mt-0.5 h-5 w-5 accent-saga-600" />
           <span>
-            <b>お得なお知らせメールを受け取る</b>
+            <b>{t("お得なお知らせメールを受け取る")}</b>
             <br />
-            <span className="text-xs text-slate-600">毎週金曜日に、新着クーポン・お店のお知らせをまとめてお届けします。いつでも配信停止できます。</span>
+            <span className="text-xs text-slate-600">{t("毎週金曜日に、新着クーポン・お店のお知らせをまとめてお届けします。いつでも配信停止できます。")}</span>
           </span>
         </label>
         <p className="text-xs text-slate-500">
-          登録すると、<Link href="/terms" className="underline">利用規約</Link>と
-          <Link href="/privacy" className="underline">プライバシーポリシー</Link>に同意したものとみなします。
+          {t("登録すると、")}<Link href="/terms" className="underline">{t("利用規約")}</Link>{t("と")}
+          <Link href="/privacy" className="underline">{t("プライバシーポリシー")}</Link>{t("に同意したものとみなします。")}
         </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button disabled={loading} className="btn-accent btn-lg">
-          {loading ? "登録中…" : "無料で登録する"}
+          {loading ? t("登録中…") : t("無料で登録する")}
         </button>
         {googleAvailable && (
           <button type="button" onClick={() => signIn("google", { callbackUrl: next })} className="btn-outline w-full">
-            Google で登録
+            {t("Google で登録")}
           </button>
         )}
       </form>
       <p className="mt-4 text-center text-sm text-slate-600">
-        登録済みの方は <Link className="text-saga-600 underline" href={next === "/" ? "/login" : `/login?callbackUrl=${encodeURIComponent(next)}`}>ログイン</Link>
-        {"　"}お店の方は <Link className="text-saga-600 underline" href="/register/business">事業主登録</Link>
+        {t("登録済みの方は")} <Link className="text-saga-600 underline" href={next === "/" ? "/login" : `/login?callbackUrl=${encodeURIComponent(next)}`}>{t("ログイン")}</Link>
+        {"　"}{t("お店の方は")} <Link className="text-saga-600 underline" href="/register/business">{t("事業主登録")}</Link>
       </p>
       </div>
     </main>

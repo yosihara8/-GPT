@@ -12,6 +12,7 @@ import { CouponStub } from "@/components/CouponRow";
 import { eventPeriod, eventStatus, type SagaEvent } from "@/lib/events";
 import { couponRules, couponShort, type CouponValue } from "@/lib/coupon";
 import { daysLeft } from "@/lib/open-status";
+import { useT } from "@/components/LangProvider";
 
 type EventCoupon = CouponValue & {
   id: number;
@@ -33,6 +34,7 @@ type EventCoupon = CouponValue & {
 
 /** イベント特集のページ（だれでも見られる。クーポンを使うときに会員登録） */
 export default function EventPage(props: { params: Promise<{ slug: string }> }) {
+  const t = useT();
   const params = use(props.params);
   const router = useRouter();
   const { data: session } = useSession();
@@ -49,9 +51,9 @@ export default function EventPage(props: { params: Promise<{ slug: string }> }) 
   if (data === "missing")
     return (
       <main className="mx-auto max-w-lg p-6 text-center">
-        <p className="font-bold">このイベントは見つかりませんでした。</p>
+        <p className="font-bold">{t("このイベントは見つかりませんでした。")}</p>
         <Link href="/" className="btn-primary mt-4">
-          地図でお店をさがす
+          {t("地図でお店をさがす")}
         </Link>
       </main>
     );
@@ -91,7 +93,7 @@ export default function EventPage(props: { params: Promise<{ slug: string }> }) 
         <img src="/art/panorama.svg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-40 mix-blend-soft-light" aria-hidden />
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" aria-hidden />
         <div className="relative px-5 pb-6 pt-10">
-          <p className="num text-[11px] font-bold tracking-[0.3em] text-white/85">イベント特集</p>
+          <p className="num text-[11px] font-bold tracking-[0.3em] text-white/85">{t("イベント特集")}</p>
           <h1 className="mt-1 font-mincho text-[28px] font-bold leading-tight drop-shadow">{ev.title}</h1>
           {ev.subtitle && <p className="mt-1 text-sm text-white/90">{ev.subtitle}</p>}
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
@@ -116,12 +118,12 @@ export default function EventPage(props: { params: Promise<{ slug: string }> }) 
           {ev.link_url && (
             <a href={ev.link_url} target="_blank" rel="noreferrer" className="btn-outline">
               <ExternalLink className="h-4 w-4" aria-hidden />
-              公式サイト
+              {t("公式サイト")}
             </a>
           )}
           <button type="button" onClick={share} className="btn-outline">
             <Share2 className="h-4 w-4" aria-hidden />
-            {copied ? "リンクをコピーしました" : "友だちに教える"}
+            {copied ? t("リンクをコピーしました") : t("友だちに教える")}
           </button>
         </div>
 
@@ -129,11 +131,11 @@ export default function EventPage(props: { params: Promise<{ slug: string }> }) 
         <section>
           <h2 className="flex items-center gap-1.5 text-lg font-bold text-coupon">
             <Ticket className="h-5 w-5" aria-hidden />
-            この期間だけの限定クーポン <span className="num text-base text-slate-500">{coupons.length}件</span>
+            {t("この期間だけの限定クーポン")} <span className="num text-base text-slate-500">{coupons.length}{t("件")}</span>
           </h2>
           {coupons.length === 0 ? (
             <p className="mt-2 rounded-2xl bg-white p-4 text-sm text-slate-500 ring-1 ring-slate-200/70">
-              参加するお店を準備中です。お店の方は、ダッシュボードの「クーポン発行」で「イベント限定」を選ぶと、ここに載ります。
+              {t("参加するお店を準備中です。お店の方は、ダッシュボードの「クーポン発行」で「イベント限定」を選ぶと、ここに載ります。")}
             </p>
           ) : (
             <ul className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -170,7 +172,7 @@ export default function EventPage(props: { params: Promise<{ slug: string }> }) 
           <section>
             <h2 className="flex items-center gap-1.5 text-lg font-bold">
               <MapPin className="h-5 w-5 text-saga-600" aria-hidden />
-              参加しているお店
+              {t("参加しているお店")}
             </h2>
             <div className="mt-2 overflow-hidden rounded-2xl ring-1 ring-slate-200">
               <MapView shops={shops} me={null} highlightRadius={Number.POSITIVE_INFINITY} onSelectShop={(id) => router.push(`/?shop=${id}`)} legend={false} className="h-72" />
@@ -180,14 +182,14 @@ export default function EventPage(props: { params: Promise<{ slug: string }> }) 
 
         {!session?.user && (
           <div className="rounded-3xl bg-saga-600 p-5 text-center text-white">
-            <p className="font-bold">クーポンを使うには、無料の会員登録（30 秒）</p>
+            <p className="font-bold">{t("クーポンを使うには、無料の会員登録（30 秒）")}</p>
             <Link href={`/register/customer?next=${encodeURIComponent(`/events/${ev.slug}`)}`} className="btn-accent mt-3 w-full rounded-full py-3">
-              無料で登録してクーポンを使う
+              {t("無料で登録してクーポンを使う")}
             </Link>
           </div>
         )}
         <Link href="/" className="btn-outline w-full">
-          地図でほかのお店もさがす
+          {t("地図でほかのお店もさがす")}
         </Link>
       </div>
     </main>

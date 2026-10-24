@@ -12,7 +12,8 @@ import { getSessionUser } from "@/lib/session";
 import { BEST_LABEL_SQL } from "@/lib/coupon";
 import { isWeekly, summarizeWeekly } from "@/lib/schedule";
 import { areaOf } from "@/lib/areas";
-import { guideOfCategory } from "@/lib/guides";
+import { GUIDE_EN, guideOfCategory } from "@/lib/guides";
+import { getT } from "@/lib/i18n-server";
 import { jsonLd } from "@/lib/public-shops";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +84,8 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
   const area = areaOf(shop.address);
   const guide = guideOfCategory(shop.category);
   const { hours, closed } = hoursOf(shop);
+  const { lang, t } = await getT();
+  const gTitle = guide ? (lang === "en" ? GUIDE_EN[guide.slug].title : guide.title) : "";
 
   const ld = {
     "@context": "https://schema.org",
@@ -99,11 +102,11 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
       <div className="mx-auto max-w-2xl px-5 pt-5">
         <nav aria-label="パンくず" className="flex flex-wrap items-center gap-1 text-xs text-slate-500">
-          <Link href="/guide" className="hover:text-saga-600">お店さがし</Link>
+          <Link href="/guide" className="hover:text-saga-600">{t("お店さがし")}</Link>
           {guide && (
             <>
               <ChevronRight className="h-3 w-3" aria-hidden />
-              <Link href={`/guide/${guide.slug}`} className="hover:text-saga-600">{guide.title}</Link>
+              <Link href={`/guide/${guide.slug}`} className="hover:text-saga-600">{gTitle}</Link>
             </>
           )}
           <ChevronRight className="h-3 w-3" aria-hidden />
@@ -115,7 +118,7 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
         </div>
         <p className="mt-4 flex items-center gap-1.5 text-xs font-medium text-slate-500">
           <CategoryIcon category={shop.category} className="h-3.5 w-3.5" />
-          {shop.category}
+          {t(shop.category)}
           {PRICE_LEVEL_LABELS[shop.price_level] ? `・${PRICE_LEVEL_LABELS[shop.price_level]}` : ""}
         </p>
         <h1 className="mt-1 font-mincho text-[26px] font-bold leading-snug text-slate-900">{shop.name}</h1>
@@ -126,7 +129,7 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
         {shop.has_coupon && (
           <div className="mt-5">
             {member ? (
-              <Link href={next} className="btn-accent btn-lg">クーポンを見る</Link>
+              <Link href={next} className="btn-accent btn-lg">{t("クーポンを見る")}</Link>
             ) : (
               <LockedCoupon label={shop.best_label} next={next} />
             )}
@@ -134,12 +137,12 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
         )}
 
         <section className="mt-6 border-t border-slate-200">
-          <h2 className="pt-5 text-[15px] font-bold tracking-[0.1em] text-slate-800">基本情報</h2>
+          <h2 className="pt-5 text-[15px] font-bold tracking-[0.1em] text-slate-800">{t("基本情報")}</h2>
           <dl className="mt-2 divide-y divide-slate-100 text-sm">
-            <Row icon={MapPin} label="住所">{shop.address}</Row>
-            {hours && <Row icon={Clock} label="営業時間">{hours}{shop.hours_note ? `（${shop.hours_note}）` : ""}</Row>}
-            {closed && <Row icon={Clock} label="定休日">{closed}</Row>}
-            {PRICE_LEVEL_LABELS[shop.price_level] && <Row icon={Wallet} label="価格帯">{PRICE_LEVEL_LABELS[shop.price_level]}（1 人あたり）</Row>}
+            <Row icon={MapPin} label={t("住所")}>{shop.address}</Row>
+            {hours && <Row icon={Clock} label={t("営業時間")}>{hours}{shop.hours_note ? `（${shop.hours_note}）` : ""}</Row>}
+            {closed && <Row icon={Clock} label={t("定休日")}>{closed}</Row>}
+            {PRICE_LEVEL_LABELS[shop.price_level] && <Row icon={Wallet} label={t("価格帯")}>{PRICE_LEVEL_LABELS[shop.price_level]}{t("（1 人あたり）")}</Row>}
           </dl>
         </section>
 
@@ -148,21 +151,21 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
           <section className="mt-6 rounded-lg bg-mizu-50 p-4">
             <p className="flex items-center gap-1.5 text-sm font-bold text-slate-800">
               <Lock className="h-4 w-4 text-saga-600" aria-hidden />
-              会員になると、このお店の
+              {t("会員になると、このお店の")}
             </p>
             <ul className="mt-2 grid grid-cols-2 gap-2 text-xs font-bold text-slate-700">
-              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><Navigation className="h-3.5 w-3.5 text-saga-600" aria-hidden />地図・行き方</li>
-              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><Phone className="h-3.5 w-3.5 text-saga-600" aria-hidden />電話・予約</li>
-              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><CategoryIcon category="飲食" className="h-3.5 w-3.5 text-saga-600" />メニュー・写真</li>
-              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><Lock className="h-3.5 w-3.5 text-saga-600" aria-hidden />お得なクーポン</li>
+              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><Navigation className="h-3.5 w-3.5 text-saga-600" aria-hidden />{t("地図・行き方")}</li>
+              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><Phone className="h-3.5 w-3.5 text-saga-600" aria-hidden />{t("電話・予約")}</li>
+              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><CategoryIcon category="飲食" className="h-3.5 w-3.5 text-saga-600" />{t("メニュー・写真")}</li>
+              <li className="flex items-center gap-1.5 rounded-md bg-white px-2.5 py-2"><Lock className="h-3.5 w-3.5 text-saga-600" aria-hidden />{t("お得なクーポン")}</li>
             </ul>
-            <p className="mt-2 text-xs text-slate-500">が見られます（無料・1 分で登録）。</p>
+            <p className="mt-2 text-xs text-slate-500">{t("が見られます（無料・1 分で登録）。")}</p>
           </section>
         )}
         {member && (
           <Link href={next} className="btn-outline mt-6 w-full rounded-full py-3">
             <Navigation className="h-4 w-4" aria-hidden />
-            地図でお店のページを開く
+            {t("地図でお店のページを開く")}
           </Link>
         )}
 
@@ -170,12 +173,12 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
         {guide && (
           <div className="mt-8 flex flex-col gap-2 text-sm font-bold">
             <Link href={`/guide/${guide.slug}`} className="flex items-center justify-between rounded-lg px-3 py-3 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
-              {guide.title}をもっと見る
+              {t("{g}をもっと見る", { g: gTitle })}
               <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
             </Link>
             {area && (
               <Link href={`/guide/${guide.slug}/${{ nw: "hokuseibu", w: "seibu", c: "chubu", e: "tobu", s: "nanbu" }[area.area.key]}`} className="flex items-center justify-between rounded-lg px-3 py-3 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
-                {area.area.name}エリアの{guide.title.replace(/^佐賀の/, "")}
+                {lang === "en" ? `${gTitle} — ${t(`${area.area.name}エリア`)}` : `${area.area.name}エリアの${guide.title.replace(/^佐賀の/, "")}`}
                 <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
               </Link>
             )}
@@ -186,9 +189,9 @@ export default async function ShopPage(props: { params: Promise<{ id: string }> 
       {!member && (
         <>
           <div className="mt-10">
-            <JoinBand next={next} title={`会員になると「${shop.name}」のクーポン・行き方が使えます`} />
+            <JoinBand next={next} title={t("会員になると「{name}」のクーポン・行き方が使えます", { name: shop.name })} />
           </div>
-          <StickyJoin next={next} text={shop.has_coupon ? `「${shop.name}」の会員限定クーポンを使う` : "無料の会員登録で、地図・行き方・クーポンが使えます"} />
+          <StickyJoin next={next} text={shop.has_coupon ? t("「{name}」の会員限定クーポンを使う", { name: shop.name }) : t("無料の会員登録で、地図・行き方・クーポンが使えます")} />
         </>
       )}
     </main>
