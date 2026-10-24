@@ -385,6 +385,12 @@ export const EN: Record<string, string> = {
   "公式サイト": "Official site",
   "地図でほかのお店もさがす": "Find more shops on the map",
   "地図でお店をさがす": "Find shops on the map",
+  "佐賀のお店と、": "Saga’s shops,",
+  "旅する人をつなぐ地図": "connected to travelers",
+  "近くのお店・お得なクーポン・行き方の案内が、すべて無料で使えます。": "Nearby shops, coupons and directions — all free.",
+  "ピンを押すと、お店の情報が見られます。現在地からの行き方・クーポンは、会員登録（無料）で使えます。": "Tap a pin to see shop info. Directions from your location and coupons are free for members.",
+  "赤いピンは、会員限定クーポンのあるお店です": "Red pins are shops with members-only coupons",
+  "ジャンルからさがす": "Browse by genre",
   "参加するお店を準備中です。お店の方は、ダッシュボードの「クーポン発行」で「イベント限定」を選ぶと、ここに載ります。":
     "Participating shops coming soon. Shop owners: choose “Event only” when creating a coupon to appear here.",
   "無料で登録してクーポンを使う": "Sign up free to use coupons",
