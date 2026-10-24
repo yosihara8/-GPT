@@ -13,7 +13,6 @@ export default async function ContactPage() {
   return (
     <main className="mx-auto max-w-lg space-y-4 p-4">
       <div className="pt-2">
-        <p className="text-xs font-bold tracking-widest text-asa-500">CONTACT</p>
         <h1 className="font-mincho text-2xl font-bold">お問い合わせ</h1>
         <p className="mt-1 text-sm text-slate-600">使い方・クーポン・アカウントなど、お気軽にお問い合わせください。原則 3 営業日以内にメールでご返信します。</p>
       </div>

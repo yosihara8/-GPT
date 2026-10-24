@@ -16,18 +16,17 @@ export function AreaMark({ className = "" }: { className?: string }) {
 
 /**
  * 横にスライドして見る一覧（スマホは指で、パソコンは左右のボタンで動かす）。
- * 見出しは「大きな英字（明朝）＋日本語の題」。band で水色の帯にして、欄ごとに区切る。
+ * 見出しは日本語の題（明朝・字間広め）。band で水色の帯にして、欄ごとに区切る。
  */
 export default function Carousel({
   title,
-  eyebrow,
   note,
   children,
   count,
   band = false,
 }: {
   title: string;
-  /** 見出しの英字（例 COUPON） */
+  /** 以前の英字の小見出し（今は表示しない。見出しはすべて日本語。オーナー決定） */
   eyebrow?: string;
   /** 以前の見出しアイコン（今は表示しない。すっきり見せるため） */
   icon?: React.ReactNode;
@@ -43,8 +42,7 @@ export default function Carousel({
       <div className="mb-4 flex items-end justify-between gap-3 px-5">
         <div className="min-w-0">
           <AreaMark className="mb-2" />
-          {eyebrow && <p className="font-mincho text-[26px] font-bold uppercase leading-none tracking-[0.08em] text-slate-900">{eyebrow}</p>}
-          <h2 className="mt-1.5 flex items-baseline gap-1.5 text-[15px] font-bold tracking-[0.14em] text-slate-800">
+          <h2 className="flex items-baseline gap-2 font-mincho text-[22px] font-bold leading-snug tracking-[0.08em] text-slate-900">
             {title}
             {count != null && <span className="num text-xs font-semibold tracking-normal text-slate-400">{count}</span>}
           </h2>

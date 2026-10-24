@@ -572,7 +572,7 @@ function CouponHero({ coupon: c, shopName, onUse }: { coupon: DetailCoupon; shop
       <div className="overflow-hidden rounded-3xl bg-[#FAF6EF] shadow-[0_12px_28px_rgba(10,20,40,0.3)]">
         {c.has_image && <img src={`/api/coupons/${c.id}/image`} alt="" className="h-44 w-full object-cover" />}
         <div className="px-5 pb-5 pt-4 text-center">
-          <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">COUPON</p>
+          <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">クーポン</p>
           {(c as { event_title?: string | null }).event_title && (
             <p className="mx-auto mt-1 w-fit rounded-full bg-asa-500 px-3 py-0.5 text-xs font-bold text-white">
               {(c as { event_title?: string | null }).event_title} 限定

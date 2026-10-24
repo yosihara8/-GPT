@@ -52,7 +52,7 @@ export default function CouponUse({ target, onClose, onUsed }: { target: UseTarg
       <div className="karakusa fixed inset-0 z-[2000] flex flex-col items-center justify-center bg-saga-600 p-5" role="dialog" aria-modal="true" aria-label="クーポン利用済み">
         <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-[#FAF6EF] text-center shadow-[0_20px_40px_rgba(10,20,40,0.35)]">
           <div className="px-6 pb-6 pt-6">
-            <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">COUPON</p>
+            <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">クーポン</p>
             <p className="mt-1 font-mincho text-lg font-bold text-slate-900">{target.shopName}</p>
             {target.coupon_type === "gift" ? (
               <p className="mt-3 text-3xl font-extrabold leading-snug text-tea-600">{target.benefit || "特典サービス"}</p>

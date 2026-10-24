@@ -3,7 +3,6 @@
  * どの画面も同じ形・同じ余白にして、統一感を出す。
  */
 export default function BizPage({
-  eyebrow,
   title,
   lead,
   aside,
@@ -31,7 +30,6 @@ export default function BizPage({
         }`}
       >
         <div className="min-w-0">
-          <p className="num text-[10px] font-bold tracking-[0.3em] text-sun-400">{eyebrow}</p>
           <h1 className="mt-1 text-2xl font-extrabold">{title}</h1>
           {lead && <p className="mt-1 text-sm text-white/80">{lead}</p>}
         </div>
