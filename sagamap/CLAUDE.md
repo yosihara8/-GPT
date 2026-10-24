@@ -54,6 +54,13 @@
 - 緯度経度は仮の値で入れ、デプロイ時に scripts/migrate.mjs が住所から求め直す（geocoded = false の行。仮の位置から 10km 以上離れた結果は採らない。最大 90 秒、残りは次のデプロイ）。
 - お店が自分で登録して電話番号が同じ掲載店ができたら、基本情報は自動で出さない（/api/spots）。消したいときは hidden = true。
 
+## 検索エンジン向けの最低限の公開（オーナー決定：基本は会員登録を促す）
+- 地図のトップ `/` は会員向けのまま（未登録なら会員登録画面へ）。お店のページ `/shops/[id]` と「お店さがし」`/guide`・`/guide/[ジャンル]`・`/guide/[ジャンル]/[エリア]` は誰でも見られる。
+- 公開するのは最低限：写真（メイン）・名前・業種・エリア・紹介文・住所・営業時間・定休日・価格帯。電話・地図での行き方・メニュー・写真の一覧・SNS・クーポンの中身は会員だけ（クーポンはぼかして「会員限定」）。
+- どの公開ページにも登録の案内（下に固定の「無料登録」・MEMBER の欄・ぼかしたクーポン）。登録後は `?next=/?shop=ID` でそのお店のページへ。会員（お客さま）が /shops/ID を開くと地図のお店のページへ移る。
+- ジャンルの定義・説明文は src/lib/guides.ts（「佐賀のカフェ」「佐賀のランチ・グルメ」など）。構造化データ（JSON-LD：LocalBusiness / ItemList / BreadcrumbList）、canonical、sitemap.xml（お店・お店さがし・掲載店のあるエリア）、robots でお店の写真は許可。フッターにお店さがしへのリンク。
+- Google に見せる内容と人に見せる内容を変えない（クローキング禁止）。
+
 ## 事業主の画面（深緑）
 - ロゴ（ホーム）は事業主ダッシュボードに戻る（お客さまの地図に飛ばさない）。
 - ダッシュボード: 現在のプランは 1 行に短縮（タップで全文）。有料機能のボタンに「有料プラン中」。いま配信中のクーポン・広告を一覧表示。
@@ -175,7 +182,7 @@
 ## 変更時の注意
 - 自動処理（毎週金曜メール、毎晩の掲載チェック、毎月のバックアップ・帳簿・紹介割引）・決済・DB の設定を壊さない。
 - 変更後は `npx tsc --noEmit`、`npm run lint`（ESLint。Next 16 で `next lint` は廃止）、`npx vitest run`、`npx next build` を通す。
-- Next.js 16（React 18 のまま）。params・searchParams・cookies() は await する。middleware.ts は 16 でも動く（proxy への改名は今後）。eslint.config.mjs は React Compiler 向けの規則を止めている（使っていないため）。
+- Next.js 16（16.4.3：16.4.0 以前は重大な脆弱性があるため上げた）（React 18 のまま）。params・searchParams・cookies() は await する。middleware.ts は 16 でも動く（proxy への改名は今後）。eslint.config.mjs は React Compiler 向けの規則を止めている（使っていないため）。
 - 問題が出たら docs/ROLLBACK.md の手順で元に戻せる（Vercel の Instant Rollback、またはコミットを指定してコードごと戻す）。
 - 反映は開発ブランチに push し、`sagamap/` を既定ブランチ（Vercel が本番に使う）にも同期する。
 
