@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages: MetadataRoute.Sitemap = [
-    { url: `${APP_URL}/welcome`, changeFrequency: "daily", priority: 1 },
+    { url: `${APP_URL}/`, changeFrequency: "daily", priority: 1 },
     { url: `${APP_URL}/register/customer`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${APP_URL}/register/business`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${APP_URL}/contact`, changeFrequency: "yearly", priority: 0.3 },

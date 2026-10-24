@@ -15,6 +15,8 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "佐賀観光マップ｜佐賀のカフェ・ランチ・宿をクーポンつきでさがせる地図",
   description: "佐賀のお店と、旅する人をつなぐ観光マップ。地図からお店をさがして、会員登録（無料）でお得なクーポンや行き方の案内が使えます。",
+  // 登録前の方には、トップ（/）でこのページを出している。正規のアドレスはトップ
+  alternates: { canonical: "/" },
 };
 
 /**
