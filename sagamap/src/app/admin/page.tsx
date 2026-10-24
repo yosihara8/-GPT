@@ -53,7 +53,15 @@ export default function AdminPage() {
   const [tab, setTab] = useState<TabKey>("overview");
   return (
     <main className="mx-auto max-w-6xl space-y-4 p-4">
-      <h1 className="text-xl font-bold">運営者管理画面</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-bold">運営者管理画面</h1>
+        {/* お客さまから見た画面の確認（別のタブで開く。管理画面のログインのまま見られる） */}
+        <div className="flex flex-wrap gap-2 text-sm">
+          <a href="/" target="_blank" rel="noreferrer" className="btn-outline px-3 py-1.5">お客さまの地図の画面</a>
+          <a href="/welcome" target="_blank" rel="noreferrer" className="btn-outline px-3 py-1.5">登録前のトップ</a>
+          <a href="/guide" target="_blank" rel="noreferrer" className="btn-outline px-3 py-1.5">お店さがし（公開ページ）</a>
+        </div>
+      </div>
       <nav className="flex gap-1 overflow-x-auto border-b">
         {TABS.map((t) => (
           <button

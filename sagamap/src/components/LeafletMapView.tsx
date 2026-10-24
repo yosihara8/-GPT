@@ -62,6 +62,7 @@ export default function LeafletMapView({
   onSelectShop,
   onSelectSpot,
   center,
+  zoom = 15,
   selectedId,
   className = "h-[62vh]",
   legend = true,
@@ -97,7 +98,7 @@ export default function LeafletMapView({
   // 地図の初期化
   useEffect(() => {
     if (!divRef.current || mapRef.current) return;
-    const map = L.map(divRef.current, { zoomControl: false }).setView(center ?? me ?? SAGA_CENTER, 15);
+    const map = L.map(divRef.current, { zoomControl: false }).setView(center ?? me ?? SAGA_CENTER, zoom);
     L.control.zoom({ position: "topright" }).addTo(map);
     // 国土地理院の標準地図（カラー・日本語表記・商用利用可）。色はそのまま表示する
     base.current = {

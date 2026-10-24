@@ -53,6 +53,8 @@ export type MapViewProps = {
   routeMode?: "foot" | "car";
   onRoute?: (summary: RouteSummary | null, error?: string) => void;
   onSelectShop?: (id: number) => void;
+  /** 最初の拡大率（省略時は 15） */
+  zoom?: number;
   /** 最初に表示する中心（省略時は現在地、無ければ佐賀市） */
   center?: { lat: number; lng: number } | null;
   /** 観光スポット・宿などのピンを押したとき */
@@ -122,6 +124,7 @@ function GoogleMapView({
   onSelectShop,
   onSelectSpot,
   center,
+  zoom = 15,
   selectedId,
   className = "h-[62vh]",
   legend = true,
@@ -147,7 +150,7 @@ function GoogleMapView({
     if (!ready || !divRef.current || mapRef.current) return;
     mapRef.current = new google.maps.Map(divRef.current, {
       center: center ?? me ?? SAGA_CENTER,
-      zoom: 15,
+      zoom,
       mapId: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || undefined,
       // 地図 ID が無いときは、他社の店名を消して登録店のピンを目立たせる
       styles: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID ? undefined : GOOGLE_STYLES,
