@@ -32,7 +32,7 @@ export default function EventBanners() {
               <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" aria-hidden />
               <div className="relative p-4">
                 <p className="flex items-center gap-2 text-[11px] font-bold">
-                  <span className="num tracking-[0.25em] text-white/85">EVENT</span>
+                  <span className="num tracking-[0.25em] text-white/85">イベント</span>
                   <span className={`rounded-full px-2 py-0.5 ${st.live ? "bg-white text-slate-900" : "bg-black/30"}`}>{st.label}</span>
                 </p>
                 <p className="mt-1 font-mincho text-[19px] font-bold leading-snug drop-shadow">{ev.title}</p>

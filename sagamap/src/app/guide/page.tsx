@@ -22,8 +22,7 @@ export default async function GuideIndex() {
     <main className={user ? "pb-10" : "pb-24"}>
       <div className="mx-auto max-w-2xl px-5 pt-6">
         <AreaMark className="mb-2" />
-        <p className="font-mincho text-[26px] font-bold leading-none tracking-[0.08em] text-slate-900">SEARCH</p>
-        <h1 className="mt-1.5 text-[17px] font-bold tracking-[0.1em] text-slate-800">佐賀のお店さがし</h1>
+        <h1 className="font-mincho text-[26px] font-bold leading-snug tracking-[0.08em] text-slate-900">佐賀のお店さがし</h1>
         <p className="mt-3 text-[15px] leading-relaxed text-slate-700">
           佐賀観光マップに載っているお店を、ジャンルからさがせます。会員登録（無料）をすると、お店のクーポンや地図での行き方も使えます。
         </p>

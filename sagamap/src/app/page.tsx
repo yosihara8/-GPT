@@ -634,8 +634,7 @@ function CustomerHome() {
             {/* エリアからさがす */}
             <section className="px-5 pt-7">
               <AreaMark className="mb-2" />
-              <p className="font-mincho text-[26px] font-bold leading-none tracking-[0.08em] text-slate-900">AREA</p>
-              <h2 className="mt-1.5 text-[15px] font-bold tracking-[0.14em] text-slate-800">エリアからさがす</h2>
+              <h2 className="font-mincho text-[22px] font-bold leading-snug tracking-[0.08em] text-slate-900">エリアからさがす</h2>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {AREA_LIST.map((a) => (
                   <button

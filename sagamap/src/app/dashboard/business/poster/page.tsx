@@ -47,7 +47,7 @@ export default function PosterPage() {
       <style>{`@media print { @page { size: ${size} portrait; margin: 0; } }`}</style>
       <div className="space-y-4 print:hidden">
         <div className="karakusa -mx-4 -mt-4 bg-saga-600 px-5 pb-6 pt-6 text-white sm:mx-0 sm:mt-0 sm:rounded-3xl">
-          <p className="num text-[10px] font-bold tracking-[0.3em] text-sun-400">QR POSTER</p>
+          <p className="num text-[10px] font-bold tracking-[0.3em] text-sun-400">QR ポスター</p>
           <h1 className="mt-1 text-2xl font-extrabold">レジ横 QR ポスター</h1>
         </div>
         <p className="text-sm text-slate-600">

@@ -33,8 +33,7 @@ function Settings() {
         マイページに戻る
       </Link>
       <AreaMark className="mb-2 mt-6" />
-      <h1 className="font-mincho text-[26px] font-bold leading-none tracking-[0.08em] text-slate-900">SETTINGS</h1>
-      <p className="mt-1.5 text-[15px] font-bold tracking-[0.14em] text-slate-800">設定</p>
+      <h1 className="font-mincho text-[26px] font-bold leading-snug tracking-[0.08em] text-slate-900">設定</h1>
       <p className="mt-1 text-xs text-slate-500">見たい項目を押すと開きます。</p>
 
       <div className="mt-5 divide-y divide-slate-200 border-y border-slate-200">

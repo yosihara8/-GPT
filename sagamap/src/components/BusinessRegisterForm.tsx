@@ -60,7 +60,7 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
     <main className="mx-auto max-w-lg sm:p-4">
       {inviteCode ? (
         <div className="karakusa overflow-hidden bg-saga-600 p-5 pb-8 text-white sm:rounded-3xl">
-          <p className="text-xs font-bold tracking-widest text-sun-100">SPECIAL INVITATION</p>
+          <p className="text-xs font-bold tracking-widest text-sun-100">特別招待</p>
           <h1 className="mt-1 text-2xl font-bold">特別招待 事業主登録</h1>
           <p className="mt-2 text-sm font-bold leading-6">
             運営からのご紹介で、<span className="rounded bg-white/25 px-1">有料プランのすべての機能を無料</span>で、期限なしでずっとご利用いただけます。

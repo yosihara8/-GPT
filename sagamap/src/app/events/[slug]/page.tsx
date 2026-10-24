@@ -91,7 +91,7 @@ export default function EventPage(props: { params: Promise<{ slug: string }> }) 
         <img src="/art/panorama.svg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-40 mix-blend-soft-light" aria-hidden />
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" aria-hidden />
         <div className="relative px-5 pb-6 pt-10">
-          <p className="num text-[11px] font-bold tracking-[0.3em] text-white/85">EVENT 特集</p>
+          <p className="num text-[11px] font-bold tracking-[0.3em] text-white/85">イベント特集</p>
           <h1 className="mt-1 font-mincho text-[28px] font-bold leading-tight drop-shadow">{ev.title}</h1>
           {ev.subtitle && <p className="mt-1 text-sm text-white/90">{ev.subtitle}</p>}
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">

@@ -4,7 +4,6 @@
  */
 export default function SectionTitle({
   title,
-  eyebrow,
   icon,
   count,
   note,
@@ -24,7 +23,6 @@ export default function SectionTitle({
   return (
     <div className={`flex items-end justify-between gap-2 ${className}`}>
       <div className="min-w-0">
-        {eyebrow && <p className="num text-[10px] font-bold tracking-[0.28em] text-asa-500">{eyebrow}</p>}
         <h2 className={`flex items-center gap-1.5 font-mincho text-[17px] font-bold ${tone === "coupon" ? "text-coupon" : "text-slate-900"}`}>
           {icon}
           {title}
