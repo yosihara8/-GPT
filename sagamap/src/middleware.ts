@@ -5,7 +5,7 @@ import { ADMIN_COOKIE, verifyAdmin } from "@/lib/admin-session";
 
 /**
  * 会員登録必須ページ。
- * 地図トップ `/` と店舗ページ `/shops/*` も会員向け（未登録の方には最初に会員登録画面を表示する）。
+ * 地図トップ `/` も会員向け（未登録の方には最初に会員登録画面を表示する）。お店のページ `/shops/*` は最低限の情報だけ公開。
  */
 const authMiddleware = withAuth(
   async function middleware(req) {
@@ -46,7 +46,8 @@ const authMiddleware = withAuth(
   },
 );
 
-const isMemberMapPath = (path: string) => path === "/" || path.startsWith("/shops/");
+// お店のページ（/shops/*）は検索エンジンのため誰でも見られる最低限の公開（オーナー決定）。地図のトップだけ会員向け
+const isMemberMapPath = (path: string) => path === "/";
 
 /** 会員・運営者のログインが必要なページ（/admin/login・/admin/forgot はログイン前に開くので対象外） */
 const needsLogin = (path: string) =>
