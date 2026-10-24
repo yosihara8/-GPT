@@ -38,7 +38,7 @@ import LocationAccuracy from "@/components/LocationAccuracy";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import Carousel from "@/components/customer/Carousel";
 import { AdCard, CouponCard, LISTING_LABEL, ListingCard, ShopCard, SpecialtyCard, SpotCard, travelText, type CardCoupon } from "@/components/customer/Cards";
-import { SPECIALTIES, type Specialty } from "@/lib/specialties";
+import { SPECIALTIES, SPECIALTY_EN, type Specialty } from "@/lib/specialties";
 import SpecialtySheet from "@/components/customer/SpecialtySheet";
 import ListingSheet from "@/components/customer/ListingSheet";
 import { AreaMark } from "@/components/customer/Carousel";
@@ -57,6 +57,7 @@ import NoticeSheet from "@/components/customer/NoticeSheet";
 import EventBanners from "@/components/customer/EventBanners";
 import GuideTour, { guideUnseen, type TourStep } from "@/components/customer/GuideTour";
 import { api } from "@/lib/fetcher";
+import { useLang } from "@/components/LangProvider";
 
 type Shop = MapShop & DetailShop & { address: string; service_description: string };
 type Spot = MapSpot & { description?: string; area?: string; address?: string | null; tel?: string | null };
@@ -89,6 +90,7 @@ function trackShop(id: number, kind: ShopEvent) {
 function CustomerHome() {
   const params = useSearchParams();
   const { data: session } = useSession();
+  const { lang, t } = useLang();
   const isCustomer = session?.user.role === "customer";
   const { position, accuracy, isFallback, status, locate } = useGeolocation();
   // 測位中は位置が細かく変わるため、約 100m 単位にまとめて再読み込みを減らす
@@ -261,11 +263,11 @@ function CustomerHome() {
     if (!isCustomer) return;
     if (favIds.has(id)) {
       await api(`/api/favorites?businessId=${id}`, { method: "DELETE" });
-      showToast("お気に入りから外しました");
+      showToast(t("お気に入りから外しました"));
     } else {
       await api("/api/favorites", { method: "POST", body: JSON.stringify({ businessId: id }) });
       trackShop(id, "save");
-      showToast("お気に入りに保存しました（マイページで見られます）");
+      showToast(t("お気に入りに保存しました（マイページで見られます）"));
     }
     loadFavorites();
   }
@@ -276,7 +278,7 @@ function CustomerHome() {
       if (navigator.share) await navigator.share({ title: `${shop.name}｜佐賀観光マップ`, url });
       else {
         await navigator.clipboard.writeText(url);
-        showToast("リンクをコピーしました");
+        showToast(t("リンクをコピーしました"));
       }
     } catch {
       /* 共有をやめた場合は何もしない */
@@ -358,10 +360,10 @@ function CustomerHome() {
         lat: s.lat,
         lng: s.lng,
         kind: "spot",
-        description: isListing(s) ? [LISTING_LABEL[s.kind ?? ""], s.description, s.address?.replace(/^佐賀県/, "")].filter(Boolean).join("・") : s.description,
+        description: isListing(s) ? [t(LISTING_LABEL[s.kind ?? ""] ?? ""), s.description ? t(s.description) : "", s.address?.replace(/^佐賀県/, "")].filter(Boolean).join("・") : s.description,
         tel: s.tel,
       }),
-    [startRoute],
+    [startRoute, t],
   );
 
   // PR は表示された時点で「表示」として記録（この画面を開いている間は 1 広告 1 回）
@@ -434,13 +436,13 @@ function CustomerHome() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="お店・料理・地名でさがす"
+              placeholder={t("お店・料理・地名でさがす")}
               className="h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-slate-400"
-              aria-label="お店をさがす"
+              aria-label={t("お店をさがす")}
               enterKeyHint="search"
             />
             {query && (
-              <button onClick={() => setQuery("")} aria-label="検索をやめる" className="rounded-full p-1 text-slate-400 hover:bg-slate-100">
+              <button onClick={() => setQuery("")} aria-label={t("検索をやめる")} className="rounded-full p-1 text-slate-400 hover:bg-slate-100">
                 <X className="h-4 w-4" aria-hidden />
               </button>
             )}
@@ -449,25 +451,25 @@ function CustomerHome() {
             {QUICK_FILTERS.map((f) => (
               <button key={f} onClick={() => toggleFilter(f)} aria-pressed={filters.includes(f)} className={`${filters.includes(f) ? "chip bg-asa-500 text-white" : "chip-off"} shadow-pop`}>
                 {f === "営業中" ? <Clock className="h-4 w-4" aria-hidden /> : f === "クーポンあり" ? <Ticket className="h-4 w-4" aria-hidden /> : null}
-                {f}
+                {t(f)}
               </button>
             ))}
             <span className="w-px shrink-0 bg-slate-300/70" aria-hidden />
             <button onClick={() => setCategory(null)} className={`${category === null ? "chip-on" : "chip-off"} shadow-pop`}>
               <LayoutGrid className="h-4 w-4" aria-hidden />
-              すべて
+              {t("すべて")}
             </button>
             {categories.map((c) => (
               <button key={c} onClick={() => setCategory(category === c ? null : c)} className={`${category === c ? "chip-on" : "chip-off"} shadow-pop`}>
                 <CategoryIcon category={c} className="h-4 w-4" />
-                {c}
+                {t(c)}
               </button>
             ))}
           </div>
         </div>
         <button
           onClick={locate}
-          aria-label="現在地に戻る"
+          aria-label={t("現在地に戻る")}
           className={`absolute right-3 z-[600] flex h-11 w-11 items-center justify-center rounded-full bg-white text-saga-600 shadow-pop hover:bg-slate-50 ${previewShop || routeTo || favRoute ? "top-[112px]" : "bottom-3"}`}
         >
           <LocateFixed className="h-5 w-5" aria-hidden />
@@ -490,7 +492,7 @@ function CustomerHome() {
         {(routeTo || (favRoute && favorites.length > 0)) && (
           <div className="absolute inset-x-3 bottom-3 z-[700]">
             <RouteBar
-              title={routeTo ? routeTo.name : `お気に入り ${Math.min(9, favorites.length)} か所を巡るルート`}
+              title={routeTo ? routeTo.name : t("お気に入り {n} か所を巡るルート", { n: Math.min(9, favorites.length) })}
               subtitle={routeTo?.kind === "spot" ? routeTo.description : undefined}
               route={route}
               loading={routeLoading}
@@ -520,7 +522,7 @@ function CustomerHome() {
         <div className="space-y-2 px-4 pt-3 empty:hidden">
           <VerifyEmailBanner />
           <LocationAccuracy status={status} accuracy={accuracy} />
-          {isFallback && <p className="rounded-xl bg-sun-100 px-3 py-2 text-xs text-amber-800">位置情報が取得できないため、佐賀駅を現在地としています。</p>}
+          {isFallback && <p className="rounded-xl bg-sun-100 px-3 py-2 text-xs text-amber-800">{t("位置情報が取得できないため、佐賀駅を現在地としています。")}</p>}
         </div>
 
         {q || filters.length > 0 || areaKey ? (
@@ -532,18 +534,18 @@ function CustomerHome() {
               className="flex w-full items-center justify-center gap-2 rounded-full bg-saga-700 py-3 text-sm font-bold text-white shadow-sm hover:bg-saga-600"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
-              トップに戻る（すべてのお店を見る）
+              {t("トップに戻る（すべてのお店を見る）")}
             </button>
             <h2 className="mt-4 flex flex-wrap items-center gap-2 text-[15px] font-bold">
               {areaKey && !q && filters.length === 0 ? (
                 <span className="rounded-full px-2.5 py-0.5 text-sm text-white" style={{ background: AREA_LIST.find((a) => a.key === areaKey)?.border }}>
-                  {AREA_LIST.find((a) => a.key === areaKey)?.name}エリア
+                  {t(`${AREA_LIST.find((a) => a.key === areaKey)?.name}エリア`)}
                 </span>
               ) : null}
-              {q ? `「${query.trim()}」のお店` : areaKey ? "のお店" : `${filters.join("・")}のお店`}
+              {q ? t(`「${query.trim()}」のお店`) : areaKey ? t("のお店") : t("{f}のお店", { f: filters.map((f) => t(f)).join("・") })}
               <span className="num text-sm text-slate-400">{visible.length}</span>
             </h2>
-            {visible.length === 0 && <p className="mt-2 text-sm text-slate-500">見つかりませんでした。別の言葉でさがしてみてください。</p>}
+            {visible.length === 0 && <p className="mt-2 text-sm text-slate-500">{t("見つかりませんでした。別の言葉でさがしてみてください。")}</p>}
             <ul className="mt-2">
               {byDistance(visible)
                 .slice(0, 30)
@@ -556,7 +558,7 @@ function CustomerHome() {
             {visible.length > 3 && (
               <button onClick={backToTop} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-bold text-saga-700 ring-1 ring-saga-300">
                 <ArrowLeft className="h-4 w-4" aria-hidden />
-                トップに戻る
+                {t("トップに戻る")}
               </button>
             )}
           </section>
@@ -573,14 +575,14 @@ function CustomerHome() {
                     className="absolute right-[3.75rem] top-3 z-10 flex h-10 items-center gap-1 rounded-full bg-white/15 px-3 text-xs font-bold text-white ring-1 ring-white/30 backdrop-blur"
                   >
                     <CircleHelp className="h-4 w-4" aria-hidden />
-                    使い方
+                    {t("使い方")}
                   </button>
                 )}
                 {isCustomer && (
                   <button
                     type="button"
                     onClick={() => setNoticeOpen(true)}
-                    aria-label={unread > 0 ? `お知らせ（新着 ${unread} 件）` : "お知らせ"}
+                    aria-label={unread > 0 ? t("お知らせ（新着 {n} 件）", { n: unread }) : t("お知らせ")}
                     data-tour="bell"
                     className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur"
                   >
@@ -591,26 +593,26 @@ function CustomerHome() {
                   </button>
                 )}
                 <div className="relative px-5 py-5 text-white">
-                  <p className="text-xs font-bold text-white/80">{hello}</p>
+                  <p className="text-xs font-bold text-white/80">{t(hello)}</p>
                   <h1 className="mt-1 text-[21px] font-extrabold leading-snug drop-shadow">
                     {name ? (
                       <>
-                        {name}さん、
+                        {t("{name}さん、", { name })}
                         <br />
-                        今日はどこへ行こう。
+                        {t("今日はどこへ行こう。")}
                       </>
                     ) : (
-                      "今日は、どこへ行こう。"
+                      t("今日は、どこへ行こう。")
                     )}
                   </h1>
                   {isCustomer && (
                     <p className="mt-2 text-sm text-white/90">
                       {nearbyCouponCount > 0 ? (
                         <>
-                          近く（1km 以内）で使えるクーポン <b className="num text-xl text-sun-400">{nearbyCouponCount}</b> 件
+                          {t("近く（1km 以内）で使えるクーポン")} <b className="num text-xl text-sun-400">{nearbyCouponCount}</b> {t("件")}
                         </>
                       ) : (
-                        "地図のピンや、下の一覧からお店を選べます"
+                        t("地図のピンや、下の一覧からお店を選べます")
                       )}
                     </p>
                   )}
@@ -623,7 +625,7 @@ function CustomerHome() {
                   className="mt-3 flex w-full items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-left text-sm ring-1 ring-asa-500/40"
                 >
                   <Bell className="h-4 w-4 text-asa-500" aria-hidden />
-                  新しいお知らせが <b className="num text-asa-500">{unread}</b> 件あります
+                  {t("新しいお知らせが")} <b className="num text-asa-500">{unread}</b> {t("件あります")}
                   <ChevronRight className="ml-auto h-4 w-4 text-slate-400" aria-hidden />
                 </button>
               )}
@@ -634,7 +636,7 @@ function CustomerHome() {
             {/* エリアからさがす */}
             <section className="px-5 pt-7">
               <AreaMark className="mb-2" />
-              <h2 className="font-mincho text-[22px] font-bold leading-snug tracking-[0.08em] text-slate-900">エリアからさがす</h2>
+              <h2 className="font-mincho text-[22px] font-bold leading-snug tracking-[0.08em] text-slate-900">{t("エリアからさがす")}</h2>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {AREA_LIST.map((a) => (
                   <button
@@ -650,9 +652,9 @@ function CustomerHome() {
                   >
                     <span className="min-w-0">
                       <span className="block text-sm font-bold tracking-[0.12em]" style={{ color: a.border }}>
-                        {a.name}エリア
+                        {t(`${a.name}エリア`)}
                       </span>
-                      <span className="mt-0.5 block truncate text-[10px] text-slate-500">{a.towns.slice(0, 3).join("・")}{a.towns.length > 3 ? " ほか" : ""}</span>
+                      <span className="mt-0.5 block truncate text-[10px] text-slate-500">{a.towns.slice(0, 3).map((x) => t(x)).join("・")}{a.towns.length > 3 ? t(" ほか") : ""}</span>
                     </span>
                     <ChevronRight className="h-4 w-4 shrink-0" style={{ color: a.border }} aria-hidden />
                   </button>
@@ -662,7 +664,7 @@ function CustomerHome() {
 
             {isCustomer && couponList.length > 0 && (
               <div data-tour="coupons">
-              <Carousel band title="近くのクーポン" eyebrow="COUPON" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note="タップで、クーポンの条件・お店の情報・行き方を表示" count={coupons.length}>
+              <Carousel band title={t("近くのクーポン")} eyebrow="COUPON" icon={<Ticket className="h-4 w-4 text-coupon" aria-hidden />} note={t("タップで、クーポンの条件・お店の情報・行き方を表示")} count={coupons.length}>
                 {couponList.map((c) => (
                   <CouponCard
                     key={c.id}
@@ -677,7 +679,7 @@ function CustomerHome() {
               </div>
             )}
             {ads.length > 0 && (
-              <Carousel title="PR・お店からのお知らせ" eyebrow="NEWS" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} note="タップで、お知らせの全文とお店の情報を表示">
+              <Carousel title={t("PR・お店からのお知らせ")} eyebrow="NEWS" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} note={t("タップで、お知らせの全文とお店の情報を表示")}>
                 {ads.map((ad) => (
                   <AdCard
                     key={ad.id}
@@ -691,7 +693,7 @@ function CustomerHome() {
               </Carousel>
             )}
             {recList.length > 0 && (
-              <Carousel title={recs.length ? "あなたへのおすすめ" : "おすすめのお店"} eyebrow="PICK UP" icon={<Sparkles className="h-4 w-4 text-asa-500" aria-hidden />} note={recs.length ? "見たお店・使ったクーポンから選んでいます" : "クーポン配信中のお店"}>
+              <Carousel title={t(recs.length ? "あなたへのおすすめ" : "おすすめのお店")} eyebrow="PICK UP" icon={<Sparkles className="h-4 w-4 text-asa-500" aria-hidden />} note={t(recs.length ? "見たお店・使ったクーポンから選んでいます" : "クーポン配信中のお店")}>
                 {recList.map(({ shop, note }) => (
                   <ShopCard
                     key={shop.id}
@@ -706,7 +708,7 @@ function CustomerHome() {
               </Carousel>
             )}
             {nearList.length > 0 && (
-              <Carousel band title="近くのお店" eyebrow="NEARBY" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="現在地から近い順">
+              <Carousel band title={t("近くのお店")} eyebrow="NEARBY" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note={t("現在地から近い順")}>
                 {nearList.map((shop) => (
                   <ShopCard
                     key={shop.id}
@@ -721,31 +723,31 @@ function CustomerHome() {
               </Carousel>
             )}
             {spotList.length > 0 && (
-              <Carousel title="観光スポット" eyebrow="SIGHTSEEING" icon={<Landmark className="h-4 w-4 text-sun-500" aria-hidden />} note="タップで、地図に行き方を表示">
+              <Carousel title={t("観光スポット")} eyebrow="SIGHTSEEING" icon={<Landmark className="h-4 w-4 text-sun-500" aria-hidden />} note={t("タップで、地図に行き方を表示")}>
                 {spotList.map((s) => (
                   <SpotCard key={s.id} name={s.name} description={s.description} meters={dist(s)} onOpen={() => spotRoute(s)} />
                 ))}
               </Carousel>
             )}
             {listingList.length > 0 && (
-              <Carousel title="宿・交通" eyebrow="STAY & TRAVEL" icon={<BedDouble className="h-4 w-4 text-tea-600" aria-hidden />} note="2023 年 3 月時点の公開資料の基本情報です。最新の情報は各施設にご確認ください">
+              <Carousel title={t("宿・交通")} eyebrow="STAY & TRAVEL" icon={<BedDouble className="h-4 w-4 text-tea-600" aria-hidden />} note={t("2023 年 3 月時点の公開資料の基本情報です。最新の情報は各施設にご確認ください")}>
                 {listingList.map((s) => (
                   <ListingCard key={s.id} name={s.name} kind={s.kind ?? "stay"} area={s.area} address={s.address} tel={s.tel} meters={dist(s)} onOpen={() => setListingId(s.id)} />
                 ))}
               </Carousel>
             )}
-            <Carousel band title="佐賀の美味いもの" eyebrow="LOCAL FOOD" icon={<UtensilsCrossed className="h-4 w-4 text-sun-500" aria-hidden />} note="地域ごとの名物">
+            <Carousel band title={t("佐賀の美味いもの")} eyebrow="LOCAL FOOD" icon={<UtensilsCrossed className="h-4 w-4 text-sun-500" aria-hidden />} note={t("地域ごとの名物")}>
               {SPECIALTIES.map((f) => (
-                <SpecialtyCard key={f.name} name={f.name} area={f.area} note={f.note} onOpen={() => setFood(f)} />
+                <SpecialtyCard key={f.name} {...(lang === "en" && SPECIALTY_EN[f.name] ? SPECIALTY_EN[f.name] : f)} onOpen={() => setFood(f)} />
               ))}
             </Carousel>
-            {shops.length === 0 && <p className="px-4 pt-6 text-sm text-slate-500">掲載店舗を準備中です。</p>}
+            {shops.length === 0 && <p className="px-4 pt-6 text-sm text-slate-500">{t("掲載店舗を準備中です。")}</p>}
             {isCustomer && (
               <div className="px-4 pt-2">
                 <Link href="/dashboard/customer" className="flex items-center justify-between rounded-lg bg-white px-4 py-3 text-sm font-bold text-saga-600 ring-1 ring-slate-200">
                   <span className="flex items-center gap-2">
                     <Heart className="h-4 w-4" aria-hidden />
-                    お気に入り・利用履歴・設定
+                    {t("お気に入り・利用履歴・設定")}
                   </span>
                   <ChevronRight className="h-4 w-4" aria-hidden />
                 </Link>
@@ -846,35 +848,36 @@ function PreviewCard({
   onClose: () => void;
 }) {
   const status = shopStatus(shop);
+  const { t } = useLang();
   return (
     <div className="overflow-hidden rounded-3xl bg-white shadow-[0_8px_24px_rgba(20,40,77,0.25)] ring-1 ring-slate-200/70">
       <button onClick={onOpen} className="flex w-full gap-3 p-3 text-left">
         <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl">
           <ShopPhoto shop={shop} className="h-full w-full" />
           {shop.best_label && (
-            <span className="num absolute bottom-1 left-1 rounded-md bg-coupon px-1.5 py-0.5 text-[11px] font-extrabold text-white">{shop.best_label}</span>
+            <span className="num absolute bottom-1 left-1 rounded-md bg-coupon px-1.5 py-0.5 text-[11px] font-extrabold text-white">{t(shop.best_label)}</span>
           )}
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1 text-[11px] text-slate-500">
             <CategoryIcon category={shop.category} className="h-3 w-3" />
-            {shop.category}
+            {t(shop.category)}
           </span>
           <span className="mt-0.5 block truncate text-base font-bold text-slate-900">{shop.name}</span>
-          <span className="mt-0.5 block truncate text-xs text-slate-500">{travelText(meters)}</span>
-          {status && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${status.open ? "bg-tea-100 text-tea-700" : "bg-slate-100 text-slate-600"}`}>{status.label}</span>}
+          <span className="mt-0.5 block truncate text-xs text-slate-500">{t(travelText(meters))}</span>
+          {status && <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${status.open ? "bg-tea-100 text-tea-700" : "bg-slate-100 text-slate-600"}`}>{t(status.label)}</span>}
         </span>
       </button>
       <div className="grid grid-cols-[1fr_1fr_auto] gap-2 border-t border-slate-100 p-2">
         <button onClick={onOpen} className="btn-outline rounded-full py-2">
           <Store className="h-4 w-4" aria-hidden />
-          お店の詳細
+          {t("お店の詳細")}
         </button>
         <button onClick={onRoute} className="btn-accent rounded-full py-2">
           <Navigation className="h-4 w-4" aria-hidden />
-          ここへ行く
+          {t("ここへ行く")}
         </button>
-        <button onClick={onClose} aria-label="閉じる" className="rounded-full px-3 text-slate-400 hover:bg-slate-100">
+        <button onClick={onClose} aria-label={t("閉じる")} className="rounded-full px-3 text-slate-400 hover:bg-slate-100">
           <X className="h-4 w-4" aria-hidden />
         </button>
       </div>
@@ -911,6 +914,7 @@ function RouteBar({
   tel?: string | null;
   onClose: () => void;
 }) {
+  const { t } = useLang();
   return (
     <div className="rounded-3xl bg-white p-3 shadow-[0_8px_24px_rgba(20,40,77,0.25)] ring-1 ring-slate-200/70">
       <div className="flex items-start gap-2">
@@ -919,27 +923,27 @@ function RouteBar({
           {subtitle && <p className="truncate text-xs text-slate-500">{subtitle}</p>}
           <p className="mt-0.5 text-lg font-extrabold text-saga-600">
             {loading ? (
-              <span className="text-sm font-bold">経路を計算しています…</span>
+              <span className="text-sm font-bold">{t("経路を計算しています…")}</span>
             ) : error ? (
               <span className="text-sm font-bold text-red-600">{error}</span>
             ) : route ? (
               <>
-                {route.mode === "WALKING" ? "徒歩" : "車"}で約 <span className="num">{Math.max(1, Math.round(route.totalSeconds / 60))}</span> 分
+                {t(route.mode === "WALKING" ? "徒歩で約" : "車で約")} <span className="num">{Math.max(1, Math.round(route.totalSeconds / 60))}</span> {t("分")}
                 <span className="ml-1 text-sm font-bold text-slate-500">（{formatDistance(route.totalMeters)}）</span>
               </>
             ) : null}
           </p>
-          {route?.estimated && <p className="text-[11px] text-amber-700">道順を取得できず、直線距離からの目安です</p>}
+          {route?.estimated && <p className="text-[11px] text-amber-700">{t("道順を取得できず、直線距離からの目安です")}</p>}
         </div>
         <div className="flex shrink-0 rounded-full bg-slate-100 p-1 text-xs font-bold">
           {(["foot", "car"] as const).map((m) => (
             <button key={m} onClick={() => onMode(m)} aria-pressed={mode === m} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 ${mode === m ? "bg-saga-600 text-white" : "text-slate-500"}`}>
               {m === "foot" ? <Footprints className="h-3.5 w-3.5" aria-hidden /> : <Car className="h-3.5 w-3.5" aria-hidden />}
-              {m === "foot" ? "徒歩" : "車"}
+              {t(m === "foot" ? "徒歩" : "車")}
             </button>
           ))}
         </div>
-        <button onClick={onClose} aria-label="経路を消す" className="shrink-0 rounded-full p-1.5 text-slate-400 hover:bg-slate-100">
+        <button onClick={onClose} aria-label={t("経路を消す")} className="shrink-0 rounded-full p-1.5 text-slate-400 hover:bg-slate-100">
           <X className="h-4 w-4" aria-hidden />
         </button>
       </div>
@@ -947,25 +951,25 @@ function RouteBar({
         {tel && (
           <a href={`tel:${tel.replace(/[^\d+]/g, "")}`} className="btn-outline rounded-full py-2">
             <Phone className="h-4 w-4" aria-hidden />
-            電話する
+            {t("電話する")}
           </a>
         )}
         {onInfo && (
           <button onClick={onInfo} className="btn-outline rounded-full py-2">
             <Store className="h-4 w-4" aria-hidden />
-            お店の情報・クーポン
+            {t("お店の情報・クーポン")}
           </button>
         )}
         {navUrl && (
           <a href={navUrl} target="_blank" rel="noreferrer" onClick={onNav} className="btn-accent rounded-full py-2">
             <MapIcon className="h-4 w-4" aria-hidden />
-            ナビを開始
+            {t("ナビを開始")}
           </a>
         )}
       </div>
       {route?.provider === "osm" && (
         <p className="mt-1 text-right text-[10px] text-slate-400">
-          道順 ©{" "}
+          {t("道順")} ©{" "}
           <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
             OpenStreetMap contributors
           </a>
@@ -978,6 +982,7 @@ function RouteBar({
 /** 検索結果の 1 行 */
 function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | null; onOpen: () => void }) {
   const status = shopStatus(s);
+  const { t } = useLang();
   return (
     <button onClick={onOpen} className="flex w-full items-center gap-3 border-b border-slate-100 py-3 text-left">
       <span className="h-[68px] w-[90px] shrink-0 overflow-hidden rounded-lg">
@@ -987,11 +992,11 @@ function ResultRow({ shop: s, meters, onOpen }: { shop: Shop; meters: number | n
         <span className="block truncate font-bold">{s.name}</span>
         <AreaTag address={s.address} className="my-0.5" />
         <span className="block truncate text-xs text-slate-500">
-          {s.category}・{travelText(meters)}
+          {t(s.category)}・{t(travelText(meters))}
         </span>
-        {status && <span className={`text-[11px] font-bold ${status.open ? "text-tea-700" : "text-slate-500"}`}>{status.label}</span>}
+        {status && <span className={`text-[11px] font-bold ${status.open ? "text-tea-700" : "text-slate-500"}`}>{t(status.label)}</span>}
       </span>
-      {s.best_label && <span className="num shrink-0 rounded-lg bg-coral-50 px-2 py-1 text-xs font-bold text-coupon">{s.best_label}</span>}
+      {s.best_label && <span className="num shrink-0 rounded-lg bg-coral-50 px-2 py-1 text-xs font-bold text-coupon">{t(s.best_label)}</span>}
     </button>
   );
 }

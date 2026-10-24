@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { api } from "@/lib/fetcher";
+import { useT } from "@/components/LangProvider";
 
 export default function ForgotPasswordPage() {
+  const t = useT();
   const [role, setRole] = useState<"customer" | "business">("customer");
   const [sent, setSent] = useState<{ mailEnabled: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,18 +28,18 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="mx-auto max-w-md p-4">
-      <h1 className="mt-4 text-2xl font-bold">パスワードの再設定</h1>
+      <h1 className="mt-4 text-2xl font-bold">{t("パスワードの再設定")}</h1>
       {sent ? (
         <div className="card mt-4 space-y-2 text-sm">
-          <p className="font-bold">ご登録のメールアドレス宛てに、再設定用のリンクをお送りしました（1 時間有効）。</p>
-          <p className="text-slate-600">メールが届かない場合は、迷惑メールフォルダをご確認いただくか、運営者にお問い合わせください。</p>
+          <p className="font-bold">{t("ご登録のメールアドレス宛てに、再設定用のリンクをお送りしました（1 時間有効）。")}</p>
+          <p className="text-slate-600">{t("メールが届かない場合は、迷惑メールフォルダをご確認いただくか、運営者にお問い合わせください。")}</p>
           {!sent.mailEnabled && (
             <p className="rounded-xl bg-sun-100 px-3 py-2 text-amber-800">
-              現在メール送信の準備中です。お手数ですが、運営者にお問い合わせください。運営者から再設定用のリンクをお送りします。
+              {t("現在メール送信の準備中です。お手数ですが、運営者にお問い合わせください。運営者から再設定用のリンクをお送りします。")}
             </p>
           )}
           <Link href="/login" className="btn-outline mt-2 w-full">
-            ログインへ戻る
+            {t("ログインへ戻る")}
           </Link>
         </div>
       ) : (
@@ -51,17 +53,17 @@ export default function ForgotPasswordPage() {
                 aria-pressed={role === r}
                 className={`rounded-lg py-2 ${role === r ? "bg-saga-600 font-bold text-white" : "text-slate-500"}`}
               >
-                {r === "customer" ? "お客さま" : "事業主"}
+                {r === "customer" ? t("お客さま") : t("事業主")}
               </button>
             ))}
           </div>
           <div>
-            <label className="label" htmlFor="email">登録したメールアドレス</label>
+            <label className="label" htmlFor="email">{t("登録したメールアドレス")}</label>
             <input id="email" name="email" type="email" required autoComplete="email" className="input" />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button disabled={loading} className="btn-primary btn-lg">
-            {loading ? "送信中…" : "再設定用のリンクを送る"}
+            {loading ? t("送信中…") : t("再設定用のリンクを送る")}
           </button>
         </form>
       )}

@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
+import { useT } from "@/components/LangProvider";
 
 export type SlidePhoto = { id: number; kind: string; caption: string };
 type Slide = { src: string; kind: string; caption: string };
@@ -29,6 +30,7 @@ export default function PhotoSlider({
   ];
   const strip = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
+  const t = useT();
   const [full, setFull] = useState<number | null>(null);
 
   const key = `${main}|${photos.map((p) => p.id).join(",")}`;
@@ -52,7 +54,7 @@ export default function PhotoSlider({
         ref={strip}
         onScroll={(e) => setIndex(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
         className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
-        aria-label={`${name}の写真`}
+        aria-label={t("{name}の写真", { name })}
       >
         {slides.map((s, i) => (
           <button
@@ -60,12 +62,12 @@ export default function PhotoSlider({
             type="button"
             onClick={() => setFull(i)}
             className="relative h-60 w-full shrink-0 snap-center bg-slate-100"
-            aria-label={`写真 ${i + 1}枚目（${s.kind}）を大きく見る`}
+            aria-label={t("写真 {i}枚目（{k}）を大きく見る", { i: i + 1, k: t(s.kind) })}
           >
             <img src={s.src} alt={s.caption || `${name} ${s.kind}`} loading={i < 2 ? "eager" : "lazy"} className="h-full w-full object-cover" />
             {(s.kind !== "メイン" || s.caption) && (
               <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 pb-2 pt-6 text-left text-white">
-                {s.kind !== "メイン" && <span className="mr-1.5 rounded-full bg-white/25 px-2 py-0.5 text-[11px] font-bold backdrop-blur">{s.kind}</span>}
+                {s.kind !== "メイン" && <span className="mr-1.5 rounded-full bg-white/25 px-2 py-0.5 text-[11px] font-bold backdrop-blur">{t(s.kind)}</span>}
                 <span className="text-xs">{s.caption}</span>
               </span>
             )}
@@ -81,7 +83,7 @@ export default function PhotoSlider({
             type="button"
             onClick={() => go(index - 1)}
             disabled={index === 0}
-            aria-label="前の写真"
+            aria-label={t("前の写真")}
             className="absolute left-2 top-[6.5rem] hidden h-9 w-9 place-items-center rounded-full bg-white/90 shadow disabled:hidden sm:grid"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -90,7 +92,7 @@ export default function PhotoSlider({
             type="button"
             onClick={() => go(index + 1)}
             disabled={index === slides.length - 1}
-            aria-label="次の写真"
+            aria-label={t("次の写真")}
             className="absolute right-2 top-[6.5rem] hidden h-9 w-9 place-items-center rounded-full bg-white/90 shadow disabled:hidden sm:grid"
           >
             <ChevronRight className="h-5 w-5" />
@@ -98,10 +100,10 @@ export default function PhotoSlider({
         </>
       )}
       {kinds.length > 0 && (
-        <div className="no-scrollbar flex gap-1.5 overflow-x-auto bg-white px-4 pt-3" aria-label="写真の種類">
+        <div className="no-scrollbar flex gap-1.5 overflow-x-auto bg-white px-4 pt-3" aria-label={t("写真の種類")}>
           <span className="flex shrink-0 items-center gap-1 text-xs font-bold text-slate-500">
             <Expand className="h-3.5 w-3.5" aria-hidden />
-            写真 {slides.length}枚
+            {t("写真 {n}枚", { n: slides.length })}
           </span>
           {kinds.map((k) => (
             <button
@@ -125,6 +127,7 @@ export default function PhotoSlider({
 function Lightbox({ slides, start, name, onClose }: { slides: Slide[]; start: number; name: string; onClose: () => void }) {
   const strip = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(start);
+  const t = useT();
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
   useEffect(() => {
@@ -140,12 +143,12 @@ function Lightbox({ slides, start, name, onClose }: { slides: Slide[]; start: nu
   }, [start]);
   const s = slides[index];
   return (
-    <div role="dialog" aria-modal="true" aria-label={`${name}の写真`} className="fixed inset-0 z-[3000] flex flex-col bg-black">
+    <div role="dialog" aria-modal="true" aria-label={t("{name}の写真", { name })} className="fixed inset-0 z-[3000] flex flex-col bg-black">
       <div className="flex items-center justify-between px-3 py-2 text-white">
         <span className="num text-sm font-bold">
           {index + 1} / {slides.length}
         </span>
-        <button type="button" onClick={onClose} aria-label="写真を閉じる" className="grid h-11 w-11 place-items-center rounded-full bg-white/15">
+        <button type="button" onClick={onClose} aria-label={t("写真を閉じる")} className="grid h-11 w-11 place-items-center rounded-full bg-white/15">
           <X className="h-6 w-6" />
         </button>
       </div>
@@ -161,7 +164,7 @@ function Lightbox({ slides, start, name, onClose }: { slides: Slide[]; start: nu
         ))}
       </div>
       <p className="min-h-[4rem] px-4 py-3 text-sm text-white">
-        {s?.kind !== "メイン" && <span className="mr-2 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{s?.kind}</span>}
+        {s?.kind !== "メイン" && <span className="mr-2 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{t(s?.kind ?? "")}</span>}
         {s?.caption}
       </p>
     </div>

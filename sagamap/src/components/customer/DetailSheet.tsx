@@ -40,6 +40,7 @@ import PhotoSlider, { type SlidePhoto } from "./PhotoSlider";
 import { paymentRows, paymentTags } from "@/lib/payment";
 import { CouponStub, type CouponInfo } from "@/components/CouponRow";
 import { couponBadge, couponRules, couponShort } from "@/lib/coupon";
+import { useT } from "@/components/LangProvider";
 
 export type DetailShop = CardShop & {
   lat: number;
@@ -129,6 +130,7 @@ export default function DetailSheet({
   onToggleFavorite?: (id: number) => void;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
+  const t = useT();
   // 別のお店に切り替えたら、いちばん上から見せる
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
@@ -199,19 +201,19 @@ export default function DetailSheet({
       className="fixed inset-0 z-[1500] flex flex-col bg-mizu-50 lg:inset-auto lg:bottom-0 lg:left-0 lg:top-14 lg:w-[480px] lg:border-r lg:border-slate-200 lg:shadow-[8px_0_24px_rgba(20,40,77,0.12)]"
       role="dialog"
       aria-modal="true"
-      aria-label={`${shop.name}の詳細`}
+      aria-label={t("{name}の詳細", { name: shop.name })}
     >
       {/* 上の帯（戻る・保存・共有） */}
       <div className="flex h-14 shrink-0 items-center gap-1 border-b border-slate-200/80 bg-[#FFFDF9]/95 px-2 backdrop-blur">
         <button onClick={onClose} className="flex h-10 items-center gap-1 rounded-full px-3 text-sm font-bold text-saga-600 hover:bg-slate-100">
           <ArrowLeft className="h-5 w-5" aria-hidden />
-          地図に戻る
+          {t("地図に戻る")}
         </button>
         <span className="min-w-0 flex-1 truncate text-center text-sm font-bold text-slate-700">{shop.name}</span>
-        <button onClick={onFavorite} aria-label={favorite ? "お気に入りから外す" : "お気に入りに保存"} aria-pressed={favorite} className="rounded-full p-2.5 hover:bg-slate-100">
+        <button onClick={onFavorite} aria-label={t(favorite ? "お気に入りから外す" : "お気に入りに保存")} aria-pressed={favorite} className="rounded-full p-2.5 hover:bg-slate-100">
           <Heart className={`h-5 w-5 ${favorite ? "fill-coupon text-coupon" : "text-slate-600"}`} aria-hidden />
         </button>
-        <button onClick={onShare} aria-label="共有" className="rounded-full p-2.5 text-slate-600 hover:bg-slate-100">
+        <button onClick={onShare} aria-label={t("共有")} className="rounded-full p-2.5 text-slate-600 hover:bg-slate-100">
           <Share2 className="h-5 w-5" aria-hidden />
         </button>
       </div>
@@ -233,29 +235,29 @@ export default function DetailSheet({
           <div className="px-4 pb-4 pt-3">
             <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs font-medium text-slate-500">
               <CategoryIcon category={shop.category} className="h-3.5 w-3.5" />
-              {shop.category}
+              {t(shop.category)}
               {shop.price_level ? <span>・{PRICE_LEVEL_LABELS[shop.price_level]}</span> : null}
             </p>
             <h1 className="mt-1 text-[24px] font-bold leading-snug text-slate-900">{shop.name}</h1>
             <AreaTag address={shop.address} className="mt-1.5" />
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
               {status && (
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${status.open ? "bg-tea-100 text-tea-700" : "bg-slate-100 text-slate-600"}`}>{status.label}</span>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${status.open ? "bg-tea-100 text-tea-700" : "bg-slate-100 text-slate-600"}`}>{t(status.label)}</span>
               )}
               {meters != null && (
                 <span className="inline-flex items-center gap-1 text-slate-600">
                   <Footprints className="h-4 w-4 text-saga-600" aria-hidden />
-                  現在地から {travelText(meters)}
+                  {t(`現在地から ${travelText(meters)}`)}
                 </span>
               )}
             </div>
             {shop.service_description && <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-slate-700">{shop.service_description}</p>}
             {features.length > 0 && (
-              <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="お店の特徴">
+              <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={t("お店の特徴")}>
                 {features.map((a) => (
                   <li key={a} className="inline-flex items-center gap-1 rounded-full bg-saga-50 px-2.5 py-1 text-xs font-bold text-saga-700">
                     <BadgeCheck className="h-3.5 w-3.5" aria-hidden />
-                    {a}
+                    {t(a)}
                   </li>
                 ))}
               </ul>
@@ -284,7 +286,7 @@ export default function DetailSheet({
         {/* お店のページの目次（食べログ・ホットペッパーのように、見たい情報へ 1 タップで） */}
         <nav
           ref={tabNav}
-          aria-label="お店のページの目次"
+          aria-label={t("お店のページの目次")}
           className="no-scrollbar sticky top-0 z-20 flex gap-1 overflow-x-auto border-b border-slate-200/80 bg-[#FFFDF9]/95 px-3 py-2 backdrop-blur"
         >
           {tabs.map(([key, label]) => (
@@ -298,7 +300,7 @@ export default function DetailSheet({
                 activeTab === key ? "bg-saga-600 text-white" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
-              {label}
+              {t(label as string)}
             </button>
           ))}
         </nav>
@@ -310,7 +312,7 @@ export default function DetailSheet({
             <SectionTitle
               eyebrow="COUPON"
               tone="coupon"
-              title={focusCoupon ? "このお店のほかのクーポン" : "このお店で使えるクーポン"}
+              title={t(focusCoupon ? "このお店のほかのクーポン" : "このお店で使えるクーポン")}
               icon={<Ticket className="h-4 w-4" aria-hidden />}
             />
             {coupons === null && <div className="mt-2 h-20 animate-pulse rounded-2xl bg-white" />}
@@ -322,13 +324,13 @@ export default function DetailSheet({
           </section>
         )}
         {coupons !== null && coupons.length === 0 && (
-          <p className="mx-4 mt-5 rounded-2xl bg-white px-4 py-3 text-sm text-slate-500 ring-1 ring-slate-200/70">このお店は、いまクーポンを配信していません。</p>
+          <p className="mx-4 mt-5 rounded-2xl bg-white px-4 py-3 text-sm text-slate-500 ring-1 ring-slate-200/70">{t("このお店は、いまクーポンを配信していません。")}</p>
         )}
 
         <div data-sec="menu" />
         {/* メニュー・商品（写真・価格） */}
         {menu && menu.length > 0 && (
-          <Carousel title="メニュー・商品" eyebrow="MENU" icon={<UtensilsCrossed className="h-4 w-4 text-asa-500" aria-hidden />} count={menu.length}>
+          <Carousel title={t("メニュー・商品")} eyebrow="MENU" icon={<UtensilsCrossed className="h-4 w-4 text-asa-500" aria-hidden />} count={menu.length}>
             {menu.map((m) => (
               <div key={m.id} className="w-[176px] shrink-0 snap-start overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/70">
                 {m.has_image ? (
@@ -351,7 +353,7 @@ export default function DetailSheet({
         {/* ⑤ お店からのお知らせ（広告） */}
         {otherAds.length > 0 && (
           <section className="px-4 pt-5">
-            <SectionTitle eyebrow="NEWS" title="お店からのお知らせ" icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} />
+            <SectionTitle eyebrow="NEWS" title={t("お店からのお知らせ")} icon={<Megaphone className="h-4 w-4 text-slate-500" aria-hidden />} />
             <div className="mt-2 space-y-3">
               {otherAds.map((ad) => (
                 <AdHero key={ad.id} ad={ad} compact />
@@ -375,19 +377,19 @@ export default function DetailSheet({
         <section className="mx-4 mt-5 rounded-3xl bg-white p-4 ring-1 ring-slate-200/70">
           <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
             <Store className="h-4 w-4 text-saga-600" aria-hidden />
-            お店の情報
+            {t("お店の情報")}
           </h2>
           <dl className="mt-3 space-y-3 text-[15px]">
             <Info icon={Clock} label="営業時間">
               {status ? (
-                <span className={status.open ? "font-bold text-tea-700" : "text-slate-600"}>{status.label}</span>
+                <span className={status.open ? "font-bold text-tea-700" : "text-slate-600"}>{t(status.label)}</span>
               ) : shop.business_hours || shop.closed_days ? (
                 <>
                   {shop.business_hours && <span className="block">{shop.business_hours}</span>}
-                  {shop.closed_days && <span className="block text-slate-500">定休日：{shop.closed_days}</span>}
+                  {shop.closed_days && <span className="block text-slate-500">{t("定休日：")}{shop.closed_days}</span>}
                 </>
               ) : (
-                <span className="text-slate-400">お店にお問い合わせください</span>
+                <span className="text-slate-400">{t("お店にお問い合わせください")}</span>
               )}
             </Info>
             {shop.address && (
@@ -413,17 +415,17 @@ export default function DetailSheet({
                 <span className="flex flex-wrap gap-4">
                   {shop.reservation_url && (
                     <a href={shop.reservation_url} target="_blank" rel="noreferrer" onClick={onCall} className="font-bold text-saga-600">
-                      予約ページ
+                      {t("予約ページ")}
                     </a>
                   )}
                   {shop.line_url && (
                     <a href={shop.line_url} target="_blank" rel="noreferrer" onClick={onCall} className="font-bold text-saga-600">
-                      LINE で問い合わせ
+                      {t("LINE で問い合わせ")}
                     </a>
                   )}
                   {shop.website_url && (
                     <a href={shop.website_url} target="_blank" rel="noreferrer" className="font-bold text-saga-600">
-                      ホームページ
+                      {t("ホームページ")}
                     </a>
                   )}
                 </span>
@@ -432,12 +434,12 @@ export default function DetailSheet({
             {payments.length > 0 && (
               <Info icon={Wallet} label="お支払い方法（現金以外）">
                 <span className="block space-y-2">
-                  <span className="block text-[15px] font-bold text-slate-800">お支払い方法（現金以外）</span>
+                  <span className="block text-[15px] font-bold text-slate-800">{t("お支払い方法（現金以外）")}</span>
                   {payments.map((r) => (
                     <span key={r.key} className="block">
-                      <span className="block text-xs font-bold text-slate-500">{r.label}</span>
+                      <span className="block text-xs font-bold text-slate-500">{t(r.label)}</span>
                       {r.none ? (
-                        <span className="text-slate-400">使えません</span>
+                        <span className="text-slate-400">{t("使えません")}</span>
                       ) : (
                         <span className="mt-1 flex flex-wrap gap-1">
                           {r.items.map((m) => (
@@ -471,11 +473,11 @@ export default function DetailSheet({
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button onClick={onRoute} className="btn-outline">
               <Navigation className="h-4 w-4" aria-hidden />
-              経路を見る
+              {t("経路を見る")}
             </button>
             <a href={gmapNav} target="_blank" rel="noreferrer" onClick={onNav} className="btn-outline">
               <MapIcon className="h-4 w-4" aria-hidden />
-              ナビを開く
+              {t("ナビを開く")}
             </a>
           </div>
         </section>
@@ -483,7 +485,7 @@ export default function DetailSheet({
         <div data-sec="near" />
         {/* ⑦ 3 回目のタップ：近くのお店（はしご・ついで寄りを提案） */}
         {nearby.length > 0 && (
-          <Carousel title="このお店の近くのお店" eyebrow="NEXT STOP" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note="このお店からの距離・クーポン配信中のお店を先に表示">
+          <Carousel title={t("このお店の近くのお店")} eyebrow="NEXT STOP" icon={<MapPin className="h-4 w-4 text-saga-600" aria-hidden />} note={t("このお店からの距離・クーポン配信中のお店を先に表示")}>
             {nearby.map(({ shop: s, meters: m }) => (
               <ShopCard
                 key={s.id}
@@ -503,12 +505,12 @@ export default function DetailSheet({
         {bestCoupon && (
           <button onClick={() => onUseCoupon(bestCoupon)} className="btn flex-1 rounded-full bg-coupon py-3 text-white hover:bg-coral-600">
             <Ticket className="h-4 w-4" aria-hidden />
-            {bestCoupon.coupon_type === "gift" ? "特典を使う" : `${couponShort(bestCoupon)}を使う`}
+            {bestCoupon.coupon_type === "gift" ? t("特典を使う") : t("{c}を使う", { c: t(couponShort(bestCoupon)) })}
           </button>
         )}
         <button onClick={onRoute} className="btn-accent flex-1 rounded-full py-3">
           <Navigation className="h-4 w-4" aria-hidden />
-          ここへ行く
+          {t("ここへ行く")}
         </button>
       </div>
     </div>
@@ -530,11 +532,12 @@ function Action({
   primary?: boolean;
   on?: boolean;
 }) {
+  const t = useT();
   const cls = `flex flex-col items-center gap-1 rounded-2xl py-2.5 text-[12px] font-bold ${primary ? "bg-asa-500 text-white" : "bg-slate-50 text-saga-600 ring-1 ring-slate-200/70"}`;
   const inner = (
     <>
       <Icon className={`h-5 w-5 ${on ? "fill-coupon text-coupon" : ""}`} aria-hidden />
-      {label}
+      {t(label)}
     </>
   );
   if (href) {
@@ -552,10 +555,11 @@ function Action({
 }
 
 function Info({ icon: Icon, label, children }: { icon: typeof Clock; label: string; children: React.ReactNode }) {
+  const t = useT();
   return (
     <div className="flex gap-3">
       <dt className="shrink-0 pt-0.5 text-slate-400">
-        <Icon className="h-4 w-4" aria-label={label} />
+        <Icon className="h-4 w-4" aria-label={t(label)} />
       </dt>
       <dd className="min-w-0 text-slate-700">{children}</dd>
     </div>
@@ -567,61 +571,62 @@ function CouponHero({ coupon: c, shopName, onUse }: { coupon: DetailCoupon; shop
   const left = daysLeft(c.expires_at);
   const badge = couponBadge(c);
   const color = badge.tone === "green" ? "text-tea-600" : badge.tone === "gold" ? "text-sun-500" : "text-coupon";
+  const t = useT();
   return (
     <section className="karakusa bg-saga-600 px-4 pb-5 pt-4">
       <div className="overflow-hidden rounded-3xl bg-[#FAF6EF] shadow-[0_12px_28px_rgba(10,20,40,0.3)]">
         {c.has_image && <img src={`/api/coupons/${c.id}/image`} alt="" className="h-44 w-full object-cover" />}
         <div className="px-5 pb-5 pt-4 text-center">
-          <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">クーポン</p>
+          <p className="num text-[11px] font-bold tracking-[0.3em] text-asa-500">{t("クーポン")}</p>
           {(c as { event_title?: string | null }).event_title && (
             <p className="mx-auto mt-1 w-fit rounded-full bg-asa-500 px-3 py-0.5 text-xs font-bold text-white">
-              {(c as { event_title?: string | null }).event_title} 限定
+              {(c as { event_title?: string | null }).event_title} {t("限定")}
             </p>
           )}
           <p className="mt-0.5 text-sm font-bold text-slate-600">{shopName}</p>
           {c.coupon_type === "gift" ? (
-            <p className={`mt-2 text-[26px] font-extrabold leading-snug ${color}`}>{c.benefit || "特典サービス"}</p>
+            <p className={`mt-2 text-[26px] font-extrabold leading-snug ${color}`}>{c.benefit || t("特典サービス")}</p>
           ) : (
             <p className={`mt-2 font-num font-extrabold leading-none ${color}`}>
-              {c.coupon_type === "price" && <span className="mr-1 align-middle text-base font-bold">特別価格</span>}
+              {c.coupon_type === "price" && <span className="mr-1 align-middle text-base font-bold">{t("特別価格")}</span>}
               <span className="text-6xl tracking-tight">{badge.main}</span>
-              <span className="text-2xl">{badge.sub}</span>
+              <span className="text-2xl">{t(badge.sub)}</span>
             </p>
           )}
           {c.coupon_type === "price" && c.regular_price && (
             <p className="mt-1 text-sm text-slate-500">
-              通常 <s>{c.regular_price.toLocaleString()}円</s>
+              {t("通常")} <s>{t(`${c.regular_price.toLocaleString()}円`)}</s>
             </p>
           )}
           <p className="mt-2 text-lg font-bold text-slate-900">{c.title}</p>
-          {c.conditions && <p className="mt-1 text-sm text-slate-600">条件：{c.conditions}</p>}
+          {c.conditions && <p className="mt-1 text-sm text-slate-600">{t("条件：")}{c.conditions}</p>}
           <p className="mt-2 inline-flex items-center gap-1 text-sm text-slate-600">
             <CalendarClock className="h-4 w-4" aria-hidden />
-            {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
-            {left && <b className="ml-1 rounded-full bg-coral-50 px-2 py-0.5 text-xs text-coupon">{left}</b>}
+            {t("{d}まで", { d: new Date(c.expires_at).toLocaleDateString("ja-JP") })}
+            {left && <b className="ml-1 rounded-full bg-coral-50 px-2 py-0.5 text-xs text-coupon">{t(left)}</b>}
           </p>
           <p className="mt-1 flex flex-wrap justify-center gap-1">
-            {couponRules(c).map((t) => (
-              <span key={t} className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-saga-600 ring-1 ring-saga-100">
-                {t}
+            {couponRules(c).map((r) => (
+              <span key={r} className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-saga-600 ring-1 ring-saga-100">
+                {t(r)}
               </span>
             ))}
           </p>
           <div className="my-4 border-t-2 border-dashed border-slate-300" aria-hidden />
           <ol className="grid grid-cols-3 gap-2 text-left text-[11px] leading-snug text-slate-600">
             <li>
-              <b className="num block text-base text-saga-600">1</b>お店へ行く
+              <b className="num block text-base text-saga-600">1</b>{t("お店へ行く")}
             </li>
             <li>
-              <b className="num block text-base text-saga-600">2</b>お会計の前に「使う」
+              <b className="num block text-base text-saga-600">2</b>{t("お会計の前に「使う」")}
             </li>
             <li>
-              <b className="num block text-base text-saga-600">3</b>店員さんに画面を見せる
+              <b className="num block text-base text-saga-600">3</b>{t("店員さんに画面を見せる")}
             </li>
           </ol>
           <button onClick={onUse} className="btn mt-4 w-full rounded-full bg-coupon py-3 text-base text-white hover:bg-coral-600">
             <Ticket className="h-5 w-5" aria-hidden />
-            このクーポンを使う
+            {t("このクーポンを使う")}
           </button>
         </div>
       </div>
@@ -632,6 +637,7 @@ function CouponHero({ coupon: c, shopName, onUse }: { coupon: DetailCoupon; shop
 /** クーポンの 1 行（残り日数・使い方の条件つき） */
 function CouponLine({ coupon: c, onUse }: { coupon: DetailCoupon; onUse: () => void }) {
   const left = daysLeft(c.expires_at);
+  const t = useT();
   return (
     <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/70">
       {c.has_image && <img src={`/api/coupons/${c.id}/image`} alt="" className="h-32 w-full object-cover" loading="lazy" />}
@@ -643,13 +649,13 @@ function CouponLine({ coupon: c, onUse }: { coupon: DetailCoupon; onUse: () => v
             {c.coupon_type === "gift" && c.benefit && <span className="block text-xs font-bold text-tea-700">{c.benefit}</span>}
             <span className="block text-xs text-slate-500">
               {c.conditions && `${c.conditions}・`}
-              {new Date(c.expires_at).toLocaleDateString("ja-JP")}まで
-              {left && <b className="ml-1 text-coupon">{left}</b>}
+              {t("{d}まで", { d: new Date(c.expires_at).toLocaleDateString("ja-JP") })}
+              {left && <b className="ml-1 text-coupon">{t(left)}</b>}
             </span>
-            <span className="block text-[11px] text-slate-400">{couponRules(c).join("・")}</span>
+            <span className="block text-[11px] text-slate-400">{couponRules(c).map((r) => t(r)).join("・")}</span>
           </span>
           <button onClick={onUse} className="btn-primary shrink-0 rounded-full px-4 py-2">
-            使う
+            {t("使う")}
           </button>
         </div>
       </div>
@@ -659,17 +665,18 @@ function CouponLine({ coupon: c, onUse }: { coupon: DetailCoupon; onUse: () => v
 
 /** 広告（PR）の内容を大きく */
 function AdHero({ ad, compact = false }: { ad: Ad; compact?: boolean }) {
+  const t = useT();
   return (
     <section className={compact ? "overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200/70" : "bg-white"}>
       {ad.has_image && <img src={`/api/ads/${ad.id}/image`} alt="" className={`w-full object-cover ${compact ? "h-40" : "max-h-[46vh] min-h-[200px]"}`} />}
       <div className="p-4">
         <p className="flex items-center gap-2 text-xs text-slate-500">
           <span className="rounded border border-slate-300 px-1.5 py-px text-[10px] font-bold tracking-wide text-slate-500">PR</span>
-          {ad.business_name} からのお知らせ
+          {t("{name} からのお知らせ", { name: ad.business_name })}
         </p>
         <h2 className={`mt-1.5 font-bold leading-snug text-slate-900 ${compact ? "text-base" : "text-xl"}`}>{ad.headline}</h2>
         {ad.body && <p className="mt-1 whitespace-pre-line text-[15px] leading-relaxed text-slate-700">{ad.body}</p>}
-        {ad.ends_at && <p className="mt-2 text-xs text-slate-400">{new Date(ad.ends_at).toLocaleDateString("ja-JP")} まで掲載</p>}
+        {ad.ends_at && <p className="mt-2 text-xs text-slate-400">{t("{d} まで掲載", { d: new Date(ad.ends_at).toLocaleDateString("ja-JP") })}</p>}
       </div>
     </section>
   );

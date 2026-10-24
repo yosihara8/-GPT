@@ -101,3 +101,91 @@ export const SPECIALTIES: Specialty[] = [
     keyword: "伊万里牛",
   },
 ];
+
+/** 英語の表示（名前・地域・ひとこと・説明） */
+export const SPECIALTY_EN: Record<string, { name: string; area: string; note: string; detail: string }> = {
+  呼子のいか: {
+    name: "Yobuko Squid",
+    area: "Karatsu · Yobuko",
+    note: "Translucent, freshly sliced squid",
+    detail: "Yobuko in Karatsu is a fishing port famous for squid served sliced while still fresh. The translucent flesh has a firm, crunchy bite, and many restaurants will fry or grill the tentacles for you afterwards.",
+  },
+  "Q さば": {
+    name: "Q-Saba Mackerel",
+    area: "Karatsu",
+    note: "Farmed mackerel you can eat raw",
+    detail: "A farmed mackerel from Karatsu, developed with Kyushu University. It is carefully raised so it can be eaten raw — try it as sashimi or shabu-shabu.",
+  },
+  佐賀牛: {
+    name: "Saga Beef",
+    area: "Saga",
+    note: "Finely marbled Wagyu",
+    detail: "A premium brand of Japanese Black cattle raised in Saga; only beef that meets strict standards may use the name. Known for its fine marbling and melt-in-the-mouth texture.",
+  },
+  丸ぼうろ: {
+    name: "Marubouro",
+    area: "Saga",
+    note: "A simple, gently sweet baked treat",
+    detail: "A round, flat baked sweet made from flour, sugar and eggs. Said to come from Portuguese-influenced confectionery, it is a classic souvenir from Saga.",
+  },
+  シシリアンライス: {
+    name: "Sicilian Rice",
+    area: "Saga",
+    note: "Saga City’s local rice bowl",
+    detail: "Rice topped with sweet-savory stir-fried meat and fresh salad, finished with mayonnaise. A local favorite served at cafés and diners all over Saga City, each with its own twist.",
+  },
+  鯉こく: {
+    name: "Koikoku (Carp Miso Soup)",
+    area: "Ogi",
+    note: "Carp soup near Kiyomizu Falls",
+    detail: "Carp cut into rounds and slowly simmered in miso. Restaurants serving carp dishes line the foot of Kiyomizu Falls in Ogi City.",
+  },
+  小城羊羹: {
+    name: "Ogi Yokan",
+    area: "Ogi",
+    note: "Traditional sweet bean jelly with a sugary crust",
+    detail: "Ogi City’s famous yokan (sweet bean jelly). The traditional style has a crisp sugar crust on the outside and a moist center.",
+  },
+  嬉野茶: {
+    name: "Ureshino Tea",
+    area: "Ureshino",
+    note: "Fragrant, rolled green tea",
+    detail: "Green tea grown in Ureshino. Much of it is tamaryokucha, with curled leaves, known for its mellow taste and fresh aroma.",
+  },
+  温泉湯どうふ: {
+    name: "Onsen Yudofu",
+    area: "Ureshino",
+    note: "Tofu that melts in hot-spring water",
+    detail: "Tofu simmered in Ureshino’s hot-spring water. The minerals make the tofu soft and creamy, and it is eaten together with the milky broth.",
+  },
+  竹崎カニ: {
+    name: "Takezaki Crab",
+    area: "Tara",
+    note: "Swimming crab from the Ariake Sea",
+    detail: "Swimming crab landed at Takezaki in Tara Town, on the Ariake Sea. Packed with meat — enjoy it boiled or at the many crab restaurants in the area.",
+  },
+  "日本酒（酒蔵）": {
+    name: "Sake & Breweries",
+    area: "Kashima · Ureshino",
+    note: "A sake region with brewery tours",
+    detail: "The Kashima and Ureshino area has many sake breweries. Enjoy brewery visits and freshly made sake at spring brewery events.",
+  },
+  呉豆腐: {
+    name: "Gōdōfu",
+    area: "Takeo · Arita",
+    note: "Chewy, soft tofu",
+    detail: "A Saga specialty made by setting soy milk with starch such as kudzu. It has a chewy texture and is served with a sweet sauce.",
+  },
+  ちゃんぽん: {
+    name: "Champon Noodles",
+    area: "Takeo · Kitagata",
+    note: "The “Champon Road” along Route 34",
+    detail: "Along Route 34 around Kitagata in Takeo, champon noodle shops line the “Champon Road”. A bowl piled high with vegetables is the local favorite.",
+  },
+  伊万里牛: {
+    name: "Imari Beef",
+    area: "Imari",
+    note: "Wagyu raised in Imari",
+    detail: "A brand of Japanese Black cattle raised mainly in Imari City, known for tender meat and sweet fat.",
+  },
+};

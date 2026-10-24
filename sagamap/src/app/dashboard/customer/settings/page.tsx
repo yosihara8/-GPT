@@ -9,6 +9,7 @@ import EmailChangeForm from "@/components/EmailChangeForm";
 import DeleteAccount from "@/components/DeleteAccount";
 import PasswordChangeForm from "@/components/PasswordChangeForm";
 import NotifySetting from "@/components/NotifySetting";
+import { useT } from "@/components/LangProvider";
 
 /**
  * お客さまの設定（マイページから「設定」で開く別ページ）。
@@ -24,40 +25,41 @@ export default function CustomerSettingsPage() {
 }
 
 function Settings() {
+  const t = useT();
   // お知らせから「メールの設定」で来たときは、その項目を開いておく
   const open = useSearchParams().get("open");
   return (
     <main className="mx-auto max-w-2xl px-5 pb-12 pt-5">
       <Link href="/dashboard/customer" className="inline-flex items-center gap-1 text-sm font-bold text-saga-600">
         <ArrowLeft className="h-4 w-4" aria-hidden />
-        マイページに戻る
+        {t("マイページに戻る")}
       </Link>
       <AreaMark className="mb-2 mt-6" />
-      <h1 className="font-mincho text-[26px] font-bold leading-snug tracking-[0.08em] text-slate-900">設定</h1>
-      <p className="mt-1 text-xs text-slate-500">見たい項目を押すと開きます。</p>
+      <h1 className="font-mincho text-[26px] font-bold leading-snug tracking-[0.08em] text-slate-900">{t("設定")}</h1>
+      <p className="mt-1 text-xs text-slate-500">{t("見たい項目を押すと開きます。")}</p>
 
       <div className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
-        <Fold icon={Bell} title="お知らせメール" sub="新着クーポンのまとめメールの受け取り" defaultOpen={open === "notify"}>
+        <Fold icon={Bell} title={t("お知らせメール")} sub={t("新着クーポンのまとめメールの受け取り")} defaultOpen={open === "notify"}>
           <NotifySetting />
         </Fold>
-        <Fold icon={Mail} title="メールアドレスの変更" sub="ログインに使うメールアドレス">
+        <Fold icon={Mail} title={t("メールアドレスの変更")} sub={t("ログインに使うメールアドレス")}>
           <EmailChangeForm />
         </Fold>
-        <Fold icon={KeyRound} title="パスワードの変更" sub="ログインに使うパスワード">
+        <Fold icon={KeyRound} title={t("パスワードの変更")} sub={t("ログインに使うパスワード")}>
           <PasswordChangeForm />
         </Fold>
         <Link href="/contact" className="flex items-center gap-3 py-4">
           <MessageCircle className="h-5 w-5 shrink-0 text-saga-600" aria-hidden />
           <span className="min-w-0 flex-1">
-            <span className="block font-bold text-slate-900">お問い合わせ</span>
-            <span className="block text-xs text-slate-500">使い方・クーポン・個人情報のご請求など</span>
+            <span className="block font-bold text-slate-900">{t("お問い合わせ")}</span>
+            <span className="block text-xs text-slate-500">{t("使い方・クーポン・個人情報のご請求など")}</span>
           </span>
           <ChevronDown className="h-4 w-4 -rotate-90 text-slate-400" aria-hidden />
         </Link>
       </div>
 
       <div className="mt-10">
-        <Fold icon={UserX} title="退会について" sub="アカウントの削除" small>
+        <Fold icon={UserX} title={t("退会について")} sub={t("アカウントの削除")} small>
           <DeleteAccount />
         </Fold>
       </div>

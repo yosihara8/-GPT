@@ -3,9 +3,11 @@
 import PasswordInput from "@/components/PasswordInput";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/fetcher";
+import { useT } from "@/components/LangProvider";
 
 /** メールアドレスの変更（今のパスワードで本人確認） */
 export default function EmailChangeForm({ onChanged, admin = false }: { onChanged?: (email: string) => void; admin?: boolean }) {
+  const t = useT();
   const endpoint = admin ? "/api/account/email?as=admin" : "/api/account/email";
   const [current, setCurrent] = useState<string | null>(null);
   const [canChange, setCanChange] = useState(true);
@@ -26,7 +28,7 @@ export default function EmailChangeForm({ onChanged, admin = false }: { onChange
     const form = e.currentTarget;
     const f = Object.fromEntries(new FormData(form)) as Record<string, string>;
     if (f.email.trim().toLowerCase() !== f.email2.trim().toLowerCase()) {
-      return setMsg({ ok: false, text: "確認用のメールアドレスが一致しません" });
+      return setMsg({ ok: false, text: t("確認用のメールアドレスが一致しません") });
     }
     setSaving(true);
     setMsg(null);
@@ -39,8 +41,8 @@ export default function EmailChangeForm({ onChanged, admin = false }: { onChange
       setMsg({
         ok: true,
         text: d.verify
-          ? "メールアドレスを変更しました。新しいアドレスに確認メールを送りました。メールのボタンを押して確認を完了してください。"
-          : "メールアドレスを変更しました。次回から新しいアドレスでログインしてください。",
+          ? t("メールアドレスを変更しました。新しいアドレスに確認メールを送りました。メールのボタンを押して確認を完了してください。")
+          : t("メールアドレスを変更しました。次回から新しいアドレスでログインしてください。"),
       });
       form.reset();
       onChanged?.(d.email);
@@ -53,24 +55,24 @@ export default function EmailChangeForm({ onChanged, admin = false }: { onChange
 
   return (
     <form onSubmit={onSubmit} className="card space-y-3">
-      <h2 className="font-bold">メールアドレスの変更</h2>
+      <h2 className="font-bold">{t("メールアドレスの変更")}</h2>
       <p className="text-sm text-slate-600">
-        今のメールアドレス：<b className="break-all text-slate-900">{current ?? "読み込み中…"}</b>
+        {t("今のメールアドレス：")}<b className="break-all text-slate-900">{current ?? t("読み込み中…")}</b>
       </p>
       {canChange ? (
         <>
-          <input name="email" type="email" required placeholder="新しいメールアドレス" autoComplete="email" className="input" />
-          <input name="email2" type="email" required placeholder="新しいメールアドレス（確認）" autoComplete="email" className="input" />
-          <PasswordInput name="password" required placeholder="今のパスワード（本人確認のため）" autoComplete="current-password" className="input" />
-          <p className="text-xs text-slate-500">変更すると、元のメールアドレスにもお知らせが届きます。ログインには新しいメールアドレスを使います。</p>
+          <input name="email" type="email" required placeholder={t("新しいメールアドレス")} autoComplete="email" className="input" />
+          <input name="email2" type="email" required placeholder={t("新しいメールアドレス（確認）")} autoComplete="email" className="input" />
+          <PasswordInput name="password" required placeholder={t("今のパスワード（本人確認のため）")} autoComplete="current-password" className="input" />
+          <p className="text-xs text-slate-500">{t("変更すると、元のメールアドレスにもお知らせが届きます。ログインには新しいメールアドレスを使います。")}</p>
           {msg && <p className={`text-sm ${msg.ok ? "text-tea-700" : "text-red-600"}`}>{msg.text}</p>}
           <button disabled={saving} className="btn-primary w-full">
-            {saving ? "変更中…" : "変更する"}
+            {saving ? t("変更中…") : t("変更する")}
           </button>
         </>
       ) : (
         <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
-          Google で登録したアカウント、または代理ログイン中は、ここからメールアドレスを変更できません。
+          {t("Google で登録したアカウント、または代理ログイン中は、ここからメールアドレスを変更できません。")}
         </p>
       )}
     </form>

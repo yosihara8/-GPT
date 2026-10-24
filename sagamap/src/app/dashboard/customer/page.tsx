@@ -12,6 +12,7 @@ import { ShopCard } from "@/components/customer/Cards";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import NotificationList from "@/components/customer/NotificationList";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useT } from "@/components/LangProvider";
 
 type Favorite = {
   id: number;
@@ -46,6 +47,7 @@ export default function MyPage() {
 
 /** マイページ：お知らせ・お気に入り・利用履歴・設定（地図はトップの 1 画面にまとめた） */
 function MyPageInner() {
+  const t = useT();
   const router = useRouter();
   const params = useSearchParams();
   const { data: session } = useSession();
@@ -111,25 +113,25 @@ function MyPageInner() {
   }
 
   const nav = [
-    { href: "#news", label: "お知らせ", icon: Bell, badge: unread },
-    { href: "#favorites", label: "お気に入り", icon: Heart, badge: 0 },
-    { href: "#history", label: "利用履歴", icon: Clock, badge: 0 },
-    { href: "/dashboard/customer/settings", label: "設定", icon: Settings, badge: 0 },
+    { href: "#news", label: t("お知らせ"), icon: Bell, badge: unread },
+    { href: "#favorites", label: t("お気に入り"), icon: Heart, badge: 0 },
+    { href: "#history", label: t("利用履歴"), icon: Clock, badge: 0 },
+    { href: "/dashboard/customer/settings", label: t("設定"), icon: Settings, badge: 0 },
   ];
 
   return (
     <main className="mx-auto max-w-3xl pb-10">
       <section className="karakusa bg-saga-600 px-5 pb-6 pt-6 text-white sm:mx-4 sm:mt-4 sm:rounded-3xl">
-        <p className="num text-[10px] font-bold tracking-[0.3em] text-white/70">マイページ</p>
-        <h1 className="mt-1 text-2xl font-extrabold">{session?.user.name ? `${session.user.name}さんのページ` : "マイページ"}</h1>
+        <p className="num text-[10px] font-bold tracking-[0.3em] text-white/70">{t("マイページ")}</p>
+        <h1 className="mt-1 text-2xl font-extrabold">{session?.user.name ? t("{name}さんのページ", { name: session.user.name }) : t("マイページ")}</h1>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <Stat label="お気に入り" value={favorites.length} />
-          <Stat label="使ったクーポン" value={usedCount} />
-          <Stat label="新着のお知らせ" value={unread + notes.freshIds.size} />
+          <Stat label={t("お気に入り")} value={favorites.length} />
+          <Stat label={t("使ったクーポン")} value={usedCount} />
+          <Stat label={t("新着のお知らせ")} value={unread + notes.freshIds.size} />
         </div>
         <Link href="/" className="btn-accent mt-4 w-full rounded-full py-3">
           <MapIcon className="h-4 w-4" aria-hidden />
-          地図でお店をさがす
+          {t("地図でお店をさがす")}
         </Link>
       </section>
 
@@ -144,7 +146,7 @@ function MyPageInner() {
             <span className={`grid h-7 w-12 place-items-center rounded-full transition ${section === n.href.slice(1) ? "bg-saga-600 text-white" : "text-saga-600"}`}>
               <n.icon className="h-5 w-5" aria-hidden />
             </span>
-            {n.label}
+            {t(n.label)}
             {n.badge > 0 && <span className="num absolute right-[22%] top-1.5 rounded-full bg-coupon px-1.5 text-[10px] text-white">{n.badge}</span>}
           </a>
         ))}
@@ -156,7 +158,7 @@ function MyPageInner() {
 
       {/* お知らせ */}
       <section id="news" ref={newsRef} className="scroll-mt-28 px-4 pt-5">
-        <SectionTitle eyebrow="NEWS" title="お知らせ" icon={<Bell className="h-4 w-4 text-asa-500" aria-hidden />} />
+        <SectionTitle eyebrow="NEWS" title={t("お知らせ")} icon={<Bell className="h-4 w-4 text-asa-500" aria-hidden />} />
         <div className="mt-2">
           <NotificationList
             items={notes.items}
@@ -172,14 +174,14 @@ function MyPageInner() {
       <section id="favorites" className="scroll-mt-28 pt-3">
         {favorites.length === 0 ? (
           <div className="px-4 pt-2">
-            <SectionTitle eyebrow="FAVORITE" title="お気に入り" icon={<Heart className="h-4 w-4 text-coupon" aria-hidden />} />
+            <SectionTitle eyebrow="FAVORITE" title={t("お気に入り")} icon={<Heart className="h-4 w-4 text-coupon" aria-hidden />} />
             <p className="mt-2 rounded-2xl bg-white p-4 text-sm text-slate-500 ring-1 ring-slate-200/70">
-              まだありません。地図のお店のカードや、お店の画面の「保存」を押すと、ここに集まります。
+              {t("まだありません。地図のお店のカードや、お店の画面の「保存」を押すと、ここに集まります。")}
             </p>
           </div>
         ) : (
           <>
-            <Carousel title="お気に入り" eyebrow="FAVORITE" icon={<Heart className="h-4 w-4 text-coupon" aria-hidden />} count={favorites.length}>
+            <Carousel title={t("お気に入り")} eyebrow="FAVORITE" icon={<Heart className="h-4 w-4 text-coupon" aria-hidden />} count={favorites.length}>
               {favorites.map((f) => (
                 <ShopCard key={f.id} shop={f} meters={null} favorite onOpen={() => router.push(`/?shop=${f.id}`)} onFavorite={() => removeFavorite(f.id)} />
               ))}
@@ -188,7 +190,7 @@ function MyPageInner() {
               <div className="px-4">
                 <Link href="/?route=fav" className="btn-primary w-full rounded-full py-3">
                   <RouteIcon className="h-4 w-4" aria-hidden />
-                  お気に入りを巡るルートを地図で見る
+                  {t("お気に入りを巡るルートを地図で見る")}
                 </Link>
               </div>
             )}
@@ -200,35 +202,35 @@ function MyPageInner() {
       <section id="history" className="scroll-mt-28 px-4 pt-6">
         <SectionTitle
           eyebrow="HISTORY"
-          title="利用履歴"
+          title={t("利用履歴")}
           icon={<Clock className="h-4 w-4 text-saga-600" aria-hidden />}
-          note="見たお店と使ったクーポンです。おすすめを選ぶときの参考にしています。"
+          note={t("見たお店と使ったクーポンです。おすすめを選ぶときの参考にしています。")}
         />
         <div className="mt-2 flex gap-2">
           <button onClick={() => setFilter("all")} className={filter === "all" ? "chip-on" : "chip-off"}>
-            すべて
+            {t("すべて")}
           </button>
           <button onClick={() => setFilter("coupon")} className={filter === "coupon" ? "chip-on" : "chip-off"}>
-            使ったクーポン
+            {t("使ったクーポン")}
           </button>
         </div>
         {rows === null ? (
-          <p className="mt-3 text-sm text-slate-500">読み込み中…</p>
+          <p className="mt-3 text-sm text-slate-500">{t("読み込み中…")}</p>
         ) : shown.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">履歴はまだありません。</p>
+          <p className="mt-3 text-sm text-slate-500">{t("履歴はまだありません。")}</p>
         ) : (
           <ul className="mt-2 divide-y divide-slate-100 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/70">
             {shown.slice(0, 50).map((r) => (
               <li key={r.id}>
                 <Link href={`/?shop=${r.business_id}`} className="flex items-center gap-3 px-4 py-3">
                   <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${r.coupon_used ? "bg-coral-50 text-coupon" : "bg-slate-100 text-slate-500"}`}>
-                    {r.coupon_used ? "利用" : "閲覧"}
+                    {r.coupon_used ? t("利用") : t("閲覧")}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-bold">{r.business_name}</span>
                     <span className="block truncate text-xs text-slate-500">
                       {r.category}
-                      {r.coupon_title && `・${r.coupon_title}（${r.coupon_label ?? `${r.discount_rate}%OFF`}）`}
+                      {r.coupon_title && `・${r.coupon_title}（${t(r.coupon_label ?? `${r.discount_rate}%OFF`)}）`}
                     </span>
                   </span>
                   <time className="shrink-0 text-xs text-slate-500">
@@ -246,8 +248,8 @@ function MyPageInner() {
         <Link href="/dashboard/customer/settings" className="flex items-center gap-3 rounded-lg bg-white px-4 py-3.5 ring-1 ring-slate-200 hover:bg-slate-50">
           <Settings className="h-5 w-5 shrink-0 text-saga-600" aria-hidden />
           <span className="min-w-0 flex-1">
-            <span className="block font-bold">設定</span>
-            <span className="block text-xs text-slate-500">お知らせメール・メールアドレス・パスワード・お問い合わせ</span>
+            <span className="block font-bold">{t("設定")}</span>
+            <span className="block text-xs text-slate-500">{t("お知らせメール・メールアドレス・パスワード・お問い合わせ")}</span>
           </span>
           <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
         </Link>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import { getLang } from "@/lib/i18n-server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ErrorReporter from "@/components/ErrorReporter";
@@ -22,9 +23,10 @@ export const viewport: Viewport = {
   themeColor: "#1E3A6E",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
   return (
-    <html lang="ja">
+    <html lang={lang}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -35,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Providers>
+        <Providers lang={lang}>
           <ErrorReporter />
           <ThemeScope>
             <SiteChrome>
