@@ -114,14 +114,50 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     seed();
   }
+  // 陸の上を粒子が流れないよう、画面上の陸地の形を塗った判定用の画像を作る
+  var mask = null;
+  function buildMask() {
+    mask = null;
+    if (!window.UMI_LAND || !W || !H) return;
+    var c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var g = c.getContext("2d");
+    g.fillStyle = "#000";
+    window.UMI_LAND.features.forEach(function (f) {
+      f.geometry.coordinates.forEach(function (poly) {
+        g.beginPath();
+        poly.forEach(function (ring) {
+          ring.forEach(function (pt, i) {
+            var q = map.latLngToContainerPoint([pt[1], pt[0]]);
+            if (i) g.lineTo(q.x, q.y); else g.moveTo(q.x, q.y);
+          });
+          g.closePath();
+        });
+        g.fill("evenodd");
+      });
+    });
+    var d = g.getImageData(0, 0, W, H).data;
+    mask = new Uint8Array(W * H);
+    for (var k = 0; k < W * H; k++) mask[k] = d[k * 4 + 3] > 0 ? 1 : 0;
+  }
+  function onLand(x, y) {
+    if (!mask) return false;
+    x = x | 0; y = y | 0;
+    if (x < 0 || y < 0 || x >= W || y >= H) return false;
+    return mask[y * W + x] === 1;
+  }
   function seed() {
+    buildMask();
     var n = Math.round(Math.min(1400, W * H / 650));
     particles = [];
     for (var k = 0; k < n; k++) particles.push(spawn({}));
     ctx.clearRect(0, 0, W, H);
   }
   function spawn(p) {
-    p.x = Math.random() * W; p.y = Math.random() * H;
+    for (var tries = 0; tries < 12; tries++) {
+      p.x = Math.random() * W; p.y = Math.random() * H;
+      if (!onLand(p.x, p.y)) break;
+    }
     p.age = Math.floor(Math.random() * MAX_AGE);
     return p;
   }
@@ -162,7 +198,7 @@
       ctx.strokeStyle = speedColor(Math.sqrt(uv[0] * uv[0] + uv[1] * uv[1]));
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(nx, ny); ctx.stroke();
       p.x = nx; p.y = ny;
-      if (p.x < 0 || p.y < 0 || p.x > W || p.y > H) spawn(p);
+      if (p.x < 0 || p.y < 0 || p.x > W || p.y > H || onLand(p.x, p.y)) spawn(p);
     }
   }
 
@@ -186,7 +222,36 @@
     el("flowPlay").setAttribute("aria-pressed", on ? "true" : "false");
   }
 
+  // プレビュー版(外部に接続できない表示)で使う動きの見本。
+  // 北東へ向かう対馬暖流に、約12.4時間周期で向きが入れ替わる潮の流れを足したもの
+  function demoData() {
+    var start = new Date(Date.now() + 9 * 3600e3);
+    start.setUTCMinutes(0, 0, 0);
+    start = new Date(start.getTime() - 24 * 3600e3);
+    var times = [], u = [], v = [], wave = [], wdir = [], sst = [];
+    for (var h = 0; h < 96; h++) {
+      times.push(new Date(start.getTime() + h * 3600e3).toISOString().slice(0, 16));
+      var tide = Math.sin(h * 2 * Math.PI / 12.42);
+      u.push(grid(function (i, j) { var off = Math.min(1, (LATS[i] - 33.45) / 0.3); return off < 0 ? null : (0.22 * off) * Math.sin(55 * Math.PI / 180) + 0.3 * tide * Math.sin(75 * Math.PI / 180) + 0.04 * Math.sin(j); }));
+      v.push(grid(function (i, j) { var off = Math.min(1, (LATS[i] - 33.45) / 0.3); return off < 0 ? null : (0.22 * off) * Math.cos(55 * Math.PI / 180) + 0.3 * tide * Math.cos(75 * Math.PI / 180) + 0.04 * Math.cos(i); }));
+      wave.push(grid(function () { return 0.9 + 0.3 * Math.sin(h / 9); }));
+      wdir.push(grid(function () { return 320; }));
+      sst.push(grid(function () { return null; }));
+    }
+    return { times: times, u: u, v: v, wave: wave, wdir: wdir, sst: sst, loadedAt: new Date(), demo: true };
+  }
+
   function load() {
+    if (window.UMI_PREVIEW) {
+      data = demoData();
+      el("flowSlider").max = data.times.length - 1;
+      tNow = nowIndex(data.times);
+      syncTimeUi();
+      el("flowStatus").textContent = "プレビュー: これは動きの見本です。公開版では実際の予報データを30分ごとに取得します。";
+      el("liveDot").textContent = "見本";
+      seed();
+      return;
+    }
     el("flowStatus").textContent = "最新のデータを取得中…";
     return fetch(buildUrl()).then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status);
@@ -218,7 +283,7 @@
   var DIR16 = ["北", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南", "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西"];
   function dirName(deg) { return DIR16[Math.round(((deg % 360) + 360) % 360 / 22.5) % 16]; }
   U.flowAt = function (lat, lon) {
-    if (!data) return null;
+    if (!data || data.demo) return null;
     var t = Math.round(tNow);
     var uv = sampleUV(lat, lon, t);
     var out = { label: timeLabel(t) };
