@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>宇宙から見た唐津の海</title>
+<meta name="description" content="衛星データと地形図を重ねて、唐津周辺の海の水温・プランクトン・海底地形・藻場を目で見るための地図" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+<style>
+  /* 海図(チャート)の見た目: 地図が主役、左に計器盤のようなパネル */
+  :root {
+    --sea-deep: #0d2a3f;
+    --sea: #1b4d6b;
+    --chart-paper: #f4f7f6;
+    --panel: #ffffff;
+    --ink: #13212b;
+    --ink-sub: #50646f;
+    --line: #d5e0e3;
+    --buoy: #e2632b;      /* 浮標の朱色をアクセントに */
+    --kelp: #3f7d4e;
+    --warn: #c9921b;
+    --bad: #b8433a;
+    --good: #2f7d5a;
+    --font-display: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    --panel-w: 372px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --chart-paper: #0b1820; --panel: #11232e; --ink: #e4edf0; --ink-sub: #9bb0b9;
+      --line: #23404f; --sea-deep: #061620; --sea: #7fb6d3; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --chart-paper: #0b1820; --panel: #11232e; --ink: #e4edf0; --ink-sub: #9bb0b9;
+    --line: #23404f; --sea-deep: #061620; --sea: #7fb6d3; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--font-body); color: var(--ink); background: var(--chart-paper);
+    font-size: 14px; line-height: 1.6;
+  }
+  .app { display: flex; height: 100%; }
+  .panel {
+    width: var(--panel-w); flex: none; height: 100%; overflow-y: auto;
+    background: var(--panel); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+  }
+  .panel-head {
+    background: var(--sea-deep); color: #eaf3f6;
+    padding: 18px 18px 14px;
+  }
+  .panel-head h1 {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    margin: 0; letter-spacing: .04em; text-wrap: balance;
+  }
+  .panel-head p { margin: 4px 0 0; font-size: 12px; color: #a9c3cf; }
+  .coord { font-family: var(--font-data); font-size: 11px; color: #7fa3b3; margin-top: 8px; }
+  .sec { padding: 14px 18px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+  .sec h2 {
+    margin: 0; font-size: 12px; letter-spacing: .14em; font-weight: 700;
+    color: var(--ink-sub); display: flex; align-items: center; gap: 8px;
+  }
+  .sec h2 .tag {
+    font-family: var(--font-data); letter-spacing: 0; font-weight: 500;
+    background: var(--sea-deep); color: #eaf3f6; border-radius: 3px; padding: 0 6px; font-size: 11px;
+  }
+  .hint { font-size: 12px; color: var(--ink-sub); margin: 0; }
+  .opts { display: grid; gap: 4px; }
+  .opt { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+  .opt:hover { background: color-mix(in srgb, var(--sea) 8%, transparent); }
+  .opt input { margin-top: 4px; accent-color: var(--buoy); }
+  .opt b { font-weight: 500; display: block; }
+  .opt small { color: var(--ink-sub); font-size: 11.5px; display: block; line-height: 1.45; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .row label { font-size: 12px; color: var(--ink-sub); }
+  input[type="date"], select, textarea, input[type="text"] {
+    font: inherit; font-family: var(--font-data); font-size: 13px; color: var(--ink);
+    background: var(--chart-paper); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px;
+  }
+  textarea, input[type="text"] { font-family: var(--font-body); width: 100%; }
+  input[type="range"] { accent-color: var(--buoy); }
+  .btn {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--sea); color: var(--sea); background: transparent;
+    border-radius: 6px; padding: 5px 12px;
+  }
+  .btn.primary { background: var(--buoy); border-color: var(--buoy); color: #fff; }
+  .btn[aria-pressed="true"] { background: var(--sea); color: var(--panel); }
+  .btn:focus-visible, .opt:focus-within, input:focus-visible, select:focus-visible { outline: 2px solid var(--buoy); outline-offset: 2px; }
+  .gradbar { height: 10px; border-radius: 3px; }
+  .gradlabels { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-sub); margin-top: 2px; }
+  .note { font-size: 11.5px; color: var(--ink-sub); background: color-mix(in srgb, var(--warn) 10%, transparent); border-radius: 6px; padding: 8px 10px; margin: 0; }
+  .pins-list { display: grid; gap: 6px; max-height: 180px; overflow-y: auto; }
+  .pin-item { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: start; font-size: 12.5px; }
+  .pin-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; }
+  .pin-item button { font-size: 11px; border: none; background: none; color: var(--ink-sub); cursor: pointer; }
+  .sources { font-size: 11.5px; color: var(--ink-sub); }
+  .sources a { color: var(--sea); }
+  .sources ul { margin: 4px 0 0; padding-left: 18px; }
+
+  .mapwrap { position: relative; flex: 1; min-width: 0; }
+  #map { position: absolute; inset: 0; background: #a9c6d3; }
+  .divider {
+    position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px;
+    background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); z-index: 500; pointer-events: none;
+  }
+  .swipe {
+    position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; z-index: 510;
+    -webkit-appearance: none; appearance: none; background: transparent; pointer-events: none;
+  }
+  .swipe::-webkit-slider-runnable-track { height: 100%; background: transparent; }
+  .swipe::-moz-range-track { height: 100%; background: transparent; }
+  .swipe::-webkit-slider-thumb {
+    -webkit-appearance: none; pointer-events: auto; cursor: ew-resize;
+    width: 34px; height: 34px; border-radius: 50%; background: var(--buoy); border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.4); margin-top: calc(50vh - 17px);
+  }
+  .swipe::-moz-range-thumb {
+    pointer-events: auto; cursor: ew-resize; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--buoy); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4);
+  }
+  .cmp-label {
+    position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 520;
+    font-family: var(--font-data); font-size: 12px; background: rgba(13,42,63,.86); color: #fff;
+    padding: 3px 10px; border-radius: 4px; pointer-events: none;
+  }
+  .cmp-label.left { left: 56px; } .cmp-label.right { right: 12px; }
+  .mode-banner {
+    position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+    z-index: 520; background: var(--buoy); color: #fff; font-weight: 500; font-size: 13px;
+    padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .sheet-toggle { display: none; }
+
+  /* ポップアップ */
+  .leaflet-popup-content-wrapper { border-radius: 8px; }
+  .leaflet-popup-content { margin: 12px 14px; font-family: var(--font-body); font-size: 13px; line-height: 1.55; color: #13212b; width: 290px !important; }
+  .pp h3 { margin: 0 0 2px; font-family: var(--font-display); font-size: 16px; }
+  .pp .ll { font-family: var(--font-data); font-size: 11px; color: #50646f; }
+  .pp .vals { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; }
+  .pp .val { background: #eef4f6; border-radius: 6px; padding: 6px 8px; }
+  .pp .val span { display: block; font-size: 11px; color: #50646f; }
+  .pp .val strong { font-family: var(--font-data); font-size: 18px; font-weight: 500; }
+  .pp .diff { font-size: 12.5px; margin: 4px 0 8px; }
+  .pp .sp { display: grid; grid-template-columns: 92px 1fr 46px; gap: 6px; align-items: center; font-size: 12px; margin: 2px 0; }
+  .pp .track { position: relative; height: 8px; background: #e3eaec; border-radius: 4px; }
+  .pp .band { position: absolute; top: 0; bottom: 0; background: #8cc5a3; border-radius: 4px; }
+  .pp .mark { position: absolute; top: -3px; width: 3px; height: 14px; background: #e2632b; margin-left: -1.5px; }
+  .pp .chip { white-space: nowrap; font-size: 11px; text-align: center; border-radius: 10px; padding: 0 4px; color: #fff; }
+  .pp .muted { color: #50646f; font-size: 11.5px; }
+  .pp .btn { font-size: 12px; padding: 3px 10px; color: #1b4d6b; border-color: #1b4d6b; }
+  .pp a { color: #1b4d6b; }
+  .spot-label { background: none; border: none; box-shadow: none; font-family: var(--font-body); font-weight: 700; font-size: 12px; color: #0d2a3f; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff; }
+  .spot-label::before { display: none; }
+  .current-label { background: rgba(255,255,255,.85); border: 1px solid #e2632b; color: #b8431b; font-weight: 700; font-size: 12px; }
+
+  @media (max-width: 760px) {
+    .app { flex-direction: column; }
+    .mapwrap { flex: 1; min-height: 0; margin-bottom: 64px; }
+    .panel {
+      position: fixed; left: 0; right: 0; bottom: 0; width: auto; height: 62%;
+      z-index: 2000; border-right: none; border-top: 1px solid var(--line);
+      border-radius: 14px 14px 0 0; box-shadow: 0 -4px 18px rgba(0,0,0,.2);
+      transform: translateY(calc(100% - 64px)); transition: transform .25s ease;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .panel.open { transform: none; }
+    .panel-head { border-radius: 14px 14px 0 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+    .sec { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+    .sheet-toggle { display: block; position: absolute; top: 14px; right: 16px; }
+    .panel-head p, .coord { display: none; }
+    .leaflet-popup-content { width: 260px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) { .panel { transition: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="panel" id="panel">
+    <div class="panel-head">
+      <h1>宇宙から見た唐津の海</h1>
+      <p>人工衛星と地形図を重ねて、海の「いま」と「むかし」を見る地図</p>
+      <div class="coord" id="coord">北緯 33.52° 東経 129.92° ／ 縮尺 z11</div>
+      <button class="btn sheet-toggle" id="sheetToggle" type="button" style="color:#fff;border-color:#fff">パネル</button>
+    </div>
+
+    <section class="sec">
+      <h2><span class="tag">1</span>地形を見る</h2>
+      <div class="opts" role="radiogroup" aria-label="下地の地図">
+        <label class="opt"><input type="radio" name="base" value="ocean" id="base-ocean" checked><span><b>海底地形図</b><small>海の深さを陰影で表示。湾・瀬・深みの形がわかる</small></span></label>
+        <label class="opt"><input type="radio" name="base" value="photo" id="base-photo"><span><b>航空写真(国土地理院)</b><small>拡大すると浅い岩場や藻場の黒い影が見える</small></span></label>
+        <label class="opt"><input type="radio" name="base" value="s2" id="base-s2"><span><b>衛星写真(Sentinel-2)</b><small>雲を除いた10m解像度の衛星画像</small></span></label>
+        <label class="opt"><input type="radio" name="base" value="pale" id="base-pale"><span><b>シンプルな地図</b><small>衛星データを重ねる時に見やすい</small></span></label>
+      </div>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" id="ov-gebco"><span><b>海底の起伏を強調(GEBCO)</b><small>玄界灘の大陸棚と深い所を色分け。約450m単位</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-hill"><span><b>陸の起伏(陰影起伏図)</b><small>山から海へ流れ込む谷・川の位置</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-current" checked><span><b>対馬暖流の流れ(模式図)</b><small>大まかな向きのイメージ。実際の流れは日々変わる</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-spots" checked><span><b>地形で見る海の特徴</b><small>湾・岬・島まわりで、すみやすい生き物が違う</small></span></label>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2><span class="tag">2</span>宇宙から見た海</h2>
+      <div class="opts" role="radiogroup" aria-label="衛星データ">
+        <label class="opt"><input type="radio" name="sat" value="none" id="sat-none"><span><b>表示しない</b></span></label>
+        <label class="opt"><input type="radio" name="sat" value="sst" id="sat-sst" checked><span><b>海面の水温</b><small>NASA MURデータ。1日ごと・約1km単位</small></span></label>
+        <label class="opt"><input type="radio" name="sat" value="anom" id="sat-anom"><span><b>水温の平年差</b><small>いつもの年と比べて何度高いか・低いか</small></span></label>
+        <label class="opt"><input type="radio" name="sat" value="chl" id="sat-chl"><span><b>プランクトン(クロロフィル)</b><small>魚のエサの元。多すぎると赤潮のおそれ</small></span></label>
+        <label class="opt"><input type="radio" name="sat" value="true" id="sat-true"><span><b>その日の衛星写真</b><small>濁りや赤潮、雲のようすをそのまま見る</small></span></label>
+      </div>
+      <div id="legend"></div>
+      <div class="row">
+        <label for="dateA">見る日</label>
+        <input type="date" id="dateA" value="2025-08-15" min="2002-07-04">
+      </div>
+      <div class="row">
+        <label for="opacity">濃さ</label>
+        <input type="range" id="opacity" min="0.2" max="1" step="0.05" value="0.6" style="flex:1">
+      </div>
+      <div class="row">
+        <button class="btn" id="cmpBtn" type="button" aria-pressed="false">むかしと比べる</button>
+        <label for="dateB">比べる日</label>
+        <input type="date" id="dateB" value="2005-08-15" min="2002-07-04">
+      </div>
+      <p class="hint">「むかしと比べる」を押すと、地図の左半分が比べる日、右半分が見る日になります。真ん中の朱色の丸を左右に動かしてください。</p>
+      <p class="hint"><b>海の上をクリック</b>すると、その地点の水温とプランクトンの量を数値で表示し、20年間の水温の変化も調べられます。</p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="tag">3</span>海の記憶ピン</h2>
+      <p class="hint">漁師さんや地域の方の「昔はここで獲れた」「最近ここに増えた」を地図に残します。衛星のデータと重なる場所に、問題の手がかりがあります。</p>
+      <div class="row">
+        <select id="pinCat" aria-label="ピンの種類">
+          <option value="past">昔はいた・獲れた</option>
+          <option value="less">最近へった・いなくなった</option>
+          <option value="more">最近ふえた</option>
+          <option value="weed">海藻の変化</option>
+          <option value="other">その他・気になること</option>
+        </select>
+        <button class="btn primary" id="pinBtn" type="button" aria-pressed="false">ピンを置く</button>
+      </div>
+      <div class="pins-list" id="pinsList"></div>
+      <div class="row">
+        <button class="btn" id="pinExport" type="button">ファイルに保存</button>
+        <label class="btn" for="pinImport" style="display:inline-block">ファイルを読み込む</label>
+        <input type="file" id="pinImport" accept="application/json,.json" hidden>
+      </div>
+      <p class="hint">ピンはこの端末のブラウザに保存されます。ハッカソンでは「ファイルに保存」で集めて、1つにまとめられます。</p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="tag">4</span>見方の注意</h2>
+      <p class="note">衛星が測れるのは海の表面(数メートル)だけです。海底の水温・酸素・魚そのものは見えません。雲の日は空白になります。生き物の適水温は一般的な目安なので、地元の水産試験場や漁師さんの経験と合わせて判断してください。</p>
+      <div class="sources">
+        データの出典
+        <ul>
+          <li>海面水温・平年差: NASA JPL MUR SST (GHRSST) / 表示 NASA GIBS、数値 NOAA CoastWatch ERDDAP</li>
+          <li>クロロフィル・衛星写真: NASA MODIS (Aqua / Terra)</li>
+          <li>海底地形: Esri Ocean Basemap、GEBCO</li>
+          <li>地図・航空写真・陰影起伏図: <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院 地理院タイル</a></li>
+          <li>衛星写真: Sentinel-2 cloudless by EOX (Copernicus Sentinel data)</li>
+          <li>もっと詳しく: <a href="https://www.msil.go.jp/" target="_blank" rel="noopener">海しる(海上保安庁)</a>、<a href="https://www.eorc.jaxa.jp/JASMES/index_j.html" target="_blank" rel="noopener">JASMES(JAXA しきさい)</a></li>
+        </ul>
+      </div>
+    </section>
+  </aside>
+
+  <div class="mapwrap">
+    <div id="map" aria-label="唐津周辺の海の地図"></div>
+    <div class="divider" id="divider" hidden></div>
+    <input class="swipe" id="swipe" type="range" min="0" max="1" step="0.001" value="0.5" aria-label="比較の境目" hidden>
+    <div class="cmp-label left" id="cmpLeft" hidden></div>
+    <div class="cmp-label right" id="cmpRight" hidden></div>
+    <div class="mode-banner" id="pinBanner" hidden>地図をタップしてピンを置く(もう一度ボタンで終了)</div>
+  </div>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ---------- 地図の準備 ----------
+  var map = L.map("map", { zoomControl: true, attributionControl: true, minZoom: 6, maxZoom: 17 })
+    .setView([33.52, 129.92], 11);
+  map.attributionControl.setPrefix("");
+
+  var GSI = "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>国土地理院</a>";
+  var bases = {
+    ocean: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
+      maxNativeZoom: 10, attribution: "海底地形: Esri, GEBCO, NOAA, Garmin"
+    }),
+    photo: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
+      maxNativeZoom: 18, attribution: GSI + " 航空写真"
+    }),
+    s2: L.tileLayer("https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg", {
+      maxNativeZoom: 15, attribution: "Sentinel-2 cloudless 2023 by <a href='https://s2maps.eu' target='_blank'>EOX</a> (Copernicus Sentinel data)"
+    }),
+    pale: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+      maxNativeZoom: 18, attribution: GSI
+    })
+  };
+  // 海底地形図は陸の地名が無いので、地理院の地名入り淡色地図をうっすら重ねる
+  var oceanLabels = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+    maxNativeZoom: 18, opacity: 0.35, attribution: GSI
+  });
+  var currentBase = null;
+  function setBase(key) {
+    if (currentBase) map.removeLayer(currentBase);
+    map.removeLayer(oceanLabels);
+    currentBase = bases[key];
+    currentBase.addTo(map);
+    currentBase.bringToBack();
+    if (key === "ocean") oceanLabels.addTo(map);
+  }
+
+  var overlays = {
+    gebco: L.tileLayer.wms("https://wms.gebco.net/mapserv?", {
+      layers: "GEBCO_LATEST", format: "image/png", transparent: true, opacity: 0.6,
+      attribution: "GEBCO Compilation Group"
+    }),
+    hill: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
+      maxNativeZoom: 16, opacity: 0.45, attribution: GSI + " 陰影起伏図"
+    })
+  };
+
+  // ---------- 対馬暖流(模式図) ----------
+  var currentLayer = L.layerGroup();
+  var flow = [[33.30, 129.00], [33.60, 129.45], [33.70, 129.90], [33.86, 130.28], [34.05, 130.70]];
+  L.polyline(flow, { color: "#e2632b", weight: 9, opacity: 0.25, lineCap: "round" }).addTo(currentLayer);
+  L.polyline(flow, { color: "#e2632b", weight: 3, opacity: 0.9, dashArray: "10 8" }).addTo(currentLayer);
+  // 矢じり(メルカトル上の向きで回転させた三角)
+  [[1, 2], [3, 4]].forEach(function (seg) {
+    var a = L.latLng(flow[seg[0]]), b = L.latLng(flow[seg[1]]);
+    var pa = map.project(a, 0), pb = map.project(b, 0);
+    var deg = Math.atan2(pb.y - pa.y, pb.x - pa.x) * 180 / Math.PI;
+    var mid = L.latLng((a.lat + b.lat) / 2, (a.lng + b.lng) / 2);
+    L.marker(mid, { interactive: false, icon: L.divIcon({ className: "", iconSize: [18, 18], iconAnchor: [9, 9],
+      html: "<svg width='18' height='18' viewBox='0 0 18 18' style='transform:rotate(" + deg.toFixed(1) + "deg)'><path d='M2 2 L16 9 L2 16 Z' fill='#e2632b'/></svg>" }) }).addTo(currentLayer);
+  });
+  L.marker([33.70, 130.02], { opacity: 0 }).bindTooltip("対馬暖流(模式図)", { permanent: true, direction: "center", className: "current-label" }).addTo(currentLayer);
+  currentLayer.eachLayer(function (l) {
+    l.bindPopup && l.bindPopup("<div class='pp'><h3>対馬暖流</h3><p>南から暖かい水を運ぶ海流で、玄界灘の水温や魚の種類を大きく左右します。線は大まかな向きの模式図です。日々の実際の流れは <a href='https://www.msil.go.jp/' target='_blank'>海しる</a> の海流情報で確認できます。</p></div>");
+  });
+
+  // ---------- 地形で見る海の特徴(位置はおおよそ) ----------
+  var TERRAIN = {
+    bay:  { name: "湾(内湾)", color: "#2f7d8f", text: "波が静かで、川から栄養が入りやすい場所。プランクトンが育ちやすく、カキや魚の養殖いかだを置きやすい。一方で水が入れ替わりにくく、夏は高水温や赤潮、海底の酸素不足が起きやすい。" },
+    cape: { name: "岬・瀬", color: "#b8431b", text: "潮通しがよく、水がよく入れ替わる場所。岩場に海藻が根付きやすく、魚が集まりやすい。流れが速い分、養殖いかだには向かないこともある。" },
+    isle: { name: "島まわりの岩礁", color: "#3f7d4e", text: "岩場と砂地が入り混じり、海藻の森(藻場)ができやすい場所。藻場は魚の産卵場・稚魚の隠れ家になる。藻場が消える「磯焼け」が起きていないか、航空写真で岩場の黒い影を見比べたい。" },
+    beach:{ name: "砂浜・遠浅", color: "#c9921b", text: "砂地の浅い海。ヒラメやキス、貝類のすみか。海藻は根付きにくい。川の濁りや砂の動きの影響を受けやすい。" }
+  };
+  var SPOTS = [
+    { n: "唐津湾", ll: [33.495, 130.030], t: "bay" },
+    { n: "仮屋湾", ll: [33.500, 129.835], t: "bay" },
+    { n: "呼子", ll: [33.545, 129.893], t: "bay" },
+    { n: "波戸岬", ll: [33.548, 129.836], t: "cape" },
+    { n: "七ツ釜", ll: [33.527, 129.912], t: "cape" },
+    { n: "加部島", ll: [33.560, 129.880], t: "isle" },
+    { n: "小川島", ll: [33.585, 129.888], t: "isle" },
+    { n: "加唐島", ll: [33.598, 129.842], t: "isle" },
+    { n: "松島", ll: [33.565, 129.815], t: "isle" },
+    { n: "馬渡島", ll: [33.555, 129.755], t: "isle" },
+    { n: "神集島", ll: [33.500, 129.928], t: "isle" },
+    { n: "高島", ll: [33.474, 129.966], t: "isle" },
+    { n: "虹の松原の浜", ll: [33.440, 130.015], t: "beach" }
+  ];
+  var spotsLayer = L.layerGroup();
+  SPOTS.forEach(function (s) {
+    var tr = TERRAIN[s.t];
+    L.circleMarker(s.ll, { radius: 7, color: "#fff", weight: 2, fillColor: tr.color, fillOpacity: 1 })
+      .bindTooltip(s.n, { permanent: true, direction: "right", offset: [8, 0], className: "spot-label" })
+      .bindPopup("<div class='pp'><h3>" + s.n + "</h3><div class='ll'>地形のタイプ: " + tr.name + "(位置はおおよそ)</div><p>" + tr.text + "</p><p class='muted'>近くの海をクリックすると、その地点の水温などを調べられます。</p></div>")
+      .addTo(spotsLayer);
+  });
+
+  // ---------- 衛星データ(NASA GIBS) ----------
+  var SAT = {
+    sst:  { layer: "GHRSST_L4_MUR_Sea_Surface_Temperature", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
+            legend: { bg: "linear-gradient(90deg,#2b0f6b,#2364c7,#29b5c9,#7fd36b,#f3e044,#f08a2c,#c8202a)", lo: "冷たい", hi: "暖かい" } },
+    anom: { layer: "GHRSST_L4_MUR_Sea_Surface_Temperature_Anomalies", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
+            legend: { bg: "linear-gradient(90deg,#1f3f9a,#7fa8de,#f4f4f4,#eb9a7a,#b4202a)", lo: "平年より低い", mid: "平年なみ", hi: "平年より高い" } },
+    chl:  { layer: "MODIS_Aqua_Chlorophyll_A", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
+            legend: { bg: "linear-gradient(90deg,#3a1d7a,#2a5fc1,#22a7b8,#5cc35a,#e8d33a,#e2632b,#9b1b1b)", lo: "少ない(澄んだ海)", hi: "多い(赤潮注意)" } },
+    "true": { layer: "MODIS_Terra_CorrectedReflectance_TrueColor", tms: "GoogleMapsCompatible_Level9", ext: "jpg", z: 9, legend: null }
+  };
+  map.createPane("satA"); map.createPane("satB");
+  map.getPane("satA").style.zIndex = 350; map.getPane("satB").style.zIndex = 351;
+  var blank = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+  function gibsUrl(key, date) {
+    var s = SAT[key];
+    return "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + s.layer + "/default/" + date + "/" + s.tms + "/{z}/{y}/{x}." + s.ext;
+  }
+  var satLayerA = null, satLayerB = null, satKey = "sst";
+  function makeSat(key, date, pane) {
+    return L.tileLayer(gibsUrl(key, date), {
+      pane: pane, maxNativeZoom: SAT[key].z, opacity: +el("opacity").value, errorTileUrl: blank,
+      attribution: "衛星データ: <a href='https://earthdata.nasa.gov/gibs' target='_blank'>NASA GIBS</a>"
+    });
+  }
+  function refreshSat() {
+    if (satLayerA) { map.removeLayer(satLayerA); satLayerA = null; }
+    if (satLayerB) { map.removeLayer(satLayerB); satLayerB = null; }
+    renderLegend();
+    if (satKey === "none") { updateCompareUi(); return; }
+    satLayerA = makeSat(satKey, el("dateA").value, "satA").addTo(map);
+    if (comparing) satLayerB = makeSat(satKey, el("dateB").value, "satB").addTo(map);
+    updateCompareUi();
+  }
+  function renderLegend() {
+    var box = el("legend");
+    var s = SAT[satKey];
+    if (!s || !s.legend) { box.innerHTML = ""; return; }
+    box.innerHTML = "<div class='gradbar' style='background:" + s.legend.bg + "'></div>" +
+      "<div class='gradlabels'><span>" + s.legend.lo + "</span>" + (s.legend.mid ? "<span>" + s.legend.mid + "</span>" : "") + "<span>" + s.legend.hi + "</span></div>";
+  }
+
+  // ---------- むかしと比べる(左右スワイプ) ----------
+  var comparing = false;
+  function updateClip() {
+    var paneA = map.getPane("satA"), paneB = map.getPane("satB");
+    if (!comparing || satKey === "none") { paneA.style.clip = ""; paneB.style.clip = ""; return; }
+    var size = map.getSize();
+    var nw = map.containerPointToLayerPoint([0, 0]);
+    var se = map.containerPointToLayerPoint(size);
+    var x = nw.x + size.x * +el("swipe").value;
+    // 左 = 比べる日(B)、右 = 見る日(A)
+    paneB.style.clip = "rect(" + [nw.y, x, se.y, nw.x].join("px,") + "px)";
+    paneA.style.clip = "rect(" + [nw.y, se.x, se.y, x].join("px,") + "px)";
+    el("divider").style.left = (size.x * +el("swipe").value) + "px";
+  }
+  function updateCompareUi() {
+    var on = comparing && satKey !== "none";
+    el("divider").hidden = !on; el("swipe").hidden = !on;
+    el("cmpLeft").hidden = !on; el("cmpRight").hidden = !on;
+    el("cmpLeft").textContent = "← " + el("dateB").value;
+    el("cmpRight").textContent = el("dateA").value + " →";
+    el("cmpBtn").setAttribute("aria-pressed", comparing ? "true" : "false");
+    updateClip();
+  }
+
+  // ---------- クリックで数値を調べる(NOAA ERDDAP) ----------
+  var ERDDAP = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/";
+  function sstQuery(date, lat, lon, fmt) {
+    return ERDDAP + "jplMURSST41." + (fmt || "json") + "?analysed_sst%5B(" + date + "T09:00:00Z)%5D%5B(" + lat + ")%5D%5B(" + lon + ")%5D";
+  }
+  function chlQuery(date, lat, lon, fmt) {
+    return ERDDAP + "erdMH1chla8day." + (fmt || "json") + "?chlorophyll%5B(" + date + "T00:00:00Z)%5D%5B(" + lat + ")%5D%5B(" + lon + ")%5D";
+  }
+  function fetchValue(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (j) {
+      var rows = j.table.rows;
+      var v = rows[0][rows[0].length - 1];
+      return (v === null || isNaN(v)) ? null : +v;
+    });
+  }
+
+  // 生き物の適水温(一般的な目安。地域や成長段階で変わるので要確認)
+  var SPECIES = [
+    { n: "カジメ・クロメ", lo: 12, hi: 24, max: 28, g: "海藻" },
+    { n: "ワカメ", lo: 10, hi: 20, max: 25, g: "海藻" },
+    { n: "アカモク", lo: 10, hi: 25, max: 28, g: "海藻" },
+    { n: "アワビ", lo: 15, hi: 22, max: 27, g: "貝" },
+    { n: "マガキ", lo: 12, hi: 25, max: 30, g: "貝" },
+    { n: "マサバ", lo: 13, hi: 22, max: 26, g: "魚" },
+    { n: "ヒラメ", lo: 15, hi: 22, max: 26, g: "魚" },
+    { n: "トラフグ", lo: 15, hi: 23, max: 27, g: "魚" },
+    { n: "ブリ", lo: 15, hi: 26, max: 29, g: "魚" },
+    { n: "クロマグロ", lo: 18, hi: 28, max: 30, g: "魚" },
+    { n: "ケンサキイカ", lo: 16, hi: 25, max: 28, g: "イカ" }
+  ];
+  var SCALE_LO = 5, SCALE_HI = 32;
+  function pct(t) { return Math.max(0, Math.min(100, (t - SCALE_LO) / (SCALE_HI - SCALE_LO) * 100)); }
+  function speciesHtml(t) {
+    var h = "<div class='muted' style='margin-top:6px'>この水温は生き物にとって…(緑の帯=すみやすい範囲の目安)</div>";
+    SPECIES.forEach(function (s) {
+      var chip, col;
+      if (t >= s.lo && t <= s.hi) { chip = "快適"; col = "#2f7d5a"; }
+      else if (t > s.hi && t <= s.max) { chip = "暑い"; col = "#c9921b"; }
+      else if (t > s.max) { chip = "厳しい"; col = "#b8433a"; }
+      else { chip = "冷たい"; col = "#3d6fa3"; }
+      h += "<div class='sp'><span>" + s.n + "</span><div class='track'><div class='band' style='left:" + pct(s.lo) + "%;width:" + (pct(s.hi) - pct(s.lo)) + "%'></div><div class='mark' style='left:" + pct(t) + "%'></div></div><span class='chip' style='background:" + col + "'>" + chip + "</span></div>";
+    });
+    return h;
+  }
+  function chlWord(c) {
+    if (c < 0.3) return "とても少ない(外洋のように澄んだ海)";
+    if (c < 1) return "少なめ";
+    if (c < 3) return "ふつう〜豊か(魚のエサが多い)";
+    if (c < 10) return "多い(栄養が豊富。赤潮に注意)";
+    return "非常に多い(赤潮のおそれ)";
+  }
+  function fmt(v, d) { return v === null ? "—" : v.toFixed(d); }
+
+  function querySea(latlng) {
+    var lat = latlng.lat.toFixed(2), lon = latlng.lng.toFixed(2);
+    var dA = el("dateA").value, dB = el("dateB").value;
+    var pop = L.popup({ maxWidth: 320 }).setLatLng(latlng)
+      .setContent("<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div><p class='muted'>衛星データを問い合わせ中…</p></div>")
+      .openOn(map);
+    Promise.all([
+      fetchValue(sstQuery(dA, lat, lon)).catch(function () { return undefined; }),
+      fetchValue(sstQuery(dB, lat, lon)).catch(function () { return undefined; }),
+      fetchValue(chlQuery(dA, lat, lon)).catch(function () { return undefined; })
+    ]).then(function (v) {
+      var a = v[0], b = v[1], c = v[2];
+      var h = "<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>";
+      if (a === undefined && b === undefined) {
+        h += "<p>データを取得できませんでした。通信状況を確認するか、<a href='" + sstQuery(dA, lat, lon, "htmlTable") + "' target='_blank'>こちらで直接開いて</a>ください。</p></div>";
+        pop.setContent(h); return;
+      }
+      if (a === null) {
+        h += "<p>この点は陸に近いため、衛星の水温データがありません。少し沖をクリックしてみてください。</p></div>";
+        pop.setContent(h); return;
+      }
+      h += "<div class='vals'><div class='val'><span>" + dA + " の水温</span><strong>" + fmt(a, 1) + "℃</strong></div>" +
+           "<div class='val'><span>" + dB + " の水温</span><strong>" + (b === undefined ? "—" : fmt(b, 1)) + "℃</strong></div></div>";
+      if (typeof a === "number" && typeof b === "number") {
+        var d = a - b;
+        h += "<div class='diff'>比べる日との差: <b style='color:" + (d > 0 ? "#b8433a" : "#3d6fa3") + "'>" + (d > 0 ? "+" : "") + d.toFixed(1) + "℃</b>(1日だけの比較なので、下の20年の変化もあわせて見てください)</div>";
+      }
+      if (typeof c === "number") {
+        h += "<div class='diff'>プランクトン(クロロフィル): <b>" + c.toFixed(2) + " mg/m³</b> … " + chlWord(c) + "</div>";
+      } else {
+        h += "<div class='muted'>プランクトン: 雲などでこの時期のデータがありません</div>";
+      }
+      h += speciesHtml(a);
+      h += "<div style='margin-top:10px' id='seriesBox'><button class='btn' type='button' id='seriesBtn'>この地点の20年間の水温の変化を見る</button></div>";
+      h += "<p class='muted' style='margin-top:6px'>適水温は一般的な目安です。海面の値なので、海底付近はこれより低いことが多いです。</p></div>";
+      // 文字列ではなく要素で渡すと、後で update() しても中身が作り直されない
+      var node = document.createElement("div");
+      node.innerHTML = h;
+      pop.setContent(node);
+      L.DomEvent.disableClickPropagation(node);
+      node.querySelector("#seriesBtn").addEventListener("click", function (ev) { L.DomEvent.stop(ev); loadSeries(node.querySelector("#seriesBox"), lat, lon, dA, pop); });
+    });
+  }
+
+  // 毎年同じ時期の水温を並べる(MURは2002年6月から)
+  function loadSeries(box, lat, lon, dA, pop) {
+    var md = dA.slice(5);
+    var endYear = +dA.slice(0, 4);
+    var startYear = (md < "06-01") ? 2003 : 2002;
+    var years = [];
+    for (var y = startYear; y <= endYear; y++) years.push(y);
+    box.innerHTML = "<p class='muted'>" + years.length + "年分を取得中…(少し時間がかかります)</p>";
+    var reqs = years.map(function (y) {
+      return fetchValue(sstQuery(y + "-" + md, lat, lon)).then(function (v) { return [y, v]; }).catch(function () { return [y, null]; });
+    });
+    Promise.all(reqs).then(function (res) {
+      var pts = res.filter(function (p) { return typeof p[1] === "number"; });
+      if (pts.length < 3) { box.innerHTML = "<p class='muted'>十分なデータが取れませんでした。</p>"; return; }
+      box.innerHTML = seriesSvg(pts, md);
+      if (pop.isOpen()) pop.update();
+    });
+  }
+  function seriesSvg(pts, md) {
+    var W = 280, H = 130, pl = 30, pr = 8, pt = 14, pb = 22;
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    var y0 = Math.floor(Math.min.apply(null, ys) - 0.5), y1 = Math.ceil(Math.max.apply(null, ys) + 0.5);
+    function X(x) { return pl + (x - x0) / (x1 - x0 || 1) * (W - pl - pr); }
+    function Y(y) { return pt + (1 - (y - y0) / (y1 - y0 || 1)) * (H - pt - pb); }
+    // 最小二乗の傾向線
+    var n = pts.length, sx = 0, sy = 0, sxx = 0, sxy = 0;
+    pts.forEach(function (p) { sx += p[0]; sy += p[1]; sxx += p[0] * p[0]; sxy += p[0] * p[1]; });
+    var slope = (n * sxy - sx * sy) / (n * sxx - sx * sx), icpt = (sy - slope * sx) / n;
+    var s = "<svg viewBox='0 0 " + W + " " + H + "' width='100%' role='img' aria-label='毎年" + md + "ごろの水温の変化'>";
+    for (var g = y0; g <= y1; g++) {
+      s += "<line x1='" + pl + "' x2='" + (W - pr) + "' y1='" + Y(g) + "' y2='" + Y(g) + "' stroke='#e3eaec' stroke-width='1'/>";
+      if ((g - y0) % Math.max(1, Math.round((y1 - y0) / 4)) === 0) s += "<text x='" + (pl - 4) + "' y='" + (Y(g) + 3) + "' font-size='9' text-anchor='end' fill='#50646f'>" + g + "℃</text>";
+    }
+    s += "<text x='" + pl + "' y='" + (H - 6) + "' font-size='9' fill='#50646f'>" + x0 + "年</text>";
+    s += "<text x='" + (W - pr) + "' y='" + (H - 6) + "' font-size='9' text-anchor='end' fill='#50646f'>" + x1 + "年</text>";
+    var path = pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }).join("");
+    s += "<path d='" + path + "' fill='none' stroke='#1b4d6b' stroke-width='1.5'/>";
+    pts.forEach(function (p) { s += "<circle cx='" + X(p[0]) + "' cy='" + Y(p[1]) + "' r='2.2' fill='#1b4d6b'><title>" + p[0] + "年 " + p[1].toFixed(1) + "℃</title></circle>"; });
+    s += "<line x1='" + X(x0) + "' y1='" + Y(slope * x0 + icpt) + "' x2='" + X(x1) + "' y2='" + Y(slope * x1 + icpt) + "' stroke='#e2632b' stroke-width='2' stroke-dasharray='5 3'/>";
+    var last = pts[pts.length - 1];
+    s += "<circle cx='" + X(last[0]) + "' cy='" + Y(last[1]) + "' r='3.5' fill='#e2632b'/>";
+    s += "</svg>";
+    var per10 = slope * 10;
+    return "<div class='muted'>毎年 " + md.replace("-", "月") + "日ごろの海面水温(朱色の点線=傾向)</div>" + s +
+      "<div class='diff'>傾向: 10年あたり <b style='color:" + (per10 > 0 ? "#b8433a" : "#3d6fa3") + "'>" + (per10 > 0 ? "+" : "") + per10.toFixed(2) + "℃</b>(1日ずつの値なので年ごとのばらつきがあります)</div>";
+  }
+
+  // ---------- 海の記憶ピン ----------
+  var PIN_CAT = {
+    past:  { label: "昔はいた・獲れた", color: "#3d6fa3" },
+    less:  { label: "最近へった・いなくなった", color: "#b8433a" },
+    more:  { label: "最近ふえた", color: "#c9921b" },
+    weed:  { label: "海藻の変化", color: "#3f7d4e" },
+    other: { label: "その他・気になること", color: "#6b5a8e" }
+  };
+  var STORE_KEY = "umi-map-pins-v1";
+  var pins = [];
+  try { pins = JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); } catch (e) { pins = []; }
+  var pinLayer = L.layerGroup().addTo(map);
+  var pinMode = false;
+  function savePins() { try { localStorage.setItem(STORE_KEY, JSON.stringify(pins)); } catch (e) { /* 保存できない環境では画面上だけ */ } }
+  function pinPopup(p) {
+    var wrap = document.createElement("div"); wrap.className = "pp";
+    var h = document.createElement("h3"); h.textContent = PIN_CAT[p.cat].label; wrap.appendChild(h);
+    var ll = document.createElement("div"); ll.className = "ll"; ll.textContent = "北緯 " + p.lat.toFixed(3) + "° 東経 " + p.lng.toFixed(3) + "°"; wrap.appendChild(ll);
+    var ta = document.createElement("textarea"); ta.rows = 3; ta.value = p.text || ""; ta.placeholder = "例: 20年前はこの瀬でウニがたくさん獲れた"; ta.style.marginTop = "6px";
+    ta.addEventListener("input", function () { p.text = ta.value; savePins(); renderPinList(); });
+    wrap.appendChild(ta);
+    var who = document.createElement("input"); who.type = "text"; who.placeholder = "話してくれた人・時期(任意)"; who.value = p.who || ""; who.style.marginTop = "4px";
+    who.addEventListener("input", function () { p.who = who.value; savePins(); });
+    wrap.appendChild(who);
+    return wrap;
+  }
+  function renderPins() {
+    pinLayer.clearLayers();
+    pins.forEach(function (p) {
+      L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 2.5, fillColor: PIN_CAT[p.cat].color, fillOpacity: 1 })
+        .bindPopup(pinPopup(p), { maxWidth: 320 }).addTo(pinLayer);
+    });
+    renderPinList();
+  }
+  function renderPinList() {
+    var box = el("pinsList"); box.innerHTML = "";
+    if (!pins.length) { box.innerHTML = "<p class='hint'>まだピンはありません。「ピンを置く」を押して地図をタップしてください。</p>"; return; }
+    pins.forEach(function (p, i) {
+      var row = document.createElement("div"); row.className = "pin-item";
+      var dot = document.createElement("span"); dot.className = "pin-dot"; dot.style.background = PIN_CAT[p.cat].color;
+      var tx = document.createElement("span"); tx.textContent = p.text ? p.text : "(" + PIN_CAT[p.cat].label + "・メモなし)";
+      tx.style.cursor = "pointer"; tx.addEventListener("click", function () { map.setView([p.lat, p.lng], Math.max(map.getZoom(), 13)); });
+      var del = document.createElement("button"); del.type = "button"; del.textContent = "削除";
+      del.addEventListener("click", function () { pins.splice(i, 1); savePins(); renderPins(); });
+      row.appendChild(dot); row.appendChild(tx); row.appendChild(del); box.appendChild(row);
+    });
+  }
+  function setPinMode(on) {
+    pinMode = on;
+    el("pinBtn").setAttribute("aria-pressed", on ? "true" : "false");
+    el("pinBtn").textContent = on ? "ピン置きを終える" : "ピンを置く";
+    el("pinBanner").hidden = !on;
+    map.getContainer().style.cursor = on ? "crosshair" : "";
+  }
+
+  // ---------- イベント ----------
+  function el(id) { return document.getElementById(id); }
+  document.querySelectorAll("input[name='base']").forEach(function (r) {
+    r.addEventListener("change", function () { if (r.checked) setBase(r.value); });
+  });
+  document.querySelectorAll("input[name='sat']").forEach(function (r) {
+    r.addEventListener("change", function () { if (r.checked) { satKey = r.value; refreshSat(); } });
+  });
+  function toggleOverlay(id, layer) {
+    var cb = el(id);
+    function apply() { if (cb.checked) layer.addTo(map); else map.removeLayer(layer); }
+    cb.addEventListener("change", apply); apply();
+  }
+  toggleOverlay("ov-gebco", overlays.gebco);
+  toggleOverlay("ov-hill", overlays.hill);
+  toggleOverlay("ov-current", currentLayer);
+  toggleOverlay("ov-spots", spotsLayer);
+
+  el("dateA").addEventListener("change", refreshSat);
+  el("dateB").addEventListener("change", refreshSat);
+  el("opacity").addEventListener("input", function () {
+    var o = +el("opacity").value;
+    if (satLayerA) satLayerA.setOpacity(o);
+    if (satLayerB) satLayerB.setOpacity(o);
+  });
+  el("cmpBtn").addEventListener("click", function () {
+    comparing = !comparing;
+    if (comparing && satKey === "none") { satKey = "sst"; el("sat-sst").checked = true; }
+    refreshSat();
+  });
+  el("swipe").addEventListener("input", updateClip);
+  map.on("move zoom resize", updateClip);
+
+  el("pinBtn").addEventListener("click", function () { setPinMode(!pinMode); });
+  el("pinExport").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify({ app: "umi-map", pins: pins }, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "umi-kioku-pins.json";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  el("pinImport").addEventListener("change", function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      try {
+        var data = JSON.parse(rd.result);
+        (data.pins || []).forEach(function (p) {
+          if (PIN_CAT[p.cat] && isFinite(p.lat) && isFinite(p.lng)) pins.push({ cat: p.cat, lat: +p.lat, lng: +p.lng, text: String(p.text || ""), who: String(p.who || "") });
+        });
+        savePins(); renderPins();
+      } catch (err) { el("pinsList").insertAdjacentHTML("afterbegin", "<p class='hint'>読み込めませんでした。このツールで保存したファイルを選んでください。</p>"); }
+    };
+    rd.readAsText(f);
+    e.target.value = "";
+  });
+
+  map.on("click", function (e) {
+    // ポップアップ内のボタン操作で地図のクリックが走らないようにする
+    var t = e.originalEvent && e.originalEvent.target;
+    if (t && (!document.contains(t) || (t.closest && t.closest(".leaflet-popup")))) return;
+    if (pinMode) {
+      var p = { cat: el("pinCat").value, lat: e.latlng.lat, lng: e.latlng.lng, text: "", who: "" };
+      pins.push(p); savePins(); renderPins();
+      setPinMode(false);
+      pinLayer.getLayers()[pinLayer.getLayers().length - 1].openPopup();
+      return;
+    }
+    querySea(e.latlng);
+  });
+  map.on("moveend", function () {
+    var c = map.getCenter();
+    el("coord").textContent = "北緯 " + c.lat.toFixed(2) + "° 東経 " + c.lng.toFixed(2) + "° ／ 縮尺 z" + map.getZoom();
+  });
+  el("sheetToggle").addEventListener("click", function () { el("panel").classList.toggle("open"); });
+
+  // 最新データは数日遅れで届くので、上限を3日前にする
+  var maxD = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+  el("dateA").max = maxD; el("dateB").max = maxD;
+
+  L.control.scale({ imperial: false, position: "bottomright" }).addTo(map);
+  setBase("ocean");
+  refreshSat();
+  renderPins();
+})();
+</script>
+</body>
+</html>
