@@ -152,6 +152,8 @@
   .gaps ul { margin: 6px 0; padding-left: 18px; font-size: 12px; color: var(--ink-sub); display: grid; gap: 4px; }
   .gaps a { color: var(--sea); }
   .st-badge { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 2px solid #b8433a; border-radius: 12px; padding: 1px 7px 1px 4px; font-family: var(--font-data); font-size: 11.5px; font-weight: 500; color: #b8433a; box-shadow: 0 1px 4px rgba(0,0,0,.3); white-space: nowrap; }
+  .gomi-chip { display: inline-block; background: #7c2d12; color: #fff; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 1px 6px; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.35); border: 1.5px solid #fff; }
+  .gomi-chip.big { background: #c2410c; font-size: 12px; }
   .st-pin { width: 2px; height: 8px; background: #b8433a; margin: 0 auto; }
   .st-sq { width: 9px; height: 9px; background: #0d2a3f; border-radius: 1px; }
 
@@ -295,7 +297,7 @@
       <p class="hint">藻場が減った主な原因は、温暖化で増えた南方系のウニ「ガンガゼ」による食害とされています。アイゴなど海藻を食べる魚の影響も指摘されています。</p>
       <div class="opts">
         <label class="opt"><input type="checkbox" id="ov-stations" checked><span><b>県の観測点</b><small>水温の平年差を表示。一部の点は底層(水深10m)の溶存酸素を30分ごとに測定</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-moba" checked><span><b>藻場の保全・再生の場所</b><small>ガンガゼ駆除の効果確認、ブルーカーボンの認証地区など</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-moba" checked><span><b>藻場の保全・再生の場所</b><small>ガンガゼを駆除して海藻が戻るか確かめた場所</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-wind"><span><b>洋上風力の計画海域(目安)</b><small>県が漁業環境影響調査を行った海域の目安</small></span></label>
       </div>
       <details class="gaps">
@@ -312,7 +314,26 @@
     </section>
 
     <section class="sec">
-      <h2><span class="tag">5</span>海の記憶ピン</h2>
+      <h2><span class="tag">5</span>海ごみ</h2>
+      <p class="hint">唐津の玄海側の海岸には、海外からのものも含めて大量のプラスチックごみが流れ着きます。対馬暖流、冬の北西の季節風、狭い海峡、入り組んだ海岸が重なるためと県は説明しています。</p>
+      <div class="stats">
+        <div class="stat"><span class="k">漂着ごみのうちプラスチック</span><strong>約8<small>割</small></strong><span class="s">うち約6〜7割が海外製(県)</span></div>
+        <div class="stat"><span class="k">波戸岬のビーチクリーン</span><strong>2,310<small>袋</small></strong><span class="s">燃えるごみ。延べ14回・2,250人(2025年10月まで)</span></div>
+      </div>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" id="ov-gomi" checked><span><b>漂着ごみが報告されている場所</b><small>波戸岬・馬渡島・高島など。回収した量と出典つき</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-coast" checked><span><b>風を正面から受ける海岸</b><small>風上に開けていて、浮いたごみが押し寄せやすい海岸を朱色で表示(海岸の向きと風よけの有無から計算した目安)</small></span></label>
+      </div>
+      <div class="opts" role="radiogroup" aria-label="風の向き">
+        <label class="opt"><input type="radio" name="windMode" value="winter" id="wind-winter" checked><span><b>冬の北西の季節風</b><small>ごみが一番たまる季節の風</small></span></label>
+        <label class="opt"><input type="radio" name="windMode" value="now" id="wind-now"><span><b>いまの風</b><small>唐津沖のいまの風向きで計算し直す</small></span></label>
+      </div>
+      <p class="hint" id="windStatus"></p>
+      <p class="hint">朱色の濃い線ほど風を真正面から受けます。実際にごみがたまるかは、浜の形(砂浜か岩場か)や潮の流れでも変わります。漁師さんや清掃をしている方の記録をピンで重ねると確かになります。</p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="tag">6</span>海の記憶ピン</h2>
       <p class="hint">漁師さんや地域の方の「昔はここで獲れた」「最近ここに増えた」を地図に残します。衛星のデータと重なる場所に、問題の手がかりがあります。</p>
       <div class="row">
         <select id="pinCat" aria-label="ピンの種類">
@@ -334,7 +355,7 @@
     </section>
 
     <section class="sec">
-      <h2><span class="tag">6</span>見方の注意</h2>
+      <h2><span class="tag">7</span>見方の注意</h2>
       <p class="note">衛星が測れるのは海の表面(数メートル)だけです。海底の水温・酸素・魚そのものは見えません。雲の日は空白になります。生き物の適水温は一般的な目安なので、地元の水産試験場や漁師さんの経験と合わせて判断してください。</p>
       <div class="sources">
         データの出典
@@ -344,6 +365,9 @@
           <li>潮の流れ・波・いまの水温: <a href="https://open-meteo.com/en/docs/marine-weather-api" target="_blank" rel="noopener">Open-Meteo Marine API</a>(Météo-France SMOC ほか)</li>
           <li>観測点の水温: <a href="https://www.pref.saga.lg.jp/kiji00320172/index.html" target="_blank" rel="noopener">佐賀県玄海水産振興センター 漁場環境情報</a></li>
           <li>藻場・ウニ: 佐賀県の藻場調査(佐賀新聞)、水産庁 磯焼け対策全国協議会資料、サガテレビ報道、<a href="https://www.city.karatsu.lg.jp/page/35470.html" target="_blank" rel="noopener">唐津市 ブルーカーボン</a></li>
+          <li>海ごみ: <a href="https://www.pref.saga.lg.jp/kiji003110148/index.html" target="_blank" rel="noopener">佐賀県</a>、<a href="https://karatsu-f-f.com/hadomisaki.html" target="_blank" rel="noopener">唐津Farm&amp;Food</a>、いまの風: Open-Meteo</li>
+          <li>陸地・市町の境界: 国土地理院「地球地図日本」(jpn-atlas 経由)</li>
+          <li>地名の位置: Wikipedia ほかで確認した座標</li>
           <li>海底地形: Esri Ocean Basemap、GEBCO</li>
           <li>地図・航空写真・陰影起伏図: <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院 地理院タイル</a></li>
           <li>衛星写真: Sentinel-2 cloudless by EOX (Copernicus Sentinel data)</li>
@@ -429,7 +453,7 @@
         };
       }
     }).addTo(landLayer);
-    [["唐津市", [33.40, 129.98]], ["玄海町", [33.465, 129.868]], ["伊万里市", [33.29, 129.87]], ["松浦市", [33.34, 129.71]],
+    [["唐津市", [33.40, 129.98]], ["玄海町", [33.4722, 129.8747]], ["伊万里市", [33.29, 129.87]], ["松浦市", [33.34, 129.71]],
      ["糸島市(福岡県)", [33.55, 130.20]], ["壱岐市(長崎県)", [33.77, 129.72]]].forEach(function (c) {
       L.marker(c[1], { opacity: 0, interactive: false, keyboard: false })
         .bindTooltip(c[0], { permanent: true, direction: "center", className: "town-label" }).addTo(landLayer);
@@ -455,7 +479,7 @@
     l.bindPopup && l.bindPopup("<div class='pp'><h3>対馬暖流</h3><p>南から暖かい水を運ぶ海流で、玄界灘の水温や魚の種類を大きく左右します。線は大まかな向きの模式図です。日々の実際の流れは <a href='https://www.msil.go.jp/' target='_blank'>海しる</a> の海流情報で確認できます。</p></div>");
   });
 
-  // ---------- 地形で見る海の特徴(島は地球地図の島の中心、ほかはおおよその位置) ----------
+  // ---------- 地形で見る海の特徴(位置は Wikipedia などで確かめた座標。唐津湾だけは湾のおおよその中ほど) ----------
   var TERRAIN = {
     bay:  { name: "湾(内湾)", color: "#2f7d8f", text: "波が静かで、川から栄養が入りやすい場所。プランクトンが育ちやすく、カキや魚の養殖いかだを置きやすい。一方で水が入れ替わりにくく、夏は高水温や赤潮、海底の酸素不足が起きやすい。" },
     cape: { name: "岬・瀬", color: "#b8431b", text: "潮通しがよく、水がよく入れ替わる場所。岩場に海藻が根付きやすく、魚が集まりやすい。流れが速い分、養殖いかだには向かないこともある。" },
@@ -464,18 +488,18 @@
   };
   var SPOTS = [
     { n: "唐津湾", ll: [33.495, 130.030], t: "bay" },
-    { n: "仮屋湾", ll: [33.500, 129.835], t: "bay" },
-    { n: "呼子", ll: [33.545, 129.893], t: "bay" },
-    { n: "波戸岬", ll: [33.548, 129.836], t: "cape" },
-    { n: "七ツ釜", ll: [33.527, 129.912], t: "cape" },
-    { n: "加部島", ll: [33.553, 129.881], t: "isle" },
+    { n: "仮屋湾", ll: [33.4608, 129.8559], t: "bay" },
+    { n: "呼子", ll: [33.5372, 129.8813], t: "bay" },
+    { n: "波戸岬", ll: [33.5557, 129.8463], t: "cape" },
+    { n: "七ツ釜", ll: [33.5490, 129.9324], t: "cape" },
+    { n: "加部島", ll: [33.5560, 129.8821], t: "isle" },
     { n: "小川島", ll: [33.597, 129.897], t: "isle" },
-    { n: "加唐島", ll: [33.603, 129.858], t: "isle" },
-    { n: "松島", ll: [33.587, 129.840], t: "isle" },
-    { n: "馬渡島", ll: [33.574, 129.756], t: "isle" },
-    { n: "神集島", ll: [33.535, 129.969], t: "isle" },
-    { n: "高島", ll: [33.475, 129.989], t: "isle" },
-    { n: "虹の松原の浜", ll: [33.440, 130.015], t: "beach" }
+    { n: "加唐島", ll: [33.6008, 129.8561], t: "isle" },
+    { n: "松島", ll: [33.5875, 129.8414], t: "isle" },
+    { n: "馬渡島", ll: [33.5731, 129.7594], t: "isle" },
+    { n: "神集島", ll: [33.5333, 129.9722], t: "isle" },
+    { n: "高島", ll: [33.4739, 129.9911], t: "isle" },
+    { n: "虹の松原の浜", ll: [33.4463, 130.0194], t: "beach" }
   ];
   var spotsLayer = L.layerGroup();
   SPOTS.forEach(function (s) {
@@ -861,5 +885,6 @@
 </script>
 <script src="js/flow.js"></script>
 <script src="js/survey.js"></script>
+<script src="js/gomi.js"></script>
 </body>
 </html>
