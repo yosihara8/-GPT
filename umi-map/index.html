@@ -137,6 +137,23 @@
     padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.25);
   }
   .sheet-toggle { display: none; }
+  .live { margin-left: auto; font-family: var(--font-data); font-size: 10px; letter-spacing: .08em; color: #fff; background: var(--bad); border-radius: 3px; padding: 0 6px; animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity: .45; } }
+  .flow-time { font-family: var(--font-data); font-size: 15px; font-weight: 500; color: var(--ink); }
+  #flowSlider { width: 100%; }
+  .flow-canvas { position: absolute; inset: 0; z-index: 450; pointer-events: none; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; display: grid; gap: 2px; min-width: 0; }
+  .stat .k { font-size: 11px; color: var(--ink-sub); line-height: 1.35; }
+  .stat strong { font-family: var(--font-data); font-weight: 500; font-size: 16px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stat strong small { font-size: 11px; margin-left: 1px; }
+  .stat .s { font-size: 10.5px; color: var(--ink-sub); line-height: 1.35; }
+  .gaps summary { cursor: pointer; font-size: 12.5px; font-weight: 500; color: var(--sea); }
+  .gaps ul { margin: 6px 0; padding-left: 18px; font-size: 12px; color: var(--ink-sub); display: grid; gap: 4px; }
+  .gaps a { color: var(--sea); }
+  .st-badge { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 2px solid #b8433a; border-radius: 12px; padding: 1px 7px 1px 4px; font-family: var(--font-data); font-size: 11.5px; font-weight: 500; color: #b8433a; box-shadow: 0 1px 4px rgba(0,0,0,.3); white-space: nowrap; }
+  .st-pin { width: 2px; height: 8px; background: #b8433a; margin: 0 auto; }
+  .st-sq { width: 9px; height: 9px; background: #0d2a3f; border-radius: 1px; }
 
   /* ポップアップ */
   .leaflet-popup-content-wrapper { border-radius: 8px; }
@@ -156,6 +173,18 @@
   .pp .muted { color: #50646f; font-size: 11.5px; }
   .pp .btn { font-size: 12px; padding: 3px 10px; color: #1b4d6b; border-color: #1b4d6b; }
   .pp a { color: #1b4d6b; }
+  .pp .src { font-size: 11px; color: #50646f; margin-top: 6px; }
+  .pp .nowbox { background: #0d2a3f; color: #eaf3f6; border-radius: 6px; padding: 6px 8px; margin: 8px 0; }
+  .pp .nowbox .muted { color: #a9c3cf; }
+  .pp .nowgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .pp .nowgrid span { display: block; font-size: 10.5px; color: #a9c3cf; }
+  .pp .nowgrid b { font-family: var(--font-data); font-weight: 500; font-size: 12.5px; }
+  .pp .cmp-bars { display: grid; gap: 4px; margin: 4px 0; }
+  .pp .cb-row { display: grid; grid-template-columns: 48px 1fr 48px; gap: 6px; align-items: center; font-size: 12px; }
+  .pp .cb-track { height: 10px; background: #e3eaec; border-radius: 3px; overflow: hidden; }
+  .pp .cb-bar { height: 100%; }
+  .pp .cb-bar.norm { background: #8fa9b5; }
+  .pp .cb-bar.now { background: #b8433a; }
   .spot-label { background: none; border: none; box-shadow: none; font-family: var(--font-body); font-weight: 700; font-size: 12px; color: #0d2a3f; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff; }
   .spot-label::before { display: none; }
   .current-label { background: rgba(255,255,255,.85); border: 1px solid #e2632b; color: #b8431b; font-weight: 700; font-size: 12px; }
@@ -177,7 +206,7 @@
     .panel-head p, .coord { display: none; }
     .leaflet-popup-content { width: 260px !important; }
   }
-  @media (prefers-reduced-motion: reduce) { .panel { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .panel { transition: none; } .live { animation: none; } }
 </style>
 </head>
 <body>
@@ -191,7 +220,24 @@
     </div>
 
     <section class="sec">
-      <h2><span class="tag">1</span>地形を見る</h2>
+      <h2><span class="tag">1</span>いまの海<span class="live" id="liveDot">LIVE</span></h2>
+      <label class="opt"><input type="checkbox" id="ov-flow" checked><span><b>潮の流れを動かす</b><small>海流と潮汐を合わせた流れ。線が流れていく向きと速さを表します</small></span></label>
+      <div class="flow-time" id="flowTime">読み込み中…</div>
+      <input type="range" id="flowSlider" min="0" max="95" step="1" value="24" aria-label="表示する時刻">
+      <div class="row">
+        <button class="btn primary" id="flowPlay" type="button" aria-pressed="false">再生</button>
+        <button class="btn" id="flowNow" type="button">いまに戻る</button>
+      </div>
+      <div>
+        <div class="gradbar" style="background:linear-gradient(90deg,#a0e1eb,#6ed7c8,#f5e178,#f5a050,#eb5a3c)"></div>
+        <div class="gradlabels"><span>ゆっくり 0</span><span>0.25</span><span>0.5 m/s 以上</span></div>
+      </div>
+      <p class="hint" id="flowStatus">最新のデータを取得中…</p>
+      <p class="hint">1日前から3日先まで、1時間ごとの流れを再生できます。海をクリックすると、その地点のいまの流れ・波の高さ・水温も表示します。データは約8km単位の予報モデル(Open-Meteo / Météo-France)なので、湾の奥や岸のすぐそばは目安です。</p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="tag">2</span>地形を見る</h2>
       <div class="opts" role="radiogroup" aria-label="下地の地図">
         <label class="opt"><input type="radio" name="base" value="ocean" id="base-ocean" checked><span><b>海底地形図</b><small>海の深さを陰影で表示。湾・瀬・深みの形がわかる</small></span></label>
         <label class="opt"><input type="radio" name="base" value="photo" id="base-photo"><span><b>航空写真(国土地理院)</b><small>拡大すると浅い岩場や藻場の黒い影が見える</small></span></label>
@@ -207,10 +253,10 @@
     </section>
 
     <section class="sec">
-      <h2><span class="tag">2</span>宇宙から見た海</h2>
+      <h2><span class="tag">3</span>宇宙から見た海</h2>
       <div class="opts" role="radiogroup" aria-label="衛星データ">
-        <label class="opt"><input type="radio" name="sat" value="none" id="sat-none"><span><b>表示しない</b></span></label>
-        <label class="opt"><input type="radio" name="sat" value="sst" id="sat-sst" checked><span><b>海面の水温</b><small>NASA MURデータ。1日ごと・約1km単位</small></span></label>
+        <label class="opt"><input type="radio" name="sat" value="none" id="sat-none" checked><span><b>表示しない</b></span></label>
+        <label class="opt"><input type="radio" name="sat" value="sst" id="sat-sst"><span><b>海面の水温</b><small>NASA MURデータ。1日ごと・約1km単位</small></span></label>
         <label class="opt"><input type="radio" name="sat" value="anom" id="sat-anom"><span><b>水温の平年差</b><small>いつもの年と比べて何度高いか・低いか</small></span></label>
         <label class="opt"><input type="radio" name="sat" value="chl" id="sat-chl"><span><b>プランクトン(クロロフィル)</b><small>魚のエサの元。多すぎると赤潮のおそれ</small></span></label>
         <label class="opt"><input type="radio" name="sat" value="true" id="sat-true"><span><b>その日の衛星写真</b><small>濁りや赤潮、雲のようすをそのまま見る</small></span></label>
@@ -234,7 +280,35 @@
     </section>
 
     <section class="sec">
-      <h2><span class="tag">3</span>海の記憶ピン</h2>
+      <h2><span class="tag">4</span>唐津の調査データ</h2>
+      <p class="hint">県や市が公表している調査結果です。衛星では見えない海の中のようすを補います。</p>
+      <div class="stats">
+        <div class="stat"><span class="k">玄海の藻場の面積</span><strong>1,262<small>ha</small> → 597<small>ha</small></strong><span class="s">2013年 → 2022年。約10年で半分以下</span></div>
+        <div class="stat"><span class="k">玄海地区のウニ漁獲量</span><strong>約200<small>t</small> → 15<small>t</small></strong><span class="s">約35年前 → 2024年</span></div>
+        <div class="stat"><span class="k">2026年8月4日の表層水温</span><strong>+1.5〜2.6<small>℃</small></strong><span class="s">県の5地点すべてで平年より高い</span></div>
+        <div class="stat"><span class="k">ガンガゼ(海藻を食べるウニ)の駆除</span><strong>年86<small>万個</small></strong><span class="s">漁業者グループによる駆除(報道)</span></div>
+      </div>
+      <p class="hint">藻場が減った主な原因は、温暖化で増えた南方系のウニ「ガンガゼ」による食害とされています。アイゴなど海藻を食べる魚の影響も指摘されています。</p>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" id="ov-stations" checked><span><b>県の観測点</b><small>水温の平年差を表示。一部の点は底層(水深10m)の溶存酸素を30分ごとに測定</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-moba" checked><span><b>藻場の保全・再生の場所</b><small>ガンガゼ駆除の効果確認、ブルーカーボンの認証地区など</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-wind"><span><b>洋上風力の計画海域(目安)</b><small>県が漁業環境影響調査を行った海域の目安</small></span></label>
+      </div>
+      <details class="gaps">
+        <summary>まだ地図に載せられていないデータ</summary>
+        <ul>
+          <li><b>海底の泥・砂(底質)</b>:佐賀県の<a href="https://www.pref.saga.lg.jp/kiji003111834/" target="_blank" rel="noopener">唐津市沖 漁業環境影響調査 報告書(概要版)</a>、<a href="https://www.pref.saga.lg.jp/kiji00312170/3_12170_8_teigen.pdf" target="_blank" rel="noopener">唐津湾 海岸侵食対策の提言(底質調査)</a></li>
+          <li><b>海底近くの酸素(溶存酸素)の記録</b>:<a href="https://telemeter-area.jp/saga/saga/saga.htm" target="_blank" rel="noopener">県テレメータ</a>(名護屋浦・仮屋湾の底層)、<a href="https://www.pref.saga.lg.jp/kiji00320179/index.html" target="_blank" rel="noopener">玄海水産振興センター 業務報告書</a></li>
+          <li><b>水質(COD・窒素・りん)</b>:県の公共用水域水質測定結果。令和5年度は玄海水域の一部の基準点でCODの環境基準が未達成</li>
+          <li><b>藻場の分布図</b>:県が衛星写真と潜水調査で行った玄海地区の藻場調査</li>
+          <li><b>水揚げ・海ごみ</b>:<a href="https://karatsu-f-f.com/data-bank.html" target="_blank" rel="noopener">Karatsu Data Bank(唐津Farm&amp;Food)</a></li>
+        </ul>
+        <p class="hint">これらはPDFや表で公開されていて、地点の座標が付いていないものが多いです。市や県から元の表をもらえれば、地図に重ねられます。</p>
+      </details>
+    </section>
+
+    <section class="sec">
+      <h2><span class="tag">5</span>海の記憶ピン</h2>
       <p class="hint">漁師さんや地域の方の「昔はここで獲れた」「最近ここに増えた」を地図に残します。衛星のデータと重なる場所に、問題の手がかりがあります。</p>
       <div class="row">
         <select id="pinCat" aria-label="ピンの種類">
@@ -256,13 +330,16 @@
     </section>
 
     <section class="sec">
-      <h2><span class="tag">4</span>見方の注意</h2>
+      <h2><span class="tag">6</span>見方の注意</h2>
       <p class="note">衛星が測れるのは海の表面(数メートル)だけです。海底の水温・酸素・魚そのものは見えません。雲の日は空白になります。生き物の適水温は一般的な目安なので、地元の水産試験場や漁師さんの経験と合わせて判断してください。</p>
       <div class="sources">
         データの出典
         <ul>
           <li>海面水温・平年差: NASA JPL MUR SST (GHRSST) / 表示 NASA GIBS、数値 NOAA CoastWatch ERDDAP</li>
           <li>クロロフィル・衛星写真: NASA MODIS (Aqua / Terra)</li>
+          <li>潮の流れ・波・いまの水温: <a href="https://open-meteo.com/en/docs/marine-weather-api" target="_blank" rel="noopener">Open-Meteo Marine API</a>(Météo-France SMOC ほか)</li>
+          <li>観測点の水温: <a href="https://www.pref.saga.lg.jp/kiji00320172/index.html" target="_blank" rel="noopener">佐賀県玄海水産振興センター 漁場環境情報</a></li>
+          <li>藻場・ウニ: 佐賀県の藻場調査(佐賀新聞)、水産庁 磯焼け対策全国協議会資料、サガテレビ報道、<a href="https://www.city.karatsu.lg.jp/page/35470.html" target="_blank" rel="noopener">唐津市 ブルーカーボン</a></li>
           <li>海底地形: Esri Ocean Basemap、GEBCO</li>
           <li>地図・航空写真・陰影起伏図: <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院 地理院タイル</a></li>
           <li>衛星写真: Sentinel-2 cloudless by EOX (Copernicus Sentinel data)</li>
@@ -399,7 +476,7 @@
     var s = SAT[key];
     return "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + s.layer + "/default/" + date + "/" + s.tms + "/{z}/{y}/{x}." + s.ext;
   }
-  var satLayerA = null, satLayerB = null, satKey = "sst";
+  var satLayerA = null, satLayerB = null, satKey = "none";
   function makeSat(key, date, pane) {
     return L.tileLayer(gibsUrl(key, date), {
       pane: pane, maxNativeZoom: SAT[key].z, opacity: +el("opacity").value, errorTileUrl: blank,
@@ -503,11 +580,22 @@
   }
   function fmt(v, d) { return v === null ? "—" : v.toFixed(d); }
 
+  // 潮の流れの層(js/flow.js)が持つ「いま」の値
+  function nowHtml(lat, lon) {
+    var f = window.UMI && window.UMI.flowAt ? window.UMI.flowAt(+lat, +lon) : null;
+    if (!f) return "";
+    var h = "<div class='nowbox'><div class='muted'>" + f.label + "(予報モデル)</div><div class='nowgrid'>";
+    h += "<div><span>流れ</span><b>" + (f.speed === undefined ? "—" : f.dir + "へ " + f.speed.toFixed(2) + "m/s") + "</b></div>";
+    h += "<div><span>波の高さ</span><b>" + (f.wave === null ? "—" : f.wave.toFixed(1) + "m" + (f.waveFrom ? "(" + f.waveFrom + "から)" : "")) + "</b></div>";
+    h += "<div><span>水温</span><b>" + (f.sst === null ? "—" : f.sst.toFixed(1) + "℃") + "</b></div>";
+    return h + "</div></div>";
+  }
+
   function querySea(latlng) {
     var lat = latlng.lat.toFixed(2), lon = latlng.lng.toFixed(2);
     var dA = el("dateA").value, dB = el("dateB").value;
     var pop = L.popup({ maxWidth: 320 }).setLatLng(latlng)
-      .setContent("<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div><p class='muted'>衛星データを問い合わせ中…</p></div>")
+      .setContent("<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>" + nowHtml(lat, lon) + "<p class='muted'>衛星データを問い合わせ中…</p></div>")
       .openOn(map);
     Promise.all([
       fetchValue(sstQuery(dA, lat, lon)).catch(function () { return undefined; }),
@@ -515,9 +603,9 @@
       fetchValue(chlQuery(dA, lat, lon)).catch(function () { return undefined; })
     ]).then(function (v) {
       var a = v[0], b = v[1], c = v[2];
-      var h = "<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>";
+      var h = "<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>" + nowHtml(lat, lon);
       if (a === undefined && b === undefined) {
-        h += "<p>データを取得できませんでした。通信状況を確認するか、<a href='" + sstQuery(dA, lat, lon, "htmlTable") + "' target='_blank'>こちらで直接開いて</a>ください。</p></div>";
+        h += "<p>衛星データを取得できませんでした。通信状況を確認するか、<a href='" + sstQuery(dA, lat, lon, "htmlTable") + "' target='_blank'>こちらで直接開いて</a>ください。</p></div>";
         pop.setContent(h); return;
       }
       if (a === null) {
@@ -728,12 +816,17 @@
   // 最新データは数日遅れで届くので、上限を3日前にする
   var maxD = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
   el("dateA").max = maxD; el("dateB").max = maxD;
+  el("dateA").value = maxD;
+  el("dateB").value = (+maxD.slice(0, 4) - 20) + maxD.slice(4);
 
   L.control.scale({ imperial: false, position: "bottomright" }).addTo(map);
   setBase("ocean");
   refreshSat();
   renderPins();
+  window.UMI = { map: map, el: el };
 })();
 </script>
+<script src="js/flow.js"></script>
+<script src="js/survey.js"></script>
 </body>
 </html>
