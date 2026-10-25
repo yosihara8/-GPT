@@ -90,7 +90,14 @@ function BusinessDashboard() {
 
       <VerifyEmailBanner />
       {params.get("welcome") && (
-        <p className="rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">ご登録ありがとうございます！店舗が地図に掲載されました。まずは「お店の情報」で写真と営業時間を入れましょう。</p>
+        <p className="rounded-2xl bg-tea-50 px-4 py-3 text-sm font-bold text-tea-700">
+          {params.get("photo") === "1"
+            ? "ご登録ありがとうございます！店舗が写真つきで地図に掲載されました。次は「お店の情報」で営業時間やお店の写真を入れましょう。"
+            : "ご登録ありがとうございます！店舗が地図に掲載されました。まずは「お店の情報」で写真と営業時間を入れましょう。"}
+        </p>
+      )}
+      {params.get("photo") === "ng" && (
+        <p className="rounded-2xl bg-sun-100 px-4 py-3 text-sm font-bold text-amber-800">写真の登録がうまくいきませんでした。お手数ですが「お店の情報」から、もう一度写真を入れてください。</p>
       )}
 
       {/* お客さまの行動（来店につながる動き。直近 30 日） */}
