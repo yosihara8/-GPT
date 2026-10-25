@@ -41,7 +41,7 @@ type ListKey = "owners" | "stores" | "customers" | "logs" | "errors";
 
 const COLUMNS: Record<ListKey, [key: string, label: string][]> = {
   owners: [["name", "名前"], ["email", "メール"], ["plan", "プラン"], ["monthly_price", "月額"], ["store_count", "店舗"], ["referral_count", "紹介"], ["created_at", "登録日"]],
-  stores: [["name", "店舗名"], ["category", "業種"], ["address", "住所"], ["owner_email", "事業者"], ["is_premium", "有料"], ["active_coupons", "クーポン"], ["view_count", "閲覧"], ["created_at", "登録日"]],
+  stores: [["name", "店舗名"], ["category", "業種"], ["address", "住所"], ["owner_email", "事業者"], ["photo_status", "写真"], ["is_premium", "有料"], ["active_coupons", "クーポン"], ["view_count", "閲覧"], ["created_at", "登録日"]],
   customers: [["name", "名前"], ["email", "メール"], ["interests", "興味"], ["referred_by", "紹介元"], ["notify_enabled", "通知"], ["created_at", "登録日"]],
   logs: [["created_at", "日時"], ["admin_email", "運営者"], ["action", "操作"], ["target", "対象"], ["detail", "詳細"]],
   errors: [["created_at", "日時"], ["source", "発生場所"], ["message", "内容"], ["url", "URL"]],
