@@ -91,7 +91,7 @@ function CustomerHome() {
   const params = useSearchParams();
   const { data: session } = useSession();
   const { lang, t } = useLang();
-  const isCustomer = session?.user.role === "customer";
+  const isCustomer = session?.user?.role === "customer";
   const { position, accuracy, isFallback, status, locate } = useGeolocation();
   // 測位中は位置が細かく変わるため、約 100m 単位にまとめて再読み込みを減らす
   const here = useMemo(
@@ -382,7 +382,7 @@ function CustomerHome() {
   useEffect(() => setHello(greeting()), []);
 
   const categories = CATEGORIES.filter((c) => shops.some((s) => s.category === c));
-  const name = session?.user.name;
+  const name = session?.user?.name;
   const nearbyCouponCount = coupons.filter((c) => (c.distance_m ?? Infinity) <= 1000).length;
 
   // お店のページに出す内容

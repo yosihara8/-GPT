@@ -123,7 +123,7 @@ function MyPageInner() {
     <main className="mx-auto max-w-3xl pb-10">
       <section className="karakusa bg-saga-600 px-5 pb-6 pt-6 text-white sm:mx-4 sm:mt-4 sm:rounded-3xl">
         <p className="num text-[10px] font-bold tracking-[0.3em] text-white/70">{t("マイページ")}</p>
-        <h1 className="mt-1 text-2xl font-extrabold">{session?.user.name ? t("{name}さんのページ", { name: session.user.name }) : t("マイページ")}</h1>
+        <h1 className="mt-1 text-2xl font-extrabold">{session?.user?.name ? t("{name}さんのページ", { name: session.user.name }) : t("マイページ")}</h1>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
           <Stat label={t("お気に入り")} value={favorites.length} />
           <Stat label={t("使ったクーポン")} value={usedCount} />
