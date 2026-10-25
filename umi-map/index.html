@@ -854,6 +854,8 @@
   refreshSat();
   renderPins();
   el("previewNote").hidden = !PREVIEW;
+  // プレビュー表示ではファイルを保存できないので、保存ボタンを隠す
+  if (PREVIEW) el("pinExport").hidden = true;
   window.UMI = { map: map, el: el };
 })();
 </script>
