@@ -19,6 +19,9 @@ const SQL: Record<AdminListType, string> = {
             GROUP BY o.id ORDER BY o.created_at DESC LIMIT $3`,
   stores: `SELECT b.id, b.name, b.category, b.address, b.contact, b.is_premium, b.view_count, b.created_at,
                   o.email AS owner_email,
+                  -- 写真（メイン写真のあり・なし＋お店の写真の枚数）。運営者が登録状況を確かめるため
+                  (CASE WHEN b.photo IS NOT NULL THEN 'メイン◯' ELSE 'メイン—' END) || '・' ||
+                    (SELECT count(*) FROM business_photos p WHERE p.business_id = b.id)::text || '枚' AS photo_status,
                   (SELECT count(*) FROM coupons c WHERE c.business_id = b.id AND c.is_active AND c.expires_at > now())::int AS active_coupons
              FROM businesses b JOIN business_owners o ON o.id = b.owner_id
             WHERE $1 = '' OR b.name ILIKE $2 OR b.address ILIKE $2 OR b.category ILIKE $2 OR o.email ILIKE $2
@@ -47,7 +50,7 @@ export function adminList(type: AdminListType, q: string, limit = 500) {
 
 export const CSV_COLUMNS: Record<AdminListType, [key: string, label: string][]> = {
   owners: [["id", "ID"], ["name", "名前"], ["email", "メールアドレス"], ["plan", "プラン"], ["monthly_price", "月額"], ["store_count", "店舗数"], ["referral_count", "紹介人数"], ["created_at", "登録日時"]],
-  stores: [["id", "ID"], ["name", "店舗名"], ["category", "業種"], ["address", "住所"], ["contact", "連絡先"], ["owner_email", "事業者メール"], ["is_premium", "有料"], ["active_coupons", "配信中クーポン"], ["view_count", "閲覧数"], ["created_at", "登録日時"]],
+  stores: [["id", "ID"], ["name", "店舗名"], ["category", "業種"], ["address", "住所"], ["contact", "連絡先"], ["owner_email", "事業者メール"], ["photo_status", "写真"], ["is_premium", "有料"], ["active_coupons", "配信中クーポン"], ["view_count", "閲覧数"], ["created_at", "登録日時"]],
   customers: [["id", "ID"], ["name", "名前"], ["email", "メールアドレス"], ["interests", "興味のある業種"], ["notify_enabled", "メール通知"], ["referred_by", "紹介元"], ["created_at", "登録日時"]],
   logs: [["id", "ID"], ["created_at", "日時"], ["admin_email", "運営者"], ["action", "操作"], ["target", "対象"], ["detail", "詳細"]],
   errors: [["id", "ID"], ["created_at", "日時"], ["source", "発生場所"], ["message", "内容"], ["url", "URL"], ["user_agent", "ブラウザ"]],
