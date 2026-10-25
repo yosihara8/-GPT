@@ -4,7 +4,9 @@ import PasswordInput from "@/components/PasswordInput";
 import SagaHero from "@/components/SagaHero";
 import { Opt, RegisterNotice, Req } from "@/components/FormMarks";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ImagePlus, X } from "lucide-react";
+import { resizeToJpeg } from "@/lib/image";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, PRICE_OPTIONS } from "@/lib/config";
@@ -17,6 +19,27 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
   const [addressError, setAddressError] = useState<string | null>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  // 登録と同時に入れるメイン写真（任意。選んだ時点で縮小しておく）
+  const [photo, setPhoto] = useState<Blob | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  useEffect(() => () => {
+    if (preview) URL.revokeObjectURL(preview);
+  }, [preview]);
+
+  async function pickPhoto(file: File) {
+    setPhotoError(null);
+    try {
+      const blob = await resizeToJpeg(file);
+      if (blob.size > 1.5 * 1024 * 1024) throw new Error("big");
+      setPhoto(blob);
+      setPreview(URL.createObjectURL(blob));
+    } catch {
+      setPhoto(null);
+      setPreview(null);
+      setPhotoError("この写真は読み込めませんでした。別の写真を選ぶか、登録のあとに「お店の情報」から入れてください。");
+    }
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -25,7 +48,7 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
     setAddressError(null);
     const f = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
     try {
-      await api("/api/register/business", {
+      const res = await api<{ businessId: number }>("/api/register/business", {
         method: "POST",
         body: JSON.stringify({
           name: f.name,
@@ -40,7 +63,13 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
         }),
       });
       await signIn("credentials", { email: f.email, password: f.password, role: "business", redirect: false });
-      router.push("/dashboard/business?welcome=1");
+      // 写真を選んでいれば、メイン写真として登録する（失敗しても登録は済んでいるので、ダッシュボードで案内する）
+      let photoOk = true;
+      if (photo && res.businessId) {
+        const up = await fetch(`/api/businesses/${res.businessId}/photo`, { method: "PUT", body: photo, headers: { "Content-Type": "image/jpeg" } }).catch(() => null);
+        photoOk = Boolean(up?.ok);
+      }
+      router.push(`/dashboard/business?welcome=1${photo ? (photoOk ? "&photo=1" : "&photo=ng") : ""}`);
     } catch (err) {
       if (err instanceof ApiError && err.data.field === "address") {
         // 住所から場所が見つからないときは、住所を入力し直してもらう
@@ -116,6 +145,47 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
         <div>
           <label className="label" htmlFor="serviceDescription">サービス内容<Opt /></label>
           <textarea id="serviceDescription" name="serviceDescription" rows={3} className="input" />
+        </div>
+        <div>
+          <p className="label">
+            お店の写真（メイン写真）<Opt />
+          </p>
+          <p className="mb-2 text-xs leading-relaxed text-slate-500">
+            外観・看板・料理など、お店の雰囲気が伝わる写真を 1 枚。地図や一覧に大きく出るので、写真があるお店は目に留まりやすくなります。あとから変更・追加もできます。
+          </p>
+          {preview ? (
+            <div className="relative overflow-hidden rounded-lg ring-1 ring-slate-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview} alt="選んだ写真" className="aspect-[4/3] w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => {
+                  setPhoto(null);
+                  setPreview(null);
+                }}
+                aria-label="写真を外す"
+                className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-white/95 text-slate-600 ring-1 ring-slate-200"
+              >
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+          ) : (
+            <label className="flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 text-sm font-bold text-saga-600 hover:bg-slate-100">
+              <ImagePlus className="h-8 w-8" aria-hidden />
+              写真を選ぶ
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) pickPhoto(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          )}
+          {photoError && <p className="mt-1 text-sm font-bold text-red-600">{photoError}</p>}
         </div>
         <div>
           <label className="label" htmlFor="priceLevel">価格帯<Opt /></label>
