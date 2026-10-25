@@ -5,7 +5,7 @@ import { ADMIN_COOKIE, verifyAdmin } from "@/lib/admin-session";
 
 /**
  * 会員登録必須ページ。
- * 地図トップ `/` は会員向け（登録前の方には、同じアドレスで登録前のトップ /welcome の中身を出す。地図は見るだけ）。お店のページ `/shops/*` は最低限の情報だけ公開。
+ * 地図トップ `/` は会員向け（登録前の方には、トップのページ自身が登録前のトップを出す。地図は見るだけ）。お店のページ `/shops/*` は最低限の情報だけ公開。
  * 運営者は管理画面のログインのままで `/` を確認できる。
  */
 const authMiddleware = withAuth(
@@ -15,14 +15,13 @@ const authMiddleware = withAuth(
     if (isMemberMapPath(path)) {
       // ログインしていれば（お客さま・事業主）そのまま表示
       if (role) return;
-      // 運営者（管理画面にログイン中）も、お客さまの地図の画面をそのまま確認できる
-      if (await verifyAdmin(req.cookies.get(ADMIN_COOKIE)?.value, AUTH_SECRET ?? "")) return;
-      // 共有されたお店のリンク（/?shop=ID）は、そのお店の公開ページへ
+      // 共有されたお店のリンク（/?shop=ID）は、登録前の方にはそのお店の公開ページを出す
       const shop = req.nextUrl.searchParams.get("shop");
-      if (shop && /^\d+$/.test(shop)) return NextResponse.redirect(new URL(`/shops/${shop}`, req.url));
-      // 登録前の方には、同じアドレスのまま登録前のトップ（/welcome の中身。地図は見るだけ・会員登録の案内）を出す。
-      // リダイレクトにすると、画面の中の移動（ロゴを押したとき）で読み込みに失敗し、エラーの画面が出ることがあるため
-      return NextResponse.rewrite(new URL("/welcome", req.url));
+      if (shop && /^\d+$/.test(shop) && !(await verifyAdmin(req.cookies.get(ADMIN_COOKIE)?.value, AUTH_SECRET ?? ""))) {
+        return NextResponse.redirect(new URL(`/shops/${shop}`, req.url));
+      }
+      // それ以外はそのまま表示（トップのページが、登録前の方には登録前のトップを出す）
+      return;
     }
     // 管理画面は専用のログイン（お客さま・事業主のログインとは別の Cookie）。署名と期限を確かめる
     if (path.startsWith("/admin")) {
