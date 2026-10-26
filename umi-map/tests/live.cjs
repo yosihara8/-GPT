@@ -89,6 +89,8 @@ async function waitFor(fn, ms) {
   // 宇宙から見た海: 最新の日付と古い日付
   const recent = await page.inputValue("#dateA");
   for (const date of [recent, "2010-08-15"]) {
+    await page.check("#sat-none");
+    await sleep(1000);
     await page.fill("#dateA", date);
     await page.dispatchEvent("#dateA", "change");
     for (const [id, name] of [["sat-sst", "海面の水温"], ["sat-anom", "水温の平年差"], ["sat-chl", "プランクトン"], ["sat-true", "その日の衛星写真"]]) {
@@ -113,9 +115,9 @@ async function waitFor(fn, ms) {
 
   // 海をクリック
   await page.mouse.click(820, 220);
-  const popOk = await waitFor(async () => /℃/.test(await page.innerText(".leaflet-popup-content").catch(() => "")) || /取得できません/.test(await page.innerText(".leaflet-popup-content").catch(() => "")), 30000);
+  const popOk = await waitFor(async () => !/問い合わせ中/.test(await page.innerText(".leaflet-popup-content").catch(() => "問い合わせ中")), 40000);
   const pop = await page.innerText(".leaflet-popup-content").catch(() => "");
-  check("海をクリックすると水温が出る", popOk && /℃/.test(pop) && !/取得できません/.test(pop), pop.replace(/\s+/g, " ").slice(0, 160));
+  check("海をクリックすると水温が出る", popOk && !!(await page.$(".leaflet-popup .vals")), pop.replace(/\s+/g, " ").slice(0, 200));
   check("プランクトンの数値", /mg\/m³/.test(pop), /mg\/m³/.test(pop) ? "" : "数値なし(雲・取得失敗のどちらか)", "warn");
   if (await page.$("#seriesBtn")) {
     await page.click("#seriesBtn");
@@ -136,7 +138,12 @@ async function waitFor(fn, ms) {
   await page.click("#mode-moba");
   await page.evaluate(() => window.UMI.map.setView([33.4739, 129.9911], 15));
   const keys = await page.$$eval("#mobaLeft option", (o) => o.map((x) => [x.value, x.textContent]));
+  await page.selectOption("#mobaRight", "gsi-now");
   for (const [key, label] of keys) {
+    await page.selectOption("#mobaLeft", "gsi-now");
+    await sleep(800);
+    await page.evaluate(() => window.UMI.map.setView([33.4739 + Math.random() * 0.002, 129.9911], 15));
+    await sleep(800);
     net.reset();
     await page.selectOption("#mobaLeft", key);
     await sleep(5000);

@@ -26,6 +26,9 @@ jobs:
           python3 -m http.server 8765 &
           sleep 1
           node tests/smoke.cjs
+      - name: 外部サービスの状態を調べる
+        continue-on-error: true
+        run: bash tests/diagnose.sh
       - name: 本物のサーバーでのテスト
         run: node tests/live.cjs
       - uses: actions/upload-artifact@v4
