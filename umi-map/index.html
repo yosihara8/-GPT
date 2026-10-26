@@ -403,7 +403,7 @@
         <ul>
           <li>海面水温・平年差: NASA JPL MUR SST (GHRSST) / 表示 NASA GIBS、数値 NOAA CoastWatch ERDDAP</li>
           <li>クロロフィル・その日の衛星写真: NOAA-20 VIIRS(2018年ごろ以降)、NASA MODIS Aqua / Terra(それ以前)</li>
-          <li>クリック地点の水温: Open-Meteo Marine(取れない時は NASA MUR / NOAA ERDDAP)</li>
+          <li>クリック地点の水温: Open-Meteo Marine(その日の値)、NASA MUR の月平均(NOAA ERDDAP から同梱)</li>
           <li>潮の流れ・波・いまの水温: <a href="https://open-meteo.com/en/docs/marine-weather-api" target="_blank" rel="noopener">Open-Meteo Marine API</a>(Météo-France SMOC ほか)</li>
           <li>観測点の水温: <a href="https://www.pref.saga.lg.jp/kiji00320172/index.html" target="_blank" rel="noopener">佐賀県玄海水産振興センター 漁場環境情報</a></li>
           <li>藻場・ウニ: 佐賀県の藻場調査(佐賀新聞)、水産庁 磯焼け対策全国協議会資料、サガテレビ報道、<a href="https://www.city.karatsu.lg.jp/page/35470.html" target="_blank" rel="noopener">唐津市 ブルーカーボン</a></li>
@@ -431,6 +431,7 @@
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="data/land.js"></script>
+<script src="data/history.js"></script>
 <script>
 (function () {
   "use strict";
@@ -573,10 +574,12 @@
   var SAT = {
     sst:  { layer: "GHRSST_L4_MUR_Sea_Surface_Temperature", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
             legend: { bg: "linear-gradient(90deg,#2b0f6b,#2364c7,#29b5c9,#7fd36b,#f3e044,#f08a2c,#c8202a)", lo: "冷たい", hi: "暖かい" } },
-    anom: { layer: "GHRSST_L4_MUR_Sea_Surface_Temperature_Anomalies", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
+    // 1km版は2019年7月から。それより前は25km版
+    anom: { layer: "GHRSST_L4_MUR_Sea_Surface_Temperature_Anomalies", since: "2019-07-23", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
+            old: "GHRSST_L4_MUR25_Sea_Surface_Temperature_Anomalies", oldTms: "GoogleMapsCompatible_Level6", oldZ: 6,
             legend: { bg: "linear-gradient(90deg,#1f3f9a,#7fa8de,#f4f4f4,#eb9a7a,#b4202a)", lo: "平年より低い", mid: "平年なみ", hi: "平年より高い" } },
     // 2017年12月以降は NOAA-20 VIIRS、それより前は Aqua MODIS(Aqua は2026年9月ごろ観測終了)
-    chl:  { layer: "VIIRS_NOAA20_Chlorophyll_a", since: "2017-12-13", old: "MODIS_Aqua_Chlorophyll_A", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
+    chl:  { layer: "VIIRS_NOAA20_Chlorophyll_a", since: "2017-12-13", old: "MODIS_Aqua_L2_Chlorophyll_A", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
             legend: { bg: "linear-gradient(90deg,#3a1d7a,#2a5fc1,#22a7b8,#5cc35a,#e8d33a,#e2632b,#9b1b1b)", lo: "少ない(澄んだ海)", hi: "多い(赤潮注意)" } },
     "true": { layer: "VIIRS_NOAA20_CorrectedReflectance_TrueColor", since: "2018-01-01", old: "MODIS_Terra_CorrectedReflectance_TrueColor", tms: "GoogleMapsCompatible_Level9", ext: "jpg", z: 9, legend: null }
   };
@@ -586,13 +589,14 @@
 
   function gibsUrl(key, date) {
     var s = SAT[key];
-    var layer = (s.since && date < s.since) ? s.old : s.layer;
-    return "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + layer + "/default/" + date + "/" + s.tms + "/{z}/{y}/{x}." + s.ext;
+    var old = s.since && date < s.since;
+    var layer = old ? s.old : s.layer, tms = (old && s.oldTms) || s.tms;
+    return "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + layer + "/default/" + date + "/" + tms + "/{z}/{y}/{x}." + s.ext;
   }
   var satLayerA = null, satLayerB = null, satKey = "none";
   function makeSat(key, date, pane) {
     return L.tileLayer(gibsUrl(key, date), {
-      pane: pane, maxNativeZoom: SAT[key].z, opacity: +el("opacity").value, errorTileUrl: blank,
+      pane: pane, maxNativeZoom: (SAT[key].since && date < SAT[key].since && SAT[key].oldZ) || SAT[key].z, opacity: +el("opacity").value, errorTileUrl: blank,
       attribution: "衛星データ: <a href='https://earthdata.nasa.gov/gibs' target='_blank'>NASA GIBS</a>"
     });
   }
@@ -637,14 +641,34 @@
     updateClip();
   }
 
-  // ---------- クリックで数値を調べる(NOAA ERDDAP) ----------
-  var ERDDAP = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/";
-  function sstQuery(date, lat, lon, fmt) {
-    return ERDDAP + "jplMURSST41." + (fmt || "json") + "?analysed_sst%5B(" + date + "T09:00:00Z)%5D%5B(" + lat + ")%5D%5B(" + lon + ")%5D";
+  // ---------- クリックで数値を調べる ----------
+  // 同梱した月平均(data/history.js、NOAA ERDDAP から GitHub Actions で作成)から、近くの海の値を返す
+  // latest: その月がまだ無い時(月平均は1〜2か月遅れでできる)は、いちばん新しい月の値を使う
+  function histAt(kind, date, lat, lon, latest) {
+    var H = window.UMI_HISTORY, d = H && H[kind];
+    if (!d) return null;
+    var m = d.months.indexOf(date.slice(0, 7));
+    if (m < 0 && latest && date.slice(0, 7) > d.months[d.months.length - 1]) m = d.months.length - 1;
+    if (m < 0) return null;
+    var row = d.v[m], ci = Math.round((lat - H.lat0) / H.step), cj = Math.round((lon - H.lon0) / H.step);
+    var best = null, bd = Infinity;
+    for (var di = -2; di <= 2; di++) {
+      for (var dj = -2; dj <= 2; dj++) {
+        var i = ci + di, j = cj + dj;
+        if (i < 0 || j < 0 || i >= H.nlat || j >= H.nlon) continue;
+        var val = row[i * H.nlon + j];
+        if (val === null || val === undefined) continue;
+        var dist = di * di + dj * dj;
+        if (dist < bd) { bd = dist; best = val * d.scale; }
+      }
+    }
+    return best;
   }
-  function chlQuery(date, lat, lon, fmt) {
-    return ERDDAP + "erdMH1chla8day." + (fmt || "json") + "?chlorophyll%5B(" + date + "T00:00:00Z)%5D%5B(" + lat + ")%5D%5B(" + lon + ")%5D";
+  function histMonths(kind) {
+    var H = window.UMI_HISTORY;
+    return H && H[kind] ? H[kind].months : [];
   }
+
   // Open-Meteo Marine の過去データ(その日の1時間ごとの値の平均)。ブラウザから直接読める
   function omSst(date, lat, lon) {
     var url = "https://marine-api.open-meteo.com/v1/marine?latitude=" + lat + "&longitude=" + lon +
@@ -658,24 +682,15 @@
       return v.reduce(function (a, b) { return a + b; }, 0) / v.length;
     });
   }
-  // 水温は Open-Meteo → NOAA ERDDAP(MUR 1km)の順に試す。どちらで取れたかも返す
+  // 水温は Open-Meteo(その日の値)→ 同梱した月平均 の順に使う。どちらで取れたかも返す
   function sstAt(date, lat, lon) {
     return omSst(date, lat, lon).then(function (v) { return { v: v, src: "om" }; })
       .catch(function () {
-        return fetchValue(sstQuery(date, lat, lon)).then(function (v) { return { v: v, src: "mur" }; });
+        var v = histAt("sst", date, +lat, +lon);
+        if (v === null) throw new Error("no data");
+        return { v: v, src: "hist" };
       });
   }
-  function fetchValue(url) {
-    return fetch(url).then(function (r) {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.json();
-    }).then(function (j) {
-      var rows = j.table.rows;
-      var v = rows[0][rows[0].length - 1];
-      return (v === null || isNaN(v)) ? null : +v;
-    });
-  }
-
   // 生き物の適水温(一般的な目安。地域や成長段階で変わるので要確認)
   var SPECIES = [
     { n: "カジメ・クロメ", lo: 12, hi: 24, max: 28, g: "海藻" },
@@ -714,7 +729,7 @@
   function srcName(srcs) {
     var n = [];
     if (srcs.indexOf("om") >= 0) n.push("Open-Meteo(約5〜50km単位のモデル)");
-    if (srcs.indexOf("mur") >= 0) n.push("NASA MUR 衛星水温(約1km)");
+    if (srcs.indexOf("hist") >= 0) n.push("NASA MUR 衛星水温の月平均(約5km間隔)");
     return n.join("、") || "—";
   }
   function fmt(v, d) { return v === null ? "—" : v.toFixed(d); }
@@ -739,14 +754,14 @@
     Promise.all([
       sstAt(dA, lat, lon).catch(function () { return undefined; }),
       sstAt(dB, lat, lon).catch(function () { return undefined; }),
-      fetchValue(chlQuery(dA, lat, lon)).catch(function () { return undefined; })
+      Promise.resolve(histAt("chl", dA, +lat, +lon, true))
     ]).then(function (v) {
       var srcs = [v[0], v[1]].filter(Boolean).map(function (x) { return x.src; });
       var a = v[0] ? v[0].v : undefined, b = v[1] ? v[1].v : undefined, c = v[2];
       var h = "<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>" + nowHtml(lat, lon);
       if (a === undefined && b === undefined) {
         if (PREVIEW) { h += "<p class='muted'>プレビュー版では衛星の数値は取得できません。公開版で表示されます。</p></div>"; pop.setContent(h); return; }
-        h += "<p>衛星データを取得できませんでした。通信状況を確認するか、<a href='" + sstQuery(dA, lat, lon, "htmlTable") + "' target='_blank'>こちらで直接開いて</a>ください。</p></div>";
+        h += "<p>この日の水温を取得できませんでした。通信状況を確認するか、別の日付を選んでください。</p></div>";
         pop.setContent(h); return;
       }
       if (a === null) {
@@ -760,9 +775,10 @@
         h += "<div class='diff'>比べる日との差: <b style='color:" + (d > 0 ? "#b8433a" : "#3d6fa3") + "'>" + (d > 0 ? "+" : "") + d.toFixed(1) + "℃</b>(1日だけの比較なので、下の20年の変化もあわせて見てください)</div>";
       }
       if (typeof c === "number") {
-        h += "<div class='diff'>プランクトン(クロロフィル): <b>" + c.toFixed(2) + " mg/m³</b> … " + chlWord(c) + "</div>";
+        var cm = histMonths("chl"), used = cm.indexOf(dA.slice(0, 7)) >= 0 ? dA.slice(0, 7) : cm[cm.length - 1];
+        h += "<div class='diff'>プランクトン(クロロフィル、" + used.replace("-", "年") + "月の平均): <b>" + c.toFixed(2) + " mg/m³</b> … " + chlWord(c) + "</div>";
       } else {
-        h += "<div class='muted'>プランクトン: 雲などでこの時期のデータがありません</div>";
+        h += "<div class='muted'>プランクトン: この月の値はまだありません(色の地図で見てください)</div>";
       }
       h += speciesHtml(a);
       h += "<div style='margin-top:10px' id='seriesBox'><button class='btn' type='button' id='seriesBtn'>この地点の20年間の水温の変化を見る</button></div>";
@@ -778,6 +794,17 @@
 
   // 毎年同じ時期の水温を並べる(MURは2002年6月から)
   function loadSeries(box, lat, lon, dA, pop) {
+    var mon = dA.slice(5, 7);
+    var hist = histMonths("sst").filter(function (m) { return m.slice(5) === mon; });
+    if (hist.length >= 5) {
+      var hp = hist.map(function (m) { return [+m.slice(0, 4), histAt("sst", m + "-15", +lat, +lon)]; })
+        .filter(function (p) { return p[1] !== null; });
+      if (hp.length >= 3) {
+        box.innerHTML = seriesSvg(hp, "毎年" + (+mon) + "月の平均の海面水温");
+        if (pop.isOpen()) pop.update();
+        return;
+      }
+    }
     var md = dA.slice(5);
     var endYear = +dA.slice(0, 4);
     var startYear = (md < "06-01") ? 2003 : 2002;
@@ -790,11 +817,11 @@
     Promise.all(reqs).then(function (res) {
       var pts = res.filter(function (p) { return typeof p[1] === "number"; });
       if (pts.length < 3) { box.innerHTML = "<p class='muted'>十分なデータが取れませんでした。</p>"; return; }
-      box.innerHTML = seriesSvg(pts, md);
+      box.innerHTML = seriesSvg(pts, "毎年 " + md.replace("-", "月") + "日ごろの海面水温");
       if (pop.isOpen()) pop.update();
     });
   }
-  function seriesSvg(pts, md) {
+  function seriesSvg(pts, title) {
     var W = 280, H = 130, pl = 30, pr = 8, pt = 14, pb = 22;
     var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
     var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
@@ -805,7 +832,7 @@
     var n = pts.length, sx = 0, sy = 0, sxx = 0, sxy = 0;
     pts.forEach(function (p) { sx += p[0]; sy += p[1]; sxx += p[0] * p[0]; sxy += p[0] * p[1]; });
     var slope = (n * sxy - sx * sy) / (n * sxx - sx * sx), icpt = (sy - slope * sx) / n;
-    var s = "<svg viewBox='0 0 " + W + " " + H + "' width='100%' role='img' aria-label='毎年" + md + "ごろの水温の変化'>";
+    var s = "<svg viewBox='0 0 " + W + " " + H + "' width='100%' role='img' aria-label='" + title + "'>";
     for (var g = y0; g <= y1; g++) {
       s += "<line x1='" + pl + "' x2='" + (W - pr) + "' y1='" + Y(g) + "' y2='" + Y(g) + "' stroke='#e3eaec' stroke-width='1'/>";
       if ((g - y0) % Math.max(1, Math.round((y1 - y0) / 4)) === 0) s += "<text x='" + (pl - 4) + "' y='" + (Y(g) + 3) + "' font-size='9' text-anchor='end' fill='#50646f'>" + g + "℃</text>";
@@ -820,7 +847,7 @@
     s += "<circle cx='" + X(last[0]) + "' cy='" + Y(last[1]) + "' r='3.5' fill='#e2632b'/>";
     s += "</svg>";
     var per10 = slope * 10;
-    return "<div class='muted'>毎年 " + md.replace("-", "月") + "日ごろの海面水温(朱色の点線=傾向)</div>" + s +
+    return "<div class='muted'>" + title + "(朱色の点線=傾向)</div>" + s +
       "<div class='diff'>傾向: 10年あたり <b style='color:" + (per10 > 0 ? "#b8433a" : "#3d6fa3") + "'>" + (per10 > 0 ? "+" : "") + per10.toFixed(2) + "℃</b>(1日ずつの値なので年ごとのばらつきがあります)</div>";
   }
 

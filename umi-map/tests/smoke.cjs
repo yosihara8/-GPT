@@ -29,11 +29,29 @@ function marineGrid(url) {
   }));
 }
 
+// 同梱する月平均(data/history.js)の模擬: 2002年6月〜2026年9月、全部の格子に年ごとに少し上がる水温
+function fakeHistory() {
+  const nlat = 13, nlon = 17, months = [], sst = [], chl = [];
+  for (let y = 2002; y <= 2026; y++) {
+    for (let m = 1; m <= 12; m++) {
+      if ((y === 2002 && m < 6) || (y === 2026 && m > 9)) continue;
+      months.push(y + "-" + String(m).padStart(2, "0"));
+      sst.push(Array(nlat * nlon).fill(Math.round((20 + (y - 2002) * 0.04) * 10)));
+      chl.push(Array(nlat * nlon).fill(85));
+    }
+  }
+  return "window.UMI_HISTORY=" + JSON.stringify({ lat0: 33.3, lon0: 129.5, step: 0.05, nlat, nlon,
+    sst: { months, scale: 0.1, v: sst }, chl: { months, scale: 0.01, v: chl } }) + ";";
+}
+
 async function setup(page, opts) {
   const log = { gibs: [], photo: [], marinePoint: 0, erddap: 0, wind: 0 };
   await page.route("**/*", async (route) => {
     const u = new URL(route.request().url());
     const h = u.hostname;
+    if ((h === "localhost" || h === "127.0.0.1") && u.pathname.endsWith("/data/history.js")) {
+      return route.fulfill({ status: 200, contentType: "application/javascript", body: fakeHistory() });
+    }
     if (h === "localhost" || h === "127.0.0.1") return route.continue();
     if (h.includes("fonts.")) return route.fulfill({ status: 200, body: "" });
     if (h === "gibs.earthdata.nasa.gov") { log.gibs.push(u.pathname); return route.fulfill({ status: 200, contentType: "image/png", body: PNG }); }
@@ -97,13 +115,15 @@ async function setup(page, opts) {
     await page.mouse.click(820, 220);
     await page.waitForSelector(".leaflet-popup .vals", { timeout: 5000 }).catch(() => {});
     const pop = await page.innerText(".leaflet-popup-content").catch(() => "");
-    check("海をクリックすると水温が出る(NOAA が読めなくても)", /℃/.test(pop) && /Open-Meteo/.test(pop), pop.slice(0, 80).replace(/\n/g, " "));
+    check("海をクリックすると水温が出る", /℃/.test(pop) && /Open-Meteo/.test(pop), pop.slice(0, 80).replace(/\n/g, " "));
+    check("プランクトンは同梱した月平均で出す(最新の月)", /2026年09月の平均/.test(pop) && /0\.85 mg\/m³/.test(pop));
     check("いまの流れ・波も出る", /流れ/.test(pop) && /波の高さ/.test(pop));
     check("生き物の適水温の帯が出る", (await page.$$(".leaflet-popup .sp")).length === 11);
     await page.click("#seriesBtn");
     await page.waitForSelector(".leaflet-popup svg", { timeout: 8000 }).catch(() => {});
     const dots = await page.$$eval(".leaflet-popup svg circle", (c) => c.length).catch(() => 0);
-    check("20年の水温グラフが出る", dots >= 20, dots + "点");
+    const title = await page.innerText(".leaflet-popup svg + div, .leaflet-popup .muted").catch(() => "");
+    check("20年の水温グラフが出る(同梱した月平均)", dots >= 20 && log.erddap === 0, dots + "点");
     await page.keyboard.press("Escape");
 
     // 衛星データの切り替え
@@ -115,7 +135,11 @@ async function setup(page, opts) {
     await page.fill("#dateA", "2010-08-15");
     await page.dispatchEvent("#dateA", "change");
     await page.waitForTimeout(600);
-    check("古い日付のプランクトンは Aqua MODIS", log.gibs.some((p) => p.includes("MODIS_Aqua_Chlorophyll_A/default/2010-08-15")), log.gibs[0]);
+    check("古い日付のプランクトンは Aqua MODIS", log.gibs.some((p) => p.includes("MODIS_Aqua_L2_Chlorophyll_A/default/2010-08-15")), log.gibs[0]);
+    log.gibs.length = 0;
+    await page.check("#sat-anom");
+    await page.waitForTimeout(600);
+    check("古い日付の水温の平年差は25km版", log.gibs.some((p) => p.includes("MUR25_Sea_Surface_Temperature_Anomalies/default/2010-08-15/GoogleMapsCompatible_Level6")), log.gibs[0]);
     log.gibs.length = 0;
     await page.check("#sat-true");
     await page.waitForTimeout(600);
@@ -208,16 +232,16 @@ async function setup(page, opts) {
     await page.close();
   }
 
-  // ---- 3. Open-Meteo に古い年が無い時は NOAA(MUR)で補う ----
+  // ---- 3. Open-Meteo に古い年が無い時は同梱した月平均で補う ----
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
-    const log = await setup(page, { omOldMissing: true, erddapCors: true });
+    const log = await setup(page, { omOldMissing: true });
     await page.goto(BASE);
     await page.waitForTimeout(1200);
     await page.mouse.click(820, 220);
     await page.waitForSelector(".leaflet-popup .vals", { timeout: 5000 }).catch(() => {});
     const pop = await page.innerText(".leaflet-popup-content").catch(() => "");
-    check("古い日付は NOAA MUR で補う", /MUR/.test(pop) && log.erddap > 0);
+    check("古い日付は同梱した月平均で補う", /月平均/.test(pop) && /20\.\d℃/.test(pop) && log.erddap === 0, pop.replace(/\s+/g, " ").slice(0, 120));
     await page.close();
   }
 

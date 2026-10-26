@@ -15,6 +15,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // サーバーごとの応答を数える
 function watch(page) {
   const stat = {};
+  const urls = [];   // [パス, 成功したか]
   function rec(host, key, extra) {
     stat[host] = stat[host] || { ok: 0, ng: 0, codes: {}, sample: "" };
     stat[host][key]++;
@@ -24,6 +25,7 @@ function watch(page) {
     const u = new URL(r.url());
     if (u.hostname === "localhost") return;
     const good = r.status() >= 200 && r.status() < 400;
+    urls.push([u.pathname, good]);
     rec(u.hostname, good ? "ok" : "ng", String(r.status()));
     if (!good && !stat[u.hostname].sample) stat[u.hostname].sample = u.pathname.slice(0, 120);
   });
@@ -31,11 +33,14 @@ function watch(page) {
     const u = new URL(r.url());
     if (u.hostname === "localhost") return;
     rec(u.hostname, "ng", (r.failure() || {}).errorText || "failed");
+    urls.push([u.pathname, false]);
     if (!stat[u.hostname].sample) stat[u.hostname].sample = u.pathname.slice(0, 120);
   });
   return {
     stat,
-    reset() { for (const k in stat) delete stat[k]; },
+    reset() { for (const k in stat) delete stat[k]; urls.length = 0; },
+    // パスに part を含む通信の成功・失敗の数
+    byPath(part) { const m = urls.filter((x) => x[0].includes(part)); return { ok: m.filter((x) => x[1]).length, ng: m.filter((x) => !x[1]).length }; },
     summary(host) { const s = stat[host]; return s ? "成功" + s.ok + " 失敗" + s.ng + " " + JSON.stringify(s.codes) + (s.sample ? " 例:" + s.sample : "") : "通信なし"; },
     good(host) { const s = stat[host]; return !!s && s.ok > 0 && s.ok >= s.ng; }
   };
@@ -124,7 +129,7 @@ async function waitFor(fn, ms) {
     await waitFor(async () => !!(await page.$(".leaflet-popup svg")) || /取れませんでした/.test(await page.innerText(".leaflet-popup-content")), 90000);
     const dots = await page.$$eval(".leaflet-popup svg circle", (c) => c.length).catch(() => 0);
     const txt = await page.innerText(".leaflet-popup-content");
-    check("20年の水温グラフ", dots >= 10, dots + "点 " + (txt.match(/傾向[^\n]*/) || [""])[0]);
+    check("20年の水温グラフ", dots >= 15, dots + "点 " + (txt.match(/毎年[^\n]*/) || [""])[0] + " " + (txt.match(/傾向[^\n]*/) || [""])[0]);
   }
   await page.keyboard.press("Escape");
 
@@ -138,17 +143,17 @@ async function waitFor(fn, ms) {
   await page.click("#mode-moba");
   await page.evaluate(() => window.UMI.map.setView([33.4739, 129.9911], 15));
   const keys = await page.$$eval("#mobaLeft option", (o) => o.map((x) => [x.value, x.textContent]));
-  await page.selectOption("#mobaRight", "gsi-now");
-  for (const [key, label] of keys) {
-    await page.selectOption("#mobaLeft", "gsi-now");
-    await sleep(800);
-    await page.evaluate(() => window.UMI.map.setView([33.4739 + Math.random() * 0.002, 129.9911], 15));
-    await sleep(800);
+  const places = [[33.4739, 129.9911], [33.5333, 129.9722], [33.5560, 129.8821], [33.5557, 129.8463], [33.597, 129.897], [33.6008, 129.8561], [33.5731, 129.7594], [33.53, 129.95], [33.50, 129.83]];
+  const part = (key) => key.startsWith("s2-") ? "s2cloudless-" + key.slice(3) : key === "gsi-1975" ? "/gazo1/" : "/seamlessphoto/";
+  for (let k = 0; k < keys.length; k++) {
+    const [key, label] = keys[k];
+    await page.evaluate((ll) => window.UMI.map.setView(ll, 15), places[k % places.length]);
+    await sleep(500);
     net.reset();
     await page.selectOption("#mobaLeft", key);
     await sleep(5000);
-    const host = key.startsWith("s2") ? "tiles.maps.eox.at" : "cyberjapandata.gsi.go.jp";
-    check("藻場の比較: " + label, net.good(host), net.summary(host), key === "gsi-1975" ? "warn" : undefined);
+    const c = net.byPath(part(key));
+    check("藻場の比較: " + label, c.ok > 0 && c.ok >= c.ng, "成功" + c.ok + " 失敗" + c.ng, key === "gsi-1975" ? "warn" : undefined);
   }
   await page.screenshot({ path: "live-moba.png" });
 
