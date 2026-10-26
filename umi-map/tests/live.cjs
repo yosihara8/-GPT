@@ -137,6 +137,8 @@ async function waitFor(fn, ms) {
   const part = (key) => key.startsWith("s2-") ? "s2cloudless-" + key.slice(3) : key === "gsi-1975" ? "/gazo1/" : "/seamlessphoto/";
   for (let k = 0; k < keys.length; k++) {
     const [key, label] = keys[k];
+    // 右側は別の年にして、左側の写真だけを数える
+    await page.selectOption("#mobaRight", k === 0 ? keys[1][0] : keys[0][0]);
     await page.evaluate((ll) => window.UMI.map.setView(ll, 15), places[k % places.length]);
     await sleep(500);
     net.reset();
