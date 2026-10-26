@@ -264,7 +264,7 @@
         <label class="opt"><input type="radio" name="sat" value="none" id="sat-none" checked><span><b>表示しない</b></span></label>
         <label class="opt"><input type="radio" name="sat" value="sst" id="sat-sst"><span><b>海面の水温</b><small>NASA MURデータ。1日ごと・約1km単位</small></span></label>
         <label class="opt"><input type="radio" name="sat" value="anom" id="sat-anom"><span><b>水温の平年差</b><small>いつもの年と比べて何度高いか・低いか</small></span></label>
-        <label class="opt"><input type="radio" name="sat" value="chl" id="sat-chl"><span><b>プランクトン(クロロフィル)</b><small>魚のエサの元。多すぎると赤潮のおそれ</small></span></label>
+        <label class="opt"><input type="radio" name="sat" value="chl" id="sat-chl"><span><b>プランクトン(クロロフィル)</b><small>魚のエサの元。多すぎると赤潮のおそれ(2017年12月以降は NOAA-20 VIIRS、それより前は Aqua MODIS)</small></span></label>
         <label class="opt"><input type="radio" name="sat" value="true" id="sat-true"><span><b>その日の衛星写真</b><small>濁りや赤潮、雲のようすをそのまま見る</small></span></label>
       </div>
       <div id="legend"></div>
@@ -361,7 +361,8 @@
         データの出典
         <ul>
           <li>海面水温・平年差: NASA JPL MUR SST (GHRSST) / 表示 NASA GIBS、数値 NOAA CoastWatch ERDDAP</li>
-          <li>クロロフィル・衛星写真: NASA MODIS (Aqua / Terra)</li>
+          <li>クロロフィル・その日の衛星写真: NOAA-20 VIIRS(2018年ごろ以降)、NASA MODIS Aqua / Terra(それ以前)</li>
+          <li>クリック地点の水温: Open-Meteo Marine(取れない時は NASA MUR / NOAA ERDDAP)</li>
           <li>潮の流れ・波・いまの水温: <a href="https://open-meteo.com/en/docs/marine-weather-api" target="_blank" rel="noopener">Open-Meteo Marine API</a>(Météo-France SMOC ほか)</li>
           <li>観測点の水温: <a href="https://www.pref.saga.lg.jp/kiji00320172/index.html" target="_blank" rel="noopener">佐賀県玄海水産振興センター 漁場環境情報</a></li>
           <li>藻場・ウニ: 佐賀県の藻場調査(佐賀新聞)、水産庁 磯焼け対策全国協議会資料、サガテレビ報道、<a href="https://www.city.karatsu.lg.jp/page/35470.html" target="_blank" rel="noopener">唐津市 ブルーカーボン</a></li>
@@ -401,7 +402,7 @@
   var GSI = "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>国土地理院</a>";
   var bases = {
     ocean: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
-      maxNativeZoom: 10, attribution: "海底地形: Esri, GEBCO, NOAA, Garmin"
+      maxNativeZoom: 13, attribution: "海底地形: Esri, GEBCO, NOAA, Garmin"
     }),
     photo: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
       maxNativeZoom: 18, attribution: GSI + " 航空写真"
@@ -418,10 +419,24 @@
     maxNativeZoom: 18, opacity: 0.35, attribution: GSI
   });
   var currentBase = null;
+  // 下地の地図画像が読めているかを見て、読めなければ陸地データで陸を塗る
+  var tileOk = 0, tileNg = 0;
+  function watchTiles(layer) {
+    layer.on("tileload", function () { tileOk++; updateLandFill(); });
+    layer.on("tileerror", function () { tileNg++; updateLandFill(); });
+  }
+  function updateLandFill() {
+    if (!landShapes) return;
+    var show = PREVIEW || (tileOk === 0 && tileNg >= 3);
+    landShapes.setStyle(function (f) { return landStyle(f, show); });
+  }
   function setBase(key) {
+    tileOk = 0; tileNg = 0;
     if (currentBase) map.removeLayer(currentBase);
     map.removeLayer(oceanLabels);
     currentBase = bases[key];
+    if (!currentBase._watched) { watchTiles(currentBase); currentBase._watched = true; }
+    updateLandFill();
     currentBase.addTo(map);
     currentBase.bringToBack();
     if (key === "ocean") oceanLabels.addTo(map);
@@ -442,16 +457,19 @@
   map.createPane("land");
   map.getPane("land").style.zIndex = 360;
   var landLayer = L.layerGroup();
+  var landShapes = null;
+  function landStyle(f, show) {
+    var home = f.properties.name === "唐津市";
+    return {
+      color: home ? "#6d5a3a" : "#8a8a78", weight: home ? 1.6 : 0.8, opacity: show ? 1 : 0,
+      fillColor: home ? "#efe3c2" : "#e4ded0", fillOpacity: show ? 1 : 0
+    };
+  }
   if (window.UMI_LAND) {
-    L.geoJSON(window.UMI_LAND, {
+    landShapes = L.geoJSON(window.UMI_LAND, {
       pane: "land", interactive: false,
-      style: function (f) {
-        var home = f.properties.name === "唐津市";
-        return {
-          color: home ? "#6d5a3a" : "#8a8a78", weight: home ? 1.6 : 0.8,
-          fillColor: home ? "#efe3c2" : "#e4ded0", fillOpacity: PREVIEW ? 1 : 0.28
-        };
-      }
+      // 最初は描かずに待ち、地図画像が読めなかった時だけ陸を塗る
+      style: function (f) { return landStyle(f, PREVIEW); }
     }).addTo(landLayer);
     [["唐津市", [33.40, 129.98]], ["玄海町", [33.4722, 129.8747]], ["伊万里市", [33.29, 129.87]], ["松浦市", [33.34, 129.71]],
      ["糸島市(福岡県)", [33.55, 130.20]], ["壱岐市(長崎県)", [33.77, 129.72]]].forEach(function (c) {
@@ -516,9 +534,10 @@
             legend: { bg: "linear-gradient(90deg,#2b0f6b,#2364c7,#29b5c9,#7fd36b,#f3e044,#f08a2c,#c8202a)", lo: "冷たい", hi: "暖かい" } },
     anom: { layer: "GHRSST_L4_MUR_Sea_Surface_Temperature_Anomalies", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
             legend: { bg: "linear-gradient(90deg,#1f3f9a,#7fa8de,#f4f4f4,#eb9a7a,#b4202a)", lo: "平年より低い", mid: "平年なみ", hi: "平年より高い" } },
-    chl:  { layer: "MODIS_Aqua_Chlorophyll_A", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
+    // 2017年12月以降は NOAA-20 VIIRS、それより前は Aqua MODIS(Aqua は2026年9月ごろ観測終了)
+    chl:  { layer: "VIIRS_NOAA20_Chlorophyll_a", since: "2017-12-13", old: "MODIS_Aqua_Chlorophyll_A", tms: "GoogleMapsCompatible_Level7", ext: "png", z: 7,
             legend: { bg: "linear-gradient(90deg,#3a1d7a,#2a5fc1,#22a7b8,#5cc35a,#e8d33a,#e2632b,#9b1b1b)", lo: "少ない(澄んだ海)", hi: "多い(赤潮注意)" } },
-    "true": { layer: "MODIS_Terra_CorrectedReflectance_TrueColor", tms: "GoogleMapsCompatible_Level9", ext: "jpg", z: 9, legend: null }
+    "true": { layer: "VIIRS_NOAA20_CorrectedReflectance_TrueColor", since: "2018-01-01", old: "MODIS_Terra_CorrectedReflectance_TrueColor", tms: "GoogleMapsCompatible_Level9", ext: "jpg", z: 9, legend: null }
   };
   map.createPane("satA"); map.createPane("satB");
   map.getPane("satA").style.zIndex = 350; map.getPane("satB").style.zIndex = 351;
@@ -526,7 +545,8 @@
 
   function gibsUrl(key, date) {
     var s = SAT[key];
-    return "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + s.layer + "/default/" + date + "/" + s.tms + "/{z}/{y}/{x}." + s.ext;
+    var layer = (s.since && date < s.since) ? s.old : s.layer;
+    return "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + layer + "/default/" + date + "/" + s.tms + "/{z}/{y}/{x}." + s.ext;
   }
   var satLayerA = null, satLayerB = null, satKey = "none";
   function makeSat(key, date, pane) {
@@ -584,6 +604,26 @@
   function chlQuery(date, lat, lon, fmt) {
     return ERDDAP + "erdMH1chla8day." + (fmt || "json") + "?chlorophyll%5B(" + date + "T00:00:00Z)%5D%5B(" + lat + ")%5D%5B(" + lon + ")%5D";
   }
+  // Open-Meteo Marine の過去データ(その日の1時間ごとの値の平均)。ブラウザから直接読める
+  function omSst(date, lat, lon) {
+    var url = "https://marine-api.open-meteo.com/v1/marine?latitude=" + lat + "&longitude=" + lon +
+      "&hourly=sea_surface_temperature&start_date=" + date + "&end_date=" + date + "&timezone=Asia%2FTokyo&cell_selection=sea";
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (j) {
+      var v = (j.hourly && j.hourly.sea_surface_temperature || []).filter(function (x) { return x !== null; });
+      if (!v.length) throw new Error("no data");
+      return v.reduce(function (a, b) { return a + b; }, 0) / v.length;
+    });
+  }
+  // 水温は Open-Meteo → NOAA ERDDAP(MUR 1km)の順に試す。どちらで取れたかも返す
+  function sstAt(date, lat, lon) {
+    return omSst(date, lat, lon).then(function (v) { return { v: v, src: "om" }; })
+      .catch(function () {
+        return fetchValue(sstQuery(date, lat, lon)).then(function (v) { return { v: v, src: "mur" }; });
+      });
+  }
   function fetchValue(url) {
     return fetch(url).then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status);
@@ -630,6 +670,12 @@
     if (c < 10) return "多い(栄養が豊富。赤潮に注意)";
     return "非常に多い(赤潮のおそれ)";
   }
+  function srcName(srcs) {
+    var n = [];
+    if (srcs.indexOf("om") >= 0) n.push("Open-Meteo(約5〜50km単位のモデル)");
+    if (srcs.indexOf("mur") >= 0) n.push("NASA MUR 衛星水温(約1km)");
+    return n.join("、") || "—";
+  }
   function fmt(v, d) { return v === null ? "—" : v.toFixed(d); }
 
   // 潮の流れの層(js/flow.js)が持つ「いま」の値
@@ -650,11 +696,12 @@
       .setContent("<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>" + nowHtml(lat, lon) + "<p class='muted'>衛星データを問い合わせ中…</p></div>")
       .openOn(map);
     Promise.all([
-      fetchValue(sstQuery(dA, lat, lon)).catch(function () { return undefined; }),
-      fetchValue(sstQuery(dB, lat, lon)).catch(function () { return undefined; }),
+      sstAt(dA, lat, lon).catch(function () { return undefined; }),
+      sstAt(dB, lat, lon).catch(function () { return undefined; }),
       fetchValue(chlQuery(dA, lat, lon)).catch(function () { return undefined; })
     ]).then(function (v) {
-      var a = v[0], b = v[1], c = v[2];
+      var srcs = [v[0], v[1]].filter(Boolean).map(function (x) { return x.src; });
+      var a = v[0] ? v[0].v : undefined, b = v[1] ? v[1].v : undefined, c = v[2];
       var h = "<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>" + nowHtml(lat, lon);
       if (a === undefined && b === undefined) {
         if (PREVIEW) { h += "<p class='muted'>プレビュー版では衛星の数値は取得できません。公開版で表示されます。</p></div>"; pop.setContent(h); return; }
@@ -678,7 +725,7 @@
       }
       h += speciesHtml(a);
       h += "<div style='margin-top:10px' id='seriesBox'><button class='btn' type='button' id='seriesBtn'>この地点の20年間の水温の変化を見る</button></div>";
-      h += "<p class='muted' style='margin-top:6px'>適水温は一般的な目安です。海面の値なので、海底付近はこれより低いことが多いです。</p></div>";
+      h += "<p class='muted' style='margin-top:6px'>水温の出典: " + srcName(srcs) + "。適水温は一般的な目安です。海面の値なので、海底付近はこれより低いことが多いです。</p></div>";
       // 文字列ではなく要素で渡すと、後で update() しても中身が作り直されない
       var node = document.createElement("div");
       node.innerHTML = h;
@@ -697,7 +744,7 @@
     for (var y = startYear; y <= endYear; y++) years.push(y);
     box.innerHTML = "<p class='muted'>" + years.length + "年分を取得中…(少し時間がかかります)</p>";
     var reqs = years.map(function (y) {
-      return fetchValue(sstQuery(y + "-" + md, lat, lon)).then(function (v) { return [y, v]; }).catch(function () { return [y, null]; });
+      return sstAt(y + "-" + md, lat, lon).then(function (r) { return [y, r.v]; }).catch(function () { return [y, null]; });
     });
     Promise.all(reqs).then(function (res) {
       var pts = res.filter(function (p) { return typeof p[1] === "number"; });

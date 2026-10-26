@@ -33,6 +33,16 @@ python3 -m http.server 8000
 
 GitHub Pages で公開すると、URLを共有するだけで地域の方にも見てもらえます。
 
+## テスト
+
+外部のサービス(地図画像・衛星・潮の流れ・風・NOAA)をすべて模擬して、主な機能を確かめます。
+
+```sh
+cd umi-map
+python3 -m http.server 8765 &
+node tests/smoke.cjs
+```
+
 ## 使っているデータ
 
 | データ | 提供元 | 細かさ |
@@ -41,8 +51,9 @@ GitHub Pages で公開すると、URLを共有するだけで地域の方にも�
 | 観測点の水温と平年値 | 佐賀県玄海水産振興センター「玄海漁場環境情報」令和8年度8月号 | 5地点 |
 | 藻場の面積・ウニ漁獲量など | 佐賀県の藻場調査(佐賀新聞)、水産庁 磯焼け対策全国協議会資料、サガテレビ報道、唐津市 | — |
 | 海面水温・平年差(MUR SST) | NASA JPL / 表示 NASA GIBS / 数値 NOAA CoastWatch ERDDAP | 約1km・毎日(2002年6月〜) |
-| クロロフィル(プランクトン) | NASA MODIS Aqua | 約1〜4km・8日平均 |
-| その日の衛星写真 | NASA MODIS Terra | 約250m・毎日 |
+| クリック地点の水温・20年の変化 | Open-Meteo Marine(取れない年は NASA MUR / NOAA ERDDAP) | 約5〜50km(MUR は約1km) |
+| クロロフィル(プランクトン) | NOAA-20 VIIRS(2017年12月以降)、NASA MODIS Aqua(それ以前) | 約1km・毎日 |
+| その日の衛星写真 | NOAA-20 VIIRS(2018年以降)、NASA MODIS Terra(それ以前) | 約250〜375m・毎日 |
 | 海底地形 | Esri Ocean Basemap、GEBCO | 約450m |
 | 地図・航空写真・陰影起伏図 | 国土地理院 地理院タイル | 高解像度 |
 | 雲なし衛星写真 | Sentinel-2 cloudless (EOX) | 10m |
