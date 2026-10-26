@@ -44,8 +44,11 @@ GitHub Pages で公開すると、URLを共有するだけで地域の方にも�
 ```sh
 cd umi-map
 python3 -m http.server 8765 &
-node tests/smoke.cjs
+node tests/smoke.cjs   # 外部サービスを模擬したテスト
+node tests/live.cjs    # 本物のサーバーにつなぐテスト(インターネットが必要)
 ```
+
+`umi-map` を変更して GitHub に送ると、GitHub Actions(`.github/workflows/umi-map-live.yml`)が両方のテストを自動で実行します。
 
 ## 使っているデータ
 

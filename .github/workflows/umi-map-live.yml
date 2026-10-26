@@ -1,0 +1,36 @@
+name: umi-map live check
+
+# 宇宙から見た唐津の海(umi-map)を、本物の地図・衛星・潮の流れのサーバーにつないで確かめる
+on:
+  push:
+    paths: ["umi-map/**", ".github/workflows/umi-map-live.yml"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: umi-map
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.48.2
+      - run: npx playwright install --with-deps chromium
+      - name: 模擬データでのテスト
+        run: |
+          python3 -m http.server 8765 &
+          sleep 1
+          node tests/smoke.cjs
+      - name: 本物のサーバーでのテスト
+        run: node tests/live.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: umi-map-screenshots
+          path: umi-map/*.png
+          if-no-files-found: ignore
