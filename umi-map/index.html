@@ -137,6 +137,14 @@
     padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.25);
   }
   .sheet-toggle { display: none; }
+  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; background: rgba(255,255,255,.08); border-radius: 8px; padding: 3px; }
+  .mode-tab { font: inherit; font-size: 13px; font-weight: 500; color: #cfe0e7; background: transparent; border: none; border-radius: 6px; padding: 6px 4px; cursor: pointer; white-space: nowrap; }
+  .mode-tab[aria-selected="true"] { background: #fff; color: var(--sea-deep); }
+  .mode-tab:focus-visible { outline: 2px solid var(--buoy); outline-offset: 1px; }
+  .sec[hidden] { display: none; }
+  .jump { display: flex; flex-wrap: wrap; gap: 6px; }
+  .jump button { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--chart-paper); color: var(--ink); border-radius: 14px; padding: 3px 10px; cursor: pointer; }
+  .jump button:hover { border-color: var(--sea); }
   .live { margin-left: auto; font-family: var(--font-data); font-size: 10px; letter-spacing: .08em; color: #fff; background: var(--bad); border-radius: 3px; padding: 0 6px; animation: blink 2s ease-in-out infinite; }
   @keyframes blink { 50% { opacity: .45; } }
   .flow-time { font-family: var(--font-data); font-size: 15px; font-weight: 500; color: var(--ink); }
@@ -195,12 +203,12 @@
 
   @media (max-width: 760px) {
     .app { flex-direction: column; }
-    .mapwrap { flex: 1; min-height: 0; margin-bottom: 64px; }
+    .mapwrap { flex: 1; min-height: 0; margin-bottom: 104px; }
     .panel {
       position: fixed; left: 0; right: 0; bottom: 0; width: auto; height: 62%;
       z-index: 2000; border-right: none; border-top: 1px solid var(--line);
       border-radius: 14px 14px 0 0; box-shadow: 0 -4px 18px rgba(0,0,0,.2);
-      transform: translateY(calc(100% - 64px)); transition: transform .25s ease;
+      transform: translateY(calc(100% - 104px)); transition: transform .25s ease;
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     .panel.open { transform: none; }
@@ -208,6 +216,9 @@
     .sec { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
     .sheet-toggle { display: block; position: absolute; top: 14px; right: 16px; }
     .panel-head p, .coord { display: none; }
+    .panel-head { padding-top: 12px; padding-bottom: 10px; }
+    .panel-head h1 { font-size: 19px; }
+    .modes { margin-top: 10px; }
     .leaflet-popup-content { width: 260px !important; }
   }
   @media (prefers-reduced-motion: reduce) { .panel { transition: none; } .live { animation: none; } }
@@ -221,12 +232,17 @@
       <p>人工衛星と地形図を重ねて、海の「いま」と「むかし」を見る地図</p>
       <div class="coord" id="coord">北緯 33.52° 東経 129.92° ／ 縮尺 z11</div>
       <button class="btn sheet-toggle" id="sheetToggle" type="button" style="color:#fff;border-color:#fff">パネル</button>
+      <div class="modes" role="tablist" aria-label="目的">
+        <button type="button" role="tab" class="mode-tab" data-mode="know" id="mode-know">海を知る</button>
+        <button type="button" role="tab" class="mode-tab" data-mode="moba" id="mode-moba">藻場を見守る</button>
+        <button type="button" role="tab" class="mode-tab" data-mode="gomi" id="mode-gomi">海ごみ</button>
+      </div>
     </div>
     <div class="preview-note" id="previewNote" hidden>プレビュー版です。陸地と調査データは本物、潮の流れは動きの見本です。地図画像・衛星データ・リアルタイムの予報は公開版で表示されます。</div>
 
-    <section class="sec">
-      <h2><span class="tag">1</span>いまの海<span class="live" id="liveDot">LIVE</span></h2>
-      <label class="opt"><input type="checkbox" id="ov-flow" checked><span><b>潮の流れを動かす</b><small>海流と潮汐を合わせた流れ。線が流れていく向きと速さを表します</small></span></label>
+    <section class="sec" data-modes="know gomi">
+      <h2>いまの海<span class="live" id="liveDot">LIVE</span></h2>
+      <label class="opt"><input type="checkbox" id="ov-flow" data-modes="know gomi" checked><span><b>潮の流れを動かす</b><small>海流と潮汐を合わせた流れ。線が流れていく向きと速さを表します</small></span></label>
       <div class="flow-time" id="flowTime">読み込み中…</div>
       <input type="range" id="flowSlider" min="0" max="95" step="1" value="24" aria-label="表示する時刻">
       <div class="row">
@@ -241,8 +257,8 @@
       <p class="hint">1日前から3日先まで、1時間ごとの流れを再生できます。海をクリックすると、その地点のいまの流れ・波の高さ・水温も表示します。データは約8km単位の予報モデル(Open-Meteo / Météo-France)なので、湾の奥や岸のすぐそばは目安です。</p>
     </section>
 
-    <section class="sec">
-      <h2><span class="tag">2</span>地形を見る</h2>
+    <section class="sec" data-modes="know">
+      <h2>地形を見る</h2>
       <div class="opts" role="radiogroup" aria-label="下地の地図">
         <label class="opt"><input type="radio" name="base" value="ocean" id="base-ocean" checked><span><b>海底地形図</b><small>海の深さを陰影で表示。湾・瀬・深みの形がわかる</small></span></label>
         <label class="opt"><input type="radio" name="base" value="photo" id="base-photo"><span><b>航空写真(国土地理院)</b><small>拡大すると浅い岩場や藻場の黒い影が見える</small></span></label>
@@ -250,16 +266,16 @@
         <label class="opt"><input type="radio" name="base" value="pale" id="base-pale"><span><b>シンプルな地図</b><small>衛星データを重ねる時に見やすい</small></span></label>
       </div>
       <div class="opts">
-        <label class="opt"><input type="checkbox" id="ov-land" checked><span><b>陸地と市町の境界</b><small>海岸線・島・市町の境(国土地理院 地球地図、100万分の1)。唐津市を濃く表示</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-gebco"><span><b>海底の起伏を強調(GEBCO)</b><small>玄界灘の大陸棚と深い所を色分け。約450m単位</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-hill"><span><b>陸の起伏(陰影起伏図)</b><small>山から海へ流れ込む谷・川の位置</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-current" checked><span><b>対馬暖流の流れ(模式図)</b><small>大まかな向きのイメージ。実際の流れは日々変わる</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-spots" checked><span><b>地形で見る海の特徴</b><small>湾・岬・島まわりで、すみやすい生き物が違う</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-land" data-modes="know moba gomi" checked><span><b>陸地と市町の境界</b><small>海岸線・島・市町の境(国土地理院 地球地図、100万分の1)。唐津市を濃く表示</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-gebco" data-modes="know"><span><b>海底の起伏を強調(GEBCO)</b><small>玄界灘の大陸棚と深い所を色分け。約450m単位</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-hill" data-modes="know"><span><b>陸の起伏(陰影起伏図)</b><small>山から海へ流れ込む谷・川の位置</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-current" data-modes="know" checked><span><b>対馬暖流の流れ(模式図)</b><small>大まかな向きのイメージ。実際の流れは日々変わる</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-spots" data-modes="know moba" checked><span><b>地形で見る海の特徴</b><small>湾・岬・島まわりで、すみやすい生き物が違う</small></span></label>
       </div>
     </section>
 
-    <section class="sec">
-      <h2><span class="tag">3</span>宇宙から見た海</h2>
+    <section class="sec" data-modes="know">
+      <h2>宇宙から見た海</h2>
       <div class="opts" role="radiogroup" aria-label="衛星データ">
         <label class="opt"><input type="radio" name="sat" value="none" id="sat-none" checked><span><b>表示しない</b></span></label>
         <label class="opt"><input type="radio" name="sat" value="sst" id="sat-sst"><span><b>海面の水温</b><small>NASA MURデータ。1日ごと・約1km単位</small></span></label>
@@ -285,8 +301,33 @@
       <p class="hint"><b>海の上をクリック</b>すると、その地点の水温とプランクトンの量を数値で表示し、20年間の水温の変化も調べられます。</p>
     </section>
 
-    <section class="sec">
-      <h2><span class="tag">4</span>唐津の調査データ</h2>
+    <section class="sec" data-modes="moba">
+      <h2>年ごとに比べる</h2>
+      <p class="hint">同じ場所の写真を2つの年で並べ、真ん中の朱色の丸を左右に動かして見比べます。海藻の森は浅い岩場の上の<b>黒っぽい影</b>、磯焼けした所は<b>白っぽい岩肌</b>に見えます。</p>
+      <div class="row">
+        <label for="mobaLeft">左</label>
+        <select id="mobaLeft"></select>
+      </div>
+      <div class="row">
+        <label for="mobaRight">右</label>
+        <select id="mobaRight"></select>
+      </div>
+      <div>
+        <div class="hint" style="margin-bottom:4px">見る場所</div>
+        <div class="jump" id="mobaJump"></div>
+      </div>
+      <p class="hint">衛星写真(Sentinel-2)は10m単位で、その年の雲の少ない日を合成したものです。細かい海藻の種類まではわかりません。気になる場所が見つかったら「海の記憶ピン」で印をつけ、潜って確かめるのが次の一歩です。</p>
+      <details class="gaps">
+        <summary>これからの予定(Isoyake Watch)</summary>
+        <ul>
+          <li><b>記録する</b>: 潜水記録(場所・日付・海藻の被度・ウニの数・写真)を地図に残し、潜る候補の順位を、理由が見える決まりで出す</li>
+          <li><b>当てる</b>: 1シーズン分の潜水記録を答えにして、衛星画像から藻場の変化を見つける仕組みを作り、当たり具合を確かめる</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="sec" data-modes="know moba">
+      <h2>唐津の調査データ</h2>
       <p class="hint">県や市が公表している調査結果です。衛星では見えない海の中のようすを補います。</p>
       <div class="stats">
         <div class="stat"><span class="k">玄海の藻場の面積</span><strong>1,262<small>ha</small> → 597<small>ha</small></strong><span class="s">2013年 → 2022年。約10年で半分以下</span></div>
@@ -296,9 +337,9 @@
       </div>
       <p class="hint">藻場が減った主な原因は、温暖化で増えた南方系のウニ「ガンガゼ」による食害とされています。アイゴなど海藻を食べる魚の影響も指摘されています。</p>
       <div class="opts">
-        <label class="opt"><input type="checkbox" id="ov-stations" checked><span><b>県の観測点</b><small>水温の平年差を表示。一部の点は底層(水深10m)の溶存酸素を30分ごとに測定</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-moba" checked><span><b>藻場の保全・再生の場所</b><small>ガンガゼを駆除して海藻が戻るか確かめた場所</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-wind"><span><b>洋上風力の計画海域(目安)</b><small>県が漁業環境影響調査を行った海域の目安</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-stations" data-modes="know" checked><span><b>県の観測点</b><small>水温の平年差を表示。一部の点は底層(水深10m)の溶存酸素を30分ごとに測定</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-moba" data-modes="know moba" checked><span><b>藻場の保全・再生の場所</b><small>ガンガゼを駆除して海藻が戻るか確かめた場所</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-wind" data-modes="know"><span><b>洋上風力の計画海域(目安)</b><small>県が漁業環境影響調査を行った海域の目安</small></span></label>
       </div>
       <details class="gaps">
         <summary>まだ地図に載せられていないデータ</summary>
@@ -313,16 +354,16 @@
       </details>
     </section>
 
-    <section class="sec">
-      <h2><span class="tag">5</span>海ごみ</h2>
+    <section class="sec" data-modes="gomi">
+      <h2>海ごみ</h2>
       <p class="hint">唐津の玄海側の海岸には、海外からのものも含めて大量のプラスチックごみが流れ着きます。対馬暖流、冬の北西の季節風、狭い海峡、入り組んだ海岸が重なるためと県は説明しています。</p>
       <div class="stats">
         <div class="stat"><span class="k">漂着ごみのうちプラスチック</span><strong>約8<small>割</small></strong><span class="s">うち約6〜7割が海外製(県)</span></div>
         <div class="stat"><span class="k">波戸岬のビーチクリーン</span><strong>2,310<small>袋</small></strong><span class="s">燃えるごみ。延べ14回・2,250人(2025年10月まで)</span></div>
       </div>
       <div class="opts">
-        <label class="opt"><input type="checkbox" id="ov-gomi" checked><span><b>漂着ごみが報告されている場所</b><small>波戸岬・馬渡島・高島など。回収した量と出典つき</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-coast" checked><span><b>風を正面から受ける海岸</b><small>風上に開けていて、浮いたごみが押し寄せやすい海岸を朱色で表示(海岸の向きと風よけの有無から計算した目安)</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-gomi" data-modes="gomi" checked><span><b>漂着ごみが報告されている場所</b><small>波戸岬・馬渡島・高島など。回収した量と出典つき</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-coast" data-modes="gomi" checked><span><b>風を正面から受ける海岸</b><small>風上に開けていて、浮いたごみが押し寄せやすい海岸を朱色で表示(海岸の向きと風よけの有無から計算した目安)</small></span></label>
       </div>
       <div class="opts" role="radiogroup" aria-label="風の向き">
         <label class="opt"><input type="radio" name="windMode" value="winter" id="wind-winter" checked><span><b>冬の北西の季節風</b><small>ごみが一番たまる季節の風</small></span></label>
@@ -332,8 +373,8 @@
       <p class="hint">朱色の濃い線ほど風を真正面から受けます。実際にごみがたまるかは、浜の形(砂浜か岩場か)や潮の流れでも変わります。漁師さんや清掃をしている方の記録をピンで重ねると確かになります。</p>
     </section>
 
-    <section class="sec">
-      <h2><span class="tag">6</span>海の記憶ピン</h2>
+    <section class="sec" data-modes="know moba gomi">
+      <h2>海の記憶ピン</h2>
       <p class="hint">漁師さんや地域の方の「昔はここで獲れた」「最近ここに増えた」を地図に残します。衛星のデータと重なる場所に、問題の手がかりがあります。</p>
       <div class="row">
         <select id="pinCat" aria-label="ピンの種類">
@@ -354,8 +395,8 @@
       <p class="hint">ピンはこの端末のブラウザに保存されます。ハッカソンでは「ファイルに保存」で集めて、1つにまとめられます。</p>
     </section>
 
-    <section class="sec">
-      <h2><span class="tag">7</span>見方の注意</h2>
+    <section class="sec" data-modes="know moba gomi">
+      <h2>見方の注意</h2>
       <p class="note">衛星が測れるのは海の表面(数メートル)だけです。海底の水温・酸素・魚そのものは見えません。雲の日は空白になります。生き物の適水温は一般的な目安なので、地元の水産試験場や漁師さんの経験と合わせて判断してください。</p>
       <div class="sources">
         データの出典
@@ -933,5 +974,7 @@
 <script src="js/flow.js"></script>
 <script src="js/survey.js"></script>
 <script src="js/gomi.js"></script>
+<script src="js/moba.js"></script>
+<script src="js/modes.js"></script>
 </body>
 </html>

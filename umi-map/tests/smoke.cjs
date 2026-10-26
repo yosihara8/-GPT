@@ -30,7 +30,7 @@ function marineGrid(url) {
 }
 
 async function setup(page, opts) {
-  const log = { gibs: [], marinePoint: 0, erddap: 0, wind: 0 };
+  const log = { gibs: [], photo: [], marinePoint: 0, erddap: 0, wind: 0 };
   await page.route("**/*", async (route) => {
     const u = new URL(route.request().url());
     const h = u.hostname;
@@ -38,6 +38,7 @@ async function setup(page, opts) {
     if (h.includes("fonts.")) return route.fulfill({ status: 200, body: "" });
     if (h === "gibs.earthdata.nasa.gov") { log.gibs.push(u.pathname); return route.fulfill({ status: 200, contentType: "image/png", body: PNG }); }
     if (h === "server.arcgisonline.com" || h === "cyberjapandata.gsi.go.jp" || h === "tiles.maps.eox.at" || h === "wms.gebco.net") {
+      if (h === "tiles.maps.eox.at" || u.pathname.includes("/gazo1/")) log.photo.push(u.pathname);
       return opts.tilesDown ? route.fulfill({ status: 503, body: "" }) : route.fulfill({ status: 200, contentType: "image/png", body: PNG });
     }
     if (h === "marine-api.open-meteo.com") {
@@ -136,6 +137,9 @@ async function setup(page, opts) {
     await page.click("#cmpBtn");
 
     // 海ごみ
+    await page.click("#mode-gomi");
+    await page.waitForTimeout(400);
+    check("「海ごみ」では衛星データの項目を隠す", await page.isHidden("#sat-sst"));
     const coastWinter = await page.$$eval(".leaflet-overlay-pane path", (p) => p.length);
     await page.check("#wind-now");
     await page.waitForTimeout(600);
@@ -144,7 +148,30 @@ async function setup(page, opts) {
     const coastNow = await page.$$eval(".leaflet-overlay-pane path", (p) => p.length);
     check("風向きが変わると寄りやすい海岸も変わる", coastWinter !== coastNow, coastWinter + " → " + coastNow);
     check("漂着ごみの場所が5か所", (await page.$$(".gomi-chip")).length === 5);
+    await page.click("#mode-know");
+    await page.waitForTimeout(400);
     check("県の観測点が5か所", (await page.$$(".st-badge")).length === 5);
+
+    // 藻場を見守る
+    log.photo.length = 0;
+    await page.click("#mode-moba");
+    await page.waitForTimeout(800);
+    check("「藻場を見守る」で年の比較を出す", await page.isVisible("#mobaLeft") && await page.isHidden("#sat-sst"));
+    check("「藻場を見守る」では潮の流れを止める", !(await page.isChecked("#ov-flow")));
+    check("2018年と2024年の衛星写真を読み込む", log.photo.some((p) => p.includes("s2cloudless-2018")) && log.photo.some((p) => p.includes("s2cloudless-2024")));
+    const mclip = await page.evaluate(() => document.querySelector(".leaflet-mobaL-pane").style.clip);
+    check("左右に切り分けて表示する", mclip.startsWith("rect") && await page.isVisible("#mobaSwipe"));
+    log.photo.length = 0;
+    await page.selectOption("#mobaLeft", "gsi-1975");
+    await page.waitForTimeout(600);
+    check("1974〜78年の航空写真を選べる", log.photo.some((p) => p.includes("/gazo1/")));
+    await page.click("#mobaJump button");
+    await page.waitForTimeout(600);
+    const z = await page.evaluate(() => window.UMI.map.getZoom());
+    check("島のボタンで移動する", z === 15, "z" + z);
+    await page.click("#mode-know");
+    await page.waitForTimeout(600);
+    check("「海を知る」に戻ると潮の流れが戻る", await page.isChecked("#ov-flow") && await page.isHidden("#mobaSwipe"));
 
     // ピン
     await page.click("#pinBtn");
@@ -154,6 +181,19 @@ async function setup(page, opts) {
     check("ピンを置いて保存できる", (await page.innerText("#pinsList")).includes("テスト"));
     await page.click("#pinsList button");
     check("ピンを消せる", !(await page.innerText("#pinsList")).includes("テスト"));
+    await page.close();
+  }
+
+  // ---- 1b. URL の #gomi で「海ごみ」から始まる ----
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    await setup(page, {});
+    await page.goto(BASE + "#gomi");
+    await page.waitForTimeout(1200);
+    const sel = await page.getAttribute("#mode-gomi", "aria-selected");
+    check("#gomi で「海ごみ」から始まる", sel === "true" && (await page.$$(".gomi-chip")).length === 5 && errors.length === 0, errors.join(" / "));
     await page.close();
   }
 
