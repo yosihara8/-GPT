@@ -44,6 +44,18 @@ function fakeHistory() {
     sst: { months, scale: 0.1, v: sst }, chl: { months, scale: 0.01, v: chl } }) + ";";
 }
 
+// 海底地形図(data/bathy.js)の模擬: 全部の海を水深35m、等深線を2本
+function fakeBathy() {
+  const nlat = 20, nlon = 24;
+  return "window.UMI_BATHY=" + JSON.stringify({
+    bounds: [[33.15, 129.4], [34.0, 130.4]], image: "data:image/png;base64," + PNG.toString("base64"),
+    stops: [[0, "rgb(214,241,245)"], [50, "rgb(70,150,196)"], [150, "rgb(22,62,112)"], [250, "rgb(14,40,80)"]],
+    grid: { lat0: 33.17, lon0: 129.42, step: 0.0425, nlat, nlon, d: Array(nlat * nlon).fill(35) },
+    contours: [{ d: 20, c: Array.from({ length: 30 }, (_, k) => [33.6 + k * 0.002, 129.8 + k * 0.004]) },
+               { d: 50, c: Array.from({ length: 30 }, (_, k) => [33.7 + k * 0.002, 129.7 + k * 0.004]) }]
+  }) + ";";
+}
+
 async function setup(page, opts) {
   const log = { gibs: [], photo: [], marinePoint: 0, erddap: 0, wind: 0 };
   await page.route("**/*", async (route) => {
@@ -51,6 +63,9 @@ async function setup(page, opts) {
     const h = u.hostname;
     if ((h === "localhost" || h === "127.0.0.1") && u.pathname.endsWith("/data/history.js")) {
       return route.fulfill({ status: 200, contentType: "application/javascript", body: fakeHistory() });
+    }
+    if ((h === "localhost" || h === "127.0.0.1") && u.pathname.endsWith("/data/bathy.js")) {
+      return route.fulfill({ status: 200, contentType: "application/javascript", body: fakeBathy() });
     }
     if (h === "localhost" || h === "127.0.0.1") return route.continue();
     if (h.includes("fonts.")) return route.fulfill({ status: 200, body: "" });
@@ -99,6 +114,7 @@ async function setup(page, opts) {
     await page.waitForTimeout(1500);
     check("読み込み時にエラーが出ない", errors.length === 0, errors.join(" / "));
 
+    check("海底地形図(色分けと等深線)を出す", (await page.$$(".leaflet-bathy-pane img")).length === 1 && (await page.$$(".depth-label")).length === 2);
     const landHidden = await page.evaluate(() => [...document.querySelectorAll(".leaflet-land-pane path")].every((p) => p.getAttribute("fill-opacity") === "0"));
     check("地図画像が読めた時は粗い陸地の塗りを消す", landHidden);
 
@@ -117,6 +133,7 @@ async function setup(page, opts) {
     const pop = await page.innerText(".leaflet-popup-content").catch(() => "");
     check("海をクリックすると水温が出る", /℃/.test(pop) && /Open-Meteo/.test(pop), pop.slice(0, 80).replace(/\n/g, " "));
     check("いまの流れ・波も出る", /流れ/.test(pop) && /波の高さ/.test(pop));
+    check("クリック地点の水深が出る", /水深 約35m/.test(pop));
     check("生き物の適水温の帯が出る", (await page.$$(".leaflet-popup .sp")).length === 11);
     await page.click("#seriesBtn");
     await page.waitForSelector(".leaflet-popup svg", { timeout: 8000 }).catch(() => {});

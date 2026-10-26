@@ -196,7 +196,13 @@
   .pp .cb-bar.norm { background: #8fa9b5; }
   .pp .cb-bar.now { background: #b8433a; }
   .spot-label { background: none; border: none; box-shadow: none; font-family: var(--font-body); font-weight: 700; font-size: 12px; color: #0d2a3f; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff; }
-  .spot-label::before, .town-label::before { display: none; }
+  .spot-label::before, .town-label::before, .depth-label::before { display: none; }
+  .depth-label { background: rgba(255,255,255,.75); border: none; box-shadow: none; border-radius: 3px; padding: 0 3px; font-family: var(--font-data); font-size: 10.5px; color: #0b2a44; }
+  .bathy-legend { padding: 0 8px 4px 34px; }
+  .depth-ticks { position: relative; height: 16px; font-size: 10.5px; color: var(--ink-sub); }
+  .depth-ticks span { position: absolute; top: 2px; transform: translateX(-50%); white-space: nowrap; }
+  .depth-ticks span:first-child { transform: none; }
+  .depth-ticks span:last-child { transform: translateX(-100%); }
   .town-label { background: none; border: none; box-shadow: none; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .12em; color: #6d5a3a; text-shadow: 0 0 3px #f4efe2, 0 0 3px #f4efe2; }
   .preview-note { background: var(--buoy); color: #fff; font-size: 12px; padding: 8px 18px; }
   .current-label { background: rgba(255,255,255,.85); border: 1px solid #e2632b; color: #b8431b; font-weight: 700; font-size: 12px; }
@@ -260,14 +266,15 @@
     <section class="sec" data-modes="know">
       <h2>地形を見る</h2>
       <div class="opts" role="radiogroup" aria-label="下地の地図">
-        <label class="opt"><input type="radio" name="base" value="ocean" id="base-ocean" checked><span><b>海底地形図</b><small>海の深さを陰影で表示。湾・瀬・深みの形がわかる</small></span></label>
         <label class="opt"><input type="radio" name="base" value="photo" id="base-photo"><span><b>航空写真(国土地理院)</b><small>拡大すると浅い岩場や藻場の黒い影が見える</small></span></label>
         <label class="opt"><input type="radio" name="base" value="s2" id="base-s2"><span><b>衛星写真(Sentinel-2)</b><small>雲を除いた10m解像度の衛星画像</small></span></label>
-        <label class="opt"><input type="radio" name="base" value="pale" id="base-pale"><span><b>シンプルな地図</b><small>衛星データを重ねる時に見やすい</small></span></label>
+        <label class="opt"><input type="radio" name="base" value="pale" id="base-pale" checked><span><b>シンプルな地図</b><small>海底地形図や衛星データを重ねる時に見やすい</small></span></label>
+        <label class="opt"><input type="radio" name="base" value="ocean" id="base-ocean"><span><b>Esri の海洋地図</b><small>広い範囲の海底のようす(唐津の近くは粗い)</small></span></label>
       </div>
       <div class="opts">
+        <label class="opt"><input type="checkbox" id="ov-bathy" data-modes="know gomi" checked><span><b>海底地形図(水深の色分けと等深線)</b><small>浅い所ほど明るい水色。線は5・10・20・30…150mの等深線</small></span></label>
+        <div id="bathyLegend" class="bathy-legend"></div>
         <label class="opt"><input type="checkbox" id="ov-land" data-modes="know moba gomi" checked><span><b>陸地と市町の境界</b><small>海岸線・島・市町の境(国土地理院 地球地図、100万分の1)。唐津市を濃く表示</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-gebco" data-modes="know"><span><b>海底の起伏を強調(GEBCO)</b><small>玄界灘の大陸棚と深い所を色分け。約450m単位</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-hill" data-modes="know"><span><b>陸の起伏(陰影起伏図)</b><small>山から海へ流れ込む谷・川の位置</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-current" data-modes="know" checked><span><b>対馬暖流の流れ(模式図)</b><small>大まかな向きのイメージ。実際の流れは日々変わる</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-spots" data-modes="know moba" checked><span><b>地形で見る海の特徴</b><small>湾・岬・島まわりで、すみやすい生き物が違う</small></span></label>
@@ -410,7 +417,7 @@
           <li>海ごみ: <a href="https://www.pref.saga.lg.jp/kiji003110148/index.html" target="_blank" rel="noopener">佐賀県</a>、<a href="https://karatsu-f-f.com/hadomisaki.html" target="_blank" rel="noopener">唐津Farm&amp;Food</a>、いまの風: Open-Meteo</li>
           <li>陸地・市町の境界: 国土地理院「地球地図日本」(jpn-atlas 経由)</li>
           <li>地名の位置: Wikipedia ほかで確認した座標</li>
-          <li>海底地形: Esri Ocean Basemap、GEBCO</li>
+          <li>海底地形図: <a href="https://www.gebco.net/" target="_blank" rel="noopener">GEBCO 2024 Grid</a>(約450m単位)から色分けと等深線を作成、Esri Ocean Basemap</li>
           <li>地図・航空写真・陰影起伏図: <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院 地理院タイル</a></li>
           <li>衛星写真: Sentinel-2 cloudless by EOX (Copernicus Sentinel data)</li>
           <li>もっと詳しく: <a href="https://www.msil.go.jp/" target="_blank" rel="noopener">海しる(海上保安庁)</a>、<a href="https://www.eorc.jaxa.jp/JASMES/index_j.html" target="_blank" rel="noopener">JASMES(JAXA しきさい)</a></li>
@@ -432,6 +439,7 @@
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="data/land.js"></script>
 <script src="data/history.js"></script>
+<script src="data/bathy.js"></script>
 <script>
 (function () {
   "use strict";
@@ -485,10 +493,6 @@
   }
 
   var overlays = {
-    gebco: L.tileLayer.wms("https://wms.gebco.net/mapserv?", {
-      layers: "GEBCO_LATEST", format: "image/png", transparent: true, opacity: 0.6,
-      attribution: "GEBCO Compilation Group"
-    }),
     hill: L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png", {
       maxNativeZoom: 16, opacity: 0.45, attribution: GSI + " 陰影起伏図"
     })
@@ -745,6 +749,11 @@
     return h + "</div></div>";
   }
 
+  function depthText(lat, lon) {
+    var d = window.UMI.depthAt ? window.UMI.depthAt(+lat, +lon) : null;
+    return d === null ? "" : " ／ 水深 約" + d + "m";
+  }
+
   function querySea(latlng) {
     var lat = latlng.lat.toFixed(2), lon = latlng.lng.toFixed(2);
     var dA = el("dateA").value, dB = el("dateB").value;
@@ -758,7 +767,7 @@
     ]).then(function (v) {
       var srcs = [v[0], v[1]].filter(Boolean).map(function (x) { return x.src; });
       var a = v[0] ? v[0].v : undefined, b = v[1] ? v[1].v : undefined, c = v[2];
-      var h = "<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°</div>" + nowHtml(lat, lon);
+      var h = "<div class='pp'><h3>この地点の海</h3><div class='ll'>北緯 " + lat + "° 東経 " + lon + "°" + depthText(lat, lon) + "</div>" + nowHtml(lat, lon);
       if (a === undefined && b === undefined) {
         if (PREVIEW) { h += "<p class='muted'>プレビュー版では衛星の数値は取得できません。公開版で表示されます。</p></div>"; pop.setContent(h); return; }
         h += "<p>この日の水温を取得できませんでした。通信状況を確認するか、別の日付を選んでください。</p></div>";
@@ -920,7 +929,6 @@
     cb.addEventListener("change", apply); apply();
   }
   toggleOverlay("ov-land", landLayer);
-  toggleOverlay("ov-gebco", overlays.gebco);
   toggleOverlay("ov-hill", overlays.hill);
   toggleOverlay("ov-current", currentLayer);
   toggleOverlay("ov-spots", spotsLayer);
@@ -989,7 +997,7 @@
   el("dateB").value = (+maxD.slice(0, 4) - 20) + maxD.slice(4);
 
   L.control.scale({ imperial: false, position: "bottomright" }).addTo(map);
-  setBase("ocean");
+  setBase("pale");
   refreshSat();
   renderPins();
   el("previewNote").hidden = !PREVIEW;
@@ -1001,6 +1009,7 @@
 <script src="js/flow.js"></script>
 <script src="js/survey.js"></script>
 <script src="js/gomi.js"></script>
+<script src="js/bathy.js"></script>
 <script src="js/moba.js"></script>
 <script src="js/modes.js"></script>
 </body>

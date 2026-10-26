@@ -62,7 +62,6 @@ async function waitFor(fn, ms) {
   await page.goto(BASE + "#know");
   await sleep(6000);
   check("読み込み時にエラーが出ない", errors.length === 0, errors.join(" / "));
-  check("海底地形図(Esri)", net.good("server.arcgisonline.com"), net.summary("server.arcgisonline.com"));
   check("国土地理院の地図", net.good("cyberjapandata.gsi.go.jp"), net.summary("cyberjapandata.gsi.go.jp"));
   check("文字の書体(Google Fonts)", net.good("fonts.gstatic.com") || net.good("fonts.googleapis.com"), net.summary("fonts.googleapis.com"), "warn");
 
@@ -71,20 +70,17 @@ async function waitFor(fn, ms) {
   check("潮の流れ(Open-Meteo)", flowOk, (await page.innerText("#flowStatus")) + " / " + net.summary("marine-api.open-meteo.com"));
 
   // 下地の写真
-  for (const [id, host, name] of [["base-photo", "cyberjapandata.gsi.go.jp", "航空写真(国土地理院)"], ["base-s2", "tiles.maps.eox.at", "衛星写真 Sentinel-2(EOX)"]]) {
+  for (const [id, host, name] of [["base-photo", "cyberjapandata.gsi.go.jp", "航空写真(国土地理院)"], ["base-s2", "tiles.maps.eox.at", "衛星写真 Sentinel-2(EOX)"], ["base-ocean", "server.arcgisonline.com", "Esri の海洋地図"]]) {
     net.reset();
     await page.check("#" + id);
     await sleep(5000);
     check(name, net.good(host), net.summary(host));
   }
-  await page.check("#base-ocean");
+  await page.check("#base-pale");
 
   // 重ねる地形
-  net.reset();
-  await page.check("#ov-gebco");
-  await sleep(6000);
-  check("海底の起伏(GEBCO)", net.good("wms.gebco.net"), net.summary("wms.gebco.net"));
-  await page.uncheck("#ov-gebco");
+  check("海底地形図(GEBCO から作った色分けと等深線)", (await page.$$(".leaflet-bathy-pane img")).length === 1 && (await page.$$(".depth-label")).length > 3,
+    (await page.$$(".depth-label")).length + "本の水深の数字");
   net.reset();
   await page.check("#ov-hill");
   await sleep(4000);

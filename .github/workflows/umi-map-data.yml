@@ -1,10 +1,10 @@
 name: umi-map data
 
-# 唐津周辺の海の月平均(水温・クロロフィル)を NOAA から取り直し、umi-map/data/history.js を更新する
+# 唐津周辺の海のデータを作り直す: 月平均水温(NOAA)→ data/history.js、海底地形図(GEBCO)→ data/bathy.js / bathy.png
 # (NOAA のサーバーはブラウザから直接読めないため、ここで取って地図に同梱する)
 on:
   push:
-    paths: ["umi-map/tools/build_history.py", ".github/workflows/umi-map-data.yml"]
+    paths: ["umi-map/tools/**", ".github/workflows/umi-map-data.yml"]
   workflow_dispatch:
 
 permissions:
@@ -23,13 +23,22 @@ jobs:
             echo "== $h"; curl -4 -s -m 30 -o /dev/null -w "%{http_code} %{time_total}s\n" "https://$h/erddap/info/jplMURSST41mday/index.csv" || echo "つながらない"
           done
       - name: 月平均を取得
+        continue-on-error: true
         working-directory: umi-map
         run: python3 tools/build_history.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 海底地形図を作る
+        working-directory: umi-map
+        run: |
+          pip install rasterio numpy scipy matplotlib pillow
+          python tools/build_bathy.py
       - name: 変わっていれば送る
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add umi-map/data/history.js
+          git add umi-map/data/history.js umi-map/data/bathy.js umi-map/data/bathy.png
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
-          git commit -m "唐津周辺の海の月平均データを更新"
+          git commit -m "唐津周辺の海のデータ(月平均水温・海底地形図)を更新"
           git push
