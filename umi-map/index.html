@@ -754,7 +754,7 @@
     Promise.all([
       sstAt(dA, lat, lon).catch(function () { return undefined; }),
       sstAt(dB, lat, lon).catch(function () { return undefined; }),
-      Promise.resolve(histAt("chl", dA, +lat, +lon, true))
+      Promise.resolve(undefined)
     ]).then(function (v) {
       var srcs = [v[0], v[1]].filter(Boolean).map(function (x) { return x.src; });
       var a = v[0] ? v[0].v : undefined, b = v[1] ? v[1].v : undefined, c = v[2];
@@ -778,7 +778,7 @@
         var cm = histMonths("chl"), used = cm.indexOf(dA.slice(0, 7)) >= 0 ? dA.slice(0, 7) : cm[cm.length - 1];
         h += "<div class='diff'>プランクトン(クロロフィル、" + used.replace("-", "年") + "月の平均): <b>" + c.toFixed(2) + " mg/m³</b> … " + chlWord(c) + "</div>";
       } else {
-        h += "<div class='muted'>プランクトン: この月の値はまだありません(色の地図で見てください)</div>";
+        h += "<div class='muted'>プランクトンの量は「宇宙から見た海」のプランクトンの色の地図で見てください。</div>";
       }
       h += speciesHtml(a);
       h += "<div style='margin-top:10px' id='seriesBox'><button class='btn' type='button' id='seriesBtn'>この地点の20年間の水温の変化を見る</button></div>";

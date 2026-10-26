@@ -116,7 +116,6 @@ async function setup(page, opts) {
     await page.waitForSelector(".leaflet-popup .vals", { timeout: 5000 }).catch(() => {});
     const pop = await page.innerText(".leaflet-popup-content").catch(() => "");
     check("海をクリックすると水温が出る", /℃/.test(pop) && /Open-Meteo/.test(pop), pop.slice(0, 80).replace(/\n/g, " "));
-    check("プランクトンは同梱した月平均で出す(最新の月)", /2026年09月の平均/.test(pop) && /0\.85 mg\/m³/.test(pop));
     check("いまの流れ・波も出る", /流れ/.test(pop) && /波の高さ/.test(pop));
     check("生き物の適水温の帯が出る", (await page.$$(".leaflet-popup .sp")).length === 11);
     await page.click("#seriesBtn");

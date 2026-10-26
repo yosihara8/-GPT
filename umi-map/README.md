@@ -58,7 +58,8 @@ node tests/live.cjs    # 本物のサーバーにつなぐテスト(インター
 | 観測点の水温と平年値 | 佐賀県玄海水産振興センター「玄海漁場環境情報」令和8年度8月号 | 5地点 |
 | 藻場の面積・ウニ漁獲量など | 佐賀県の藻場調査(佐賀新聞)、水産庁 磯焼け対策全国協議会資料、サガテレビ報道、唐津市 | — |
 | 海面水温・平年差(MUR SST) | NASA JPL / 表示 NASA GIBS / 数値 NOAA CoastWatch ERDDAP | 約1km・毎日(2002年6月〜) |
-| クリック地点の水温・20年の変化 | Open-Meteo Marine(取れない年は NASA MUR / NOAA ERDDAP) | 約5〜50km(MUR は約1km) |
+| クリック地点の水温 | Open-Meteo Marine(2023年末以降のその日の値)、それより前は下の月平均 | 約5〜50km |
+| 20年の水温の変化 | NASA MUR 衛星水温の月平均(NOAA ERDDAP から GitHub Actions で取得し `data/history.js` に同梱) | 約5km間隔・2002年6月〜 |
 | クロロフィル(プランクトン) | NOAA-20 VIIRS(2017年12月以降)、NASA MODIS Aqua(それ以前) | 約1km・毎日 |
 | その日の衛星写真 | NOAA-20 VIIRS(2018年以降)、NASA MODIS Terra(それ以前) | 約250〜375m・毎日 |
 | 海底地形 | Esri Ocean Basemap、GEBCO | 約450m |
@@ -84,6 +85,12 @@ node tests/live.cjs    # 本物のサーバーにつなぐテスト(インター
 - 佐賀県玄海水産振興センター 業務報告書
 - 佐賀県 公共用水域水質測定結果(COD・窒素・りん)
 - Karatsu Data Bank(水揚げ・海ごみ)
+
+## 月平均データの作り方
+
+NOAA ERDDAP はブラウザから直接読めないため、`tools/build_history.py` を GitHub Actions(`.github/workflows/umi-map-data.yml`)で動かし、
+唐津周辺の約5km間隔の格子で2002年6月からの月平均水温を `data/history.js` に書き出しています。
+スクリプトを変更して送ると、自動で取り直します。
 
 ## これから足したいこと
 

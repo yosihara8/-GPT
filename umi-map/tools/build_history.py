@@ -1,4 +1,4 @@
-"""唐津周辺の海の月平均(水温・クロロフィル)を NOAA ERDDAP から取り、data/history.js に書き出す。
+"""唐津周辺の海の月平均水温を NOAA ERDDAP から取り、data/history.js に書き出す。
 
 NOAA ERDDAP はブラウザからは直接読めない(CORS が無い)ため、GitHub Actions でこのスクリプトを動かし、
 取れた値を地図に同梱する。約5km間隔の格子で、2002年からの毎月の平均値を持つ。
@@ -32,8 +32,7 @@ socket.getaddrinfo = _ipv4_only
 
 # 試すデータセット(先に書いたものから順に)。dims は緯度経度より前に入る次元の数
 SST_SETS = [("jplMURSST41mday", "sst", 0), ("jplMURSST41mday", "analysed_sst", 0)]
-CHL_SETS = [("nesdisVHNSQchlaMonthly", "chlor_a", 1), ("nesdisVHNnoaa20chlaMonthly", "chlor_a", 1),
-            ("erdMH1chlamday", "chlorophyll", 0)]
+# クロロフィルは、試したデータセットが2022年で止まっていて値も 0 ばかりだったため、今は取らない
 
 
 # Python 標準の名乗り(Python-urllib)だと NOAA に断られるため、名乗りを付ける
@@ -140,7 +139,7 @@ def main():
     out = {"lat0": S, "lon0": W, "step": STEP,
            "nlat": int(round((N - S) / STEP)) + 1, "nlon": int(round((E - W) / STEP)) + 1,
            "built": time.strftime("%Y-%m-%d")}
-    for key, sets, scale in (("sst", SST_SETS, 0.1), ("chl", CHL_SETS, 0.01)):
+    for key, sets, scale in (("sst", SST_SETS, 0.1),):
         for ds, var, extra in sets:
             res = grab(ds, var, extra)
             if res:

@@ -109,21 +109,11 @@ async function waitFor(fn, ms) {
   await page.dispatchEvent("#dateA", "change");
   await page.check("#sat-none");
 
-  // NOAA ERDDAP がブラウザから読めるか(読めなくても Open-Meteo で補うので注意だけ)
-  const erddap = await page.evaluate(async () => {
-    try {
-      const r = await fetch("https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.json?analysed_sst%5B(2025-08-15T09:00:00Z)%5D%5B(33.6)%5D%5B(129.9)%5D");
-      return r.ok ? "読める" : "HTTP " + r.status;
-    } catch (e) { return "読めない(" + e.message + ")"; }
-  });
-  check("NOAA ERDDAP をブラウザから読める", erddap === "読める", erddap, "warn");
-
   // 海をクリック
   await page.mouse.click(820, 220);
   const popOk = await waitFor(async () => !/問い合わせ中/.test(await page.innerText(".leaflet-popup-content").catch(() => "問い合わせ中")), 40000);
   const pop = await page.innerText(".leaflet-popup-content").catch(() => "");
   check("海をクリックすると水温が出る", popOk && !!(await page.$(".leaflet-popup .vals")), pop.replace(/\s+/g, " ").slice(0, 200));
-  check("プランクトンの数値", /mg\/m³/.test(pop), /mg\/m³/.test(pop) ? "" : "数値なし(雲・取得失敗のどちらか)", "warn");
   if (await page.$("#seriesBtn")) {
     await page.click("#seriesBtn");
     await waitFor(async () => !!(await page.$(".leaflet-popup svg")) || /取れませんでした/.test(await page.innerText(".leaflet-popup-content")), 90000);
