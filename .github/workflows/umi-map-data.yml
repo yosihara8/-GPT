@@ -1,0 +1,29 @@
+name: umi-map data
+
+# 唐津周辺の海の月平均(水温・クロロフィル)を NOAA から取り直し、umi-map/data/history.js を更新する
+# (NOAA のサーバーはブラウザから直接読めないため、ここで取って地図に同梱する)
+on:
+  push:
+    paths: ["umi-map/tools/build_history.py", ".github/workflows/umi-map-data.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: 月平均を取得
+        working-directory: umi-map
+        run: python3 tools/build_history.py
+      - name: 変わっていれば送る
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add umi-map/data/history.js
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -m "唐津周辺の海の月平均データを更新"
+          git push
