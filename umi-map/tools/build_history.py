@@ -9,6 +9,7 @@ import json
 import math
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -22,14 +23,24 @@ CHL_SETS = [("nesdisVHNSQchlaMonthly", "chlor_a", 1), ("nesdisVHNnoaa20chlaMonth
             ("erdMH1chlamday", "chlorophyll", 0)]
 
 
+# Python 標準の名乗り(Python-urllib)だと NOAA に断られるため、名乗りを付ける
+UA = "umi-map/1.0 (+https://github.com/yosihara8/-GPT; ocean environment map of Karatsu)"
+
+
 def fetch(url, tries=4):
     for k in range(tries):
         try:
-            with urllib.request.urlopen(url, timeout=300) as r:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=300) as r:
                 return r.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            print("  HTTP", e.code, url[:120], file=sys.stderr)
+            if e.code in (400, 404):   # データが無い・書き方が違う時は何度試しても同じ
+                return None
+            time.sleep(10 * (k + 1))
         except Exception as e:  # noqa: BLE001
             print("  retry", k + 1, e, file=sys.stderr)
-            time.sleep(5 * (k + 1))
+            time.sleep(10 * (k + 1))
     return None
 
 
