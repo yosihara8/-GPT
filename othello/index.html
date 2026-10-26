@@ -1,4 +1,5 @@
 <title>オセロ・サロン</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -141,6 +142,7 @@ header.top {
   position: relative; border: 0; padding: 0; margin: 0; background: transparent; cursor: default;
   box-shadow: inset -1px -1px 0 rgba(0,0,0,.42), inset 1px 1px 0 rgba(255,255,255,.035);
   perspective: 500px;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
 }
 .cell.legal { cursor: pointer; }
 .cell.legal::before {
@@ -258,7 +260,7 @@ header.top {
 .stats b { display: block; font-family: var(--display); font-size: 22px; font-variant-numeric: tabular-nums; }
 .stats span { font-size: 11px; color: var(--ink-dim); letter-spacing: .12em; }
 
-.history { max-height: 220px; overflow-y: auto; margin: 0; padding: 0; list-style: none; font-size: 13px; font-variant-numeric: tabular-nums;
+.history { position: relative; max-height: 220px; overflow-y: auto; margin: 0; padding: 0; list-style: none; font-size: 13px; font-variant-numeric: tabular-nums;
   display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; }
 .history li { display: flex; gap: 8px; align-items: center; padding: 2px 4px; border-radius: 3px; color: var(--ink-dim); }
 .history li.cur { background: rgba(214,180,112,.14); color: var(--ink); }
@@ -292,6 +294,13 @@ header.top {
 .result-title { text-align: center; }
 .tip-level { display: inline-block; font-size: 11px; letter-spacing: .15em; border: 1px solid var(--panel-line); color: var(--gold); padding: 0 6px; border-radius: 3px; margin-right: 6px; }
 
+.mini { display: none; align-items: center; justify-content: center; gap: 14px; }
+.mini-p { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; transition: border-color .3s, background .3s; }
+.mini-p.active { border-color: var(--gold); background: rgba(214,180,112,.1); }
+.mini-p b { font-family: var(--display); font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; min-width: 1.4em; text-align: center; }
+.mini-p .chip { width: 20px; height: 20px; }
+.mini-sep { color: var(--ink-dim); font-family: var(--display); font-size: 13px; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {
   .salon { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
@@ -301,6 +310,13 @@ header.top {
 }
 @media (max-width: 680px) {
   body { padding-block: 12px 32px; }
+  header.top { flex-wrap: nowrap; align-items: center; margin-bottom: 12px; padding-bottom: 10px; }
+  .brand span { display: none; }
+  .brand h1 { font-size: 24px; letter-spacing: .1em; }
+  #rulesBtn { padding: 7px 10px; font-size: 13px; white-space: nowrap; }
+  .stage { gap: 8px; }
+  .mini { display: flex; }
+  .status { font-size: 15px; }
   .salon { grid-template-columns: minmax(0,1fr); gap: 18px; }
   .frame { --coord: 18px; padding: 8px; }
   .coords-top, .coords-left { font-size: 11px; }
@@ -364,6 +380,11 @@ header.top {
   </section>
 
   <section class="stage" aria-label="盤面">
+    <div class="mini" aria-hidden="true">
+      <span class="mini-p" id="miniB"><i class="chip b"></i><b id="miniCountB">2</b></span>
+      <span class="mini-sep">対</span>
+      <span class="mini-p" id="miniW"><b id="miniCountW">2</b><i class="chip w"></i></span>
+    </div>
     <div class="status" id="status" aria-live="polite">黒の番です</div>
     <div class="frame">
       <div></div>
@@ -795,6 +816,10 @@ header.top {
     document.getElementById("meterW").style.width = (c.w / tot * 100) + "%";
     document.getElementById("plaqueB").classList.toggle("active", st.turn === B);
     document.getElementById("plaqueW").classList.toggle("active", st.turn === W);
+    document.getElementById("miniCountB").textContent = c.b;
+    document.getElementById("miniCountW").textContent = c.w;
+    document.getElementById("miniB").classList.toggle("active", st.turn === B);
+    document.getElementById("miniW").classList.toggle("active", st.turn === W);
     document.getElementById("statMoves").textContent = S.ptr;
     document.getElementById("statEmpty").textContent = c.e;
   }
@@ -819,7 +844,11 @@ header.top {
       `<li class="${k + 1 === S.ptr ? "cur" : ""}"><span class="n">${k + 1}.</span><span class="c ${s.mover === B ? "b" : "w"}"></span>${s.label}${s.pass ? '<span style="opacity:.6">（パス）</span>' : ""}</li>`
     ).join("");
     const curLi = ol.querySelector(".cur");
-    if (curLi) curLi.scrollIntoView({ block: "nearest" });
+    if (curLi) {
+      const top = curLi.offsetTop, h = curLi.offsetHeight;
+      if (top < ol.scrollTop) ol.scrollTop = top;
+      else if (top + h > ol.scrollTop + ol.clientHeight) ol.scrollTop = top + h - ol.clientHeight;
+    }
   }
 
   let toastTimer = 0;
@@ -855,8 +884,8 @@ header.top {
 
   // ---------- Overlays ----------
   let lastFocus = null;
-  function openOv(id) { lastFocus = document.activeElement; const o = document.getElementById(id); o.hidden = false; o.querySelector(".btn.primary").focus(); }
-  function closeOv(id) { document.getElementById(id).hidden = true; if (lastFocus) lastFocus.focus(); }
+  function openOv(id) { lastFocus = document.activeElement; const o = document.getElementById(id); o.hidden = false; o.querySelector(".btn.primary").focus({ preventScroll: true }); }
+  function closeOv(id) { document.getElementById(id).hidden = true; if (lastFocus) lastFocus.focus({ preventScroll: true }); }
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") ["resultOv", "rulesOv"].forEach(id => { if (!document.getElementById(id).hidden) closeOv(id); });
   });
