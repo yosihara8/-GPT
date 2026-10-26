@@ -1,0 +1,986 @@
+<title>オセロ・サロン</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: a private card-room — player plaques flank a walnut-framed felt board, controls tucked to the side */
+:root {
+  --room: #0d1512;          /* deep lacquered green-black */
+  --room-2: #141f1b;
+  --panel: rgba(255, 248, 230, 0.04);
+  --panel-line: rgba(214, 180, 112, 0.22);
+  --ink: #efe7d6;           /* ivory text */
+  --ink-dim: #a99f8a;
+  --gold: #d6b470;          /* brass */
+  --gold-deep: #9c7a3c;
+  --felt: #145240;
+  --felt-dark: #0b3529;
+  --walnut: #3b2416;
+  --walnut-light: #6b4329;
+  --danger: #e08a6c;
+  --display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(214,180,112,0.10), transparent 60%),
+    radial-gradient(900px 600px at 50% 110%, rgba(20,82,64,0.35), transparent 70%),
+    var(--room);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+header.top {
+  max-width: 1240px; margin: 0 auto 22px;
+  display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--panel-line); padding-bottom: 14px;
+}
+.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.brand h1 {
+  font-family: var(--display); font-weight: 800; margin: 0;
+  font-size: clamp(26px, 4vw, 38px); letter-spacing: 0.14em; line-height: 1.1;
+  background: linear-gradient(180deg, #f6e3b4, var(--gold) 55%, var(--gold-deep));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.brand span { color: var(--ink-dim); font-size: 13px; letter-spacing: 0.2em; }
+.top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.salon {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 28px;
+  grid-template-columns: 250px minmax(0, 1fr) 290px;
+  align-items: start;
+}
+.col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* ---------- Player plaques ---------- */
+.plaque {
+  position: relative; padding: 16px 18px 18px; min-width: 0;
+  border: 1px solid var(--panel-line); border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255,248,230,0.05), rgba(255,248,230,0.015));
+  transition: border-color .3s, box-shadow .3s, transform .3s;
+}
+.plaque.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(214,180,112,.35), 0 10px 40px -12px rgba(214,180,112,.45);
+}
+.plaque .row { display: flex; align-items: center; gap: 12px; }
+.chip { width: 34px; height: 34px; border-radius: 50%; flex: none; }
+.chip.b { background: radial-gradient(circle at 35% 30%, #5a5a5a, #161616 55%, #000); box-shadow: 0 2px 4px rgba(0,0,0,.6); }
+.chip.w { background: radial-gradient(circle at 35% 30%, #fff, #ece6d8 50%, #b9b09c); box-shadow: 0 2px 4px rgba(0,0,0,.6); }
+.pname {
+  flex: 1; min-width: 0; width: 100%; background: transparent; border: 0; border-bottom: 1px dashed transparent;
+  font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--ink); padding: 2px 0;
+}
+.pname:hover, .pname:focus { border-bottom-color: var(--panel-line); outline: none; }
+.plabel { font-size: 11px; letter-spacing: .2em; color: var(--ink-dim); }
+.count {
+  font-family: var(--display); font-weight: 800; font-size: 54px; line-height: 1; margin-top: 10px;
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.count small { font-size: 14px; color: var(--ink-dim); font-weight: 500; margin-left: 6px; font-family: var(--body); }
+.turn-tag {
+  position: absolute; top: 12px; right: 14px; font-size: 11px; letter-spacing: .18em;
+  color: var(--room); background: var(--gold); padding: 2px 8px; border-radius: 999px; opacity: 0; transition: opacity .3s;
+}
+.plaque.active .turn-tag { opacity: 1; }
+.meter { height: 6px; border-radius: 999px; overflow: hidden; display: flex; background: #000; border: 1px solid var(--panel-line); }
+.meter i { display: block; height: 100%; transition: width .5s ease; }
+.meter .mb { background: linear-gradient(90deg, #000, #3a3a3a); }
+.meter .mw { background: linear-gradient(90deg, #cfc7b3, #fffaf0); }
+
+.status {
+  font-family: var(--display); font-size: 17px; text-align: center; min-height: 1.6em; color: var(--gold);
+  letter-spacing: .06em;
+}
+
+/* ---------- Board ---------- */
+.stage { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+.frame {
+  --coord: 26px;
+  width: min(100%, 620px);
+  padding: 12px;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(95deg, rgba(255,255,255,.025) 0 2px, transparent 2px 9px),
+    linear-gradient(145deg, var(--walnut-light), var(--walnut) 45%, #23140b);
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -2px 0 rgba(0,0,0,.4);
+  display: grid; grid-template-columns: var(--coord) 1fr; grid-template-rows: var(--coord) auto;
+}
+.coords-top, .coords-left { display: grid; color: rgba(240,215,160,.7); font-family: var(--display); font-size: 13px; }
+.coords-top { grid-column: 2; grid-template-columns: repeat(8, 1fr); text-align: center; align-items: center; }
+.coords-left { grid-row: 2; grid-template-rows: repeat(8, 1fr); align-items: center; justify-items: center; }
+.board-wrap {
+  grid-column: 2; grid-row: 2; position: relative; aspect-ratio: 1; max-width: 100%;
+  padding: 3px; border-radius: 3px;
+  background: linear-gradient(180deg, #e7c886, var(--gold-deep));
+  box-shadow: 0 0 0 1px #1a0f08;
+}
+.board {
+  position: relative; width: 100%; height: 100%;
+  display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255,255,255,.06), transparent 65%),
+    repeating-radial-gradient(circle at 30% 30%, rgba(0,0,0,.04) 0 1px, transparent 1px 3px),
+    linear-gradient(160deg, var(--felt), var(--felt-dark));
+}
+.star { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #06231a; z-index: 1; pointer-events: none; }
+.cell {
+  position: relative; border: 0; padding: 0; margin: 0; background: transparent; cursor: default;
+  box-shadow: inset -1px -1px 0 rgba(0,0,0,.42), inset 1px 1px 0 rgba(255,255,255,.035);
+  perspective: 500px;
+}
+.cell.legal { cursor: pointer; }
+.cell.legal::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; transform: translate(-50%,-50%);
+  border-radius: 50%; z-index: 2;
+}
+.board[data-turn="1"] .cell.legal::before { background: rgba(0,0,0,.45); box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
+.board[data-turn="2"] .cell.legal::before { background: rgba(255,250,235,.45); }
+.board.noguide .cell.legal::before { display: none; }
+.cell.legal:hover::before, .cell.legal:focus-visible::before { display: none; }
+.ghost {
+  position: absolute; inset: 9%; border-radius: 50%; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 2;
+}
+.board[data-turn="1"] .ghost { background: radial-gradient(circle at 35% 30%, #5a5a5a, #111 60%); }
+.board[data-turn="2"] .ghost { background: radial-gradient(circle at 35% 30%, #fff, #d8d0bd 60%); }
+.cell.legal:hover .ghost, .cell.legal:focus-visible .ghost { opacity: .5; }
+.badge {
+  position: absolute; right: 4%; top: 4%; z-index: 5; min-width: 20px; height: 20px; padding: 0 5px;
+  border-radius: 999px; background: var(--gold); color: #1b130a; font-size: 12px; font-weight: 700;
+  display: grid; place-items: center; opacity: 0; transform: scale(.7); transition: .15s; pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.board.showcount .cell.legal:hover .badge, .board.showcount .cell.legal:focus-visible .badge { opacity: 1; transform: none; }
+.board .cell.preview-flip .face { filter: brightness(1.35) saturate(.6); }
+
+.dwrap { position: absolute; inset: 7%; z-index: 3; pointer-events: none; }
+.dwrap.drop { animation: drop .32s cubic-bezier(.2,.9,.3,1.3); }
+@keyframes drop { from { transform: scale(1.35) translateY(-8%); opacity: 0; } to { transform: none; opacity: 1; } }
+.disc { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.35,.7,.25,1); }
+.disc[data-c="0"] { display: none; }
+.disc[data-c="2"] { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; border-radius: 50%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.face.b {
+  background: radial-gradient(circle at 34% 28%, #6a6a6a 0, #262626 32%, #0a0a0a 62%, #000 100%);
+  box-shadow: 0 3px 5px rgba(0,0,0,.55), inset 0 -2px 3px rgba(255,255,255,.08);
+}
+.face.w {
+  transform: rotateY(180deg);
+  background: radial-gradient(circle at 34% 28%, #ffffff 0, #f6f1e4 35%, #ddd5c2 70%, #b5ab95 100%);
+  box-shadow: 0 3px 5px rgba(0,0,0,.5), inset 0 -2px 3px rgba(0,0,0,.12);
+}
+.board.instant .disc { transition: none !important; }
+.mark {
+  position: absolute; left: 50%; top: 50%; width: 14%; height: 14%; transform: translate(-50%,-50%);
+  border-radius: 50%; background: #d8573c; z-index: 4; display: none; box-shadow: 0 0 6px rgba(216,87,60,.8);
+}
+.cell.last .mark { display: block; }
+.cell.hint::after {
+  content: ""; position: absolute; inset: 6%; border-radius: 50%; border: 2px solid var(--gold); z-index: 4;
+  animation: pulse 1.1s ease-in-out infinite; pointer-events: none;
+}
+@keyframes pulse { 0%,100% { opacity: .35; transform: scale(.88); } 50% { opacity: 1; transform: scale(1); } }
+
+.thinking {
+  position: absolute; left: 50%; bottom: -2px; transform: translate(-50%, 100%); font-size: 12px; color: var(--ink-dim);
+  letter-spacing: .15em;
+}
+
+.toast {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(.95); z-index: 10;
+  background: rgba(13,21,18,.92); border: 1px solid var(--gold); color: var(--ink);
+  padding: 14px 26px; border-radius: 6px; font-family: var(--display); font-size: 20px; letter-spacing: .08em;
+  opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+
+/* ---------- Panels & controls ---------- */
+.panel {
+  border: 1px solid var(--panel-line); border-radius: 6px; background: var(--panel); padding: 16px;
+}
+.panel h2 {
+  font-family: var(--display); font-weight: 700; font-size: 14px; letter-spacing: .22em; color: var(--gold);
+  margin: 0 0 12px;
+}
+.btn {
+  appearance: none; border: 1px solid var(--panel-line); background: rgba(255,248,230,.04);
+  padding: 9px 14px; border-radius: 4px; cursor: pointer; letter-spacing: .06em; font-size: 14px;
+  transition: background .2s, border-color .2s, color .2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn:hover:not(:disabled) { border-color: var(--gold); background: rgba(214,180,112,.1); }
+.btn:disabled { opacity: .35; cursor: not-allowed; }
+.btn.primary {
+  background: linear-gradient(180deg, #e5c788, var(--gold) 60%, #b58f4c); color: #1d140a; border-color: #e9cf96; font-weight: 700;
+}
+.btn.primary:hover:not(:disabled) { background: linear-gradient(180deg, #f0d79e, #dcbc7a 60%, #c09a55); color: #1d140a; }
+.btn.warn { border-color: var(--danger); color: var(--danger); }
+.btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-grid .wide { grid-column: 1 / -1; }
+
+.seg { display: flex; border: 1px solid var(--panel-line); border-radius: 4px; overflow: hidden; }
+.seg button {
+  flex: 1; border: 0; background: transparent; padding: 8px 6px; cursor: pointer; font-size: 13px; color: var(--ink-dim);
+  border-right: 1px solid var(--panel-line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: rgba(214,180,112,.16); color: var(--ink); }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field > span { font-size: 12px; color: var(--ink-dim); letter-spacing: .12em; }
+.field[hidden] { display: none; }
+.lvl-note { font-size: 12px; color: var(--ink-dim); margin: 0; }
+
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 0; cursor: pointer; font-size: 14px; }
+.toggle + .toggle { border-top: 1px solid rgba(214,180,112,.1); }
+.toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sw { width: 38px; height: 22px; border-radius: 999px; background: #2b332f; border: 1px solid var(--panel-line); position: relative; flex: none; transition: background .2s; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink-dim); transition: transform .2s, background .2s; }
+.toggle input:checked + .sw { background: rgba(214,180,112,.35); }
+.toggle input:checked + .sw::after { transform: translateX(16px); background: var(--gold); }
+.toggle input:focus-visible + .sw { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.stats div { border: 1px solid rgba(214,180,112,.12); border-radius: 4px; padding: 8px 4px; }
+.stats b { display: block; font-family: var(--display); font-size: 22px; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 11px; color: var(--ink-dim); letter-spacing: .12em; }
+
+.history { max-height: 220px; overflow-y: auto; margin: 0; padding: 0; list-style: none; font-size: 13px; font-variant-numeric: tabular-nums;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; }
+.history li { display: flex; gap: 8px; align-items: center; padding: 2px 4px; border-radius: 3px; color: var(--ink-dim); }
+.history li.cur { background: rgba(214,180,112,.14); color: var(--ink); }
+.history li .n { width: 2.2em; text-align: right; opacity: .7; }
+.history li .c { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.history li .c.b { background: #111; border: 1px solid #555; }
+.history li .c.w { background: #f2ece0; }
+.history .empty { grid-column: 1 / -1; color: var(--ink-dim); font-size: 13px; }
+
+/* ---------- Overlays ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; background: rgba(5,9,7,.72); backdrop-filter: blur(4px);
+  display: grid; place-items: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.overlay[hidden] { display: none; }
+.sheet {
+  width: min(560px, 100%); max-height: 100%; overflow-y: auto;
+  background: linear-gradient(180deg, #17221e, #101915); border: 1px solid var(--gold); border-radius: 8px;
+  padding: 26px 26px 22px; box-shadow: 0 40px 80px -20px rgba(0,0,0,.9);
+}
+.sheet h2 { font-family: var(--display); font-size: 24px; margin: 0 0 6px; letter-spacing: .1em; color: var(--gold); text-wrap: balance; }
+.sheet h3 { font-family: var(--display); font-size: 16px; margin: 20px 0 6px; color: var(--ink); letter-spacing: .08em; }
+.sheet p, .sheet li { color: #d7cfbe; font-size: 14px; }
+.sheet ul, .sheet ol { padding-left: 1.3em; margin: 6px 0; }
+.sheet .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+.result-score { display: flex; justify-content: center; align-items: center; gap: 22px; margin: 18px 0 6px; }
+.result-score .side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.result-score .side b { font-family: var(--display); font-size: 48px; line-height: 1; font-variant-numeric: tabular-nums; }
+.result-score .vs { color: var(--ink-dim); font-family: var(--display); }
+.result-title { text-align: center; }
+.tip-level { display: inline-block; font-size: 11px; letter-spacing: .15em; border: 1px solid var(--panel-line); color: var(--gold); padding: 0 6px; border-radius: 3px; margin-right: 6px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .salon { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+  .stage { grid-column: 1 / -1; order: -1; }
+  .col.left { order: 0; }
+  .col.right { order: 1; }
+}
+@media (max-width: 680px) {
+  body { padding-block: 12px 32px; }
+  .salon { grid-template-columns: minmax(0,1fr); gap: 18px; }
+  .frame { --coord: 18px; padding: 8px; }
+  .coords-top, .coords-left { font-size: 11px; }
+  .col.left { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+  .col.left .panel { grid-column: 1 / -1; }
+  .plaque { padding: 12px; }
+  .count { font-size: 38px; }
+  .pname { font-size: 15px; }
+  .chip { width: 26px; height: 26px; }
+  .turn-tag { top: 8px; right: 8px; font-size: 10px; }
+  .toast { font-size: 16px; padding: 10px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .disc, .dwrap, .plaque, .meter i { transition: none !important; animation: none !important; }
+  .cell.hint::after { animation: none; opacity: 1; }
+}
+</style>
+
+<header class="top">
+  <div class="brand">
+    <h1>オセロ・サロン</h1>
+    <span>OTHELLO SALON · 8×8</span>
+  </div>
+  <div class="top-actions">
+    <button class="btn" id="rulesBtn" type="button">遊び方・ルール</button>
+  </div>
+</header>
+
+<main class="salon">
+  <section class="col left" aria-label="対局者">
+    <div class="plaque" id="plaqueB">
+      <span class="turn-tag">手番</span>
+      <div class="row">
+        <div class="chip b" aria-hidden="true"></div>
+        <div style="min-width:0;flex:1">
+          <div class="plabel">先手・黒</div>
+          <input class="pname" id="nameB" value="プレイヤー1" maxlength="12" aria-label="黒の名前">
+        </div>
+      </div>
+      <div class="count" id="countB">2<small>石</small></div>
+    </div>
+    <div class="plaque" id="plaqueW">
+      <span class="turn-tag">手番</span>
+      <div class="row">
+        <div class="chip w" aria-hidden="true"></div>
+        <div style="min-width:0;flex:1">
+          <div class="plabel">後手・白</div>
+          <input class="pname" id="nameW" value="プレイヤー2" maxlength="12" aria-label="白の名前">
+        </div>
+      </div>
+      <div class="count" id="countW">2<small>石</small></div>
+    </div>
+    <div class="panel">
+      <div class="meter" aria-hidden="true"><i class="mb" id="meterB" style="width:50%"></i><i class="mw" id="meterW" style="width:50%"></i></div>
+      <div class="stats" style="margin-top:12px">
+        <div><b id="statMoves">0</b><span>手数</span></div>
+        <div><b id="statEmpty">60</b><span>空きマス</span></div>
+        <div><b id="statLegal">4</b><span>打てる所</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="盤面">
+    <div class="status" id="status" aria-live="polite">黒の番です</div>
+    <div class="frame">
+      <div></div>
+      <div class="coords-top" aria-hidden="true"></div>
+      <div class="coords-left" aria-hidden="true"></div>
+      <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="オセロ盤 8×8"></div>
+        <div class="toast" id="toast"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="col right" aria-label="操作と設定">
+    <div class="panel">
+      <h2>対局</h2>
+      <div class="btn-grid">
+        <button class="btn primary wide" id="newBtn" type="button">新しい対局</button>
+        <button class="btn" id="undoBtn" type="button">待った</button>
+        <button class="btn" id="redoBtn" type="button">やり直し</button>
+        <button class="btn wide" id="hintBtn" type="button">ヒント（おすすめの一手）</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>対戦相手</h2>
+      <div class="field">
+        <span>モード</span>
+        <div class="seg" id="modeSeg">
+          <button type="button" data-v="pvp" aria-pressed="true">2人で対戦</button>
+          <button type="button" data-v="cpu" aria-pressed="false">コンピュータ</button>
+        </div>
+      </div>
+      <div class="field" id="cpuFields1" hidden>
+        <span>強さ</span>
+        <div class="seg" id="levelSeg">
+          <button type="button" data-v="1" aria-pressed="false">初級</button>
+          <button type="button" data-v="2" aria-pressed="true">中級</button>
+          <button type="button" data-v="3" aria-pressed="false">上級</button>
+        </div>
+        <p class="lvl-note" id="levelNote"></p>
+      </div>
+      <div class="field" id="cpuFields2" hidden>
+        <span>あなたの石</span>
+        <div class="seg" id="sideSeg">
+          <button type="button" data-v="1" aria-pressed="true">黒（先手）</button>
+          <button type="button" data-v="2" aria-pressed="false">白（後手）</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>ガイド</h2>
+      <label class="toggle">置ける場所を表示<input type="checkbox" id="optGuide" checked><span class="sw"></span></label>
+      <label class="toggle">裏返る石を予告<input type="checkbox" id="optCount" checked><span class="sw"></span></label>
+      <label class="toggle">最後の一手に印<input type="checkbox" id="optLast" checked><span class="sw"></span></label>
+      <label class="toggle">石を置く音<input type="checkbox" id="optSound" checked><span class="sw"></span></label>
+    </div>
+
+    <div class="panel">
+      <h2>棋譜</h2>
+      <ol class="history" id="history"></ol>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="resultOv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <h2 class="result-title" id="resultTitle">対局終了</h2>
+    <div class="result-score">
+      <div class="side"><div class="chip b"></div><b id="resB">0</b><span id="resNameB"></span></div>
+      <div class="vs">対</div>
+      <div class="side"><div class="chip w"></div><b id="resW">0</b><span id="resNameW"></span></div>
+    </div>
+    <p style="text-align:center" id="resultNote"></p>
+    <div class="actions">
+      <button class="btn" id="resultClose" type="button">盤面を見る</button>
+      <button class="btn primary" id="resultAgain" type="button">もう一局</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="rulesOv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <h2 id="rulesTitle">遊び方・ルール</h2>
+    <h3>基本のルール</h3>
+    <ol>
+      <li>盤の中央に黒2つ・白2つを斜めに置いて始めます。<b>黒が先手</b>です。</li>
+      <li>自分の石で相手の石を<b>縦・横・斜めにはさむ</b>ように置きます。はさんだ相手の石はすべて裏返って自分の色になります。</li>
+      <li>1つも裏返せないマスには置けません。置ける場所がないときは<b>パス</b>になり、相手の番になります（置ける場所がある時はパスできません）。</li>
+      <li>どちらも置けなくなったら終了。<b>石の多い方が勝ち</b>です。</li>
+    </ol>
+    <h3>この盤の使い方</h3>
+    <ul>
+      <li>盤上の小さな点が、いま置ける場所です。マスに指やマウスを合わせると、裏返る数が金色の数字で出ます。</li>
+      <li>「待った」で1手戻せます。コンピュータ対戦ではあなたの番まで戻ります。</li>
+      <li>「ヒント」でおすすめの一手が金色の輪で光ります。</li>
+      <li>パスは自動で行われ、盤の中央でお知らせします。</li>
+      <li>キーボードでは矢印キーでマスを移動し、Enterで置けます。</li>
+    </ul>
+    <h3>上達のコツ</h3>
+    <ul>
+      <li><span class="tip-level">初心者</span><b>四隅（a1・h1・a8・h8）</b>は二度と裏返されない最強のマスです。</li>
+      <li><span class="tip-level">初心者</span>隅の斜め隣（b2・g2・b7・g7、通称「X打ち」）は、相手に隅を渡しやすいので避けましょう。</li>
+      <li><span class="tip-level">中級者</span>序盤はたくさん取るより、<b>取る数を少なく</b>して相手の置ける場所を減らすのが有利です。</li>
+      <li><span class="tip-level">中級者</span>辺の石は隅とつながってから安定します。辺に1つだけ飛び出すのは要注意。</li>
+      <li><span class="tip-level">上級者</span>終盤は空きマスの「偶数・奇数」を意識し、各区画の最後の1マスを自分が打てるように進めます（偶数理論）。</li>
+    </ul>
+    <div class="actions"><button class="btn primary" id="rulesClose" type="button">閉じる</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const EMPTY = 0, B = 1, W = 2;
+  const COLS = "abcdefgh";
+  const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  const WEIGHTS = [
+    120,-20, 20,  5,  5, 20,-20,120,
+    -20,-40, -5, -5, -5, -5,-40,-20,
+     20, -5, 15,  3,  3, 15, -5, 20,
+      5, -5,  3,  3,  3,  3, -5,  5,
+      5, -5,  3,  3,  3,  3, -5,  5,
+     20, -5, 15,  3,  3, 15, -5, 20,
+    -20,-40, -5, -5, -5, -5,-40,-20,
+    120,-20, 20,  5,  5, 20,-20,120
+  ];
+  const CORNERS = [[0,[1,8,9]],[7,[6,15,14]],[56,[48,57,49]],[63,[62,55,54]]];
+  const LEVEL_NOTES = {
+    1: "気ままに打つ相手。ルールを覚えたての方に。",
+    2: "数手先まで読み、隅を狙ってきます。",
+    3: "深く読み、終盤は最後まで計算します。"
+  };
+
+  // ---------- Rules engine ----------
+  function initialBoard() {
+    const b = new Array(64).fill(EMPTY);
+    b[27] = W; b[28] = B; b[35] = B; b[36] = W;
+    return b;
+  }
+  function flipsFor(b, i, p) {
+    if (b[i] !== EMPTY) return [];
+    const o = 3 - p, r0 = i >> 3, c0 = i & 7, out = [];
+    for (const [dr, dc] of DIRS) {
+      let r = r0 + dr, c = c0 + dc;
+      const line = [];
+      while (r >= 0 && r < 8 && c >= 0 && c < 8 && b[r*8+c] === o) { line.push(r*8+c); r += dr; c += dc; }
+      if (line.length && r >= 0 && r < 8 && c >= 0 && c < 8 && b[r*8+c] === p) out.push(...line);
+    }
+    return out;
+  }
+  function legalMoves(b, p) {
+    const m = [];
+    for (let i = 0; i < 64; i++) if (b[i] === EMPTY && flipsFor(b, i, p).length) m.push(i);
+    return m;
+  }
+  function applyMove(b, i, p) {
+    const f = flipsFor(b, i, p);
+    const nb = b.slice();
+    nb[i] = p;
+    for (const k of f) nb[k] = p;
+    return { board: nb, flipped: f };
+  }
+  function counts(b) {
+    let bl = 0, wh = 0;
+    for (const v of b) { if (v === B) bl++; else if (v === W) wh++; }
+    return { b: bl, w: wh, e: 64 - bl - wh };
+  }
+
+  // ---------- AI ----------
+  function evaluate(b, p) {
+    const o = 3 - p;
+    let pos = 0;
+    const w = WEIGHTS.slice();
+    for (const [c, adj] of CORNERS) if (b[c] !== EMPTY) for (const a of adj) w[a] = 6;
+    for (let i = 0; i < 64; i++) { if (b[i] === p) pos += w[i]; else if (b[i] === o) pos -= w[i]; }
+    const mp = legalMoves(b, p).length, mo = legalMoves(b, o).length;
+    const mob = (mp + mo) ? 100 * (mp - mo) / (mp + mo) : 0;
+    return pos + mob * 1.2;
+  }
+  function finalScore(b, p) {
+    const c = counts(b);
+    const d = p === B ? c.b - c.w : c.w - c.b;
+    return d * 10000;
+  }
+  function negamax(b, p, depth, alpha, beta, passed) {
+    const moves = legalMoves(b, p);
+    if (!moves.length) {
+      if (passed) return finalScore(b, p);
+      return -negamax(b, 3 - p, depth, -beta, -alpha, true);
+    }
+    if (depth <= 0) return evaluate(b, p);
+    moves.sort((x, y) => WEIGHTS[y] - WEIGHTS[x]);
+    let best = -Infinity;
+    for (const m of moves) {
+      const v = -negamax(applyMove(b, m, p).board, 3 - p, depth - 1, -beta, -alpha, false);
+      if (v > best) best = v;
+      if (v > alpha) alpha = v;
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+  function bestMove(b, p, level) {
+    const moves = legalMoves(b, p);
+    if (!moves.length) return -1;
+    if (moves.length === 1) return moves[0];
+    if (level === 1) {
+      if (Math.random() < 0.35) {
+        const scored = moves.map(m => [m, WEIGHTS[m] + Math.random() * 30]);
+        scored.sort((x, y) => y[1] - x[1]);
+        return scored[0][0];
+      }
+      return moves[Math.floor(Math.random() * moves.length)];
+    }
+    const empties = counts(b).e;
+    let depth = level === 2 ? 3 : 5;
+    if (level === 3 && empties <= 12) depth = empties + 1;
+    if (level === 2 && empties <= 8) depth = empties + 1;
+    moves.sort((x, y) => WEIGHTS[y] - WEIGHTS[x]);
+    let best = moves[0], bestV = -Infinity, alpha = -Infinity;
+    for (const m of moves) {
+      const v = -negamax(applyMove(b, m, p).board, 3 - p, depth - 1, -Infinity, -alpha, false) + Math.random() * 0.5;
+      if (v > bestV) { bestV = v; best = m; }
+      if (v > alpha) alpha = v;
+    }
+    return best;
+  }
+
+  // ---------- State ----------
+  const S = {
+    states: [],   // {board, turn, last, mover, label, pass}
+    ptr: 0,
+    settings: { mode: "pvp", level: 2, human: B, guide: true, count: true, last: true, sound: true, nameB: "プレイヤー1", nameW: "プレイヤー2" },
+    hint: -1,
+    thinking: false,
+    gameOverShown: false
+  };
+  const cur = () => S.states[S.ptr];
+
+  function newGame() {
+    S.states = [{ board: initialBoard(), turn: B, last: -1, mover: 0, label: "", pass: 0 }];
+    S.ptr = 0; S.hint = -1; S.gameOverShown = false;
+    render({ instant: true });
+    save();
+    maybeCpu();
+  }
+
+  function nextTurnAfter(board, mover) {
+    const o = 3 - mover;
+    if (legalMoves(board, o).length) return { turn: o, pass: 0 };
+    if (legalMoves(board, mover).length) return { turn: mover, pass: o };
+    return { turn: 0, pass: 0 };
+  }
+
+  function play(i) {
+    const st = cur();
+    if (!st.turn) return;
+    const { board, flipped } = applyMove(st.board, i, st.turn);
+    if (!flipped.length) return;
+    const nt = nextTurnAfter(board, st.turn);
+    S.states = S.states.slice(0, S.ptr + 1);
+    S.states.push({ board, turn: nt.turn, last: i, mover: st.turn, label: COLS[i & 7] + ((i >> 3) + 1), pass: nt.pass });
+    S.ptr++;
+    S.hint = -1;
+    sound();
+    render({ placed: i, flipped });
+    if (nt.pass) showToast(`${nameOf(nt.pass)}は置ける場所がないのでパス`);
+    save();
+    if (!nt.turn) setTimeout(showResult, 900);
+    else maybeCpu();
+  }
+
+  function isCpuTurn() {
+    const st = cur();
+    return S.settings.mode === "cpu" && st.turn && st.turn !== S.settings.human;
+  }
+  let cpuTimer = 0;
+  function maybeCpu() {
+    clearTimeout(cpuTimer);
+    if (!isCpuTurn()) { S.thinking = false; updateStatus(); return; }
+    S.thinking = true; updateStatus(); updateBoardClasses();
+    const ptrAtStart = S.ptr;
+    cpuTimer = setTimeout(() => {
+      const st = cur();
+      if (S.ptr !== ptrAtStart || !isCpuTurn()) return;
+      const m = bestMove(st.board, st.turn, S.settings.level);
+      S.thinking = false;
+      if (m >= 0) play(m);
+    }, 550 + Math.random() * 350);
+  }
+
+  function undo() {
+    if (S.ptr === 0) return;
+    clearTimeout(cpuTimer); S.thinking = false;
+    S.ptr--;
+    if (S.settings.mode === "cpu") while (S.ptr > 0 && cur().turn !== S.settings.human) S.ptr--;
+    S.hint = -1; S.gameOverShown = false;
+    render({ instant: true }); save(); maybeCpu();
+  }
+  function redo() {
+    if (S.ptr >= S.states.length - 1) return;
+    clearTimeout(cpuTimer); S.thinking = false;
+    S.ptr++;
+    if (S.settings.mode === "cpu") while (S.ptr < S.states.length - 1 && cur().turn && cur().turn !== S.settings.human) S.ptr++;
+    S.hint = -1;
+    render({ instant: true }); save();
+    if (!cur().turn) showResult(); else maybeCpu();
+  }
+  function hint() {
+    const st = cur();
+    if (!st.turn || S.thinking) return;
+    S.hint = bestMove(st.board, st.turn, 3);
+    updateBoardClasses();
+  }
+
+  // ---------- Rendering ----------
+  const boardEl = document.getElementById("board");
+  const cells = [];
+  function buildBoard() {
+    const top = document.querySelector(".coords-top"), left = document.querySelector(".coords-left");
+    for (let c = 0; c < 8; c++) top.insertAdjacentHTML("beforeend", `<span>${COLS[c]}</span>`);
+    for (let r = 0; r < 8; r++) left.insertAdjacentHTML("beforeend", `<span>${r + 1}</span>`);
+    for (let i = 0; i < 64; i++) {
+      const el = document.createElement("button");
+      el.type = "button"; el.className = "cell"; el.dataset.i = i; el.tabIndex = i === 19 ? 0 : -1;
+      el.innerHTML = '<span class="ghost"></span><span class="dwrap"><span class="disc" data-c="0"><span class="face b"></span><span class="face w"></span></span></span><span class="mark"></span><span class="badge"></span>';
+      el.addEventListener("click", () => onCell(i));
+      el.addEventListener("mouseenter", () => previewFlips(i, true));
+      el.addEventListener("mouseleave", () => previewFlips(i, false));
+      el.addEventListener("focus", () => previewFlips(i, true));
+      el.addEventListener("blur", () => previewFlips(i, false));
+      el.addEventListener("keydown", e => onKey(e, i));
+      boardEl.appendChild(el);
+      cells.push(el);
+    }
+    for (const [x, y] of [[25,25],[75,25],[25,75],[75,75]]) {
+      const s = document.createElement("span"); s.className = "star"; s.style.left = x + "%"; s.style.top = y + "%";
+      boardEl.appendChild(s);
+    }
+  }
+  function onCell(i) {
+    const st = cur();
+    if (!st.turn || S.thinking || isCpuTurn()) return;
+    if (flipsFor(st.board, i, st.turn).length) play(i);
+  }
+  function onKey(e, i) {
+    const map = { ArrowUp: -8, ArrowDown: 8, ArrowLeft: -1, ArrowRight: 1 };
+    if (map[e.key] !== undefined) {
+      e.preventDefault();
+      let r = i >> 3, c = i & 7;
+      if (e.key === "ArrowUp") r = Math.max(0, r - 1);
+      if (e.key === "ArrowDown") r = Math.min(7, r + 1);
+      if (e.key === "ArrowLeft") c = Math.max(0, c - 1);
+      if (e.key === "ArrowRight") c = Math.min(7, c + 1);
+      const n = r * 8 + c;
+      cells[i].tabIndex = -1; cells[n].tabIndex = 0; cells[n].focus();
+    }
+  }
+  function previewFlips(i, on) {
+    const st = cur();
+    cells.forEach(c => c.classList.remove("preview-flip"));
+    if (!on || !S.settings.count || !st.turn || isCpuTurn()) return;
+    for (const k of flipsFor(st.board, i, st.turn)) cells[k].classList.add("preview-flip");
+  }
+
+  function nameOf(p) {
+    const n = p === B ? S.settings.nameB : S.settings.nameW;
+    return (n && n.trim()) || (p === B ? "黒" : "白");
+  }
+
+  function render(opts = {}) {
+    const st = cur();
+    if (opts.instant) boardEl.classList.add("instant");
+    const placed = opts.placed ?? -1;
+    const flipped = opts.flipped || [];
+    const pr = placed >= 0 ? placed >> 3 : 0, pc = placed >= 0 ? placed & 7 : 0;
+    for (let i = 0; i < 64; i++) {
+      const disc = cells[i].querySelector(".disc");
+      const wrap = cells[i].querySelector(".dwrap");
+      const v = st.board[i];
+      if (i === placed) {
+        disc.style.transitionDelay = "0ms";
+        boardEl.classList.add("instant");
+        disc.dataset.c = v;
+        void disc.offsetWidth;
+        if (!opts.instant) boardEl.classList.remove("instant");
+        wrap.classList.remove("drop"); void wrap.offsetWidth; wrap.classList.add("drop");
+      } else {
+        if (flipped.includes(i)) {
+          const d = Math.max(Math.abs((i >> 3) - pr), Math.abs((i & 7) - pc));
+          disc.style.transitionDelay = (80 + d * 70) + "ms";
+        } else disc.style.transitionDelay = "0ms";
+        disc.dataset.c = v;
+      }
+      const label = v === B ? "黒" : v === W ? "白" : "空き";
+      cells[i].setAttribute("aria-label", `${COLS[i & 7]}${(i >> 3) + 1} ${label}`);
+    }
+    if (opts.instant) requestAnimationFrame(() => requestAnimationFrame(() => boardEl.classList.remove("instant")));
+    updateBoardClasses();
+    updateSide();
+    updateStatus();
+    updateHistory();
+  }
+
+  function updateBoardClasses() {
+    const st = cur();
+    const legal = st.turn && !S.thinking && !isCpuTurn() ? legalMoves(st.board, st.turn) : [];
+    boardEl.dataset.turn = st.turn || 0;
+    boardEl.classList.toggle("noguide", !S.settings.guide);
+    boardEl.classList.toggle("showcount", S.settings.count);
+    for (let i = 0; i < 64; i++) {
+      const isLegal = legal.includes(i);
+      cells[i].classList.toggle("legal", isLegal);
+      cells[i].classList.toggle("last", S.settings.last && st.last === i);
+      cells[i].classList.toggle("hint", S.hint === i);
+      cells[i].querySelector(".badge").textContent = isLegal ? flipsFor(st.board, i, st.turn).length : "";
+    }
+    document.getElementById("statLegal").textContent = legal.length || (st.turn ? legalMoves(st.board, st.turn).length : 0);
+    document.getElementById("undoBtn").disabled = S.ptr === 0;
+    document.getElementById("redoBtn").disabled = S.ptr >= S.states.length - 1;
+    document.getElementById("hintBtn").disabled = !st.turn || S.thinking || isCpuTurn();
+  }
+
+  function updateSide() {
+    const st = cur(), c = counts(st.board);
+    document.getElementById("countB").innerHTML = `${c.b}<small>石</small>`;
+    document.getElementById("countW").innerHTML = `${c.w}<small>石</small>`;
+    const tot = c.b + c.w || 1;
+    document.getElementById("meterB").style.width = (c.b / tot * 100) + "%";
+    document.getElementById("meterW").style.width = (c.w / tot * 100) + "%";
+    document.getElementById("plaqueB").classList.toggle("active", st.turn === B);
+    document.getElementById("plaqueW").classList.toggle("active", st.turn === W);
+    document.getElementById("statMoves").textContent = S.ptr;
+    document.getElementById("statEmpty").textContent = c.e;
+  }
+
+  function updateStatus() {
+    const st = cur(), el = document.getElementById("status");
+    if (!st.turn) {
+      const c = counts(st.board);
+      el.textContent = c.b === c.w ? `対局終了 ― ${c.b}対${c.w}で引き分け` : `対局終了 ― ${nameOf(c.b > c.w ? B : W)}の勝ち（${Math.max(c.b,c.w)}対${Math.min(c.b,c.w)}）`;
+      return;
+    }
+    const col = st.turn === B ? "黒" : "白";
+    if (S.thinking) el.textContent = `${nameOf(st.turn)}（${col}）が考えています…`;
+    else el.textContent = `${nameOf(st.turn)}（${col}）の番です`;
+  }
+
+  function updateHistory() {
+    const ol = document.getElementById("history");
+    const items = S.states.slice(1);
+    if (!items.length) { ol.innerHTML = '<li class="empty">黒の一手目から記録されます。</li>'; return; }
+    ol.innerHTML = items.map((s, k) =>
+      `<li class="${k + 1 === S.ptr ? "cur" : ""}"><span class="n">${k + 1}.</span><span class="c ${s.mover === B ? "b" : "w"}"></span>${s.label}${s.pass ? '<span style="opacity:.6">（パス）</span>' : ""}</li>`
+    ).join("");
+    const curLi = ol.querySelector(".cur");
+    if (curLi) curLi.scrollIntoView({ block: "nearest" });
+  }
+
+  let toastTimer = 0;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2000);
+  }
+
+  function showResult() {
+    const st = cur();
+    if (st.turn || S.gameOverShown) return;
+    S.gameOverShown = true;
+    const c = counts(st.board);
+    document.getElementById("resB").textContent = c.b;
+    document.getElementById("resW").textContent = c.w;
+    document.getElementById("resNameB").textContent = nameOf(B);
+    document.getElementById("resNameW").textContent = nameOf(W);
+    let title, note;
+    if (c.b === c.w) { title = "引き分け"; note = "互角の名勝負でした。"; }
+    else {
+      const win = c.b > c.w ? B : W;
+      title = `${nameOf(win)}の勝ち`;
+      const diff = Math.abs(c.b - c.w);
+      note = diff >= 30 ? "圧勝です。" : diff >= 10 ? "見事な勝利です。" : "僅差の接戦でした。";
+      if (S.settings.mode === "cpu") note = win === S.settings.human ? `コンピュータ（${["","初級","中級","上級"][S.settings.level]}）に勝ちました。${note}` : "惜しい。「待った」で戻って別の手を試すこともできます。";
+    }
+    document.getElementById("resultTitle").textContent = title;
+    document.getElementById("resultNote").textContent = note;
+    openOv("resultOv");
+  }
+
+  // ---------- Overlays ----------
+  let lastFocus = null;
+  function openOv(id) { lastFocus = document.activeElement; const o = document.getElementById(id); o.hidden = false; o.querySelector(".btn.primary").focus(); }
+  function closeOv(id) { document.getElementById(id).hidden = true; if (lastFocus) lastFocus.focus(); }
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") ["resultOv", "rulesOv"].forEach(id => { if (!document.getElementById(id).hidden) closeOv(id); });
+  });
+  document.querySelectorAll(".overlay").forEach(o => o.addEventListener("click", e => { if (e.target === o) closeOv(o.id); }));
+
+  // ---------- Sound ----------
+  let actx = null;
+  function sound() {
+    if (!S.settings.sound) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = actx.currentTime;
+      const len = Math.floor(actx.sampleRate * 0.06);
+      const buf = actx.createBuffer(1, len, actx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+      const src = actx.createBufferSource(); src.buffer = buf;
+      const f = actx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1800; f.Q.value = 1.2;
+      const g = actx.createGain(); g.gain.value = 0.55;
+      const osc = actx.createOscillator(); osc.frequency.setValueAtTime(220, t); osc.frequency.exponentialRampToValueAtTime(90, t + 0.08);
+      const og = actx.createGain(); og.gain.setValueAtTime(0.25, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      src.connect(f).connect(g).connect(actx.destination);
+      osc.connect(og).connect(actx.destination);
+      src.start(t); osc.start(t); osc.stop(t + 0.12);
+    } catch (_) {}
+  }
+
+  // ---------- Settings UI ----------
+  function setSeg(id, val) {
+    document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === String(val))));
+  }
+  function syncSettingsUI() {
+    const s = S.settings;
+    setSeg("modeSeg", s.mode); setSeg("levelSeg", s.level); setSeg("sideSeg", s.human);
+    document.getElementById("cpuFields1").hidden = s.mode !== "cpu";
+    document.getElementById("cpuFields2").hidden = s.mode !== "cpu";
+    document.getElementById("levelNote").textContent = LEVEL_NOTES[s.level];
+    document.getElementById("optGuide").checked = s.guide;
+    document.getElementById("optCount").checked = s.count;
+    document.getElementById("optLast").checked = s.last;
+    document.getElementById("optSound").checked = s.sound;
+    const nb = document.getElementById("nameB"), nw = document.getElementById("nameW");
+    if (s.mode === "cpu") {
+      const cpuName = `コンピュータ（${["","初級","中級","上級"][s.level]}）`;
+      if (s.human === B) { nb.value = s.nameB; nw.value = cpuName; nw.disabled = true; nb.disabled = false; }
+      else { nw.value = s.nameW; nb.value = cpuName; nb.disabled = true; nw.disabled = false; }
+    } else {
+      nb.disabled = nw.disabled = false; nb.value = s.nameB; nw.value = s.nameW;
+    }
+  }
+  const origNameOf = nameOf;
+  nameOf = function (p) {
+    if (S.settings.mode === "cpu" && p !== S.settings.human) return `コンピュータ`;
+    return origNameOf(p);
+  };
+
+  document.getElementById("modeSeg").addEventListener("click", e => {
+    const v = e.target.closest("button")?.dataset.v; if (!v || v === S.settings.mode) return;
+    S.settings.mode = v; syncSettingsUI(); afterSettingChange(true);
+  });
+  document.getElementById("levelSeg").addEventListener("click", e => {
+    const v = e.target.closest("button")?.dataset.v; if (!v) return;
+    S.settings.level = Number(v); syncSettingsUI(); save();
+  });
+  document.getElementById("sideSeg").addEventListener("click", e => {
+    const v = e.target.closest("button")?.dataset.v; if (!v || Number(v) === S.settings.human) return;
+    S.settings.human = Number(v); syncSettingsUI(); afterSettingChange(true);
+  });
+  function afterSettingChange(restart) {
+    save();
+    if (restart && S.ptr > 0) { newGame(); showToast("新しい対局を始めました"); }
+    else { render({ instant: true }); maybeCpu(); }
+  }
+  [["optGuide","guide"],["optCount","count"],["optLast","last"],["optSound","sound"]].forEach(([id, key]) => {
+    document.getElementById(id).addEventListener("change", e => { S.settings[key] = e.target.checked; updateBoardClasses(); save(); });
+  });
+  document.getElementById("nameB").addEventListener("input", e => { if (!e.target.disabled) { S.settings.nameB = e.target.value; updateStatus(); save(); } });
+  document.getElementById("nameW").addEventListener("input", e => { if (!e.target.disabled) { S.settings.nameW = e.target.value; updateStatus(); save(); } });
+
+  let newArmed = 0;
+  const newBtn = document.getElementById("newBtn");
+  newBtn.addEventListener("click", () => {
+    const inProgress = S.ptr > 0 && cur().turn;
+    if (inProgress && !newArmed) {
+      newBtn.textContent = "もう一度押すと最初から";
+      newBtn.classList.remove("primary"); newBtn.classList.add("warn");
+      newArmed = setTimeout(resetNewBtn, 3000);
+      return;
+    }
+    resetNewBtn(); newGame();
+  });
+  function resetNewBtn() { clearTimeout(newArmed); newArmed = 0; newBtn.textContent = "新しい対局"; newBtn.classList.add("primary"); newBtn.classList.remove("warn"); }
+  document.getElementById("undoBtn").addEventListener("click", undo);
+  document.getElementById("redoBtn").addEventListener("click", redo);
+  document.getElementById("hintBtn").addEventListener("click", hint);
+  document.getElementById("rulesBtn").addEventListener("click", () => openOv("rulesOv"));
+  document.getElementById("rulesClose").addEventListener("click", () => closeOv("rulesOv"));
+  document.getElementById("resultClose").addEventListener("click", () => closeOv("resultOv"));
+  document.getElementById("resultAgain").addEventListener("click", () => { closeOv("resultOv"); newGame(); });
+
+  // ---------- Persistence ----------
+  const KEY = "othello-salon-v1";
+  function snapshot() { return { states: S.states, ptr: S.ptr, settings: S.settings }; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (_) {} }
+  function load(data) {
+    if (data && data.settings) Object.assign(S.settings, data.settings);
+    if (data && Array.isArray(data.states) && data.states.length && typeof data.ptr === "number") {
+      S.states = data.states; S.ptr = Math.min(data.ptr, data.states.length - 1);
+      S.gameOverShown = !cur().turn;
+      return true;
+    }
+    return false;
+  }
+
+  function start(hotData) {
+    buildBoard();
+    let restored = false;
+    if (hotData && hotData.states) restored = load(hotData);
+    if (!restored) { try { restored = load(JSON.parse(localStorage.getItem(KEY) || "null")); } catch (_) {} }
+    syncSettingsUI();
+    if (!restored) newGame();
+    else { render({ instant: true }); maybeCpu(); }
+    window.claude?.hot?.snapshot?.(snapshot);
+  }
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
