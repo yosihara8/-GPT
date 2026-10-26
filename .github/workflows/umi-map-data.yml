@@ -13,9 +13,15 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - name: NOAA につながるか確かめる
+        continue-on-error: true
+        run: |
+          for h in coastwatch.pfeg.noaa.gov upwell.pfeg.noaa.gov; do
+            echo "== $h"; curl -4 -s -m 30 -o /dev/null -w "%{http_code} %{time_total}s\n" "https://$h/erddap/info/jplMURSST41mday/index.csv" || echo "つながらない"
+          done
       - name: 月平均を取得
         working-directory: umi-map
         run: python3 tools/build_history.py

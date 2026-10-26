@@ -5,6 +5,7 @@ NOAA ERDDAP はブラウザからは直接読めない(CORS が無い)ため、G
 """
 import csv
 import io
+import socket
 import json
 import math
 import sys
@@ -15,7 +16,19 @@ import urllib.request
 
 S, N, W, E = 33.30, 33.90, 129.50, 130.30
 STEP = 0.05
-ERDDAP = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/"
+# 同じデータを持つ NOAA のサーバー。つながらない時は次を試す
+HOSTS = ["https://coastwatch.pfeg.noaa.gov/erddap/griddap/", "https://upwell.pfeg.noaa.gov/erddap/griddap/"]
+ERDDAP = HOSTS[0]
+
+# GitHub Actions では IPv6 でつながらないことがあるので IPv4 だけを使う
+_orig_getaddrinfo = socket.getaddrinfo
+
+
+def _ipv4_only(host, port, family=0, *args, **kwargs):
+    return _orig_getaddrinfo(host, port, socket.AF_INET, *args, **kwargs)
+
+
+socket.getaddrinfo = _ipv4_only
 
 # 試すデータセット(先に書いたものから順に)。dims は緯度経度より前に入る次元の数
 SST_SETS = [("jplMURSST41mday", "sst", 0), ("jplMURSST41mday", "analysed_sst", 0)]
@@ -27,11 +40,11 @@ CHL_SETS = [("nesdisVHNSQchlaMonthly", "chlor_a", 1), ("nesdisVHNnoaa20chlaMonth
 UA = "umi-map/1.0 (+https://github.com/yosihara8/-GPT; ocean environment map of Karatsu)"
 
 
-def fetch(url, tries=4):
+def fetch(url, tries=2):
     for k in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=300) as r:
+            with urllib.request.urlopen(req, timeout=180) as r:
                 return r.read().decode("utf-8")
         except urllib.error.HTTPError as e:
             print("  HTTP", e.code, url[:120], file=sys.stderr)
@@ -109,7 +122,21 @@ def pack(res, scale):
     }
 
 
+def pick_host():
+    global ERDDAP
+    for h in HOSTS:
+        t = fetch(h.replace("griddap/", "info/") + "jplMURSST41mday/index.csv", tries=1)
+        if t:
+            ERDDAP = h
+            print("使うサーバー:", h)
+            return True
+        print("つながらない:", h)
+    return False
+
+
 def main():
+    if not pick_host():
+        sys.exit("NOAA のサーバーにつながりませんでした")
     out = {"lat0": S, "lon0": W, "step": STEP,
            "nlat": int(round((N - S) / STEP)) + 1, "nlon": int(round((E - W) / STEP)) + 1,
            "built": time.strftime("%Y-%m-%d")}
