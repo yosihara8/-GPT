@@ -137,11 +137,28 @@
     padding: 6px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.25);
   }
   .sheet-toggle { display: none; }
-  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; background: rgba(255,255,255,.08); border-radius: 8px; padding: 3px; }
-  .mode-tab { font: inherit; font-size: 13px; font-weight: 500; color: #cfe0e7; background: transparent; border: none; border-radius: 6px; padding: 6px 4px; cursor: pointer; white-space: nowrap; }
+  .modes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-top: 12px; background: rgba(255,255,255,.08); border-radius: 8px; padding: 3px; }
+  .mode-tab { font: inherit; font-size: 12.5px; font-weight: 500; color: #cfe0e7; background: transparent; border: none; border-radius: 6px; padding: 6px 4px; cursor: pointer; white-space: nowrap; }
   .mode-tab[aria-selected="true"] { background: #fff; color: var(--sea-deep); }
   .mode-tab:focus-visible { outline: 2px solid var(--buoy); outline-offset: 1px; }
   .sec[hidden] { display: none; }
+  .reasons { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+  .reasons li b { display: block; font-size: 13.5px; }
+  .reasons li span { display: block; font-size: 12px; color: var(--ink-sub); line-height: 1.55; }
+  .fgroup { margin: 10px 0 2px; font-size: 12.5px; color: var(--ink); }
+  .fish { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; display: grid; gap: 3px; }
+  .fish + .fish { margin-top: 6px; }
+  .fhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .verdict { font-size: 11px; font-weight: 700; border-radius: 10px; padding: 0 8px; color: #fff; white-space: nowrap; }
+  .v-up { background: var(--good); } .v-down { background: var(--bad); } .v-same { background: #7b8c94; } .v-warn { background: var(--warn); }
+  .frow { display: grid; grid-template-columns: 20px 1fr 44px; gap: 6px; align-items: center; font-size: 11px; color: var(--ink-sub); }
+  .fnum { font-family: var(--font-data); text-align: right; }
+  .fnote { font-size: 11px; color: var(--ink-sub); }
+  .mstrip { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; }
+  .mstrip span { height: 10px; border-radius: 2px; }
+  .m-ok { background: #3f9c6d; } .m-hot { background: #e8a23a; } .m-bad { background: #c2410c; } .m-cold { background: #5b8fc9; } .m-na { background: var(--line); }
+  .mlegend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 11px; color: var(--ink-sub); }
+  .mlegend span { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: -6px; }
   .jump { display: flex; flex-wrap: wrap; gap: 6px; }
   .jump button { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--chart-paper); color: var(--ink); border-radius: 14px; padding: 3px 10px; cursor: pointer; }
   .jump button:hover { border-color: var(--sea); }
@@ -240,6 +257,7 @@
       <button class="btn sheet-toggle" id="sheetToggle" type="button" style="color:#fff;border-color:#fff">パネル</button>
       <div class="modes" role="tablist" aria-label="目的">
         <button type="button" role="tab" class="mode-tab" data-mode="know" id="mode-know">海を知る</button>
+        <button type="button" role="tab" class="mode-tab" data-mode="fish" id="mode-fish">魚を知る</button>
         <button type="button" role="tab" class="mode-tab" data-mode="moba" id="mode-moba">藻場を見守る</button>
         <button type="button" role="tab" class="mode-tab" data-mode="gomi" id="mode-gomi">海ごみ</button>
       </div>
@@ -272,12 +290,12 @@
         <label class="opt"><input type="radio" name="base" value="ocean" id="base-ocean"><span><b>Esri の海洋地図</b><small>広い範囲の海底のようす(唐津の近くは粗い)</small></span></label>
       </div>
       <div class="opts">
-        <label class="opt"><input type="checkbox" id="ov-bathy" data-modes="know gomi" checked><span><b>海底地形図(水深の色分けと等深線)</b><small>浅い所ほど明るい水色。線は5・10・20・30…150mの等深線</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-bathy" data-modes="know gomi fish" checked><span><b>海底地形図(水深の色分けと等深線)</b><small>浅い所ほど明るい水色。線は5・10・20・30…150mの等深線</small></span></label>
         <div id="bathyLegend" class="bathy-legend"></div>
-        <label class="opt"><input type="checkbox" id="ov-land" data-modes="know moba gomi" checked><span><b>陸地と市町の境界</b><small>海岸線・島・市町の境(国土地理院 地球地図、100万分の1)。唐津市を濃く表示</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-land" data-modes="know moba gomi fish" checked><span><b>陸地と市町の境界</b><small>海岸線・島・市町の境(国土地理院 地球地図、100万分の1)。唐津市を濃く表示</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-hill" data-modes="know"><span><b>陸の起伏(陰影起伏図)</b><small>山から海へ流れ込む谷・川の位置</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-current" data-modes="know" checked><span><b>対馬暖流の流れ(模式図)</b><small>大まかな向きのイメージ。実際の流れは日々変わる</small></span></label>
-        <label class="opt"><input type="checkbox" id="ov-spots" data-modes="know moba" checked><span><b>地形で見る海の特徴</b><small>湾・岬・島まわりで、すみやすい生き物が違う</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-spots" data-modes="know moba fish" checked><span><b>地形で見る海の特徴</b><small>湾・岬・島まわりで、すみやすい生き物が違う</small></span></label>
       </div>
     </section>
 
@@ -306,6 +324,44 @@
       </div>
       <p class="hint">「むかしと比べる」を押すと、地図の左半分が比べる日、右半分が見る日になります。真ん中の朱色の丸を左右に動かしてください。</p>
       <p class="hint"><b>海の上をクリック</b>すると、その地点の水温とプランクトンの量を数値で表示し、20年間の水温の変化も調べられます。</p>
+    </section>
+
+    <section class="sec" data-modes="fish">
+      <h2>なぜ魚が減ったのか</h2>
+      <p class="hint">公表されている調査と、この地図の20年分の衛星水温からわかることです。原因は1つではなく、いくつかが重なっています。</p>
+      <ol class="reasons">
+        <li><b>夏の海が熱くなった</b><span>衛星の月平均で、7月は20年前より約1.9℃、9月は約1.2℃高い。一方、冬(12〜3月)はほとんど変わっていない。2026年8月は県の観測5地点すべてで平年より1.5〜2.6℃高かった。</span></li>
+        <li><b>魚のゆりかご(藻場)が半分になった</b><span>玄海の藻場は1,262ha(2013年)から597ha(2022年)へ。南方系のウニ「ガンガゼ」などが海藻を食べ尽くす磯焼けが主な原因とされる。藻場は多くの魚の産卵場・稚魚の隠れ家。</span></li>
+        <li><b>回遊してくる魚・イカの来方が変わった</b><span>佐賀県のケンサキイカは2018年に305tで、30年前の約5分の1。対馬暖流や日本海の水温の変化が関係すると考えられているが、はっきりした原因はまだわかっていない。代わりにブリ・サワラなど暖かい海の魚が増えている。</span></li>
+        <li><b>漁をする側も減った</b><span>玄海地区の漁獲量は2011年の9,570tから2020年の2,660tへ約7割減。資源の減少に加え、漁獲の半分以上を占めていた大型まき網が2015年に撤退したことも大きい。高齢化・燃料代・魚の値段も重なる。</span></li>
+      </ol>
+      <details class="gaps">
+        <summary>まだわからないこと・確かめ方</summary>
+        <ul>
+          <li><b>海の底のようす</b>: 衛星は海面しか見えない。海底近くの水温や酸素は県のテレメータ(名護屋浦・仮屋湾)の記録が手がかり</li>
+          <li><b>魚の種類ごとの漁獲の変化</b>: 県の水産統計や漁協の水揚げ記録、定置網の記録(佐賀県の研究報告に1983〜2010年の分析あり)</li>
+          <li><b>いまどの魚がいるか</b>: 海水から魚の種類がわかる環境DNA調査</li>
+        </ul>
+      </details>
+      <details class="gaps">
+        <summary>出典</summary>
+        <ul>
+          <li><a href="https://www.saga-s.co.jp/articles/-/1405110" target="_blank" rel="noopener">佐賀新聞「玄海地区海域で磯焼けが深刻化」(漁獲量・まき網撤退)</a></li>
+          <li><a href="https://www.saga-s.co.jp/articles/-/926343" target="_blank" rel="noopener">佐賀新聞「玄海地区の藻場を大規模調査」</a></li>
+          <li><a href="https://www.pref.saga.lg.jp/kiji00380333/3_80333_245881_up_8rwcbmiy.pdf" target="_blank" rel="noopener">佐賀県 玄海圏域 総合水産基盤整備事業計画</a></li>
+          <li><a href="https://tsurinews.jp/112986/" target="_blank" rel="noopener">呼子で不漁のケンサキイカ(西海区水産研究所の発表の報道)</a></li>
+          <li><a href="https://www.jstage.jst.go.jp/article/pamjsfe/2019/0/2019_153/_pdf/-char/ja" target="_blank" rel="noopener">木所英昭「気候変動による回遊性魚介類の変化と日本漁業の適応」</a></li>
+          <li><a href="https://www.pref.saga.lg.jp/kiji00320172/index.html" target="_blank" rel="noopener">佐賀県玄海水産振興センター 漁場環境情報</a></li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="sec" data-modes="fish">
+      <h2>いまの海に合う生き物</h2>
+      <p class="hint">それぞれの生き物にとって住みやすい水温の月が、昔と今で何か月あるかを比べます。<b>地図をクリック</b>すると、その場所の水温で計算し直します。</p>
+      <div class="row"><button class="btn" id="fishReset" type="button">海域全体の平均に戻す</button></div>
+      <div id="fishTable"></div>
+      <p class="note">海面の水温だけで見た目安です。海底は海面より冷たいことが多く、エサ・流れ・海藻・獲り方でも魚の数は変わります。適水温は一般的な文献値をまとめたもので、成長段階でも違います。</p>
     </section>
 
     <section class="sec" data-modes="moba">
@@ -344,7 +400,7 @@
       </div>
       <p class="hint">藻場が減った主な原因は、温暖化で増えた南方系のウニ「ガンガゼ」による食害とされています。アイゴなど海藻を食べる魚の影響も指摘されています。</p>
       <div class="opts">
-        <label class="opt"><input type="checkbox" id="ov-stations" data-modes="know" checked><span><b>県の観測点</b><small>水温の平年差を表示。一部の点は底層(水深10m)の溶存酸素を30分ごとに測定</small></span></label>
+        <label class="opt"><input type="checkbox" id="ov-stations" data-modes="know fish" checked><span><b>県の観測点</b><small>水温の平年差を表示。一部の点は底層(水深10m)の溶存酸素を30分ごとに測定</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-moba" data-modes="know moba" checked><span><b>藻場の保全・再生の場所</b><small>ガンガゼを駆除して海藻が戻るか確かめた場所</small></span></label>
         <label class="opt"><input type="checkbox" id="ov-wind" data-modes="know"><span><b>洋上風力の計画海域(目安)</b><small>県が漁業環境影響調査を行った海域の目安</small></span></label>
       </div>
@@ -380,7 +436,7 @@
       <p class="hint">朱色の濃い線ほど風を真正面から受けます。実際にごみがたまるかは、浜の形(砂浜か岩場か)や潮の流れでも変わります。漁師さんや清掃をしている方の記録をピンで重ねると確かになります。</p>
     </section>
 
-    <section class="sec" data-modes="know moba gomi">
+    <section class="sec" data-modes="know fish moba gomi">
       <h2>海の記憶ピン</h2>
       <p class="hint">漁師さんや地域の方の「昔はここで獲れた」「最近ここに増えた」を地図に残します。衛星のデータと重なる場所に、問題の手がかりがあります。</p>
       <div class="row">
@@ -402,7 +458,7 @@
       <p class="hint">ピンはこの端末のブラウザに保存されます。ハッカソンでは「ファイルに保存」で集めて、1つにまとめられます。</p>
     </section>
 
-    <section class="sec" data-modes="know moba gomi">
+    <section class="sec" data-modes="know fish moba gomi">
       <h2>見方の注意</h2>
       <p class="note">衛星が測れるのは海の表面(数メートル)だけです。海底の水温・酸素・魚そのものは見えません。雲の日は空白になります。生き物の適水温は一般的な目安なので、地元の水産試験場や漁師さんの経験と合わせて判断してください。</p>
       <div class="sources">
@@ -972,6 +1028,8 @@
   });
 
   map.on("click", function (e) {
+    // 「魚を知る」では、クリックは生き物の計算の場所選びに使う
+    if (window.UMI.mode === "fish" && !pinMode) return;
     // ポップアップ内のボタン操作で地図のクリックが走らないようにする
     var t = e.originalEvent && e.originalEvent.target;
     if (t && (!document.contains(t) || (t.closest && t.closest(".leaflet-popup")))) return;
@@ -1011,6 +1069,7 @@
 <script src="js/gomi.js"></script>
 <script src="js/bathy.js"></script>
 <script src="js/moba.js"></script>
+<script src="js/fish.js"></script>
 <script src="js/modes.js"></script>
 </body>
 </html>

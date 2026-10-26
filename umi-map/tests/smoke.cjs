@@ -224,6 +224,26 @@ async function setup(page, opts) {
     await page.close();
   }
 
+  // ---- 1a. 魚を知る ----
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+    const errors = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    await setup(page, {});
+    await page.goto(BASE + "#fish");
+    await page.waitForTimeout(1200);
+    const n = (await page.$$("#fishTable .fish")).length;
+    check("「魚を知る」で生き物ごとの比較を出す", n === 16 && errors.length === 0, n + "種 " + errors.join(" / "));
+    check("12か月の帯を昔と今で出す", (await page.$$("#fishTable .mstrip")).length === 32);
+    // 模擬の月平均は年0.04℃ずつ上がるので、暑さに弱い生き物の「住みやすい月」は減らないか同じ
+    await page.mouse.click(1000, 300);
+    await page.waitForTimeout(400);
+    check("地図をクリックすると、その場所で計算し直す", /地図で選んだ場所/.test(await page.innerText("#fishTable")) && !(await page.$(".leaflet-popup")));
+    await page.click("#fishReset");
+    check("海域全体の平均に戻せる", /唐津周辺の海の平均/.test(await page.innerText("#fishTable")));
+    await page.close();
+  }
+
   // ---- 1b. URL の #gomi で「海ごみ」から始まる ----
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });

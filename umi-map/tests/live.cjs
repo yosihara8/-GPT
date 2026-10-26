@@ -119,6 +119,12 @@ async function waitFor(fn, ms) {
   }
   await page.keyboard.press("Escape");
 
+  // 魚を知る(同梱した20年の月平均水温で計算)
+  await page.click("#mode-fish");
+  await sleep(800);
+  const fishTxt = await page.innerText("#fishTable");
+  check("魚を知る: 生き物ごとの比較", (await page.$$("#fishTable .fish")).length === 16, (fishTxt.match(/7月は[^。]*/) || [""])[0]);
+
   // 海ごみ: いまの風
   await page.click("#mode-gomi");
   await page.check("#wind-now");

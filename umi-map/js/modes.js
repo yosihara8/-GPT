@@ -1,10 +1,11 @@
-// 目的(海を知る・藻場を見守る・海ごみ)の切り替え。目的ごとにパネルの項目と地図の層を出し分ける
+// 目的(海を知る・魚を知る・藻場を見守る・海ごみ)の切り替え。目的ごとにパネルの項目と地図の層を出し分ける
 (function () {
   "use strict";
   var U = window.UMI, map = U.map, el = U.el;
-  var MODES = ["know", "moba", "gomi"];
+  var MODES = ["know", "fish", "moba", "gomi"];
   var VIEW = {
     know: null,
+    fish: { center: [33.55, 129.88], zoom: 10 },
     moba: { center: [33.54, 129.90], zoom: 12 },
     gomi: { center: [33.55, 129.88], zoom: 11 }
   };
@@ -17,6 +18,7 @@
     if (MODES.indexOf(mode) < 0) mode = "know";
     if (mode === current) return;
     current = mode;
+    U.mode = mode;
 
     document.querySelectorAll(".mode-tab").forEach(function (t) {
       t.setAttribute("aria-selected", t.dataset.mode === mode ? "true" : "false");
@@ -39,6 +41,7 @@
       el(savedSat).checked = true; fire(el(savedSat)); savedSat = null;
     }
     if (U.mobaCompare) U.mobaCompare(mode === "moba");
+    (U.onMode || []).forEach(function (fn) { fn(mode); });
 
     if (moveMap && VIEW[mode]) map.setView(VIEW[mode].center, VIEW[mode].zoom);
     try { localStorage.setItem("umi-map-mode", mode); } catch (e) { /* 覚えられない環境では毎回「海を知る」 */ }

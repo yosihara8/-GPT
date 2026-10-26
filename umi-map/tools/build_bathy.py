@@ -77,8 +77,9 @@ def main():
 
     rgb = color_for(fine)
     # 陰影(北西から光を当てる)で海底の起伏を浮かび上がらせる
-    gy, gx = np.gradient(fine)
-    shade = np.clip(1.0 + (gx - gy) * 0.06, 0.75, 1.2)
+    # (元のデータは約450m単位なので、なめらかにしてから陰影を付け、細かいまだら模様を抑える)
+    gy, gx = np.gradient(ndimage.gaussian_filter(fine, 3))
+    shade = np.clip(1.0 + (gx - gy) * 0.05, 0.82, 1.15)
     rgb = np.clip(rgb * shade[..., None], 0, 255)
     alpha = np.where(sea_f, 235, 0)
     img = np.dstack([rgb, alpha]).astype(np.uint8)
@@ -93,7 +94,7 @@ def main():
     feats = []
     for lev, segs in zip(cs.levels, cs.allsegs):
         for seg in segs:
-            if len(seg) < 6:
+            if len(seg) < 12:     # 小さな切れ端は線が散らかるので描かない
                 continue
             feats.append({"d": int(lev), "c": [[round(float(y), 4), round(float(x), 4)] for x, y in seg]})
     print("等深線", len(feats), "本")
