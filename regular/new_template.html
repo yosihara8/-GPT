@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数学専門塾/福岡 数学教室/福岡 高校生 塾/反転授業</title>
+<meta name="description" content="大学受験 数学塾、久留米附設１位、修猷館１位、筑紫丘１位、西南学院１位、高２で東大実践Ａ判定、福岡県理数コンクール数学一席実績あり、福岡　数学教室,反転授業">
+<meta name="keywords" content="福岡,塾,受験,数学,中学,高校,大学,福岡 高校生 塾,数学専門塾,反転授業" />
+<style type="text/css">
+:root {
+  --main: #990066;
+  --main-dark: #7a0052;
+  --main-pale: #fbeef6;
+  --gold: #a98839;
+  --gold-pale: #f8f3e6;
+  --green: #1d7a32;
+  --green-pale: #edf7ef;
+  --red: #d32f2f;
+  --text: #222;
+  --sub: #555;
+  --line: #e4e0e3;
+  --bg: #f7f5f6;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  font-size: 16px;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  padding-bottom: 76px;
+}
+img { max-width: 100%; height: auto; }
+a { color: var(--main); word-break: break-all; }
+p { margin: 0 0 1em; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+
+/* ヘッダー */
+.hero { background: #fff; border-bottom: 4px solid var(--main); padding: 24px 0 20px; text-align: center; }
+.hero img { display: block; margin: 0 auto 12px; }
+.hero .catch { font-size: 1.1rem; font-weight: bold; line-height: 1.7; margin: 0 0 8px; }
+.hero .catch em { font-style: normal; color: var(--main); }
+.hero .brand { color: var(--gold); font-weight: bold; letter-spacing: 0.15em; margin: 0; }
+
+/* セクション */
+section { background: #fff; border-radius: 12px; margin: 20px 0; padding: 22px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+h2 { font-size: 1.25rem; line-height: 1.5; color: var(--main); margin: 0 0 16px; padding-left: 12px; border-left: 5px solid var(--main); }
+h3 { font-size: 1.05rem; line-height: 1.5; margin: 0 0 8px; }
+.lead { font-size: 1.05rem; }
+.note { font-size: .95rem; color: var(--sub); }
+.small { font-size: .9rem; color: var(--sub); }
+
+/* ボタン */
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 4px; }
+.btns.one { grid-template-columns: 1fr; }
+.btn {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 52px; padding: 10px 12px;
+  border-radius: 10px; border: 2px solid var(--main);
+  background: #fff; color: var(--main);
+  font-weight: bold; line-height: 1.4; text-decoration: none; word-break: normal;
+}
+.btn:hover, .btn:focus { background: var(--main-pale); }
+.btn.fill { background: var(--main); color: #fff; }
+.btn.fill:hover, .btn.fill:focus { background: var(--main-dark); }
+.btn.gold { border-color: var(--gold); color: #6e5620; }
+.btn.gold:hover, .btn.gold:focus { background: var(--gold-pale); }
+.btn small { display: block; font-weight: normal; font-size: .8rem; }
+.btn .stack { display: block; }
+
+/* SNS */
+.sns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sns a { display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px 10px; line-height: 1.4; min-height: 52px; border-radius: 10px; color: #fff; font-weight: bold; text-decoration: none; }
+.sns .fb { background: #1877f2; }
+.sns .yt { background: #e62117; }
+.sns .x  { background: #111; }
+.sns .th { background: #444; }
+.embed { margin-top: 18px; }
+
+/* お知らせ */
+.event { background: var(--green-pale); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.event h3 { color: var(--green); }
+.event dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+.event dt { font-weight: bold; }
+.event dd { margin: 0; }
+
+/* 授業メモ */
+.memo { border-top: 1px solid var(--line); padding: 14px 0 6px; }
+.memo:first-of-type { border-top: none; padding-top: 0; }
+.memo h3 { color: var(--green); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+.chips a, .chips span {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 4px 14px;
+  border-radius: 20px; background: var(--green-pale); border: 1px solid #b9dcc1;
+  color: var(--green); text-decoration: none; font-size: .95rem; line-height: 1.4; word-break: normal;
+}
+.chips a:hover, .chips a:focus { background: #d8eedd; }
+.chips span { background: #f2f2f2; border-color: #ddd; color: var(--sub); }
+
+/* 読み物 */
+.read p { text-indent: 1em; }
+.read p.noindent { text-indent: 0; }
+.point { background: var(--gold-pale); border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0; padding: 12px 14px; margin: 0 0 1em; }
+
+/* 料金 */
+.price { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.price div { background: var(--main-pale); border-radius: 10px; padding: 12px 6px; text-align: center; line-height: 1.5; }
+.price b { display: block; color: var(--main); font-size: 1.3rem; }
+.price span { font-size: .85rem; color: var(--sub); }
+ul.marks { margin: 0 0 1em; padding-left: 1.3em; }
+ul.marks li { margin-bottom: .5em; }
+
+/* 教室一覧 */
+.rooms { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; }
+.rooms a, .rooms span {
+  display: block; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px;
+  text-decoration: none; color: var(--text); background: #fff; line-height: 1.5; word-break: normal;
+}
+.rooms a:hover, .rooms a:focus { border-color: var(--main); background: var(--main-pale); }
+.rooms b { color: var(--main); display: block; }
+.rooms small { color: var(--sub); }
+
+/* Q&A */
+.qa { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 14px; overflow: hidden; }
+.qa .q { background: #fdf1f1; padding: 12px 14px 12px 48px; position: relative; font-weight: bold; line-height: 1.7; }
+.qa .a { padding: 14px 14px 4px 48px; position: relative; }
+.qa .q::before, .qa .a::before {
+  position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; border-radius: 50%;
+  color: #fff; font-weight: bold; text-align: center; line-height: 28px; font-size: .95rem;
+}
+.qa .q::before { content: "Q"; background: var(--red); }
+.qa .a::before { content: "A"; background: var(--gold); }
+.qa .add { border-top: 1px dashed var(--line); padding: 12px 14px 4px; font-size: .95rem; }
+.qa .add .tag { display: inline-block; background: var(--gold-pale); color: #6e5620; border-radius: 4px; padding: 0 8px; font-size: .85rem; font-weight: bold; margin-bottom: 4px; }
+.speaker { color: var(--green); font-weight: bold; }
+.em { color: var(--red); }
+
+/* 在籍校・進学先 */
+.schools { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.schools li { background: var(--main-pale); border-radius: 6px; padding: 4px 12px; font-size: .95rem; line-height: 1.6; }
+.univ { list-style: none; margin: 0 0 1em; padding: 0; }
+.univ li { padding: 8px 0; border-bottom: 1px solid var(--line); line-height: 1.6; }
+.univ li b { color: var(--main); margin-right: .6em; }
+.univ li span { font-size: .92rem; color: var(--sub); }
+
+/* 年度別実績 */
+details.year { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 10px; background: #fff; }
+details.year summary {
+  cursor: pointer; list-style: none; padding: 14px 44px 14px 16px; position: relative;
+  font-weight: bold; color: var(--main); min-height: 52px; line-height: 1.5;
+}
+details.year summary::-webkit-details-marker { display: none; }
+details.year summary::after { content: "＋"; position: absolute; right: 16px; top: 13px; font-size: 1.1rem; }
+details.year[open] summary::after { content: "－"; }
+details.year .body { padding: 0 16px 10px; }
+.results { list-style: none; margin: 0 0 12px; padding: 0; }
+.results li { padding: 6px 0 6px 1.2em; border-bottom: 1px dotted var(--line); line-height: 1.6; text-indent: -1.2em; }
+.results li .from { color: var(--sub); font-size: .9rem; }
+.results-label { font-size: .9rem; font-weight: bold; color: var(--gold); margin: 8px 0 2px; }
+
+/* フッター・固定ボタン */
+footer { text-align: center; padding: 10px 0 24px; font-size: .9rem; color: var(--sub); }
+.fixed-cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,.96); border-top: 1px solid var(--line);
+}
+.fixed-cta a { display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 10px; font-weight: bold; text-decoration: none; }
+.fixed-cta .tel { background: var(--main); color: #fff; }
+.fixed-cta .mail { border: 2px solid var(--main); color: var(--main); background: #fff; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.toc a { flex: 1 1 calc(50% - 8px); }
+
+@media (min-width: 600px) {
+  .btns { grid-template-columns: repeat(4, 1fr); }
+  .hero .catch { font-size: 1.3rem; }
+  .btns.two { grid-template-columns: 1fr 1fr; }
+  .sns { grid-template-columns: repeat(4, 1fr); }
+  .rooms { grid-template-columns: 1fr 1fr; }
+  .univ { columns: 2; column-gap: 24px; }
+  .univ li { break-inside: avoid; }
+  .toc a { flex: 1 1 calc(25% - 8px); }
+  .fixed-cta { max-width: 720px; margin: 0 auto; border-radius: 12px 12px 0 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <img src="fcs.gif" width="100" height="101" alt="FCS数学教室">
+    <p class="catch">高校数学の先取り学習ができる<br>
+    高校（学校）の授業が<em>すべて復習</em>になってしまう<br>
+    画期的な数学教室！</p>
+    <p class="brand">ＦＣＳ数学教室 トップページ</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- お問い合わせ・案内 -->
+<section>
+  <h2>お問い合わせ・ご案内</h2>
+  <div class="btns two">
+    <a class="btn fill" href="tel:0929192200"><span class="stack">電話で問い合わせ<small>092-919-2200</small></span></a>
+    <a class="btn" href="mailto:mail@fcs9981.sakura.ne.jp"><span class="stack">メールで問い合わせ<small>mail@fcs9981.sakura.ne.jp</small></span></a>
+  </div>
+  <div class="btns" style="margin-top:10px">
+    <a class="btn" href="http://fcs9981.sakura.ne.jp/top2020.html" target="_blank">教室所在地・開講時間・空席状況</a>
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/261026.pdf" target="_blank">時間割（PDF）</a>
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/261013.pdf" target="_blank">教室の最新フライヤー（PDF）</a>
+    <a class="btn" href="#goukaku">気になる進学実績</a>
+  </div>
+  <div class="btns two" style="margin-top:10px">
+    <a class="btn gold" href="https://www.youtube.com/watch?feature=player_embedded&v=zLLRAtSKWBI" target="_blank">予習動画（反転授業）</a>
+    <a class="btn gold" href="https://www.fcs9981.co.jp/youtube.html" target="_blank">予習動画の目次</a>
+  </div>
+</section>
+
+<!-- SNS -->
+<section>
+  <h2>SNS・授業メモ</h2>
+  <div class="sns">
+    <a class="fb" href="http://www.facebook.com/fcs9981?ref=tn_tnmn" target="_blank">Facebook</a>
+    <a class="yt" href="http://www.youtube.com/user/FCS9981?feature=mhum" target="_blank">YouTube</a>
+    <a class="x" href="https://twitter.com/fcs9981?lang=ja" target="_blank">X（数学教室からの達示）</a>
+    <a class="th" href="https://www.threads.com/@mathlab29/" target="_blank">Threads</a>
+  </div>
+  <div class="embed">
+    <!-- LightWidget WIDGET --><script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script><iframe src="//lightwidget.com/widgets/29b7cd778a09571db91c4d9f9cf80ba8.html" scrolling="no" allowtransparency="true" class="lightwidget-widget" style="width:100%;border:0;overflow:hidden;"></iframe>
+  </div>
+  <div class="embed">
+    <a class="twitter-timeline" data-lang="ja" data-width="500" data-height="600" data-dnt="true" href="https://twitter.com/fcs9981?ref_src=twsrc%5Etfw">Tweets by fcs9981</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  </div>
+  <p class="embed" style="margin-bottom:0"><a href="261026.pdf"><img src="261026.jpg" width="640" height="450" alt="サイエンスラボ福岡"></a></p>
+</section>
+
+<!-- 入会希望の方へ -->
+<section>
+  <h2>これから入会を希望する方へ</h2>
+  <div class="event">
+    <h3>▼合同入塾相談会＋４時間勉強会（無料体験を兼ねる）</h3>
+    <dl>
+      <dt>日時</dt><dd>11/23（祝月）、28（土）　いずれも18:00～</dd>
+      <dt>場所</dt><dd>大野城まどかぴあ305号</dd>
+    </dl>
+  </div>
+  <p>前半の相談会もほどほどに、途中入会組のためのキャッチアップ勉強会を４時間連続で開催します（勉強会は途中で帰っても、来ても構いませんが、ずっといた方がお得です）。</p>
+  <p><b>持ち物：</b>スマホ、イヤホン、各学校で購入した数学教材（チャート、フォーカス、レジェンド等）をお持ちください。内容は下記＋&alpha;です。</p>
+  <p class="point" style="margin-bottom:0">尚、相談会（勉強会）まで待てない、待つわけにはいかない（１日も早く取り返したい。支払い期限が迫っている、等々の）各位は、各教室で個別に入塾相談・体験ができます。ご連絡下さい。</p>
+</section>
+
+<!-- 授業メモ -->
+<section>
+  <h2>学校別・授業メモ</h2>
+  <p class="small">ボタンを押すと、各単元の授業メモ（Threads／Instagram）が開きます。</p>
+
+  <div class="memo"><h3>▼久留米附設中学校３年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/EBlkmrKjJ/">数Ⅱ微積</a><a href="https://www.threads.com/share/Gx5_fSZ6P/">三角関数</a><a href="https://www.threads.com/@mathlab29/post/Dafcf53kvQV">指数・対数</a><a href="https://www.threads.com/@mathlab29/post/DasuwNFkkao">軌跡</a>
+  </div></div>
+  <div class="memo"><h3>▼筑紫女学園中学校３年生</h3><div class="chips">
+    <a href="https://www.instagram.com/mathlab29/p/Dbnp-o3hW9u/">二次関数</a>
+  </div></div>
+  <div class="memo"><h3>▼ラサール中学校３年生</h3><div class="chips">
+    <a href="https://www.instagram.com/mathlab29/p/DbnnKezBbu1/">三角関数</a><a href="https://www.instagram.com/p/DbVjQLVh-Da/">確率</a><a href="https://www.instagram.com/p/DbAv54Ohz-W/">場合の数</a>
+  </div></div>
+  <div class="memo"><h3>▼久留米附設中学校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/QVvJs7ojs/">命題</a><a href="https://www.threads.com/@mathlab29/post/DbAuxAgn4l_">二次関数</a>
+  </div></div>
+  <div class="memo"><h3>▼大濠中学校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/GlUvORm1V/">命題</a>
+  </div></div>
+  <div class="memo"><h3>▼久留米附設中学校１年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/IKqvidycl/">幾何、計算</a>
+  </div></div>
+  <div class="memo"><h3>▼大濠中学校１年生</h3><div class="chips">
+    <a href="https://www.instagram.com/p/Da-OoFYAS3n/?img_index=2">幾何</a>
+  </div></div>
+  <div class="memo"><h3>▼筑紫丘高校１年生普通科</h3><div class="chips">
+    <a href="https://www.threads.com/share/F4P4xqH4d/">三角関数</a><a href="https://www.threads.com/share/GHdeBjQrY/">三角比</a><a href="https://www.threads.com/@mathlab29/post/DbQlo93H6UH">確率</a><a href="https://www.threads.com/@mathlab29/post/DaXQsCXEuLX">場合の数</a>
+  </div></div>
+  <div class="memo"><h3>▼筑紫丘高校１年生理数科</h3><div class="chips">
+    <a href="https://www.threads.com/share/Gy3i7u9SF/">方程式、式と証明</a><a href="https://www.threads.com/share/GMk96jmHp/">三角関数</a>
+    <!-- ★★★ 画像なし：元ファイル89行目の途中～99行目（この学年の残りのリンク～筑紫女学園高校１年生の手前の学校）。
+         元ファイルから補ってください。99行目末尾のリンク名は「二次関数」（…xmt=AQG0DDZ230dggGu7R2GOUd7URvZrHWz9dsvgodzG9dbnldc）。 ★★★ -->
+  </div></div>
+  <div class="memo"><h3>▼筑紫女学園高校１年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/Ggpu2w8rR/">三角比</a><a href="https://www.threads.com/share/Hg0EjU-s_/">幾何・三角比</a>
+  </div></div>
+  <div class="memo"><h3>▼筑陽学園高校１年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/BlzSydZ5zR/">三角比</a><a href="https://www.threads.com/@mathlab29/post/DaK5gCtEtb7">二次関数</a>
+  </div></div>
+  <div class="memo"><h3>▼九州産業高校１年生</h3><div class="chips">
+    <a href="https://www.instagram.com/mathlab29/p/DbnmWNLhvvO/">三角比</a><a href="https://www.instagram.com/p/DbVe7ujh8BL/">幾何</a>
+  </div></div>
+  <div class="memo"><h3>▼弘学館高校１年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/TqfBXie6e/">指数対数</a>
+  </div></div>
+  <div class="memo"><h3>▼西南学院高校一貫１年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/EFmxwv7FT/">三角関数</a>
+  </div></div>
+  <div class="memo"><h3>▼八女学院高校一貫１年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/F-QVregWB/">剰余の定理</a><a href="https://www.instagram.com/p/DafRqvphxFd/">式と証明</a>
+  </div></div>
+  <div class="memo"><h3>▼久留米高専１年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/F2_1t4Kpl/">三角関数</a>
+  </div></div>
+  <div class="memo"><h3>▼筑紫丘高校２年生理系</h3><div class="chips">
+    <a href="https://www.threads.com/share/F-8WpqCbL/">数Ⅲ微分</a><a href="https://www.threads.com/share/GhZDYTGrm/">数Ⅲ極限</a><a href="https://www.threads.com/@mathlab29/post/DbS_H_On29F?xmt=AQG0mtnz32nCTsRefsAX29opzhtSfl7uelcrqss4v-YSFA8">漸化式</a><a href="https://www.threads.com/@mathlab29/post/DasDurTErpp">数列</a><a href="https://www.threads.com/@mathlab29/post/Daeb8GVAfrh?xmt=AQG0DDZ230dggGu7R2GOUd7URvZrHWz9dsvgodzG9dbnldc">微積</a>
+  </div></div>
+  <div class="memo"><h3>▼筑紫丘高校２年生文系</h3><div class="chips">
+    <a href="https://www.threads.com/share/D5i2TUyz3/">統計</a><a href="https://www.threads.com/@mathlab29/post/DbS_H_On29F?xmt=AQG0mtnz32nCTsRefsAX29opzhtSfl7uelcrqss4v-YSFA8">漸化式</a><a href="https://www.threads.com/@mathlab29/post/DasDurTErpp">数列</a><a href="https://www.threads.com/@mathlab29/post/Daeb8GVAfrh?xmt=AQG0DDZ230dggGu7R2GOUd7URvZrHWz9dsvgodzG9dbnldc">微積</a><a href="https://www.threads.com/@mathlab29/post/DaebuaYgfkq?xmt=AQG0DDZ230dggGu7R2GOUd7URvZrHWz9dsvgodzG9dbnldc">空間ベクトル</a>
+  </div></div>
+  <div class="memo"><h3>▼福岡高校２年生理系</h3><div class="chips">
+    <a href="https://www.threads.com/share/FGpBDL1ei/">極限</a><a href="https://www.threads.com/share/EDlYz8Qgr/">統計セット</a>
+  </div></div>
+  <div class="memo"><h3>▼明善高校２年生文系</h3><div class="chips">
+    <a href="https://www.threads.com/share/Gqzl4AVze/">微積</a>
+  </div></div>
+  <div class="memo"><h3>▼城南高校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/DCdAu3wel/">ベクトル</a>
+  </div></div>
+  <div class="memo"><h3>▼春日高校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/H7t6fxVB-/">ベクトル</a><a href="https://www.threads.com/share/FL6CVezJh/">漸化式</a><a href="https://www.threads.com/share/E3SXcPh_l/">数列</a><a href="https://www.threads.com/@mathlab29/post/DZUv3jYEiy9">微積</a><a href="https://www.threads.com/@mathlab29/post/DZkGkSiAbho">指数対数</a>
+  </div></div>
+  <div class="memo"><h3>▼筑紫高校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/@mathlab29/post/Dac5HqygU5Z?xmt=AQG0DDZ230dggGu7R2GOUd7URvZrHWz9dsvgodzG9dbnldc">三角関数</a>
+  </div></div>
+  <div class="memo"><h3>▼福岡中央高校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/GmcBmECGa/">微積</a><a href="https://www.threads.com/@mathlab29/post/DZkHfuAAUrz">数列</a><a href="https://www.instagram.com/p/DaaNtLmBG6Z/">漸化式</a><a href="https://www.threads.com/@mathlab29/post/DZkGkSiAbho">指数対数</a>
+  </div></div>
+  <div class="memo"><h3>▼武蔵台高校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/FX5riXR2V/">漸化式</a><a href="https://www.threads.com/share/JUvpg5Mv4/">数列</a><a href="https://www.instagram.com/mathlab29/p/DbnkQ9Ehxwf/">微積</a><a href="https://www.threads.com/@mathlab29/post/DaNjbnTElBB">指数対数</a>
+  </div></div>
+  <div class="memo"><h3>▼大濠高校一貫２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/EdmrC-yvp/">求積</a><a href="https://www.instagram.com/p/Da-OoFYAS3n/?img_index=2">極限</a>
+  </div></div>
+  <div class="memo"><h3>▼大濠高校２年生</h3><div class="chips">
+    <span>ベクトル</span><a href="https://www.threads.com/share/I4Mu7McRg/">指数対数</a>
+  </div></div>
+  <div class="memo"><h3>▼筑紫女学園高校一貫２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/E9ajLzOSv/">空間ベクトル</a><a href="https://www.threads.com/share/HeatEjz1H/">積分計算</a><a href="https://www.threads.com/share/GkfyQvijM/">微分応用</a><a href="https://www.instagram.com/p/Da7OEOvhmT0/">微分</a>
+  </div></div>
+  <div class="memo"><h3>▼筑陽学園高校一貫２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/DjDUoQFFN/">極限</a><a href="https://www.threads.com/share/Dc7BKX03r/">ベクトル</a><a href="https://www.threads.com/share/E89iFkaGY/">漸化式</a>
+  </div></div>
+  <div class="memo"><h3>▼筑陽学園高校２年生</h3><div class="chips">
+    <a href="https://www.threads.com/share/MyTPLAZje/">微積</a>
+    <!-- ★★★ 画像なし：元ファイル141行目の途中～148行目（この学年の残りのリンク～「◆指導方針」の手前）。元ファイルから補ってください。 ★★★ -->
+  </div></div>
+</section>
+
+<!-- 指導方針 -->
+<section class="read">
+  <h2>指導方針</h2>
+  <p>「大学への数学」や某通信添削が優れた教材であり、また、東大、京大、国立医学部合格者がこれらの教材を多用している実態も衆目の一致する所です。</p>
+  <p>また、超一流の予備校講師が行う「衛星」授業動画も超分かりやすく、多くの学生を虜にしており、首都圏で学生数ナンバーワンの予備校は「衛星視聴」になりました。</p>
+  <p>しかしながら、これらの教材・動画を手に（購入・ローン）したからと言って、東大、京大、国立医学部に合格するとは限らないことも皆知っています。</p>
+  <p class="point noindent">本講座は学校の予習～高校数学の導入レベルから「大学への数学」や某通信添削や超一流予備校の先生授業（動画）で扱われている問題、超一流大学模試を十全に活用できるまでの数学力を育成する数学塾、数学専門塾です。</p>
+  <p>まず、本教室では、中学～高校１年生春ぐらいから高校数学の良質な先取り学習を行います（教室には義務教育レベルの数学を履修した生徒、また、同等の学力を有すれば小中高校生関係なく参加可能の内容になっています）。</p>
+  <p>「高校の授業が復習になってしまう」この先取り学習の効果は絶大で、定期テスト等は中学校時代と変わらないくらいの得点がとれます（<b>修猷館・筑紫丘・久留米附設定期考査で得点率九割以上の実績！</b>）。</p>
+  <p>次に、学校が先に進まない試験前や長期休暇の時には、さらに難易度の高いセンター過去問や入試問題に挑戦します。</p>
+  <p>この「高校よりワンランク上」の演習経験により、<a href="https://www.facebook.com/fcs9981/photos/pb.463376657016972.-2207520000.1457157112./992537207434245/?type=3&theater" target="_blank">校外模試で全国偏差値70～90台</a>（Ｓ台・Ｙゼミ・Ｋ塾・Ｓ研各模試～勿論記述型）を獲得する生徒も多数います。</p>
+  <p>最後に、早期に高校数学を修了させているので、高３の頃になると、だいたいの<a href="https://www.facebook.com/fcs9981/photos/pb.463376657016972.-2207520000.1457156981./1062274877127144/?type=3&theater" target="_blank">世の中にある参考書や問題</a>が解ける自力がつき、じっくり、腰を落ち着けて、一題の問題に取り組む環境が整います（学力コンテスト等に応募でき、入賞する権利を得る＝東大実践等大学別模試でA判定を取るチャンスができる）。</p>
+  <p>本講座は学年フリーの無学年制。（学年、出身校、あなたの過去に一切関係なく）あなたが予習したいだけ、高校数学を先取りできる環境を整えています。</p>
+  <p>基本的に高校数学を学校で学ぶ前の段階での入会、中高一貫生なら中２～中３までに、公立中学校出身者なら高校入試修了週に入会、受講する事が望ましいですが、高校数学を学びたい意欲ある小学生、中学生の参加も認めています（ここ数年、数学教室入会者の低年齢化が進んでいます。最早、学年と云う枠組み、固定観念はここにはありません）。</p>
+  <p>勿論、本講座の目的の一つでもある「大学への数学」愛読者は学年を問わず歓迎、学力コンテスト投稿者は大歓迎です（成績優秀者＝<a href="https://www.youtube.com/channel/UCIf5ExLxd44jsWUD4vljjpA" target="_blank">Ｂコース一等賞</a>、ピーターフランクル入賞実績他、多数あり）！</p>
+  <p>ここまで読んでいただいた方。この教室で行われている事が「とても信じ難い」と思われているでしょう。本講座は約３週間の無料体験期間があります。</p>
+  <p class="point noindent" style="margin-bottom:0"><b>「百聞は一見に如かず」直接見に来てご確認下さい。</b></p>
+</section>
+
+<!-- 反転授業 -->
+<section class="read">
+  <h2>何故数学教室の生徒はいい点数が採れるのか？</h2>
+  <p class="small noindent">（<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>にある授業動画の活用、いわゆる「反転授業」について）</p>
+  <p>2010年11月2日記念すべき日。数学教室の授業が初めて<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>
+  <!-- ★★★ 画像なし：元ファイル165行目の中ほど（画像の切れ目で読めない部分）。元ファイルから補ってください。 ★★★ -->
+  きました）。そこで数学教室もノート代わりとして<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>に授業を残し、動画をアップロードしていったのではないか、と記憶します（メモであり、販売目的でないので画像のクオリティーは衛星系に比べ高くないのはそのためです）。</p>
+  <p>次第に動画が揃い出すと、欠席者や中途入会者に便宜を図るための「消極的利用」に発展しますが、動画と云うものは、見ると眠くなるもので、また他方「タダ」だったことから、動画を学習に活用する生徒はまだ少数派だったと思います。</p>
+  <p>１～２年経った頃でしょうか「見てきました」と云う高校１年生が入会するようになり、高校の予習塾である数学教室の予習を<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>上で済ませてくる生徒が現れました。</p>
+  <p>ちょうどそのころから東大生が主宰するマナビーや武雄市の反転授業、かなり遅れて受験サプリがマスコミに露出するようになり、<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>等、ネットでの学習が市民権を得て来だしたと思います。</p>
+  <p>すると間もなく「次見てくる動画を指定して下さい」とオーダーする生徒（<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>「積極的利用」派）が増え出したのでした。</p>
+  <p>今では、<a href="https://www.facebook.com/fcs9981?fref=photo&ref=tn_tnmn" target="_blank">FB</a>や<a href="top2020.html" target="_blank">HP</a>にその日の授業メモを書き、視聴すべき動画をクリック一つで視聴できるようにしています（更新されたか否かを確認するには、<a href="https://twitter.com/fcs9981" target="_blank">ツイッター</a>をフォローする事で更新が確認できるようにしました）。</p>
+  <p>とは云え、全員が動画を欠かさず見て来て、教室に参加している訳ではなく（朝課外のため早起きしないと行けないので、10分の動画を見るのさえ苦痛の人が多いと思う）、視聴を強制はしていません。</p>
+  <p>見て来てない人には<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>がなかった頃のように最初から説明をしています。</p>
+  <p class="point noindent" style="margin-bottom:0">ただ、動画を見て来た生徒はあなたが説明を受けている間に、あなたより一題でも多く問題を解き、質問する事ができるのです。</p>
+</section>
+
+<!-- 料金・入会 -->
+<section>
+  <h2>月謝・入会について</h2>
+  <div class="price">
+    <div><span>月謝</span><b>6,500円</b><span>月末払い</span></div>
+    <div><span>入会金</span><b>不要</b></div>
+    <div><span>無料体験</span><b>約３週間</b><span>各教室</span></div>
+  </div>
+  <p class="small">月謝改定しました。お知らせは<a href="https://www.facebook.com/fcs9981/posts/pfbid0A9bgMQtdXvMy83GM8b22Pe3aT3fXsrnjJE1H6V8mPAqgRou3zHNYCvJsQo8zc9hil" target="_blank">こちら</a>。※公民館のご高配でできる金額となっています。</p>
+  <ul class="marks">
+    <li>教室で学びたい単元をあらかじめ<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>で視聴予習（<a href="https://www.youtube.com/watch?feature=player_embedded&v=zLLRAtSKWBI" target="_blank">反転授業</a>）を推奨します。</li>
+    <li>学校の授業が次の単元に入る前の入会を強くお勧めします。なぜなら、この各数学教室で予習し、学校の授業をすべて復習にできるからです。</li>
+    <li>特に、春休みや定期考査終了後の１週間は最も数学教室の効力が発揮される期間となります。入会を希望する方には最もおいしい期間だと思います。</li>
+    <li>学校で使っている教材を持参下さい。使えるものは使いますし、生徒の負担（時間的、金銭的）を縮減するためです。</li>
+  </ul>
+  <div class="btns two">
+    <a class="btn" href="top2020.html" target="_blank">各教室の空席状況・休講情報・地図</a>
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/261013.pdf" target="_blank">教室の特長（最新フライヤー）</a>
+  </div>
+</section>
+
+<!-- 教室一覧 -->
+<section>
+  <h2>教室所在地（地図）・開講日時</h2>
+  <p class="small">クリックすると教室の様子（写真）もご覧になれます。</p>
+  <ul class="rooms">
+    <li><a href="ooh.html" target="_blank"><b>おおはし数学教室</b><small>三宅地録会館</small></a></li>
+    <li><a name="k"></a><a href="ksg.html" target="_blank"><b>春日原数学教室</b><small>春日原公民館</small></a></li>
+    <li><a name="sr"></a><a href="sir.html" target="_blank"><b>白木原数学教室</b><small>白木原公民館</small></a></li>
+    <li><a name="sm"></a><a href="simo.html" target="_blank"><b>下大利数学教室</b><small>下大利団地公民館</small></a></li>
+    <li><a name="f"></a><a href="fut.html" target="_blank"><b>二日市数学教室</b><small>二日市コミセン</small></a></li>
+    <li><a name="a"></a><a href="gid.html" target="_blank"><b>朝倉街道数学教室</b><small>針摺東公民館</small></a></li>
+    <li><a href="krm.html" target="_blank"><b>久留米数学教室</b><small>久留米毎日文化会館</small></a></li>
+    <li><span><b>高校数学NewStandard</b><small>zoom</small></span></li>
+  </ul>
+</section>
+
+<!-- その他の読み物 -->
+<section>
+  <h2>もっと知りたい方へ</h2>
+  <div class="btns one">
+    <a class="btn" href="koe.html" target="_blank">生徒の声</a>
+    <a class="btn" href="ob.html" target="_blank">ＯＢの声</a>
+    <a class="btn fill" href="mesage2011.html" target="_blank">入会を希望する方は必読！主宰者からのメッセージ集</a>
+    <a class="btn gold" href="https://www.fcs9981.co.jp/youtube.html" target="_blank">Youtube授業予習動画集～目次</a>
+    <a class="btn" href="exm.html#fcs" target="_blank">修猷館高校、福岡高校のある学区で数学教室に通いたい生徒へ。また、中学内容の数学を受講させたい中学生の保護者の方へ</a>
+  </div>
+</section>
+
+<!-- Q&A -->
+<section>
+  <h2><a name="qa"></a>ショートＱ＆Ａ集</h2>
+
+  <div class="qa">
+    <div class="q">どんな形式で教えているのですか？個別？授業？</div>
+    <div class="a"><p>少人数＝10名くらいのグループ(＝班)学習形式で、説明の時はホワイトボードを使いますが、問題を解く時は個別です。大学院のゼミ形式みたいな感じです。</p></div>
+  </div>
+
+  <div class="qa">
+    <div class="q">予習塾のようですが、学校でわからないところを教えてくれるのですか？</div>
+    <div class="a">
+      <p>数学教室では一日（一回の授業）で高校の一週間分の予習をし、学校の授業を復習に変えてしまう数学専門塾です。</p>
+      <p>予備校現役コースや学習塾高等部では学校で習った事を前提に生徒に教えます。基礎から教え始める教室は全国でも稀のようです。</p>
+      <p>数学教室では生半可でないスピードで教える高校の数学の授業一週間分の予習（先取り）ダイジェストを行います。</p>
+      <p>復習は全く行わないのですか？学校が進まない試験前や夏休み等に復習や学校のプリントの質問を消化する事もありますが（わからない所の質問受けや、宿題の解消を目的とされている方は数学教室でなく予備校や学習塾の個別指導部、または、家庭教師を雇った方がいいと思います）数学教室での予習効果もあって、試験前は他の教科の勉強に費やし、復習は自力で「できる子」になっています。</p>
+      <p><b>要するに、数学教室で行う予習により、学校で分からないところが激減するのです。</b></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">教材は何を使っているのですか？</div>
+    <div class="a">
+      <p>子ども達の負担を減らすため、出来る限り学校の教材を使います。そして、使えるものはできるだけ使います。</p>
+      <p>しかし、子どもと今ある教材がミスマッチしていたら、市販の問題集（1,500～2,000円程度）をその子の目的に合わせて指定します（ストックがあれば貸与します）。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">模試対策は対応出来るのですか？</div>
+    <div class="a"><p>予習が出来るようになったら「大学への数学」が自力で出来るように誘導します。模試対策はこれで必要十分で、毎年、偏差値80台の生徒が出ています（全国偏差値90台、「大学への数学」誌「学コン」一等賞も歴代複数名でています）。</p></div>
+  </div>
+
+  <div class="qa">
+    <div class="q">クラス分けはありますか？</div>
+    <div class="a">
+      <p>小中学校の間まで通っていた塾は生徒の能力に応じて「クラス分け（+確認テスト）」がある所が大半のようです。</p>
+      <p>これは、クレームが出ないよう、分かりやすい授業をするため（少ない先生で多くの生徒を教える側の都合で）行っているものです。</p>
+      <p>高校生はどうでしょうか？福岡の人口規模では「クラス分け」はできません。学校毎で進路がバラバラ。理系、文系、特クラ、凡クラ？様々な呼称のクラスがあって、授業をしても自分の進度に合わず、あれほど中学時代通っていた塾ですらみんな辞めて続きません。</p>
+      <p>クラスを作ること自体大手すら諦めてます（だから動画に誘導する）。</p>
+      <p>高校と小中（学生を教えるノウハウ）は全く別物（「クラス分け（+確認テスト）」は通用しない）ということです。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">中学時代、数学が苦手でした。</div>
+    <div class="a">
+      <p>中学時代の成績はあまり関係ありません。</p>
+      <p>正直、得意な人でも、苦手になるのが高校数学なので、寧ろ、得意な子が出来なくなる方が深刻です。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">トップ校または、数学の成績が良いお子さんでないとついていけませんか？</div>
+    <div class="a">
+      <p>在籍生は学年、学校もばらばらでクラスが成立していません。そのため集団授業は行えませんので「ついていけない」と云う概念が数学教室にはありません（<a href="https://www.facebook.com/fcs9981?ref=hl" target="_blank">FB</a>・<a href="https://twitter.com/fcs9981?lang=ja" target="_blank">X</a>・<a href="https://www.instagram.com/mathlab9981" target="_blank">Instagram</a>・HPの授業メモにご覧になられるように、やっている事は一人一人ばらばらです）。</p>
+      <p>ただ、学校の授業そのものにご子息がついていけなくなる事は大いにあります。</p>
+      <p>数学教室は学校の授業についていくために予習を行いますが、学校が先に進んでしまうと追いつくのは大変です（元々できる人は別ですが）。</p>
+      <p>そこで、新高校１年生は入試が終わった週から学校で配布された教材を少しでも多く解かせて（理想は合否がはっきりしない入試終了の週からの参加が望ましい。教材は貸与します）入学式後の授業に臨ませるようにしています（私立中の子は高校数学の単元に入る１ヶ月前から）。</p>
+      <p>そのチャンスを逃し、かつ、数学が苦手だった場合、ついていけない、と云うことが起きると思われますが、数学教室は好きな教室に好きなだけ通える制度があるので、出来るだけ多くの教室に通い、キャッチアップしてください（<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>の授業動画もご利用頂けます）。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">いつぐらい入会させたらいいのでしょうか？<br>私立中学生への対応は？</div>
+    <div class="a">
+      <p>最近、解った事ですが、数学教室は「入会何年目か」でやっている事が決まる（整っている）教室です。</p>
+      <p>よって、数学教室は高等部や予備校の様な学年、クラス編成は存在しません。</p>
+      <p>義務教育内容の数学が理解できていれば、いつでも、誰でも、入会できますし、早期入会して、長期に亘り教室で研鑽を積む者程、遠くの目標に到達できます。</p>
+      <p>とは云え、一般的には、入試が終わった週（中３の２～３月）、中高一貫私立中なら高校数学に入る前に入会する事が望ましいでしょう（学校の授業がすべて復習になりますから）。</p>
+      <p>入会が遅れた高１、高２、私立中３年生の方は、早期に入会すればする程、時間を取り戻す事は可能ですが、志望校が高いと、時間切れのため、登りきれないかもしれません。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">久留米附設中学校２年生（大濠中学校２年生）ですが進度が早く、青チャートを使っていて対応できる塾がありません。</div>
+    <div class="a">
+      <p>詳しくは<a href="https://www.facebook.com/fcs9981/posts/pfbid02S42LLwdbCLSWDugnmTeiF1a3WfhQ2snr5LUhzbEWL985ZQaprLdvky21vMokgJJAl" target="_blank">こちら</a></p>
+      <p>補足※次回の定期考査が高校数学内容の中学生は学年に問わず早急に教室に来てください。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">オープン参加とは何ですか？<br>中学生は入会できますか？</div>
+    <div class="a"><p>詳しくは<a href="https://www.facebook.com/fcs9981/posts/pfbid0vwdnkTnkmGsEoe6CkeMeXjQYUntWghXcsf1MJTBoFbH4KdxkQCxvGFj9JKSipyhMl" target="_blank">こちら</a></p></div>
+  </div>
+
+  <div class="qa">
+    <div class="q">小学生は入会できますか？</div>
+    <div class="a">
+      <p>義務教育レベルの数学を一通り修得、もしくは同等の学力があれば数学教室で学ぶ事は可能です。</p>
+      <p>過去も数名いました。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">生徒の声を読むと「生徒が生徒に教える」とありました。本当ですか？</div>
+    <div class="a">
+      <p>本当です。数学教室の最大の特長だと思っていましたが、首都圏の数学専門塾の最高峰のクラスでも同様な事をやっているそうです。</p>
+      <p>勿論、これを具現化するためには、教え役の生徒の能力を見極める事、そして何よりも「嘘を教えないように」先生並みに生徒を磨き上げないと成立しません。</p>
+      <p>相当、熟達した教室管理能力、生徒（先生？）養成能力がないとできない事だと密かに自負しています。</p>
+      <p>尚、卒業生の多くは、塾講師やチューターとして第一線で即戦力として活躍しているようです。</p>
+    </div>
+    <div class="add">
+      <span class="tag">追記</span><br>
+      <a href="http://www.nikkei.com/article/DGXMZO77678150Z20C14A9000000/?df=3" target="_blank">勢いがある高校は、生徒同士が教え合って勉強する『団体戦』の手法を推し進めている</a>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Youtubeを始めてるそうですね？</div>
+    <div class="a"><p>はい。新しい<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">電子教科書</a>として提案しています。また現役東京大学生が運営している学習支援サイト<a href="http://manavee.com/" target="_blank">マナビー</a>にも参加しています。これは、授業のノート代わりに留まらず、予習のため使って欲しい、事前に<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">動画</a>を見て「その続きは？」と教室で声をかけて欲しい、そのような希望を持って<a href="https://www.fcs9981.co.jp/youtube.html" target="_blank">You Tube</a>に取り組んでいます（世の中ではこのことを「<a href="https://www.youtube.com/watch?feature=player_embedded&v=zLLRAtSKWBI" target="_blank">反転授業</a>」と称しているようです～反転授業のメリットは<a href="https://www.facebook.com/hantenjugyo/posts/566727206734688" target="_blank">こちら</a>を参照）。</p></div>
+    <div class="add">
+      <span class="tag">追記</span><br>
+      <a href="http://toyokeizai.net/articles/-/13224?page=5" target="_blank">『ワーク･シフト』著者、リンダ･グラットン氏に聞くより</a>
+      <p><span class="speaker">グラットン</span>：人材育成が必要というのは同感です。先日のダボス会議でも紹介されましたが、今はインターネット上の教育が台頭しています。ご存じのとおり、欧米の多くの大学は、教材をネット上で公開しています。そのため、再教育にチャレンジしたい人にも道は開かれています。</p>
+      <p><span class="speaker">渡邊</span>：でも、ｅラーニングだと、実践できない。仕事には知識だけでは不十分で、実践も必要です。</p>
+      <p><span class="speaker">グラットン</span>：当然です。最近のｅラーニングでは、グローバルなグループを作り、<span class="em">互いがメンターになる仕組みもあります</span>。それにビル・ゲイツ財団も巨額の寄付をしています。<br>
+      こんな例があります。パキスタンの11歳の少女が、スタンフォード大学の物理学の講義をインターネットで受講し、トップの成績を収めたのです。これは世界中の人が、どこにいても学習できる好例です。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">スマホ（タブレッド）が必要なのですか？</div>
+    <div class="a">
+      <p>イヤホンもあるといいです。</p>
+      <p>定期考査が終わった日の教室は壮観です。教室の生徒が「試験が終わりました。次どの動画を見たらいいのか教えてください」とフォーカス（チャート、レジェンド）を持ってページの指定を尋ねます。そして、私の分身（動画の中の私）が一人一人の生徒に授業を始めているのです（未来ですね）。そして生徒は一斉にフォーカス（チャート、レジェンド）を解いています。</p>
+      <p>先生（画面の中の分身）が生徒の数だけいて問題を一心不乱に解く光景。</p>
+      <p>わからなかったら私が生徒を指名して私の分身として「生徒」が「生徒」に教えます。</p>
+      <p><b>これが33年続く数学教室の姿です！</b></p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">授業動画を使って「生産性を上げる」ある塾の経営者の書き込みを見ました。数学教室も成績のいい生徒を集め、楽な指導（生産性を上げる）をやっている塾なのですか？</div>
+    <div class="a">
+      <p>厳しい質問です。私も書き込み（著名ユーチューバー）を見ました。確かに授業動画を適切に使うと「生産性を上げる」ことができることは認めます。しかし彼女の書き込みの生産性とは「成績」というより「金銭」「拡大」「承認欲求」のそれだと過去の言動、行動より推察されます。</p>
+      <p>他方、数学教室の「生産性を上げる」とは、高２で冠模試（東大実戦、京大プレ、九大オープン）にチャレンジできる実力をつける（極大化する）ため、チャート、レジェンド、フォーカスを一刻も早く速習するためのそれです。</p>
+      <p>同業他社の（課金を極大化するために）90分がっちり見せる授業動画群の提供とは本質的に異なります。</p>
+      <p>次に、結果（数字）を出し、ネット広告、テレビCMで多くの優秀な生徒を集め、結果を再生産する大手学習塾と同じことをしてはいないのか？とのご指摘かと存じますが、残念ながらそれが通用するのは中学受験、公立高校受験までで、より高度な大学受験ではその手法は全く歯が立ちません（御三家の生徒多数が通う某教場で、年度の変わり目に４割の生徒が去っていったとの元教室長の書き込みもありました。その後、残っている生徒の進学実績も中受、高校受験のように結果をはっきり出していません、出せません？）。</p>
+      <p>大学入試はただ「成績のいい生徒」を集めれば結果が出るほど甘くないのです（御三家に受かった頭のいい子で地元の私立大学に落ちる人は想像できませんが、現実は、、、、）。</p>
+      <p>もし通俗的な「生産性を上げる」塾・予備校と数学教室が同列ならば、そもそも無料のYouTubeに授業動画を上げたりはしないでしょう。また数学教室のような実績が出れば、そのうち月謝を一桁上げて、公民館を使わず、銀行からの融資を受けてホテルのような教場を建て、見栄えを整え、テレビCMを打ち、集客を大々的にする（せざるを得ない）でしょう。</p>
+      <p>しかし、それでも大学入試は中学入試、高校入試と違って、仮に中高入試の十数倍課金しても自分の希望する大学に受かりません。</p>
+      <p>我々は大学受験の本質的難しさを知っています（「高い程、いいものに見えるだろう」と安易に高額な値札を掲示し、長期間引き落としが続く間、無責任を貫くことはとても人間としてできない）。</p>
+      <p>数学教室と（動画授業を使ったビジネススキームに投資し、参戦して来た）彼らとでは明らかに次元（生産性のベクトル、育ち？）が違うのです。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">授業動画も問題指定もSNS（クラウド）にある。家ですればいい。教室に行く必要はないのでは？</div>
+    <div class="a">
+      <p>全員が「生徒」が「生徒」に教えている訳ではないので、確かに数学教室に来なくても数学教室がやっていることはできます。</p>
+      <p><a href="https://www.youtube.com/@yobinori" target="_blank">ヨビノリ</a>や<a href="https://www.youtube.com/@user-gy1ir1eb5d" target="_blank">美しい数学の世界</a>を見て学ぶ力があれば塾・予備校（学校？）は必要ないくらいよくできた授業動画群です。</p>
+      <p>問題はそこに行くまででしょう。</p>
+      <p>あと、数学教室には学年がありません。人間は心の動物です。同級生だけでなく、他学年、他学校の生徒の存在は大きい。</p>
+      <p>最後に高校とのマッチング。このアダプトは多くの動画群（クラウド）では途上です（チューター、コンシェルジュ、将来はAI？）。</p>
+      <p>彼ら（AI）より僕らの質（腕）が見劣りした時、数学教室の役割が終える日が来るかもしれません。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Newstandard とは？リモートもして下さるのですか？費用は？</div>
+    <div class="a">
+      <p>（それでも）数学教室に行かず数学教室の指導を受けることはできないか？</p>
+      <p>コロナ前からYouTube仲間の塾の生徒に数学教室のノウハウを伝授する試みから始まったNewstandard。テレビ電話みたい使い方で物理的に教室に来ることができない生徒に遠隔指導を試したのが始まりでした。</p>
+      <p>Wi-Fiが完備した教室（春日原〈月〉二日市〈火〉朝倉街道〈日〉久留米〈火〉）が徐々に増え、教室の熱さと直結するフェーズに入ろうとしています。</p>
+      <p>詳細はお尋ねください。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">何故こんなに月謝が安いのですか？<br>ちゃんと教えてくれるのですか？</div>
+    <div class="a">
+      <p>公民館だからです（そして深い理由は<a href="https://www.facebook.com/fcs9981/posts/pfbid02XJiiNPLoM3xY4sTvworbmYNb4vm954PXxq9NQTWwAa8FbWakfAbvU1QS25VLq8JNl" target="_blank">こちら</a>）。そして、検索サイトにお金を積んでいないから（塾紹介サイトはお金を積めば順位が上がる。そのお金の出どころは・・・）。</p>
+      <p>開講して33年（1993年6月開講）が過ぎました。その間、多くの塾が廃業する中で生き残ってますし、会員は東大、京大、九大他国立医学科に現役合格をしていますから、きっとちゃんと教えているのでしょう。</p>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">AI検索で調べても見当たりません？</div>
+    <div class="a"><p>最近ご指摘を賜ったのでその事実を調査検証し、時間割の<a href="https://note.com/mathlab29/n/n9bea109fbf5f">小文</a>にまとめてみました。ご参照下さい。</p></div>
+  </div>
+</section>
+
+<!-- 在籍校 -->
+<section>
+  <h2>会員の在籍校【令和8年4月現在】</h2>
+  <ul class="schools">
+    <li>久留米附設高校</li><li>弘学館高校</li><li>筑紫丘高校（理数科・普通科）</li><li>福岡高校</li><li>明善高校（総文科・普通科）</li><li>朝倉高校</li><li>春日高校</li><li>筑紫高校</li><li>筑紫中央高校</li><li>久留米高校</li><li>武蔵台高校</li><li>久留米高等専門学校</li><li>早稲田佐賀高校</li><li>西南学院高校（一貫・一般）</li><li>福大大濠高校（一貫・一般）</li><li>東福岡高校（国際）</li><li>上智福岡高校</li><li>筑紫女学園高校（一貫）</li><li>筑陽学園高校（一貫・一般）</li><li>九州産業高校</li><li>筑紫台高校</li><li>八女学院高校</li><li>久留米附設中学校</li>
+  </ul>
+</section>
+
+<!-- 主な進学先 -->
+<section>
+  <h2><a name="goukaku"></a>会員たちの主な進学先</h2>
+  <p class="small">【進学実績なので<span class="em">重複は一切なし</span>・平成５年６月、光が丘公民館「生徒数僅か２名」の始まりから今日（令和8年3月）までの実績の一部です】</p>
+  <ul class="univ">
+    <li><b>東京大学</b><span>理一・理二・文一・文二・文三</span></li>
+    <li><b>京都大学</b><span>医医・医人・理前・理後・法・経・農・文</span></li>
+    <li><b>東京工業大学</b><span>７類</span></li>
+    <li><b>一橋大学</b><span>法・商・社</span></li>
+    <li><b>お茶の水女子大学</b><span>生活科学</span></li>
+    <li><b>東京外国語大学</b><span>外国語学部</span></li>
+    <li><b>名古屋大学</b><span>工</span></li>
+    <li><b>京都府立医科大学</b><span>医医</span></li>
+    <li><b>大阪大学</b><span>工・基工・法・経・文・外</span></li>
+    <li><b>奈良女子大学</b><span>文学部</span></li>
+    <li><b>神戸大学</b><span>医看</span></li>
+    <li><b>北海道大学</b><span>工・水産</span></li>
+    <li><b>旭川医科大学</b><span>医医</span></li>
+    <li><b>東北大学</b><span>経</span></li>
+    <li><b>九州大学</b><span>共創・21世紀プログラム・医医・医生・医保・歯・薬・法・教・理・農・工・芸工・経・経工・文</span></li>
+    <li><b>広島大学</b><span>医医・医保・医看・工・理・法</span></li>
+    <li><b>筑波大学</b><span>文系群</span></li>
+    <li><b>千葉大学</b><span>医医（文系コース出身）・工</span></li>
+    <li><b>首都大学東京</b><span>経済経営・都市環境</span></li>
+    <li><b>東京学芸大学</b><span>教</span></li>
+    <li><b>東京農工大学</b><span>工学部</span></li>
+    <li><b>埼玉大学</b><span>経・教養</span></li>
+    <li><b>電気通信大学</b><span>情</span></li>
+    <li><b>東京海洋大学</b><span>海洋工</span></li>
+    <li><b>信州大学</b><span>医保</span></li>
+    <li><b>静岡県立大学</b><span>薬</span></li>
+    <li><b>大阪府立大学</b><span>経</span></li>
+    <li><b>山口大学</b><span>理・工・経・人文・国際総合科学</span></li>
+    <li><b>徳島大学</b><span>薬</span></li>
+    <li><b>愛媛大学</b><span>農</span></li>
+    <li><b>高知工科大</b><span>工</span></li>
+    <li><b>熊本大学</b><span>医医・医看・薬・法・工・理・文</span></li>
+    <li><b>長崎大学</b><span>医医・薬・医看・経</span></li>
+    <li><b>鹿児島大学</b><span>医医・農獣医・法文</span></li>
+    <li><b>大分大学</b><span>医医・理工・教・経</span></li>
+    <li><b>宮崎大学</b><span>医医・農・農獣・工</span></li>
+    <li><b>佐賀大学</b><span>医医・医看・理工・教・経</span></li>
+    <li><b>琉球大学</b><span>医保</span></li>
+    <li><b>福岡教育大学</b><span>教</span></li>
+    <li><b>福岡女子大学</b><span>人間環境・国際文理</span></li>
+    <li><b>九州工業大学</b><span>情工・工</span></li>
+    <li><b>北九州大学</b><span>法・国際環境工</span></li>
+    <li><b>ＡＰＵ</b><span>国際経営</span></li>
+    <li><b>関西大学</b><span>ビジネスデータサイエンス学部</span></li>
+    <li><b>多摩美術大学</b><span>美術学部・プロダクトデザイン専攻</span></li>
+    <li><b>防衛医科大</b><span>医医</span></li>
+    <li><b>産業医科大</b><span>医医・医看</span></li>
+    <li><b>自治医科大</b><span>医医</span></li>
+    <li><b>防衛大</b><span>人文・理工</span></li>
+  </ul>
+  <p>他多数</p>
+  <p class="point">●西南、筑女、大濠、筑陽高校在籍会員【いずれも高校入学組】の<b class="em">九州大学現役合格実績</b>多数</p>
+  <p class="point" style="margin-bottom:0">●武蔵台高校、筑紫中央高校、柏陵高校、久留米高校、小郡高校、大宰府高校、筑紫台、福大若葉高校在籍会員の<b class="em">国公立大学・大学校現役合格実績</b>あり</p>
+</section>
+
+<!-- 年度別実績 -->
+<section>
+  <h2>年度別・現役進学実績</h2>
+  <p class="small">年度を押すと一覧が開きます。</p>
+<!--RESULTS-->
+  <div class="btns one" style="margin-top:14px">
+    <a class="btn" href="goukakufcs.html" target="_blank">18年以前の入試現役進学実績はこちら</a>
+  </div>
+</section>
+
+<!-- 連絡先 -->
+<section>
+  <h2>お問い合わせ</h2>
+  <div class="btns two">
+    <a class="btn fill" href="tel:0929192200"><span class="stack">電話する<small>092-919-2200</small></span></a>
+    <a class="btn" href="mailto:mail@fcs9981.sakura.ne.jp"><span class="stack">メールする<small>mail@fcs9981.sakura.ne.jp</small></span></a>
+  </div>
+</section>
+
+</main>
+
+<footer>ＦＣＳ数学教室</footer>
+
+<nav class="fixed-cta" aria-label="お問い合わせ">
+  <a class="tel" href="tel:0929192200">電話する</a>
+  <a class="mail" href="mailto:mail@fcs9981.sakura.ne.jp">メールする</a>
+</nav>
+
+</body>
+</html>
