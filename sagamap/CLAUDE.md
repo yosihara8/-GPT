@@ -178,6 +178,7 @@
 - 管理画面「お問い合わせ」：未対応／対応中／対応済み・対応メモ・返信リンク・「Excel でダウンロード」（/api/admin/inquiries/export）。月次バックアップにも含める。
 
 ## 自動保守（オーナー承認済み：毎朝、Claude が自動で点検・修正・公開）
+- 画面のエラーの記録（/api/errors）は、今の版（VERCEL_GIT_COMMIT_SHA。画面は NEXT_PUBLIC_APP_VERSION を送る）のものだけ。更新前から開いたままの古い画面のエラーや、拡張機能・「Script error.」などは記録しない（問題のない報告メールを出さない。オーナー決定）。
 - アプリ：毎日の自動処理（cron daily, 0:10 JST）が直近 24 時間のエラーをまとめ、「【佐賀観光マップ】エラー報告 日付（N 件）」を運営者のメールへ送る（src/lib/error-report.ts。個人情報は伏せ字）。エラーがなければ送らない。
 - Claude の Routine（毎朝 6:47 JST）の手順:
   1. Gmail で `from:noreply@saga-kanko-map.com subject:エラー報告 newer_than:2d` を読む（読むだけ。送信・削除はしない）。
