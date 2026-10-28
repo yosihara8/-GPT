@@ -36,7 +36,11 @@ const nextConfig = {
   poweredByHeader: false,
   // next/image は使っていないため、画像の最適化（/_next/image）を止める（Next 14 の DoS の脆弱性の入口を閉じる）
   images: { unoptimized: true },
-  ...(appUrl ? { env: { NEXT_PUBLIC_APP_URL: appUrl } } : {}),
+  env: {
+    ...(appUrl ? { NEXT_PUBLIC_APP_URL: appUrl } : {}),
+    // 公開ごとの版（エラーの記録で、更新前の古い画面のエラーを見分けるため）
+    NEXT_PUBLIC_APP_VERSION: process.env.VERCEL_GIT_COMMIT_SHA || "dev",
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
