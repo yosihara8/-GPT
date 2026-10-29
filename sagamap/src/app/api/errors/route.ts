@@ -4,12 +4,22 @@ import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
+const IGNORE = [/^Script error\.?$/, /ResizeObserver loop/, /chrome-extension:|moz-extension:|safari-(web-)?extension:/];
+
 /** ブラウザで起きたエラーの記録（同じ接続元から 10 分に 20 件まで） */
 export async function POST(req: Request) {
   const rl = await rateLimit(`errors:${clientIp(req.headers)}`, 20, 10 * 60);
   if (!rl.ok) return new NextResponse(null, { status: 204 });
-  const body = (await req.json().catch(() => null)) as { message?: unknown; stack?: unknown; url?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { message?: unknown; stack?: unknown; url?: unknown; version?: unknown } | null;
   if (!body || typeof body.message !== "string" || !body.message) return new NextResponse(null, { status: 204 });
+  // 問題のないものは記録しない（エラー報告メールを出さない。オーナー決定）
+  //  - 更新前から開いたままの古い画面のエラー（新しい版ではすでに直っている）
+  //  - ブラウザの拡張機能や、画面の動きに関係しない決まったメッセージ
+  const current = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (current && body.version !== current) return new NextResponse(null, { status: 204 });
+  if (IGNORE.some((re) => re.test(body.message as string) || (typeof body.stack === "string" && re.test(body.stack)))) {
+    return new NextResponse(null, { status: 204 });
+  }
   await query("INSERT INTO error_logs (source, message, stack, url, user_agent) VALUES ('browser', $1, $2, $3, $4)", [
     body.message.slice(0, 1000),
     typeof body.stack === "string" ? body.stack.slice(0, 4000) : null,

@@ -5,7 +5,13 @@ import { useEffect } from "react";
 /** 画面で起きたエラーをサーバーに記録する（運営者が管理画面の「エラー」で確認できる） */
 export function reportError(message: string, stack?: string) {
   try {
-    const body = JSON.stringify({ message: message.slice(0, 1000), stack: stack?.slice(0, 4000), url: location.href });
+    const body = JSON.stringify({
+      message: message.slice(0, 1000),
+      stack: stack?.slice(0, 4000),
+      url: location.href,
+      // この画面の版（更新前から開いたままの古い画面のエラーは、サーバー側で数えない）
+      version: process.env.NEXT_PUBLIC_APP_VERSION,
+    });
     if (!navigator.sendBeacon?.("/api/errors", new Blob([body], { type: "application/json" }))) {
       fetch("/api/errors", { method: "POST", body, headers: { "Content-Type": "application/json" }, keepalive: true });
     }
