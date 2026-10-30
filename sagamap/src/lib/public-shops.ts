@@ -41,5 +41,35 @@ export async function publicShops(filter: { categories?: string[] | null; towns?
   );
 }
 
+/** 宿・飲食の基本情報（公開資料の名前・住所。お店が自分で登録したものは除く）。電話は会員だけなので出さない */
+export type PublicListing = { id: number; name: string; kind: "stay" | "food"; address: string };
+
+const FOOD_CATEGORIES = ["飲食", "カフェ", "スイーツ", "バー"];
+
+/**
+ * 町が決まっている「人気のテーマ」のページ（嬉野温泉・武雄温泉など）に、基本情報も載せる。
+ * 宿はページの業種に宿泊が入る（または業種の指定が無い）とき、飲食は飲食の業種が入るときだけ。言葉でしぼるページには載せない。
+ */
+export async function guideListings(g: Guide): Promise<PublicListing[]> {
+  const f = guideFilter(g);
+  if (!f.towns || f.words) return [];
+  const kinds = [
+    ...(!f.categories || f.categories.includes("宿泊") ? ["stay"] : []),
+    ...(!f.categories || f.categories.some((c) => FOOD_CATEGORIES.includes(c)) ? ["food"] : []),
+  ];
+  if (kinds.length === 0) return [];
+  return query<PublicListing>(
+    `SELECT s.id, s.name, s.kind, s.address
+       FROM tourist_spots s
+      WHERE NOT s.hidden AND s.kind = ANY($1) AND s.address IS NOT NULL
+        AND s.address LIKE ANY (SELECT '%' || t || '%' FROM unnest($2::text[]) t)
+        AND (s.tel IS NULL OR NOT EXISTS (
+              SELECT 1 FROM businesses b
+               WHERE regexp_replace(b.contact, '\\D', '', 'g') LIKE '%' || regexp_replace(s.tel, '\\D', '', 'g') || '%'))
+      ORDER BY s.kind DESC, s.id`,
+    [kinds, f.towns],
+  );
+}
+
 /** JSON-LD を <script> に埋め込むとき、</script> などで抜け出されないようにする */
 export const jsonLd = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");

@@ -33,7 +33,8 @@
   --brand-600: 34 64 46;
   --brand-700: 27 51 37;
   --brand-900: 17 35 26;
-  --page-bg: 246 243 236;
+  /* 事業主の画面も白を基調に（形はお客さまの画面とそろえ、色は深緑のままにして見分けやすくする。オーナー決定） */
+  --page-bg: 255 255 255;
 }
 [data-theme="admin"] {
   --brand-50: 244 242 250;
@@ -44,6 +45,11 @@
   --brand-700: 70 52 130;
   --brand-900: 40 30 80;
   --page-bg: 243 241 245;
+}
+/* 事業主の画面のカードも、お客さまの画面と同じく影なし・角丸小さめ */
+[data-theme="business"] .card {
+  border-radius: 0.75rem;
+  box-shadow: none;
 }
 body {
   @apply bg-cream text-slate-900 antialiased;

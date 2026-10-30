@@ -43,6 +43,11 @@ export const EN: Record<string, string> = {
   // フッター・お店さがし
   "お店さがし": "Find shops",
   "佐賀のお店さがし": "Find Shops in Saga",
+  "宿・施設の基本情報": "Inns & facilities",
+  "電話番号・地図での行き方は、会員登録（無料）をすると地図の画面で見られます。": "Sign up free to see phone numbers and map directions on the map screen.",
+  "お店・宿の方へ：": "For shops & inns: ",
+  "無料で登録": "register free",
+  "すると、写真・紹介文・クーポンを載せられます。": " to add photos, a description and coupons.",
   "佐賀観光のお店さがし": "Find Shops for Your Saga Trip",
   "佐賀グルメ": "Saga Gourmet",
   "ランチ": "Lunch",
