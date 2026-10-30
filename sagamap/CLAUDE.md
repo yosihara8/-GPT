@@ -60,6 +60,9 @@
 - どの公開ページにも登録の案内（下に固定の「無料登録」・MEMBER の欄・ぼかしたクーポン）。登録後は `?next=/?shop=ID` でそのお店のページへ。会員（お客さま）が /shops/ID を開くと地図のお店のページへ移る。
 - ジャンルの定義・説明文は src/lib/guides.ts（「佐賀のカフェ」「佐賀のランチ・グルメ」など）。構造化データ（JSON-LD：LocalBusiness / ItemList / BreadcrumbList）、canonical、sitemap.xml（お店・お店さがし・掲載店のあるエリア）、robots でお店の写真は許可。フッターにお店さがしへのリンク。
 - Google に見せる内容と人に見せる内容を変えない（クローキング禁止）。
+- 佐賀観光でよく検索される言葉の上位 10 語（2026-10 調べ）を反映：佐賀 観光（トップ・/guide の題）、佐賀 グルメ、佐賀 ランチ、佐賀 カフェ、佐賀牛、呼子 いか（唐津）、嬉野温泉、武雄温泉、有田焼、佐賀 お土産。
+  - ジャンルに無い言葉は「人気のテーマ」のページ（src/lib/guides.ts の THEMES：gourmet・sagagyu・karatsu-yobuko・ureshino・takeo・arita・souvenir）。業種・町（住所）・言葉（名前・紹介文・メニュー）でしぼる（public-shops.ts の guideShops）。エリアの子ページは作らない。
+  - 掲載店が 0 件のテーマのページは noindex・sitemap に入れない（中身の無いページを検索に出さない）。登録前のトップ・/guide・お店さがしのページ・フッターからリンク。
 
 ## 日本語・英語の切り替え（お客さま向けの画面だけ）
 - ヘッダーの「EN／日本語」ボタン。Cookie `sagamap-lang`（ja/en）。サーバーの画面は `getT()`（src/lib/i18n-server.ts）、クライアントは `useT()`/`useLang()`（src/components/LangProvider.tsx）。
