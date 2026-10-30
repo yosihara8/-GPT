@@ -26,13 +26,30 @@ export default async function WelcomeView({ member }: { member: boolean }) {
         }
         lead={t("近くのお店・お得なクーポン・行き方の案内が、すべて無料で使えます。")}
       />
-      <div className="mx-auto flex max-w-2xl gap-2 px-5 pt-5">
-        <Link href="/register/customer" className="btn-accent btn-lg flex-1">
-          {t("無料で登録する")}
-        </Link>
-        <Link href="/login" className="btn-outline flex-1 rounded-full py-3 text-base">
-          {t("ログイン")}
-        </Link>
+      {/* 登録の入口：お客さまと事業者を分けて、どちらの登録か一目で分かるようにする */}
+      <div className="mx-auto grid max-w-2xl gap-3 px-5 pt-5 sm:grid-cols-2">
+        <section className="rounded-xl p-4 ring-2 ring-[#1E3A6E]" aria-labelledby="join-customer">
+          <p className="w-fit rounded-full bg-[#1E3A6E] px-3 py-1 text-xs font-bold text-white">{t("観光・お出かけの方")}</p>
+          <h2 id="join-customer" className="mt-2 font-mincho text-lg font-bold text-slate-900">{t("お客さまの会員登録")}</h2>
+          <p className="mt-1 text-xs leading-relaxed text-slate-600">{t("クーポン・地図での行き方・お気に入りが、すべて無料で使えます。")}</p>
+          <Link href="/register/customer" className="btn-accent btn-lg mt-3">
+            {t("無料で会員登録する")}
+          </Link>
+          <Link href="/login" className="mt-2 block text-center text-sm text-slate-600 underline">
+            {t("会員の方はログイン")}
+          </Link>
+        </section>
+        <section className="rounded-xl p-4 ring-2 ring-[#22402E]" aria-labelledby="join-business">
+          <p className="w-fit rounded-full bg-[#22402E] px-3 py-1 text-xs font-bold text-white">{t("お店・事業者の方")}</p>
+          <h2 id="join-business" className="mt-2 font-mincho text-lg font-bold text-slate-900">{t("お店を地図に載せる（事業主登録）")}</h2>
+          <p className="mt-1 text-xs leading-relaxed text-slate-600">{t("無料で 1 店舗を掲載できます。クーポンや広告で、観光のお客さまを呼び込めます。")}</p>
+          <Link href="/register/business" className="btn btn-lg mt-3 bg-[#22402E] text-white hover:bg-[#1B3325]">
+            {t("無料で事業主登録する")}
+          </Link>
+          <Link href="/login?role=business" className="mt-2 block text-center text-sm text-slate-600 underline">
+            {t("事業主の方はログイン")}
+          </Link>
+        </section>
       </div>
 
       {/* 地図（見るだけ） */}

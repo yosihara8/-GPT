@@ -103,7 +103,9 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
       ) : (
         <SagaHero
           className="sm:rounded-3xl"
-          eyebrow="FOR BUSINESS"
+          eyebrow="佐賀観光マップ"
+          badge="お店・事業者の方"
+          tone="business"
           title={
             <>
               事業主登録<span className="text-lg">（無料）</span>
@@ -113,6 +115,12 @@ export default function BusinessRegisterForm({ inviteCode }: { inviteCode?: stri
         />
       )}
       <div className="relative -mt-4 px-4 sm:px-0">
+      {!inviteCode && (
+        <Link href="/register/customer" className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-white px-4 py-3 text-sm ring-1 ring-slate-200 hover:bg-slate-50">
+          <span className="text-slate-600">観光・お出かけでご利用の方（お客さま）は</span>
+          <span className="shrink-0 font-bold text-[#1E3A6E] underline">会員登録へ</span>
+        </Link>
+      )}
       <form onSubmit={onSubmit} className="card space-y-4">
         <RegisterNotice business />
         <Field label="店舗名" name="name" required />
