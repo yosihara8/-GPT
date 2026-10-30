@@ -4,7 +4,7 @@ import { AreaMark } from "@/components/customer/Carousel";
 import PublicShopCard from "./PublicShopCard";
 import { JoinBand, StickyJoin } from "./Join";
 import { AREA_LIST, areaOf } from "@/lib/areas";
-import { AREA_LABEL_EN, AREA_SLUGS, GUIDES, GUIDE_EN, type Guide } from "@/lib/guides";
+import { AREA_LABEL_EN, AREA_SLUGS, GUIDES, GUIDE_EN, THEMES, isTheme, type Guide } from "@/lib/guides";
 import { getT } from "@/lib/i18n-server";
 import { APP_URL } from "@/lib/config";
 import { jsonLd, type PublicShop } from "@/lib/public-shops";
@@ -24,6 +24,7 @@ export default async function GuideView({ guide, areaKey, shops, member }: { gui
       ? `佐賀県${area.name}（${AREA_SLUGS[area.key].label}）の${guide.title.replace(/^佐賀の/, "")}`
       : guide.title;
   const path = `/guide/${guide.slug}${area ? `/${AREA_SLUGS[area.key].slug}` : ""}`;
+  const theme = isTheme(guide);
   const counts = Object.fromEntries(AREA_LIST.map((a) => [a.key, shops.filter((s) => areaOf(s.address)?.area.key === a.key).length]));
 
   const ld = [
@@ -66,7 +67,8 @@ export default async function GuideView({ guide, areaKey, shops, member }: { gui
         <p className="mt-1 text-sm font-bold tracking-[0.1em] text-slate-600">{en?.lead ?? guide.lead}</p>
         <p className="mt-3 text-[15px] leading-relaxed text-slate-700">{en?.intro ?? guide.intro}</p>
 
-        {/* エリアでしぼり込む */}
+        {/* エリアでしぼり込む（よく検索される言葉のページは町が決まっているので出さない） */}
+        {!theme && (
         <div className="mt-5 flex flex-wrap gap-2" aria-label={t("エリア")}>
           <Link
             href={`/guide/${guide.slug}`}
@@ -85,13 +87,14 @@ export default async function GuideView({ guide, areaKey, shops, member }: { gui
             </Link>
           ))}
         </div>
+        )}
 
         <h2 className="mt-7 text-[15px] font-bold tracking-[0.1em] text-slate-800">
           {t("掲載店")} <span className="num text-slate-400">{list.length}</span>
         </h2>
         {list.length === 0 ? (
           <p className="mt-3 rounded-lg bg-mizu-50 px-4 py-5 text-sm leading-relaxed text-slate-600">
-            {t("このエリアの掲載店は準備中です。ほかのエリアもご覧ください。")}
+            {theme ? t("このページの掲載店は準備中です。ほかのジャンルもご覧ください。") : t("このエリアの掲載店は準備中です。ほかのエリアもご覧ください。")}
           </p>
         ) : (
           <div className="mt-1">
@@ -101,13 +104,24 @@ export default async function GuideView({ guide, areaKey, shops, member }: { gui
           </div>
         )}
 
+        {/* よく検索されているテーマ */}
+        <h2 className="mt-8 text-[15px] font-bold tracking-[0.1em] text-slate-800">{t("人気のテーマからさがす")}</h2>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {THEMES.filter((g) => g.slug !== guide.slug).map((g) => (
+            <Link key={g.slug} href={`/guide/${g.slug}`} className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-bold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
+              {gTitle(g)}
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+            </Link>
+          ))}
+        </div>
+
         {/* ほかのジャンル */}
         <h2 className="mt-8 text-[15px] font-bold tracking-[0.1em] text-slate-800">{t("ほかのジャンルからさがす")}</h2>
         <div className="mt-3 grid grid-cols-2 gap-2">
           {GUIDES.filter((g) => g.slug !== guide.slug).map((g) => (
             <Link key={g.slug} href={`/guide/${g.slug}${area ? `/${AREA_SLUGS[area.key].slug}` : ""}`} className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-bold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
               {lang === "en" ? gTitle(g).replace(/ in Saga$/, "") : g.title.replace(/^佐賀の/, "")}
-              <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
             </Link>
           ))}
         </div>

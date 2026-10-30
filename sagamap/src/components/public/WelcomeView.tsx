@@ -4,7 +4,7 @@ import SagaHero from "@/components/SagaHero";
 import GuestMap from "@/components/public/GuestMap";
 import { AreaMark } from "@/components/customer/Carousel";
 import { JoinBand, StickyJoin } from "@/components/public/Join";
-import { GUIDES, GUIDE_EN } from "@/lib/guides";
+import { GUIDES, GUIDE_EN, THEMES } from "@/lib/guides";
 import { getT } from "@/lib/i18n-server";
 
 /**
@@ -47,6 +47,20 @@ export default async function WelcomeView({ member }: { member: boolean }) {
           <MapPin className="h-3.5 w-3.5 text-saga-600" aria-hidden />
           {t("赤いピンは、会員限定クーポンのあるお店です")}
         </p>
+      </section>
+
+      {/* 人気のテーマ（佐賀観光でよく検索される言葉） */}
+      <section className="mx-auto max-w-2xl px-5 pt-8">
+        <AreaMark className="mb-2" />
+        <h2 className="font-mincho text-[22px] font-bold tracking-[0.08em] text-slate-900">{t("人気のテーマからさがす")}</h2>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {THEMES.map((g) => (
+            <Link key={g.slug} href={`/guide/${g.slug}`} className="flex items-center justify-between rounded-lg px-3 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">
+              {lang === "en" ? GUIDE_EN[g.slug].title : g.title}
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* ジャンルからさがす */}
