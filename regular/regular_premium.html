@@ -215,10 +215,9 @@ details.year .body { padding: 0 4px 20px; }
 .results-label { font-size: .88rem; color: var(--gold); margin: 14px 0 2px; letter-spacing: .1em; }
 
 /* SNS */
-.sns { list-style: none; margin: 0 0 32px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sns { list-style: none; margin: 0 0 32px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .sns a { display: block; text-align: center; padding: 13px 8px; border: 1px solid var(--navy); text-decoration: none; letter-spacing: .1em; line-height: 1.5; background: var(--white); word-break: normal; }
 .sns a:hover { background: var(--navy); color: #fff; }
-.embed { margin-bottom: 24px; }
 
 /* お問い合わせ */
 .contact { text-align: center; }
@@ -240,7 +239,6 @@ footer a { color: var(--gold-light); }
   .facts { grid-template-columns: repeat(5, 1fr); }
   .facts div:last-child { grid-column: auto; }
   .actions { grid-template-columns: 1fr 1fr; max-width: none; }
-  .sns { grid-template-columns: repeat(4, 1fr); }
   .univ { columns: 1; }
   .fixed-cta { display: none; }
   body { padding-bottom: 0; }
@@ -1294,18 +1292,15 @@ footer a { color: var(--gold-light); }
 <section>
   <div class="wrap">
     <div class="sec-head"><span class="num">日々の授業</span><h2>SNSでの授業メモ・動画</h2></div>
+    <div class="actions" style="margin-bottom:12px">
+      <a class="button primary" href="https://www.instagram.com/mathlab9981" target="_blank">Instagramで見る<small>日々の授業メモ</small></a>
+      <a class="button primary" href="https://twitter.com/fcs9981" target="_blank">Xで見る<small>授業メモ・更新のお知らせ</small></a>
+    </div>
     <ul class="sns">
       <li><a href="http://www.facebook.com/fcs9981?ref=tn_tnmn" target="_blank">Facebook</a></li>
       <li><a href="http://www.youtube.com/user/FCS9981?feature=mhum" target="_blank">YouTube</a></li>
-      <li><a href="https://twitter.com/fcs9981?lang=ja" target="_blank">X（旧Twitter）</a></li>
       <li><a href="https://www.threads.com/@mathlab29/" target="_blank">Threads</a></li>
     </ul>
-    <div class="embed">
-      <!-- LightWidget WIDGET --><script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script><iframe src="//lightwidget.com/widgets/29b7cd778a09571db91c4d9f9cf80ba8.html" scrolling="no" allowtransparency="true" class="lightwidget-widget" style="width:100%;border:0;overflow:hidden;" loading="lazy" title="Instagram 授業メモ"></iframe>
-    </div>
-    <div class="embed">
-      <a class="twitter-timeline" data-lang="ja" data-width="500" data-height="600" data-dnt="true" href="https://twitter.com/fcs9981?ref_src=twsrc%5Etfw">Tweets by fcs9981</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
     <p style="text-align:center;margin:0"><a href="261026.pdf"><img src="261026.jpg" width="640" height="450" alt="サイエンスラボ福岡" loading="lazy"></a></p>
   </div>
 </section>
