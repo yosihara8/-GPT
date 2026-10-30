@@ -73,10 +73,11 @@ function CustomerRegisterForm() {
     <main className="mx-auto max-w-lg sm:p-4">
       <SagaHero
         eyebrow={t("佐賀観光マップ")}
+        badge={t("観光・お出かけの方（お客さま）")}
         className="sm:rounded-3xl"
         title={
           <>
-            {t("会員登録")}<span className="text-lg">{t("（無料）")}</span>
+            {t("お客さまの会員登録")}<span className="text-lg">{t("（無料）")}</span>
           </>
         }
         lead={t("近くのクーポン・お店さがし・道順の案内が、すべて無料で使えます。")}
@@ -85,6 +86,10 @@ function CustomerRegisterForm() {
       {referrer && (
         <p className="mb-3 rounded-xl bg-white px-3 py-2 text-sm font-bold text-saga-700 shadow-pop">{t("「{r}」からのご紹介です", { r: referrer })}</p>
       )}
+      <Link href="/register/business" className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-white px-4 py-3 text-sm ring-1 ring-slate-200 hover:bg-slate-50">
+        <span className="text-slate-600">{t("お店・事業者の方は、こちらから登録してください")}</span>
+        <span className="shrink-0 font-bold text-[#22402E] underline">{t("事業主登録へ")}</span>
+      </Link>
       <form onSubmit={onSubmit} className="card space-y-4 p-5">
         <RegisterNotice />
         <div>
