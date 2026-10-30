@@ -1,6 +1,7 @@
 /**
- * 事業主の画面の共通の枠（深緑の帯に英字の小見出し・明朝の見出し・説明）。
- * どの画面も同じ形・同じ余白にして、統一感を出す。
+ * 事業主の画面の共通の枠（深緑の帯に、黄金の小さな線・明朝の見出し・説明）。
+ * どの画面も同じ形・同じ余白にして、統一感を出す。形はお客さまの画面の見出し（エリアの色の線＋明朝）とそろえ、
+ * 色は深緑と黄金にして、お客さまの画面（藍）とひと目で見分けられるようにする。
  */
 export default function BizPage({
   title,
@@ -25,12 +26,17 @@ export default function BizPage({
     <main className="mx-auto max-w-4xl space-y-4 p-4 pb-10">
       {notice}
       <div
-        className={`karakusa -mx-4 -mt-4 flex flex-wrap items-end justify-between gap-3 bg-saga-600 px-5 pt-6 text-white sm:mx-0 sm:mt-0 sm:rounded-3xl ${
+        className={`karakusa -mx-4 -mt-4 flex flex-wrap items-end justify-between gap-3 bg-saga-600 px-5 pt-6 text-white sm:mx-0 sm:mt-0 sm:rounded-xl ${
           overlap ? "pb-16" : "pb-6"
         }`}
       >
         <div className="min-w-0">
-          <h1 className="mt-1 text-2xl font-extrabold">{title}</h1>
+          <span className="flex gap-[3px]" aria-hidden>
+            {["#E3B04B", "#F2D58A", "#FFFFFF"].map((c) => (
+              <span key={c} className="h-[3px] w-3 rounded-full" style={{ background: c }} />
+            ))}
+          </span>
+          <h1 className="mt-2 text-2xl font-bold tracking-[0.08em]">{title}</h1>
           {lead && <p className="mt-1 text-sm text-white/80">{lead}</p>}
         </div>
         {aside}

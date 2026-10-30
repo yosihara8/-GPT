@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { AreaMark } from "@/components/customer/Carousel";
 import { JoinBand, StickyJoin } from "@/components/public/Join";
 import { GUIDES, GUIDE_EN, THEMES } from "@/lib/guides";
-import { guideShops } from "@/lib/public-shops";
+import { guideListings, guideShops } from "@/lib/public-shops";
 import { getT } from "@/lib/i18n-server";
 import { query } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
@@ -21,7 +21,7 @@ export default async function GuideIndex() {
   const [rows, user, themeShops] = await Promise.all([
     query<{ category: string; n: number }>("SELECT category, count(*)::int AS n FROM businesses GROUP BY category"),
     getSessionUser(),
-    Promise.all(THEMES.map(guideShops)),
+    Promise.all(THEMES.map(async (g) => (await guideShops(g)).length + (await guideListings(g)).length)),
   ]);
   const count = (c?: string) => rows.find((r) => r.category === c)?.n ?? 0;
   const { lang, t } = await getT();
@@ -41,7 +41,7 @@ export default async function GuideIndex() {
                 <span className="block font-bold text-slate-900">{lang === "en" ? GUIDE_EN[g.slug].title : g.title}</span>
                 <span className="block text-xs text-slate-500">{lang === "en" ? GUIDE_EN[g.slug].lead : g.lead}</span>
               </span>
-              <span className="num text-sm text-slate-400">{themeShops[i].length}</span>
+              <span className="num text-sm text-slate-400">{themeShops[i]}</span>
               <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
             </Link>
           ))}

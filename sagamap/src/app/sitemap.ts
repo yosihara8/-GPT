@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { APP_URL } from "@/lib/config";
 import { query } from "@/lib/db";
 import { AREA_SLUGS, GUIDES, THEMES } from "@/lib/guides";
-import { guideShops } from "@/lib/public-shops";
+import { guideListings, guideShops } from "@/lib/public-shops";
 import { areaOf } from "@/lib/areas";
 
 // 掲載店が増えたらすぐ反映する（開くたびに作る）
@@ -33,10 +33,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (inCat.some((s) => areaOf(s.address)?.area.key === key)) pages.push({ url: `${APP_URL}/guide/${g.slug}/${a.slug}`, changeFrequency: "daily", priority: 0.8 });
       }
     }
-    // よく検索される言葉のページは、掲載店があるものだけ
-    const themeShops = await Promise.all(THEMES.map(guideShops));
+    // よく検索される言葉のページは、掲載店（宿などの基本情報を含む）があるものだけ
+    const themeShops = await Promise.all(THEMES.map(async (g) => (await guideShops(g)).length + (await guideListings(g)).length));
     THEMES.forEach((g, i) => {
-      if (themeShops[i].length > 0) pages.push({ url: `${APP_URL}/guide/${g.slug}`, changeFrequency: "daily", priority: 0.9 });
+      if (themeShops[i] > 0) pages.push({ url: `${APP_URL}/guide/${g.slug}`, changeFrequency: "daily", priority: 0.9 });
     });
     for (const s of shops) pages.push({ url: `${APP_URL}/shops/${s.id}`, changeFrequency: "weekly", priority: 0.7 });
     const events = await query<{ slug: string }>("SELECT slug FROM events WHERE is_published AND ends_on >= CURRENT_DATE ORDER BY starts_on");
