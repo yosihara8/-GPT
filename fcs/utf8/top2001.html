@@ -280,6 +280,18 @@ footer a { color: var(--gold-light); }
 .facts dt { font-size: .85rem; }
 .notice .label, .qa-add .label { font-size: .9rem; }
 
+.facts-link > div { padding: 0; }
+.facts .ft { display: block; font-size: .85rem; color: var(--sub); letter-spacing: .2em; line-height: 1.6; }
+.facts .fd { display: block; font-size: 1.1rem; color: var(--navy); font-weight: 600; line-height: 1.6; }
+.facts .fd small { display: block; font-size: .85rem; font-weight: 400; color: var(--sub); }
+.facts-link a { display: block; padding: 14px 8px; text-decoration: none; color: inherit; height: 100%; }
+.facts-link a:hover { background: #f3efe5; }
+.facts-link .fd::after { content: " \203A"; color: var(--gold); font-weight: 400; }
+.courses a.cname { text-decoration: none; }
+.courses a.cname:hover { color: var(--gold); }
+.courses .go { display: block; font-size: .9rem; font-weight: 400; color: var(--navy); border-bottom: 1px solid var(--gold-light); width: fit-content; margin-top: 4px; }
+.courses .go::after { content: " \203A"; color: var(--gold); }
+
 /* ホーム：お知らせ */
 .news { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
 .news li { border-bottom: 1px solid var(--rule); }
@@ -323,6 +335,7 @@ footer a { color: var(--gold-light); }
 .tt td.day small { display: block; color: var(--sub); font-size: .85rem; }
 .tt td.note { font-size: .88rem; }
 .tt td.state { white-space: nowrap; }
+.tt td.empty { color: var(--sub); }
 .tt .st { font-size: .85rem; padding: 1px 6px; }
 .tt th.c-name { width: 18%; } .tt th.c-day { width: 9%; } .tt th.c-time { width: 11%; }
 .tt th.c-venue { width: 10%; } .tt th.c-school { width: 31%; } .tt th.c-note { width: 11%; } .tt th.c-st { width: 10%; }
@@ -379,17 +392,17 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
 
 <div class="hero">
   <div class="wrap">
-    <img src="fcs.gif" width="100" height="101" alt="ＦＣＳ">
+    <img src="https://www.fcs9981.co.jp/fcs.gif" width="100" height="101" alt="ＦＣＳ">
     <p class="kicker">学年のない理数専門塾</p>
     <h1><small>福岡市早良区藤崎の理数専門塾</small>福岡チャータースクール</h1>
     <p class="catch"><span>現役高校生＆公立小学生・中学生</span><span>及び 中高一貫中学＆高校生対象</span></p>
-    <dl class="facts">
-      <div><dt>対象</dt><dd>小・中・高校生<small>学年ボーダーレス</small></dd></div>
-      <div><dt>科目</dt><dd>数学・英語<small>理科・物理・化学・国語・社会</small></dd></div>
-      <div><dt>医学部受験</dt><dd>ＦＣＳメディカル<small>月１回の特講</small></dd></div>
-      <div><dt>指導</dt><dd>先取り学習<small>好きなだけ先取りできる</small></dd></div>
-      <div><dt>本館</dt><dd>藤崎本館<small>福岡市早良区高取</small></dd></div>
-    </dl>
+    <div class="facts facts-link">
+      <div><a href="kouza.html"><span class="ft">対象</span><span class="fd">小・中・高校生<small>学年ボーダーレス</small></span></a></div>
+      <div><a href="#courses"><span class="ft">科目</span><span class="fd">数学・英語<small>理科・物理・化学・国語・社会</small></span></a></div>
+      <div><a href="#medical"><span class="ft">医学部受験</span><span class="fd">ＦＣＳメディカル<small>月１回の特講</small></span></a></div>
+      <div><a href="#about"><span class="ft">指導</span><span class="fd">先取り学習<small>好きなだけ先取りできる</small></span></a></div>
+      <div><a href="#access"><span class="ft">本館</span><span class="fd">藤崎本館<small>福岡市早良区高取</small></span></a></div>
+    </div>
     <div class="actions">
       <a class="button primary" href="kouza.html">講座開講状況（一覧表）を見る<small>曜日・時間・空席状況　2026年11月4日現在</small></a>
       <a class="button" href="tel:0928459981">入塾相談・お問い合わせ<small>お電話 092-845-9981</small></a>
@@ -403,29 +416,29 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
     <ul class="news">
       <li><a href="#medical"><span class="date">11/8（日）</span><span><span class="ttl">ＦＣＳメディカル 医学部受験対策特講</span><small>13:30～17:30　藤崎本館　次回は12/13（日）</small></span></a></li>
       <li><a href="#event"><span class="date">11/23（月・祝）</span><span><span class="ttl">合同入塾相談会＋数学勉強会</span><small>無料体験、中途入会者キャッチアップを兼ねる</small></span></a></li>
-      <li><a href="26hiver27.html"><span class="date">12月開講</span><span><span class="ttl">冬期講習26→27</span><small>特設ページはこちら</small></span></a></li>
-      <li><a href="https://fcs9981.co.jp/2611.pdf"><span class="date">11月度</span><span><span class="ttl">時間割</span><small>PDF</small></span></a></li>
-      <li><a href="https://fcs9981.co.jp/261006.pdf"><span class="date">最新</span><span><span class="ttl">フライヤー</span><small>PDF</small></span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/26hiver27.html"><span class="date">12月開講</span><span><span class="ttl">冬期講習26→27</span><small>特設ページはこちら</small></span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/2611.pdf"><span class="date">11月度</span><span><span class="ttl">時間割</span><small>PDF</small></span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/261006.pdf"><span class="date">最新</span><span><span class="ttl">フライヤー</span><small>PDF</small></span></a></li>
     </ul>
   </div>
 </section>
 
-<section class="alt">
+<section class="alt" id="courses">
   <div class="wrap">
     <div class="sec-head"><span class="num">講座のご案内</span><h2>開講中の講座</h2>
       <p>曜日・時間・空席状況は、講座開講状況の一覧表でまとめてご覧いただけます。</p></div>
     <ul class="courses">
-      <li><span class="cname">Ｓコース<small>中学英語</small></span><div><p>日曜・リモート＋オフ会形式。中学初級・中級・上級程度の３クラス。</p><p class="subj"><a href="https://www.fcs9981.co.jp/exej.html">中学英語</a></p></div></li>
-      <li><span class="cname">Ｊコース<small>中学生</small></span><div><p>藤崎本館。数学・国語・理科、社会は日曜朝の先生つき自習室にて対応。</p><p class="subj"><a href="https://www.fcs9981.co.jp/j2.html">数学</a><a href="https://www.fcs9981.co.jp/j1.html">国語</a><a href="https://www.fcs9981.co.jp/j3.html">理科</a></p></div></li>
-      <li><span class="cname">Ｒコース<small>高校生</small></span><div><p>藤崎本館。高校英語・数学予習・高校数学演習・物理・化学。</p><p class="subj"><a href="https://www.fcs9981.co.jp/exe.html">高校英語</a><a href="https://www.fcs9981.co.jp/mom.html">数学予習・高校数学演習</a><a href="https://www.fcs9981.co.jp/rp.html">高校物理</a><a href="https://www.fcs9981.co.jp/rc.html">高校化学</a></p></div></li>
-      <li><span class="cname">ＦＣＳメディカル<small>医学部受験対策</small></span><div><p>化学・物理・数学特講。原則月１回、日曜13:30～17:30。</p><p class="subj"><a href="exs.html">ＦＣＳメディカル</a><a href="#medical">日程・概要</a></p></div></li>
-      <li><span class="cname">予習講座・準備講座<small>中学・高校 2026</small></span><div><p>フォニックス中学英語準備講座、中学数学予習講座、高校数学予習講座、高校英語準備講座。2027年3月開講。</p><p class="subj"><a href="https://www.fcs9981.co.jp/exejp.html">フォニックス</a><a href="https://www.fcs9981.co.jp/exmj.html">中学数学予習</a><a href="https://www.fcs9981.co.jp/exmf.html">高校数学予習</a><a href="https://www.fcs9981.co.jp/exep.html">高校英語準備</a></p></div></li>
-      <li><span class="cname">季節講習・勉強会</span><div><p>冬期講習・春期講習・ＧＷ勉強会・夏期講習。</p><p class="subj"><a href="26hiver27.html">冬期講習26→27</a><a href="http://fcs9981.co.jp/26sp.html">春期講習2026</a><a href="https://fcs9981.co.jp/26gw.html">ＧＷ勉強会26</a><a href="ete26.html">夏期講習2026</a></p></div></li>
-      <li><span class="cname">数学NewStandard<small>オンライン</small></span><div><p>Zoom。月・金・土、時間はカスタマイズ。Ｒ数学相当・完全予約制。</p></div></li>
+      <li><a class="cname" href="kouza.html#g-s">Ｓコース<small>中学英語</small><span class="go">曜日・時間・空席を見る</span></a><div><p>日曜・リモート＋オフ会形式。中学初級・中級・上級程度の３クラス。</p><p class="subj"><a href="https://www.fcs9981.co.jp/exej.html">中学英語</a></p></div></li>
+      <li><a class="cname" href="kouza.html#g-j">Ｊコース<small>中学生</small><span class="go">曜日・時間・空席を見る</span></a><div><p>藤崎本館。数学・国語・理科、社会は日曜朝の先生つき自習室にて対応。</p><p class="subj"><a href="https://www.fcs9981.co.jp/j2.html">数学</a><a href="https://www.fcs9981.co.jp/j1.html">国語</a><a href="https://www.fcs9981.co.jp/j3.html">理科</a></p></div></li>
+      <li><a class="cname" href="kouza.html#g-r">Ｒコース<small>高校生</small><span class="go">曜日・時間・空席を見る</span></a><div><p>藤崎本館。高校英語・数学予習・高校数学演習・物理・化学。</p><p class="subj"><a href="https://www.fcs9981.co.jp/exe.html">高校英語</a><a href="https://www.fcs9981.co.jp/mom.html">数学予習・高校数学演習</a><a href="https://www.fcs9981.co.jp/rp.html">高校物理</a><a href="https://www.fcs9981.co.jp/rc.html">高校化学</a></p></div></li>
+      <li><a class="cname" href="kouza.html#g-medical">ＦＣＳメディカル<small>医学部受験対策</small><span class="go">曜日・時間・空席を見る</span></a><div><p>化学・物理・数学特講。原則月１回、日曜13:30～17:30。</p><p class="subj"><a href="https://www.fcs9981.co.jp/exs.html">ＦＣＳメディカル</a><a href="#medical">日程・概要</a></p></div></li>
+      <li><a class="cname" href="kouza.html#g-prep">予習講座・準備講座<small>中学・高校 2026</small><span class="go">曜日・時間・空席を見る</span></a><div><p>フォニックス中学英語準備講座、中学数学予習講座、高校数学予習講座、高校英語準備講座。2027年3月開講。</p><p class="subj"><a href="https://www.fcs9981.co.jp/exejp.html">フォニックス</a><a href="https://www.fcs9981.co.jp/exmj.html">中学数学予習</a><a href="https://www.fcs9981.co.jp/exmf.html">高校数学予習</a><a href="https://www.fcs9981.co.jp/exep.html">高校英語準備</a></p></div></li>
+      <li><a class="cname" href="kouza.html#g-season">季節講習・勉強会<span class="go">曜日・時間・空席を見る</span></a><div><p>冬期講習・春期講習・ＧＷ勉強会・夏期講習。</p><p class="subj"><a href="https://www.fcs9981.co.jp/26hiver27.html">冬期講習26→27</a><a href="https://www.fcs9981.co.jp/26sp.html">春期講習2026</a><a href="https://www.fcs9981.co.jp/26gw.html">ＧＷ勉強会26</a><a href="https://www.fcs9981.co.jp/ete26.html">夏期講習2026</a></p></div></li>
+      <li><a class="cname" href="kouza.html#g-ns">数学NewStandard<small>オンライン</small><span class="go">曜日・時間・空席を見る</span></a><div><p>Zoom。月・金・土、時間はカスタマイズ。Ｒ数学相当・完全予約制。</p><p class="subj"><a href="tel:0928459981">予約・お問い合わせ（お電話）</a></p></div></li>
     </ul>
     <div class="actions">
       <a class="button primary" href="kouza.html">講座開講状況（一覧表）を見る</a>
-      <a class="button" href="http://www.fcs9981.co.jp/fee.html" target="_blank">受講料について</a>
+      <a class="button" href="https://www.fcs9981.co.jp/fee.html" target="_blank">受講料について</a>
     </div>
   </div>
 </section>
@@ -461,13 +474,13 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
       <p>一回４時間と長いですが医学部物理、医学部化学、医学部数学を時間内全て使って（配分は事前打ち合わせの時に決める）習うことができる、忙しい現役高校生には夢のような講座を提供します！</p>
     </div>
     <ul class="links">
-      <li><a href="exs.html"><span>ＦＣＳメディカルの詳細</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/exs.html"><span>ＦＣＳメディカルの詳細</span></a></li>
       <li><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5mGiJogbUdH7CYS4y7GcSQy"><span>ＦＣＳメディカル紹介動画</span></a></li>
     </ul>
   </div>
 </section>
 
-<section>
+<section id="about">
   <div class="wrap">
     <div class="sec-head"><span class="num">ＦＣＳについて</span><h2>福岡チャータースクールとは</h2></div>
     <div class="prose">
@@ -480,14 +493,14 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
       <dt>在籍生出身校</dt><dd>修猷館高校、筑紫丘高校【普通科・理数科】、福岡高校、明善高校、久留米附設高校、西南学院高校、久留米附設中学、福岡教育大附属福岡中学、西南学院中学、筑紫女学園中学、福岡雙葉中学、福大大濠中学、泰星中学、百浜中学他</dd>
     </dl>
     <ul class="links" style="margin-top:28px">
-      <li><a href="http://www.fcs9981.co.jp/about.html" target="_blank"><span>ＦＣＳとは</span></a></li>
-      <li><a href="http://www.fcs9981.co.jp/history.html" target="_blank"><span>ＦＣＳの沿革</span></a></li>
-      <li><a href="http://www.fcs9981.co.jp/vision.html" target="_blank"><span>ＦＣＳの理念</span></a></li>
-      <li><a href="http://www.fcs9981.co.jp/fqa.html" target="_blank"><span>Ｑ＆Ａ</span></a></li>
-      <li><a href="http://www.fcs9981.co.jp/fee.html" target="_blank"><span>受講料について</span></a></li>
-      <li><a href="http://www.fcs9981.co.jp/170201.pdf" target="_blank"><span>入会申込書、会員規約<small>PDF</small></span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/about.html" target="_blank"><span>ＦＣＳとは</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/history.html" target="_blank"><span>ＦＣＳの沿革</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/vision.html" target="_blank"><span>ＦＣＳの理念</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/fqa.html" target="_blank"><span>Ｑ＆Ａ</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/fee.html" target="_blank"><span>受講料について</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/170201.pdf" target="_blank"><span>入会申込書、会員規約<small>PDF</small></span></a></li>
       <li><a href="http://www.fcs9981.sakura.ne.jp/nai.html" target="_blank"><span>内申書について</span></a></li>
-      <li><a href="http://www.fcs9981.co.jp/youtube.html" target="_blank"><span>YouTube授業動画もくじ</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/youtube.html" target="_blank"><span>YouTube授業動画もくじ</span></a></li>
       <li><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3" target="_blank"><span>紹介動画2025-26創りました！</span></a></li>
     </ul>
   </div>
@@ -516,13 +529,13 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
   </div>
 </section>
 
-<section>
+<section id="access">
   <div class="wrap">
     <div class="sec-head"><span class="num">アクセス</span><h2>藤崎本館</h2></div>
     <table class="detail">
       <tr><th>所在地</th><td>〒814-0011 福岡県福岡市早良区高取2-17-38</td></tr>
       <tr><th>電話</th><td><a href="tel:0928459981">092-845-9981</a></td></tr>
-      <tr><th>自転車</th><td>駐輪のルールが変更されました【22/06/18更新】。<a href="bicycle.html" target="_blank">こちら</a>をご参照願います。</td></tr>
+      <tr><th>自転車</th><td>駐輪のルールが変更されました【22/06/18更新】。<a href="https://www.fcs9981.co.jp/bicycle.html" target="_blank">こちら</a>をご参照願います。</td></tr>
     </table>
     <ul class="links">
       <li><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank"><span>教室までの地図（Googleマップ）</span></a></li>
@@ -539,7 +552,7 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
     </div>
     <ul class="sns">
       <li><a href="https://www.facebook.com/福岡チャータースクール-1325084694170087/" target="_blank">Facebook</a></li>
-      <li><a href="http://www.youtube.com/user/FCS9981?feature=mhee" target="_blank">YouTube</a></li>
+      <li><a href="https://www.youtube.com/user/FCS9981?feature=mhee" target="_blank">YouTube</a></li>
       <li><a href="https://www.threads.com/@fcs814001121738" target="_blank">Threads</a></li>
     </ul>
     <p class="note" style="text-align:center;margin-top:20px"><a href="kouza.html#memo">学校別・単元別の授業メモはこちら</a></p>

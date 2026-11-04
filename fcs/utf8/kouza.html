@@ -280,6 +280,18 @@ footer a { color: var(--gold-light); }
 .facts dt { font-size: .85rem; }
 .notice .label, .qa-add .label { font-size: .9rem; }
 
+.facts-link > div { padding: 0; }
+.facts .ft { display: block; font-size: .85rem; color: var(--sub); letter-spacing: .2em; line-height: 1.6; }
+.facts .fd { display: block; font-size: 1.1rem; color: var(--navy); font-weight: 600; line-height: 1.6; }
+.facts .fd small { display: block; font-size: .85rem; font-weight: 400; color: var(--sub); }
+.facts-link a { display: block; padding: 14px 8px; text-decoration: none; color: inherit; height: 100%; }
+.facts-link a:hover { background: #f3efe5; }
+.facts-link .fd::after { content: " \203A"; color: var(--gold); font-weight: 400; }
+.courses a.cname { text-decoration: none; }
+.courses a.cname:hover { color: var(--gold); }
+.courses .go { display: block; font-size: .9rem; font-weight: 400; color: var(--navy); border-bottom: 1px solid var(--gold-light); width: fit-content; margin-top: 4px; }
+.courses .go::after { content: " \203A"; color: var(--gold); }
+
 /* ホーム：お知らせ */
 .news { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
 .news li { border-bottom: 1px solid var(--rule); }
@@ -323,6 +335,7 @@ footer a { color: var(--gold-light); }
 .tt td.day small { display: block; color: var(--sub); font-size: .85rem; }
 .tt td.note { font-size: .88rem; }
 .tt td.state { white-space: nowrap; }
+.tt td.empty { color: var(--sub); }
 .tt .st { font-size: .85rem; padding: 1px 6px; }
 .tt th.c-name { width: 18%; } .tt th.c-day { width: 9%; } .tt th.c-time { width: 11%; }
 .tt th.c-venue { width: 10%; } .tt th.c-school { width: 31%; } .tt th.c-note { width: 11%; } .tt th.c-st { width: 10%; }
@@ -397,24 +410,24 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
         <tr><th colspan="2" class="c-name">講座名</th><th class="c-day">曜日</th><th class="c-time">時間</th><th class="c-venue">会場</th><th class="c-school">受講生の在籍校</th><th class="c-note">備考</th><th class="c-st">空席状況</th></tr>
       </thead>
       <tbody>
-        <tr class="grp-start"><td colspan="2" class="name"><a href="exs.html">ＦＣＳメディカル<br>医学部受験対策<br>化学・物理・数学特講</a></td><td class="day">次回は<br>11/8、12/13<small>※原則月１回<br>模試等で変更注意</small></td><td class="time">13:30～17:30</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">（参加実績）修猷館、大濠一貫、春日</td><td class="note"><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5mGiJogbUdH7CYS4y7GcSQy">紹介動画</a></td><td class="state"><span class="st new">募集開始</span></td></tr>
+        <tr class="grp-start" id="t-medical"><td colspan="2" class="name"><a href="https://www.fcs9981.co.jp/exs.html">ＦＣＳメディカル<br>医学部受験対策<br>化学・物理・数学特講</a></td><td class="day">次回は<br>11/8、12/13<small>※原則月１回<br>模試等で変更注意</small></td><td class="time">13:30～17:30</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">（参加実績）修猷館、大濠一貫、春日</td><td class="note"><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5mGiJogbUdH7CYS4y7GcSQy">紹介動画</a></td><td class="state"><span class="st new">募集開始</span></td></tr>
 
-        <tr class="grp-start"><td rowspan="5" class="cat">中学・高校<br>予習講座<br>準備講座<br>2026</td><td class="name sub"><a href="https://www.fcs9981.co.jp/exejp.html">フォニックス<br>中学英語準備講座</a></td><td class="day">日</td><td class="time">17:30～18:30</td><td class="venue">2/8、15、22、3/29<br>藤崎本館<br>3/1、8、15、22<br>リモート</td><td class="school">久留米附設中、西南学院中、上智福岡中、百道中、原中</td><td class="note"><a href="https://www.fcs9981.co.jp/250920fe.pdf">説明フライヤー</a></td><td rowspan="5" class="state"><span class="st plan">2027年<br>3月開講</span></td></tr>
+        <tr class="grp-start" id="t-prep"><td rowspan="5" class="cat">中学・高校<br>予習講座<br>準備講座<br>2026</td><td class="name sub"><a href="https://www.fcs9981.co.jp/exejp.html">フォニックス<br>中学英語準備講座</a></td><td class="day">日</td><td class="time">17:30～18:30</td><td class="venue">2/8、15、22、3/29<br>藤崎本館<br>3/1、8、15、22<br>リモート</td><td class="school">久留米附設中、西南学院中、上智福岡中、百道中、原中</td><td class="note"><a href="https://www.fcs9981.co.jp/250920fe.pdf">説明フライヤー</a></td><td rowspan="5" class="state"><span class="st plan">2027年<br>3月開講</span></td></tr>
         <tr><td class="name sub"><a href="https://www.fcs9981.co.jp/exmj.html">中学数学予習講座</a></td><td colspan="2" class="day">J数学開催<br>全日程で対応</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">久留米附設中、愛光中、大濠中、西南学院中、高取中、百道中、城西中</td><td class="note"><a href="https://www.youtube.com/watch?v=8h2YhddI2Pc&list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3&index=4">説明動画４</a></td></tr>
         <tr><td rowspan="2" class="name sub"><a href="https://www.fcs9981.co.jp/exmf.html">高校数学予習講座</a></td><td class="day">月</td><td class="time">18:10～19:40</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">募集中</td><td rowspan="2" class="note"><a href="https://www.youtube.com/watch?v=KDuYz3LkR9w&list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3&index=6">説明動画６</a></td></tr>
         <tr><td class="day">土</td><td class="time">18:40～20:10</td><td class="school">西南学院、舞鶴</td></tr>
-        <tr><td class="name sub"><a href="https://www.fcs9981.co.jp/exep.html">高校英語準備講座</a></td><td class="day">水</td><td class="time">19:00～20:30</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">募集中</td><td class="note"></td></tr>
+        <tr><td class="name sub"><a href="https://www.fcs9981.co.jp/exep.html">高校英語準備講座</a></td><td class="day">水</td><td class="time">19:00～20:30</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">募集中</td><td class="note empty">－</td></tr>
 
-        <tr class="grp-start"><td colspan="2" class="name"><a href="http://fcs9981.co.jp/26sp.html">春期講習2026</a></td><td colspan="2"></td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://fcs9981.co.jp/26spRequirements.pdf">参考※2026春期講習要項</a></td><td class="note"></td><td class="state"><span class="st plan">2027年<br>3月開講</span></td></tr>
-        <tr><td colspan="2" class="name"><a href="https://fcs9981.co.jp/26gw.html">ＧＷ勉強会26</a></td><td colspan="2"></td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://fcs9981.co.jp/26gwRequirements.pdf">参考※ＧＷ勉強会26要項</a></td><td class="note"></td><td class="state"><span class="st plan">2027年<br>4月開講</span></td></tr>
-        <tr><td colspan="2" class="name"><a href="ete26.html">夏期講習2026</a></td><td colspan="2"></td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://www.fcs9981.co.jp/ete26.html">参考※夏期講習2026要項</a></td><td class="note"></td><td class="state"><span class="st plan">2027年<br>7月開講</span></td></tr>
-        <tr><td colspan="2" class="name"><a href="26hiver27.html">冬期講習<br>26→27</a></td><td colspan="2"></td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://www.fcs9981.co.jp/25hiver26.html">参考※冬期講習25→26要項</a></td><td class="note"><a href="https://www.youtube.com/playlist?list=PLSl3fXGtI6Rk">説明動画</a></td><td class="state"><span class="st plan">2026年<br>12月開講</span></td></tr>
+        <tr class="grp-start" id="t-season"><td colspan="2" class="name"><a href="https://www.fcs9981.co.jp/26sp.html">春期講習2026</a></td><td colspan="2" class="day empty">要項をご覧ください</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://www.fcs9981.co.jp/26spRequirements.pdf">参考※2026春期講習要項</a></td><td class="note empty">－</td><td class="state"><span class="st plan">2027年<br>3月開講</span></td></tr>
+        <tr><td colspan="2" class="name"><a href="https://www.fcs9981.co.jp/26gw.html">ＧＷ勉強会26</a></td><td colspan="2" class="day empty">要項をご覧ください</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://www.fcs9981.co.jp/26gwRequirements.pdf">参考※ＧＷ勉強会26要項</a></td><td class="note empty">－</td><td class="state"><span class="st plan">2027年<br>4月開講</span></td></tr>
+        <tr><td colspan="2" class="name"><a href="https://www.fcs9981.co.jp/ete26.html">夏期講習2026</a></td><td colspan="2" class="day empty">要項をご覧ください</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://www.fcs9981.co.jp/ete26.html">参考※夏期講習2026要項</a></td><td class="note empty">－</td><td class="state"><span class="st plan">2027年<br>7月開講</span></td></tr>
+        <tr><td colspan="2" class="name"><a href="https://www.fcs9981.co.jp/26hiver27.html">冬期講習<br>26→27</a></td><td colspan="2" class="day empty">要項をご覧ください</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"><a href="https://www.fcs9981.co.jp/25hiver26.html">参考※冬期講習25→26要項</a></td><td class="note"><a href="https://www.youtube.com/playlist?list=PLSl3fXGtI6Rk">説明動画</a></td><td class="state"><span class="st plan">2026年<br>12月開講</span></td></tr>
 
-        <tr class="grp-start"><td rowspan="3" class="cat">Ｓコース</td><td rowspan="3" class="name sub"><a href="https://www.fcs9981.co.jp/exej.html">中学英語</a></td><td rowspan="3" class="day">日</td><td class="time">17:30～18:50</td><td rowspan="3" class="venue">リモート<br>＋<br>オフ会形式</td><td class="school">久留米附設中、原中、上智福岡中</td><td class="note">中学初級程度</td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr class="grp-start" id="t-s"><td rowspan="3" class="cat">Ｓコース</td><td rowspan="3" class="name sub"><a href="https://www.fcs9981.co.jp/exej.html">中学英語</a></td><td rowspan="3" class="day">日</td><td class="time">17:30～18:50</td><td rowspan="3" class="venue">リモート<br>＋<br>オフ会形式</td><td class="school">久留米附設中、原中、上智福岡中</td><td class="note">中学初級程度</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="time">19:00～20:20</td><td class="school">西南学院中</td><td class="note">中学中級程度</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="time">20:30～21:50</td><td class="school">久留米附設中、上智福岡中</td><td class="note">中学上級程度</td><td class="state"><span class="st">空席あり</span></td></tr>
 
-        <tr class="grp-start"><td rowspan="10" class="cat">Ｊコース</td><td rowspan="6" class="name sub"><a href="https://www.fcs9981.co.jp/j2.html">数学</a></td><td class="day">月</td><td class="time">18:40～19:40</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">久留米附設中、西南学院中</td><td rowspan="6" class="note"><a href="https://www.youtube.com/watch?v=8RLIgmeKyxQ&list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3&index=3">説明動画３</a></td><td class="state"><span class="st new">増設</span></td></tr>
+        <tr class="grp-start" id="t-j"><td rowspan="10" class="cat">Ｊコース</td><td rowspan="6" class="name sub"><a href="https://www.fcs9981.co.jp/j2.html">数学</a></td><td class="day">月</td><td class="time">18:40～19:40</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">久留米附設中、西南学院中</td><td rowspan="6" class="note"><a href="https://www.youtube.com/watch?v=8RLIgmeKyxQ&list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3&index=3">説明動画３</a></td><td class="state"><span class="st new">増設</span></td></tr>
         <tr><td rowspan="3" class="day">火</td><td class="time">18:30～19:30</td><td rowspan="3" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td rowspan="3" class="school">久留米附設中、福岡雙葉中、百道中、片江中、原中、内浜中</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="time">19:40～20:40</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="time">20:50～21:50</td><td class="state"><span class="st">空席あり</span></td></tr>
@@ -422,32 +435,32 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
         <tr><td class="day">日</td><td class="time">11:00～12:00</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">西南学院中、大濠中</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="name sub"><a href="https://www.fcs9981.co.jp/j1.html">国語</a></td><td class="day">水</td><td class="time">19:00～20:00</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">百道中</td><td class="note">8/19分振替<br>↓<br>11/19開催</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td rowspan="2" class="name sub"><a href="https://www.fcs9981.co.jp/j3.html">理科</a></td><td rowspan="2" class="day">水</td><td class="time">19:00～20:00</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">百道中、姪浜中</td><td class="note"><a href="https://youtube.com/shorts/_8hEJoEBujQ">参考動画</a></td><td class="state"><span class="st">空席あり</span></td></tr>
-        <tr><td class="time">20:10～21:10</td><td class="school">募集中</td><td class="note"></td><td class="state"><span class="st new">増設</span></td></tr>
-        <tr><td class="name sub">社会</td><td colspan="2" class="day">日曜朝・先生つき自習室にて対応</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school"></td><td class="note"><a href="https://www.youtube.com/watch?v=KqDzTmN9CkU&list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3&index=5">説明動画５</a></td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr><td class="time">20:10～21:10</td><td class="school">募集中</td><td class="note empty">－</td><td class="state"><span class="st new">増設</span></td></tr>
+        <tr><td class="name sub">社会</td><td colspan="2" class="day">日曜朝・先生つき自習室にて対応</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school empty">－</td><td class="note"><a href="https://www.youtube.com/watch?v=KqDzTmN9CkU&list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3&index=5">説明動画５</a></td><td class="state"><span class="st">空席あり</span></td></tr>
 
-        <tr class="grp-start"><td colspan="2" rowspan="2" class="name"><a href="https://www.fcs9981.co.jp/exe.html">Ｒコース<br>高校英語コース</a></td><td rowspan="2" class="day">水</td><td class="time">20:10～21:40</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">城南、上智福岡</td><td rowspan="2" class="note">8/19分振替<br>↓<br>11/19開催</td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr class="grp-start" id="t-r"><td colspan="2" rowspan="2" class="name"><a href="https://www.fcs9981.co.jp/exe.html">Ｒコース<br>高校英語コース</a></td><td rowspan="2" class="day">水</td><td class="time">20:10～21:40</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">城南、上智福岡</td><td rowspan="2" class="note">8/19分振替<br>↓<br>11/19開催</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="time">20:40～22:10</td><td class="school">百道中、上智福岡中</td><td class="state"><span class="st new">増設</span></td></tr>
 
-        <tr class="grp-start"><td colspan="2" rowspan="4" class="name"><a href="https://www.fcs9981.co.jp/mom.html">Ｒコース<br>数学予習コース</a></td><td class="day">月</td><td class="time">18:10～19:40</td><td rowspan="3" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">修猷館、西南学院（一貫・一般）、大濠（一貫・一般）</td><td rowspan="4" class="note"><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3">紹介動画</a></td><td class="state"><span class="st new">増設</span></td></tr>
+        <tr class="grp-start" id="t-r-math"><td colspan="2" rowspan="4" class="name"><a href="https://www.fcs9981.co.jp/mom.html">Ｒコース<br>数学予習コース</a></td><td class="day">月</td><td class="time">18:10～19:40</td><td rowspan="3" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">修猷館、西南学院（一貫・一般）、大濠（一貫・一般）</td><td rowspan="4" class="note"><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3">紹介動画</a></td><td class="state"><span class="st new">増設</span></td></tr>
         <tr><td rowspan="2" class="day">金</td><td class="time">18:40～20:10</td><td rowspan="2" class="school">修猷館、福岡、城南理数、城南、筑前、西南学院（一貫・一般）、大濠（一貫・一般）、筑紫女学園（一般）、上智福岡</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="time">20:20～21:50</td><td class="state"><span class="st few">空席僅か</span></td></tr>
         <tr><td class="day">土</td><td class="time">18:40～20:10</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">修猷館、福岡、城南、西南学院（一貫・一般）、大濠（一貫・一般）</td><td class="state"><span class="st few">空席僅か</span></td></tr>
 
-        <tr class="grp-start"><td colspan="2" rowspan="4" class="name"><a href="https://www.fcs9981.co.jp/mom.html">Ｒコース<br>高校数学演習コース</a></td><td rowspan="2" class="day">火</td><td class="time">18:40～20:10</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td rowspan="2" class="school">修猷館、城南、西南学院（一貫・一般）、大濠（一貫・一般）</td><td class="note"></td><td class="state"><span class="st">空席あり</span></td></tr>
-        <tr><td class="time">20:20～21:50</td><td class="note"></td><td class="state"><span class="st">空席あり</span></td></tr>
-        <tr><td class="day">土</td><td class="time">20:20～21:50</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">修猷館、福岡、城南、糸島、西南学院（一貫・一般）、大濠（一貫・一般）</td><td class="note"></td><td class="state"><span class="st few">空席僅か</span></td></tr>
-        <tr><td class="day">日</td><td class="time">11:00～12:30</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">大濠一貫、西南（一貫・一般）</td><td class="note"></td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr class="grp-start" id="t-r-ex"><td colspan="2" rowspan="4" class="name"><a href="https://www.fcs9981.co.jp/mom.html">Ｒコース<br>高校数学演習コース</a></td><td rowspan="2" class="day">火</td><td class="time">18:40～20:10</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td rowspan="2" class="school">修猷館、城南、西南学院（一貫・一般）、大濠（一貫・一般）</td><td class="note empty">－</td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr><td class="time">20:20～21:50</td><td class="note empty">－</td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr><td class="day">土</td><td class="time">20:20～21:50</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">修猷館、福岡、城南、糸島、西南学院（一貫・一般）、大濠（一貫・一般）</td><td class="note empty">－</td><td class="state"><span class="st few">空席僅か</span></td></tr>
+        <tr><td class="day">日</td><td class="time">11:00～12:30</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">大濠一貫、西南（一貫・一般）</td><td class="note empty">－</td><td class="state"><span class="st">空席あり</span></td></tr>
 
-        <tr class="grp-start"><td colspan="2" rowspan="3" class="name">数学NewStandard</td><td class="day">月</td><td rowspan="3" class="time">カスタマイズ</td><td rowspan="3" class="venue">Zoom</td><td rowspan="3" class="school">ask</td><td rowspan="3" class="note">Ｒ数学相当<br>完全予約制</td><td rowspan="3" class="state">注</td></tr>
+        <tr class="grp-start" id="t-ns"><td colspan="2" rowspan="3" class="name">数学NewStandard</td><td class="day">月</td><td rowspan="3" class="time">カスタマイズ</td><td rowspan="3" class="venue">Zoom</td><td rowspan="3" class="school">ask</td><td rowspan="3" class="note">Ｒ数学相当<br>完全予約制</td><td rowspan="3" class="state">注</td></tr>
         <tr><td class="day">金</td></tr>
         <tr><td class="day">土</td></tr>
 
-        <tr class="grp-start"><td colspan="2" rowspan="4" class="name"><a href="https://www.fcs9981.co.jp/rp.html">Ｒコース<br>高校物理コース</a></td><td class="day">月</td><td class="time">19:50～21:20</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">修猷館、福大大濠（一貫・一般）、筑紫女学園（一般）、上智福岡、福岡雙葉</td><td class="note">初学者から</td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr class="grp-start" id="t-r-phy"><td colspan="2" rowspan="4" class="name"><a href="https://www.fcs9981.co.jp/rp.html">Ｒコース<br>高校物理コース</a></td><td class="day">月</td><td class="time">19:50～21:20</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">修猷館、福大大濠（一貫・一般）、筑紫女学園（一般）、上智福岡、福岡雙葉</td><td class="note">初学者から</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td rowspan="2" class="day">水</td><td class="time">19:00～20:30</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td rowspan="2" class="school">城南、福大大濠（一貫・一般）、西南学院（一貫）、福岡雙葉、西南学院中</td><td rowspan="2" class="note">高学年、医歯薬受験</td><td rowspan="2" class="state"><span class="st few">空席僅か</span></td></tr>
         <tr><td class="time">20:40～22:10</td></tr>
-        <tr><td class="day">土</td><td class="time">18:40～20:10</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">福大大濠（一般）</td><td class="note"></td><td class="state"><span class="st few">空席僅か</span></td></tr>
+        <tr><td class="day">土</td><td class="time">18:40～20:10</td><td class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td class="school">福大大濠（一般）</td><td class="note empty">－</td><td class="state"><span class="st few">空席僅か</span></td></tr>
 
-        <tr class="grp-start"><td colspan="2" rowspan="2" class="name"><a href="https://www.fcs9981.co.jp/rc.html">Ｒコース<br>高校化学コース</a></td><td rowspan="2" class="day">水</td><td class="time">19:00～20:30</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td rowspan="2" class="school">福大大濠（一般）、福岡雙葉</td><td rowspan="2" class="note"></td><td class="state"><span class="st">空席あり</span></td></tr>
+        <tr class="grp-start" id="t-r-chem"><td colspan="2" rowspan="2" class="name"><a href="https://www.fcs9981.co.jp/rc.html">Ｒコース<br>高校化学コース</a></td><td rowspan="2" class="day">水</td><td class="time">19:00～20:30</td><td rowspan="2" class="venue"><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></td><td rowspan="2" class="school">福大大濠（一般）、福岡雙葉</td><td rowspan="2" class="note empty">－</td><td class="state"><span class="st">空席あり</span></td></tr>
         <tr><td class="time">20:40～22:10</td><td class="state"><span class="st new">増設</span></td></tr>
       </tbody>
     </table>
@@ -455,15 +468,15 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
 
     </div>
     <div class="tt-mobile">
-<h3 class="group">医学部受験対策</h3>
+<h3 class="group" id="m-medical">医学部受験対策</h3>
 <div class="course">
-  <h4><a href="exs.html">ＦＣＳメディカル　医学部受験対策<br>化学・物理・数学特講</a></h4>
+  <h4><a href="https://www.fcs9981.co.jp/exs.html">ＦＣＳメディカル　医学部受験対策<br>化学・物理・数学特講</a></h4>
   <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5mGiJogbUdH7CYS4y7GcSQy">紹介動画</a></span></p>
   <ul class="slots">
     <li><span class="when">次回は11/8、12/13<br>13:30～17:30</span><span class="st new">募集開始</span><span class="sub">※原則月１回　模試等で変更注意</span><span class="schools">（参加実績）修猷館、大濠一貫、春日</span></li>
   </ul>
 </div>
-<h3 class="group">中学・高校予習講座・準備講座 2026</h3>
+<h3 class="group" id="m-prep">中学・高校予習講座・準備講座 2026</h3>
 <div class="course">
   <h4><a href="https://www.fcs9981.co.jp/exejp.html">フォニックス　中学英語準備講座</a></h4>
   <p class="course-meta"><span><b>会場</b>2/8、15、22、3/29 は藤崎本館／3/1、8、15、22 はリモート</span><span><b>備考</b><a href="https://www.fcs9981.co.jp/250920fe.pdf">説明フライヤー</a></span><span><b>開講</b>2027年3月開講</span></p>
@@ -493,24 +506,24 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
     <li><span class="when">水　19:00～20:30</span><span class="schools">募集中</span></li>
   </ul>
 </div>
-<h3 class="group">季節講習・勉強会</h3>
+<h3 class="group" id="m-season">季節講習・勉強会</h3>
 <div class="course">
-  <h4><a href="26hiver27.html">冬期講習 26→27</a></h4>
+  <h4><a href="https://www.fcs9981.co.jp/26hiver27.html">冬期講習 26→27</a></h4>
   <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://www.fcs9981.co.jp/25hiver26.html">参考※冬期講習25→26要項</a>／<a href="https://www.youtube.com/playlist?list=PLSl3fXGtI6Rk">説明動画</a></span><span><b>開講</b>2026年12月開講</span></p>
 </div>
 <div class="course">
-  <h4><a href="http://fcs9981.co.jp/26sp.html">春期講習2026</a></h4>
-  <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://fcs9981.co.jp/26spRequirements.pdf">参考※2026春期講習要項</a></span><span><b>開講</b>2027年3月開講</span></p>
+  <h4><a href="https://www.fcs9981.co.jp/26sp.html">春期講習2026</a></h4>
+  <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://www.fcs9981.co.jp/26spRequirements.pdf">参考※2026春期講習要項</a></span><span><b>開講</b>2027年3月開講</span></p>
 </div>
 <div class="course">
-  <h4><a href="https://fcs9981.co.jp/26gw.html">ＧＷ勉強会26</a></h4>
-  <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://fcs9981.co.jp/26gwRequirements.pdf">参考※ＧＷ勉強会26要項</a></span><span><b>開講</b>2027年4月開講</span></p>
+  <h4><a href="https://www.fcs9981.co.jp/26gw.html">ＧＷ勉強会26</a></h4>
+  <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://www.fcs9981.co.jp/26gwRequirements.pdf">参考※ＧＷ勉強会26要項</a></span><span><b>開講</b>2027年4月開講</span></p>
 </div>
 <div class="course">
-  <h4><a href="ete26.html">夏期講習2026</a></h4>
+  <h4><a href="https://www.fcs9981.co.jp/ete26.html">夏期講習2026</a></h4>
   <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://www.fcs9981.co.jp/ete26.html">参考※夏期講習2026要項</a></span><span><b>開講</b>2027年7月開講</span></p>
 </div>
-<h3 class="group">Ｓコース（中学英語）</h3>
+<h3 class="group" id="m-s">Ｓコース（中学英語）</h3>
 <div class="course">
   <h4><a href="https://www.fcs9981.co.jp/exej.html">Ｓコース　中学英語</a></h4>
   <p class="course-meta"><span><b>会場</b>リモート＋オフ会形式</span></p>
@@ -520,7 +533,7 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
     <li><span class="when">日　20:30～21:50</span><span class="st">空席あり</span><span class="sub">中学上級程度</span><span class="schools">久留米附設中、上智福岡中</span></li>
   </ul>
 </div>
-<h3 class="group">Ｊコース（中学生）</h3>
+<h3 class="group" id="m-j">Ｊコース（中学生）</h3>
 <div class="course">
   <h4><a href="https://www.fcs9981.co.jp/j2.html">Ｊコース　数学</a></h4>
   <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b><a href="https://www.youtube.com/watch?v=8RLIgmeKyxQ&list=PLFdOixHNnU5k1MAyWW3GcP9F1MRANSQc3&index=3">説明動画３</a></span></p>
@@ -555,7 +568,7 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
     <li><span class="when">日曜朝</span><span class="st">空席あり</span><span class="sub">先生つき自習室にて対応</span></li>
   </ul>
 </div>
-<h3 class="group">Ｒコース（高校生）</h3>
+<h3 class="group" id="m-r">Ｒコース（高校生）</h3>
 <div class="course">
   <h4><a href="https://www.fcs9981.co.jp/exe.html">Ｒコース　高校英語コース</a></h4>
   <p class="course-meta"><span><b>会場</b><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank">藤崎本館</a></span><span><b>備考</b>8/19分振替 → 11/19開催</span></p>
@@ -602,7 +615,7 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
     <li><span class="when">水　20:40～22:10</span><span class="st new">増設</span><span class="schools">福大大濠（一般）、福岡雙葉</span></li>
   </ul>
 </div>
-<h3 class="group">オンライン</h3>
+<h3 class="group" id="m-ns">オンライン</h3>
 <div class="course">
   <h4>数学NewStandard</h4>
   <p class="course-meta"><span><b>会場</b>Zoom</span><span><b>備考</b>Ｒ数学相当・完全予約制</span></p>
@@ -612,9 +625,9 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
 </div>
     </div>
     <ul class="links" style="margin-top:28px">
-      <li><a href="https://fcs9981.co.jp/2611.pdf"><span>11月度の時間割<small>PDF</small></span></a></li>
-      <li><a href="26hiver27.html"><span>冬期講習26→27 特設ページ</span></a></li>
-      <li><a href="https://fcs9981.co.jp/261006.pdf"><span>最新フライヤー<small>PDF</small></span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/2611.pdf"><span>11月度の時間割<small>PDF</small></span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/26hiver27.html"><span>冬期講習26→27 特設ページ</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/261006.pdf"><span>最新フライヤー<small>PDF</small></span></a></li>
       <li><a href="https://goo.gl/maps/ZeAQcGKrqFT9x8HU8" target="_blank"><span>教室までの地図（藤崎本館）</span></a></li>
       <li><a href="top2001.html"><span>ホームに戻る</span></a></li>
     </ul>
@@ -652,7 +665,7 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
       <p>一回４時間と長いですが医学部物理、医学部化学、医学部数学を時間内全て使って（配分は事前打ち合わせの時に決める）習うことができる、忙しい現役高校生には夢のような講座を提供します！</p>
     </div>
     <ul class="links">
-      <li><a href="exs.html"><span>ＦＣＳメディカルの詳細</span></a></li>
+      <li><a href="https://www.fcs9981.co.jp/exs.html"><span>ＦＣＳメディカルの詳細</span></a></li>
       <li><a href="https://www.youtube.com/playlist?list=PLFdOixHNnU5mGiJogbUdH7CYS4y7GcSQy"><span>ＦＣＳメディカル紹介動画</span></a></li>
     </ul>
   </div>
@@ -717,5 +730,21 @@ h3.group { font-size: 1.05rem; color: var(--gold); letter-spacing: .15em; font-w
   <a href="mailto:fcs9981@gmail.com">メールで問い合わせ</a>
 </nav>
 
+
+<script>
+// 「kouza.html#g-○○」で開いたとき、PCなら一覧表の行、スマホなら講座ごとの一覧へ移動する
+(function () {
+  function go() {
+    var m = location.hash.match(/^#g-(.+)$/);
+    if (!m) return;
+    var t = document.getElementById('t-' + m[1]), mo = document.getElementById('m-' + m[1]);
+    var el = (t && t.offsetParent) ? t : mo;
+    if (el) el.scrollIntoView();
+  }
+  go();
+  window.addEventListener('load', go);
+  window.addEventListener('hashchange', go);
+})();
+</script>
 </body>
 </html>
