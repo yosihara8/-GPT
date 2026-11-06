@@ -1,6 +1,7 @@
 import { query, queryOne } from "./db";
 import { APP_URL, OPERATOR } from "./config";
 import { escapeHtml } from "./escape";
+import { mailFooter } from "./mail";
 import { profileChecklist, profilePercent, type ProfileStore } from "./profile";
 import { METRIC_LABELS, monthLabel, prevMonth, thisMonth, type Metrics, type OwnerReport } from "./owner-report-shared";
 
@@ -123,6 +124,7 @@ export function reportHtml(r: OwnerReport) {
     <p style="margin:24px 0"><a href="${dash}" style="background:#EE6A3A;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">ダッシュボードを開く</a></p>
     <p style="font-size:12px;color:#888">数字は、${escapeHtml(OPERATOR.serviceName)}の会員が押したボタンの数です（同じ人の同じ操作は 1 時間に 1 回まで数えます）。<br>
     このレポートメールは <a href="${dash}/report#settings">レポートの画面</a> で止められます。</p>
+    ${mailFooter("business")}
   </div>`;
 }
 

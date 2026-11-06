@@ -132,7 +132,7 @@ async function runDigest() {
         <p>${escapeHtml(r.name)} 様</p>
         <p>今週の新着まとめメールで、次のお知らせを <b>${r.people} 人</b>のお客さまにお届けしました。</p>
         <ul>${[...r.titles].map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
-        <p><a href="${APP_URL}/dashboard/business">ダッシュボードで閲覧数を見る</a></p>${mailFooter()}</div>`,
+        <p><a href="${APP_URL}/dashboard/business">ダッシュボードで閲覧数を見る</a></p>${mailFooter("business")}</div>`,
     });
   }
 
@@ -151,5 +151,5 @@ function customerMail(c: Customer, relevant: Item[], others: Item[]) {
     ${relevant.length ? `<h3>✨ あなたへのおすすめ</h3><ul style="padding-left:18px">${relevant.map(li).join("")}</ul>` : ""}
     ${others.length ? `<h3>📍 そのほかの新着</h3><ul style="padding-left:18px">${others.map(li).join("")}</ul>` : ""}
     <p><a href="${APP_URL}/" style="background:#ff6b4a;color:#fff;padding:10px 20px;border-radius:9999px;text-decoration:none">地図で近くのお店を見る</a></p>
-    ${mailFooter(`${APP_URL}/unsubscribe?token=${c.unsubscribe_token}`)}</div>`;
+    ${mailFooter("customer", `${APP_URL}/unsubscribe?token=${c.unsubscribe_token}`)}</div>`;
 }

@@ -7,15 +7,30 @@ const from = process.env.MAIL_FROM ?? "佐賀観光マップ <noreply@saga-kanko
 /** 返信はお問い合わせ窓口に届くようにする */
 const replyTo = OPERATOR.email;
 
+/** メールを受け取る人の種類（末尾のサイトへのリンクの行き先が変わる） */
+export type MailAudience = "customer" | "business" | "admin";
+
+/** どのメールにも必ず付けるサイトへのリンク（お客さま＝地図の画面、事業主＝事業主の管理画面、運営者＝管理画面）。オーナー決定 */
+export function siteLink(audience: MailAudience) {
+  const { url, label } =
+    audience === "business"
+      ? { url: `${APP_URL}/dashboard/business`, label: "事業主の管理画面を開く" }
+      : audience === "admin"
+        ? { url: `${APP_URL}/admin`, label: "運営者の管理画面を開く" }
+        : { url: `${APP_URL}/`, label: "佐賀観光マップを開く" };
+  return `<p style="margin:20px 0 4px"><a href="${url}" style="display:inline-block;background:${audience === "business" ? "#22402E" : "#1E3A6E"};color:#fff;padding:10px 20px;border-radius:9999px;text-decoration:none;font-weight:bold">${label}</a></p>
+    <p style="margin:0;font-size:12px;color:#888"><a href="${url}" style="color:#888">${url}</a></p>`;
+}
+
 /**
- * メール末尾の送信者情報（特定電子メール法の表示義務：送信者名・住所・問い合わせ先・配信停止）。
+ * メール末尾：サイトへのリンク ＋ 送信者情報（特定電子メール法の表示義務：送信者名・住所・問い合わせ先・配信停止）。
  * 住所が未設定のときは特定商取引法に基づく表記へのリンクを出す。
  */
-export function mailFooter(unsubscribeUrl?: string) {
+export function mailFooter(audience: MailAudience, unsubscribeUrl?: string) {
   const address = OPERATOR_ADDRESS
     ? escapeHtml(OPERATOR_ADDRESS)
     : `<a href="${APP_URL}/tokushoho" style="color:#888">特定商取引法に基づく表記</a>をご覧ください`;
-  return `<hr style="border:none;border-top:1px solid #eee;margin:20px 0 10px">
+  return `${siteLink(audience)}<hr style="border:none;border-top:1px solid #eee;margin:20px 0 10px">
     <p style="color:#888;font-size:12px;line-height:1.7">
       送信者：${escapeHtml(OPERATOR.name)}（${escapeHtml(OPERATOR.serviceName)}）<br>
       住所：${address}<br>
