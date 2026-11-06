@@ -23,7 +23,7 @@ async function adminEmails() {
 
 const wrap = (title: string, body: string) =>
   `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
-    <p style="font-size:20px;font-weight:bold">佐賀観光マップ ${title}</p>${body}${mailFooter()}</div>`;
+    <p style="font-size:20px;font-weight:bold">佐賀観光マップ ${title}</p>${body}${mailFooter("admin")}</div>`;
 
 /** 毎日：エラー報告（エラーがなければ送らない） */
 async function dailyErrorReport() {

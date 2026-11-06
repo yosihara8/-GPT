@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       `<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:16px">
         <p>管理画面にログインがありました。</p>
         <ul><li>日時：${at}</li><li>接続元：${ip.replace(/[<>&"]/g, "")}</li></ul>
-        <p style="color:#b45309">心当たりがない場合は、すぐにパスワードを変更し、二段階認証を設定してください。</p>${mailFooter()}</div>`,
+        <p style="color:#b45309">心当たりがない場合は、すぐにパスワードを変更し、二段階認証を設定してください。</p>${mailFooter("admin")}</div>`,
     ).catch(() => undefined);
   }
   return setAdminCookie(NextResponse.json({ ok: true }), row.id, row.session_version);

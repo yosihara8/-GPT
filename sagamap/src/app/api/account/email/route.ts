@@ -85,7 +85,7 @@ export async function POST(req: Request) {
 
   // 乗っ取り対策として、元のアドレスにも知らせる
   await Promise.allSettled([
-    sendEmailChangedNotice(row.email, next),
+    sendEmailChangedNotice(role, row.email, next),
     role === "admin" ? Promise.resolve() : sendVerificationMail(role, id, next, row.name),
   ]);
   return NextResponse.json({ ok: true, email: next, verify: role !== "admin" });

@@ -71,7 +71,7 @@ export async function runContentReview() {
           <p>${escapeHtml(row.business_name)} の${escapeHtml(label)}に、法令（景品表示法・医薬品医療機器等法）上掲載できない表現が含まれていたため、掲載を停止しました。</p>
           <ul>${result.blocked.map((r) => `<li>${escapeHtml(r)}</li>`).join("")}</ul>
           <p>表現を見直して、もう一度登録してください。</p>
-          <p><a href="${APP_URL}/dashboard/business">ダッシュボードを開く</a></p>${mailFooter()}</div>`,
+          <p><a href="${APP_URL}/dashboard/business">ダッシュボードを開く</a></p>${mailFooter("business")}</div>`,
       ).catch(() => undefined);
       continue;
     }
@@ -104,7 +104,7 @@ export async function runContentReview() {
           <p style="font-size:20px;font-weight:bold">🛡️ 掲載チェックの結果</p>
           ${stopped.length ? `<h3>自動で停止したもの（事業者に通知済み）</h3>${list(stopped)}` : ""}
           ${flagged.length ? `<h3>確認してほしいもの</h3>${list(flagged)}` : ""}
-          <p><a href="${APP_URL}/admin">管理画面の「🛡️ 掲載チェック」で確認する</a></p>${mailFooter()}</div>`,
+          <p><a href="${APP_URL}/admin">管理画面の「🛡️ 掲載チェック」で確認する</a></p>${mailFooter("admin")}</div>`,
       ).catch(() => undefined);
     }
   }
