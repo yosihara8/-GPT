@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         `【佐賀観光マップ】お問い合わせ #${id}（${d.category}）`,
         `<div style="font-family:sans-serif;max-width:560px;margin:auto;padding:16px">
           <p style="font-size:18px;font-weight:bold">新しいお問い合わせ</p>${table}
-          <p style="font-size:13px">ご返信は ${escapeHtml(d.email)} 宛てにお送りください。<a href="${APP_URL}/admin">管理画面の「お問い合わせ」</a>で対応状況を管理し、一覧を Excel で書き出せます。</p></div>`,
+          <p style="font-size:13px">ご返信は ${escapeHtml(d.email)} 宛てにお送りください。<a href="${APP_URL}/admin">管理画面の「お問い合わせ」</a>で対応状況を管理し、一覧を Excel で書き出せます。</p>${mailFooter("admin")}</div>`,
       );
     }
     await sendMail(
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
         <p>${OPERATOR.serviceName}へのお問い合わせありがとうございます。以下の内容で受け付けました。<br>内容を確認のうえ、原則 3 営業日以内に、このメールアドレスへご連絡します。</p>
         ${table}
         <p style="font-size:12px;color:#888">※ このメールは自動でお送りしています。お心当たりのない場合は、このメールを破棄してください。</p>
-        ${mailFooter()}</div>`,
+        ${mailFooter(role === "business" ? "business" : "customer")}</div>`,
     );
   } catch (e) {
     // メールが送れなくても、お問い合わせは保存済み（管理画面で確認できる）
