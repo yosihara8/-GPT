@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>二日市数学教室｜筑紫野市・太宰府市の高校数学塾（西鉄二日市駅 徒歩5分）｜ＦＣＳ数学教室</title>
+<meta name="description" content="筑紫野市・二日市コミュニティー（西鉄二日市駅から徒歩5分）で毎週火曜20:20～22:00に開講する高校数学の専門塾。筑紫丘・筑紫・筑紫台・春日・武蔵台・筑陽学園・西南学院・上智福岡などの高校生が、学校の予習から大学受験まで学んでいます。毎回の授業メモを公開中。">
+<meta name="keywords" content="二日市数学教室,筑紫野市 塾,太宰府市 塾,二日市 塾 高校,数学塾 福岡,高校数学 先取り,大学受験 数学,サイエンスラボ福岡" />
+<meta name="robots" content="index, follow" />
+<!-- 公開URLが決まったら次の1行のコメントを外してください
+<link rel="canonical" href="http://www.fcs9981.sakura.ne.jp/fut.html" />
+-->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ja_JP" />
+<meta property="og:site_name" content="ＦＣＳ数学教室" />
+<meta property="og:title" content="二日市数学教室｜筑紫野市の高校数学塾" />
+<meta property="og:description" content="西鉄二日市駅から徒歩5分。毎週火曜20:20～22:00、高校数学の予習から大学受験まで。" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "二日市数学教室（ＦＣＳ数学教室）",
+  "description": "筑紫野市・二日市コミュニティーで開講する高校数学の専門塾。毎週火曜20:20～22:00。",
+  "telephone": "+81-92-919-2200",
+  "email": "mail@fcs9981.sakura.ne.jp",
+  "address": { "@type": "PostalAddress", "addressLocality": "筑紫野市", "addressRegion": "福岡県", "addressCountry": "JP" },
+  "areaServed": ["福岡県筑紫野市", "福岡県太宰府市"],
+  "parentOrganization": { "@type": "EducationalOrganization", "name": "ＦＣＳ数学教室" },
+  "sameAs": ["https://www.facebook.com/fcs9981", "https://www.youtube.com/user/FCS9981", "https://twitter.com/fcs9981", "https://www.threads.com/@mathlab29", "https://www.instagram.com/mathlab9981"]
+}
+</script>
+<style type="text/css">
+:root {
+  --main: #990066;
+  --main-dark: #7a0052;
+  --main-pale: #fbeef6;
+  --gold: #a98839;
+  --gold-pale: #f8f3e6;
+  --green: #1d7a32;
+  --green-pale: #edf7ef;
+  --red: #d32f2f;
+  --text: #222;
+  --sub: #555;
+  --line: #e4e0e3;
+  --bg: #f7f5f6;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  font-size: 16px;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  padding-bottom: 76px;
+}
+img { max-width: 100%; height: auto; }
+a { color: var(--main); word-break: break-all; }
+p { margin: 0 0 1em; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+
+/* ヘッダー */
+.hero { background: #fff; border-bottom: 4px solid var(--main); padding: 24px 0 20px; text-align: center; }
+.hero img { display: block; margin: 0 auto 12px; }
+.hero .catch { font-size: 1.1rem; font-weight: bold; line-height: 1.7; margin: 0 0 8px; }
+.hero .catch em { font-style: normal; color: var(--main); }
+.hero .brand { color: var(--gold); font-weight: bold; letter-spacing: 0.15em; margin: 0; }
+
+/* セクション */
+section { background: #fff; border-radius: 12px; margin: 20px 0; padding: 22px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+h2 { font-size: 1.25rem; line-height: 1.5; color: var(--main); margin: 0 0 16px; padding-left: 12px; border-left: 5px solid var(--main); }
+h3 { font-size: 1.05rem; line-height: 1.5; margin: 0 0 8px; }
+.lead { font-size: 1.05rem; }
+.note { font-size: .95rem; color: var(--sub); }
+.small { font-size: .9rem; color: var(--sub); }
+
+/* ボタン */
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 4px; }
+.btns.one { grid-template-columns: 1fr; }
+.btn {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 52px; padding: 10px 12px;
+  border-radius: 10px; border: 2px solid var(--main);
+  background: #fff; color: var(--main);
+  font-weight: bold; line-height: 1.4; text-decoration: none; word-break: normal;
+}
+.btn:hover, .btn:focus { background: var(--main-pale); }
+.btn.fill { background: var(--main); color: #fff; }
+.btn.fill:hover, .btn.fill:focus { background: var(--main-dark); }
+.btn.gold { border-color: var(--gold); color: #6e5620; }
+.btn.gold:hover, .btn.gold:focus { background: var(--gold-pale); }
+.btn small { display: block; font-weight: normal; font-size: .8rem; }
+.btn .stack { display: block; }
+
+/* SNS */
+.sns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sns a { display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px 10px; line-height: 1.4; min-height: 52px; border-radius: 10px; color: #fff; font-weight: bold; text-decoration: none; }
+.sns .fb { background: #1877f2; }
+.sns .yt { background: #e62117; }
+.sns .x  { background: #111; }
+.sns .th { background: #444; }
+.embed { margin-top: 18px; }
+
+/* お知らせ */
+.event { background: var(--green-pale); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.event h3 { color: var(--green); }
+.event dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+.event dt { font-weight: bold; }
+.event dd { margin: 0; }
+
+/* 授業メモ */
+.memo { border-top: 1px solid var(--line); padding: 14px 0 6px; }
+.memo:first-of-type { border-top: none; padding-top: 0; }
+.memo h3 { color: var(--green); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+.chips a, .chips span {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 4px 14px;
+  border-radius: 20px; background: var(--green-pale); border: 1px solid #b9dcc1;
+  color: var(--green); text-decoration: none; font-size: .95rem; line-height: 1.4; word-break: normal;
+}
+.chips a:hover, .chips a:focus { background: #d8eedd; }
+.chips span { background: #f2f2f2; border-color: #ddd; color: var(--sub); }
+
+/* 読み物 */
+.read p { text-indent: 1em; }
+.read p.noindent { text-indent: 0; }
+.point { background: var(--gold-pale); border-left: 4px solid var(--gold); border-radius: 0 8px 8px 0; padding: 12px 14px; margin: 0 0 1em; }
+
+/* 料金 */
+.price { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.price div { background: var(--main-pale); border-radius: 10px; padding: 12px 6px; text-align: center; line-height: 1.5; }
+.price b { display: block; color: var(--main); font-size: 1.3rem; }
+.price span { font-size: .85rem; color: var(--sub); }
+ul.marks { margin: 0 0 1em; padding-left: 1.3em; }
+ul.marks li { margin-bottom: .5em; }
+
+/* 教室一覧 */
+.rooms { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; }
+.rooms a, .rooms span {
+  display: block; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px;
+  text-decoration: none; color: var(--text); background: #fff; line-height: 1.5; word-break: normal;
+}
+.rooms a:hover, .rooms a:focus { border-color: var(--main); background: var(--main-pale); }
+.rooms b { color: var(--main); display: block; }
+.rooms small { color: var(--sub); }
+
+/* Q&A */
+.qa { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 14px; overflow: hidden; }
+.qa .q { background: #fdf1f1; padding: 12px 14px 12px 48px; position: relative; font-weight: bold; line-height: 1.7; }
+.qa .a { padding: 14px 14px 4px 48px; position: relative; }
+.qa .q::before, .qa .a::before {
+  position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; border-radius: 50%;
+  color: #fff; font-weight: bold; text-align: center; line-height: 28px; font-size: .95rem;
+}
+.qa .q::before { content: "Q"; background: var(--red); }
+.qa .a::before { content: "A"; background: var(--gold); }
+.qa .add { border-top: 1px dashed var(--line); padding: 12px 14px 4px; font-size: .95rem; }
+.qa .add .tag { display: inline-block; background: var(--gold-pale); color: #6e5620; border-radius: 4px; padding: 0 8px; font-size: .85rem; font-weight: bold; margin-bottom: 4px; }
+.speaker { color: var(--green); font-weight: bold; }
+.em { color: var(--red); }
+
+/* 在籍校・進学先 */
+.schools { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.schools li { background: var(--main-pale); border-radius: 6px; padding: 4px 12px; font-size: .95rem; line-height: 1.6; }
+.univ { list-style: none; margin: 0 0 1em; padding: 0; }
+.univ li { padding: 8px 0; border-bottom: 1px solid var(--line); line-height: 1.6; }
+.univ li b { color: var(--main); margin-right: .6em; }
+.univ li span { font-size: .92rem; color: var(--sub); }
+
+/* 年度別実績 */
+details.year { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 10px; background: #fff; }
+details.year summary {
+  cursor: pointer; list-style: none; padding: 14px 44px 14px 16px; position: relative;
+  font-weight: bold; color: var(--main); min-height: 52px; line-height: 1.5;
+}
+details.year summary::-webkit-details-marker { display: none; }
+details.year summary::after { content: "＋"; position: absolute; right: 16px; top: 13px; font-size: 1.1rem; }
+details.year[open] summary::after { content: "－"; }
+details.year .body { padding: 0 16px 10px; }
+.results { list-style: none; margin: 0 0 12px; padding: 0; }
+.results li { padding: 6px 0 6px 1.2em; border-bottom: 1px dotted var(--line); line-height: 1.6; text-indent: -1.2em; }
+.results li .from { color: var(--sub); font-size: .9rem; }
+.results-label { font-size: .9rem; font-weight: bold; color: var(--gold); margin: 8px 0 2px; }
+
+/* フッター・固定ボタン */
+footer { text-align: center; padding: 10px 0 24px; font-size: .9rem; color: var(--sub); }
+.fixed-cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,.96); border-top: 1px solid var(--line);
+}
+.fixed-cta a { display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 10px; font-weight: bold; text-decoration: none; }
+.fixed-cta .tel { background: var(--main); color: #fff; }
+.fixed-cta .mail { border: 2px solid var(--main); color: var(--main); background: #fff; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.toc a { flex: 1 1 calc(50% - 8px); }
+
+@media (min-width: 600px) {
+  .btns { grid-template-columns: repeat(4, 1fr); }
+  .hero .catch { font-size: 1.3rem; }
+  .btns.two { grid-template-columns: 1fr 1fr; }
+  .sns { grid-template-columns: repeat(4, 1fr); }
+  .rooms { grid-template-columns: 1fr 1fr; }
+  .univ { columns: 2; column-gap: 24px; }
+  .univ li { break-inside: avoid; }
+  .toc a { flex: 1 1 calc(25% - 8px); }
+  .fixed-cta { max-width: 720px; margin: 0 auto; border-radius: 12px 12px 0 0; }
+}
+
+/* 二日市数学教室 */
+.btn small { font-size: .85rem; }
+.hero.room { padding: 0 0 20px; }
+.hero.room .photo { display: block; width: 100%; max-width: 720px; margin: 0 auto 16px; border-radius: 0 0 12px 12px; }
+.hero.room h1 { font-size: 1.6rem; color: var(--main); margin: 0 0 4px; line-height: 1.4; }
+.hero.room h1 small { display: block; font-size: .95rem; color: var(--sub); font-weight: normal; margin-bottom: 4px; }
+.info { width: 100%; border-collapse: collapse; margin: 0 0 14px; }
+.info th, .info td { text-align: left; padding: 12px 8px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.7; }
+.info th { width: 5.5em; color: var(--main); white-space: nowrap; }
+.info td b { font-size: 1.15rem; }
+.memo-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 10px; margin: 0 0 14px; background: #fff; }
+.memo-card .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.memo-card h3 { margin: 0; color: var(--main); }
+.memo-card time { color: var(--sub); font-size: .95rem; }
+.memo-card .pre { background: var(--gold-pale); border-radius: 6px; padding: 8px 12px; margin: 0 0 10px; }
+.memo-rows { list-style: none; margin: 0 0 10px; padding: 0; }
+.memo-rows li { display: grid; grid-template-columns: 11.5em 1fr; gap: 0 12px; padding: 8px 0; border-bottom: 1px dotted var(--line); line-height: 1.6; }
+.memo-rows li:last-child { border-bottom: none; }
+.memo-rows .sch { color: var(--green); font-weight: bold; }
+.memo-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.memo-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 16px; border-radius: 22px; border: 2px solid var(--main); color: var(--main); font-weight: bold; text-decoration: none; }
+.memo-links a.x { border-color: #111; color: #111; }
+.memo-links a:hover, .memo-links a:focus { background: var(--main-pale); }
+details.month { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 10px; background: #fff; }
+details.month summary { cursor: pointer; list-style: none; padding: 14px 44px 14px 16px; position: relative; font-weight: bold; color: var(--main); min-height: 52px; }
+details.month summary::-webkit-details-marker { display: none; }
+details.month summary::after { content: "＋"; position: absolute; right: 16px; top: 13px; }
+details.month[open] summary::after { content: "－"; }
+details.month summary small { color: var(--sub); font-weight: normal; margin-left: 6px; }
+details.month .body { padding: 0 12px 4px; }
+details.month .memo-card { border-color: var(--rule, #eee); }
+.sns { grid-template-columns: 1fr 1fr; }
+.sns .ig { background: #c13584; }
+.ig-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.toc { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 480px) {
+  .memo-rows li { grid-template-columns: 1fr; gap: 0; }
+  .info th { width: 4.5em; }
+}
+@media (min-width: 600px) {
+  .sns { grid-template-columns: repeat(5, 1fr); }
+  .toc { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<header class="hero room">
+  <img class="photo" src="fut15.jpg" width="640" height="480" alt="二日市数学教室の教室の様子">
+  <div class="wrap">
+    <h1><small>ＦＣＳ数学教室｜筑紫野市・太宰府市の高校数学塾</small>二日市数学教室</h1>
+    <p class="catch">毎週<em>火曜日 20:20～22:00</em><br>西鉄二日市駅から徒歩５分</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section>
+  <h2>教室のご案内</h2>
+  <table class="info">
+    <tr><th>曜日・時間</th><td><b>火曜日 20:20～22:00</b></td></tr>
+    <tr><th>会場</th><td>二日市コミュニティー（旧筑紫税務署跡）</td></tr>
+    <tr><th>アクセス</th><td>西鉄二日市駅下車、Ｊボウル方面へ徒歩５分</td></tr>
+  </table>
+  <div class="btns one">
+    <a class="btn" href="https://www.city.chikushino.fukuoka.jp/soshiki/10/3810.html" target="_blank"><span class="stack">会場の場所・地図を見る<small>筑紫野市のページ</small></span></a>
+  </div>
+</section>
+
+<section>
+  <h2>お問い合わせ・ご案内</h2>
+  <div class="btns two">
+    <a class="btn fill" href="tel:0929192200"><span class="stack">電話で問い合わせ<small>092-919-2200</small></span></a>
+    <a class="btn" href="mailto:mail@fcs9981.sakura.ne.jp"><span class="stack">メールで問い合わせ<small>mail@fcs9981.sakura.ne.jp</small></span></a>
+  </div>
+  <div class="btns" style="margin-top:10px">
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/regular.html#goukaku" target="_blank">気になる進学実績</a>
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/261013.pdf" target="_blank">最新フライヤー（PDF）</a>
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/koe.html" target="_blank">生徒の声</a>
+    <a class="btn" href="https://www.youtube.com/playlist?list=PLFdOixHNnU5nvhJunHpgvJ8PmPpNV-goM" target="_blank">教室紹介動画</a>
+  </div>
+  <div class="btns two" style="margin-top:10px">
+    <a class="btn gold" href="https://www.youtube.com/watch?feature=player_embedded&v=zLLRAtSKWBI" target="_blank">予習動画（反転授業）</a>
+    <a class="btn gold" href="https://www.fcs9981.co.jp/youtube.html" target="_blank">予習動画の目次</a>
+  </div>
+  <div class="btns two" style="margin-top:10px">
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/regular.html">数学教室トップページ</a>
+    <a class="btn" href="http://www.fcs9981.sakura.ne.jp/top2020.html">サイエンスラボ福岡トップ</a>
+  </div>
+</section>
+
+<section id="memo">
+  <h2>在籍者の出身校・学年・指導内容報告</h2>
+  <p class="small">毎回の授業メモです。新しい３回分を表示しています。それ以前は月ごとに押すと開きます。</p>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★11/3授業メモ</h3><time datetime="2026-11-03">2026年11月3日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>二次曲線</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>複素平面</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>空間ベクトル</span></li>
+    <li><span class="sch">春日高校２年生理系</span><span>ベクトル方程式</span></li>
+    <li><span class="sch">武蔵台高校２年生理系</span><span>数列３限目</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>微積</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>微積</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>同</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2117625073934966809" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★10/27授業メモ</h3><time datetime="2026-10-27">2026年10月27日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>九大2024</span></li>
+    <li><span class="sch">筑陽学園高校３年生</span><span>黒本</span></li>
+    <li><span class="sch">春日高校３年生理系</span><span>次回琉球2018、ベクトル２限目教える</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>同習う</span></li>
+    <li><span class="sch">上智福岡高校２年生文系</span><span>進研過去問教える</span></li>
+    <li><span class="sch">九州産業高校１年生</span><span>同習う</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2115120392872628444" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★10/20授業メモ</h3><time datetime="2026-10-20">2026年10月20日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>微分次数求める教える</span></li>
+    <li><span class="sch">上智福岡高校２年生文系</span><span>同習う</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>進研模試感想戦</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>微分</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>積分</span></li>
+    <li><span class="sch">春日高校２年生理系</span><span>ベクトル２限目</span></li>
+    <li><span class="sch">筑紫高校２年生習塾理系</span><span>ベクトル方程式</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2112515828482736216" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+  <h3 style="margin-top:24px">これまでの授業メモ</h3>
+<details class="month"><summary>2026年10月<small>2件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★10/13授業メモ</h3><time datetime="2026-10-13">2026年10月13日</time></div>
+  <p class="pre">筑紫丘高校１年生は、試験明け後は下記（三角比）</p>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>入試問題集</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>試験対策、次回三角比</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>九工大過去問</span></li>
+    <li><span class="sch">西南学院高校２年生一貫文系</span><span>場合の数入試問題ドリルライト</span></li>
+  </ul>
+  <p class="memo-links"><a href="https://t.co/OhxqDSQsQo" target="_blank">三角比の動画</a><a class="x" href="https://x.com/fcs9981/status/2110013187987018074" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★10/6授業メモ</h3><time datetime="2026-10-06">2026年10月6日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>不等式、平均値習う</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>平均値教える</span></li>
+    <li><span class="sch">春日高校３年生理系</span><span>琉球過去問</span></li>
+    <li><span class="sch">筑陽学園高校３年生</span><span>共通テスト</span></li>
+    <li><span class="sch">筑紫高校２年生習塾理系</span><span>ベクトル２限目</span></li>
+    <li><span class="sch">西南学院高校２年生一貫文系</span><span>三関数冊子</span></li>
+    <li><span class="sch">上智福岡高校２年生文系</span><span>数Ⅱ微積指定</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2107510411625181346" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年9月<small>4件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★9/29授業メモ</h3><time datetime="2026-09-29">2026年9月29日</time></div>
+  <p class="pre">筑紫女学園中学校３年生は下記計算のあと二次関数１限目</p>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>整数教える</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>同習う</span></li>
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>クリア</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>九工大～21</span></li>
+  </ul>
+  <p class="memo-links"><a href="https://t.co/j7yuSuouSY" target="_blank">二次関数の動画</a><a class="x" href="https://x.com/fcs9981/status/2104908175204061590" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★これから入会を希望する方へ</h3><time datetime="2026-09-15">2026年9月15日</time></div>
+  <p class="pre">▼入塾相談会＋４時間勉強会（無料体験を兼ねる）　日時●9/21（祝月）18:00～　場所●大野城まどかぴあ305号。前半の相談会もほどほどに途中入会組のためのキャッチアップ勉強会を４時間連続で開催します（勉強会は途中で帰っても、来ても構いませんがずっといた方がお得で…</p>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2099894209495081054" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★9/8授業メモ</h3><time datetime="2026-09-08">2026年9月8日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>入試問題集</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>区分求</span></li>
+    <li><span class="sch">西南学院高校一貫２年生</span><span>名大赤本貸与、空間ベクトル</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>三角関数チャート</span></li>
+    <li><span class="sch">武蔵台高校２年生理系</span><span>接線</span></li>
+    <li><span class="sch">筑陽学園高校２年生文系</span><span>平均変化率</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2097306297238704236" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★9/1授業メモ</h3><time datetime="2026-09-01">2026年9月1日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>実テ分からない問題習う</span></li>
+    <li><span class="sch">久留米附設中学校３年生</span><span>同教える</span></li>
+    <li><span class="sch">春日高校３年生理系</span><span>琉球大～22</span></li>
+    <li><span class="sch">筑陽学園高校３年生</span><span>メジアン</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>数Ⅲ積分、そろそろ区分求</span></li>
+    <li><span class="sch">西南学院高校一貫２年生</span><span>次回名大</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>合成</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2094826800832823322" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年8月<small>4件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★8/25授業メモ</h3><time datetime="2026-08-26">2026年8月26日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>区分求不等式</span></li>
+    <li><span class="sch">筑陽学園高校３年生</span><span>反省</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>積分</span></li>
+    <li><span class="sch">上智福岡高校２年生文系</span><span>エウレカ、数Ⅱ微積入試問題ドリルライト</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>ベクトル冊子渡し</span></li>
+    <li><span class="sch">武蔵台高校２年生理系</span><span>やま</span></li>
+    <li><span class="sch">筑陽学園高校２年生文理</span><span>三関数やま</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2092612724006301912" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★8/18授業メモ</h3><time datetime="2026-08-18">2026年8月18日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>九大2022</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>数Ⅲ積分</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>加法定理</span></li>
+    <li><span class="sch">春日高校卒</span><span>図形と方程式</span></li>
+    <li><span class="sch">西南学院高校一貫２年生</span><span>図形と方程式</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>数列プリント</span></li>
+    <li><span class="sch">筑紫高校２年生習塾理系</span><span>課題</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2089759112511074766" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★8/11授業メモ</h3><time datetime="2026-08-11">2026年8月11日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>九大2021</span></li>
+    <li><span class="sch">春日高校３年生理系</span><span>クリアー</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>メジアン</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>数Ⅲ積分初歩</span></li>
+    <li><span class="sch">武蔵台高校２年生理系</span><span>微分（写真）</span></li>
+    <li><span class="sch">筑紫女学園高校一貫１年生</span><span>式と証明</span></li>
+    <li><span class="sch">筑紫丘高校理数科１年生</span><span>整数</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>幾何</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2087180250853896322" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★8/4授業メモ</h3><time datetime="2026-08-05">2026年8月5日</time></div>
+  <p class="pre">中高一貫中学生が比較的多い二日市数学教室</p>
+  <p class="memo-links"><a href="https://t.co/iealw050im" target="_blank">授業メモを読む</a><a class="x" href="https://x.com/fcs9981/status/2084950209843593317" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年7月<small>4件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★7/28授業メモ</h3><time datetime="2026-07-28">2026年7月28日</time></div>
+  <p class="pre">ラ・サール中学校３年生は確率</p>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校３年生</span><span>模試反省</span></li>
+    <li><span class="sch">筑紫台高校３年生</span><span>複素平面</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>合成</span></li>
+    <li><span class="sch">武蔵台高校２年生</span><span>課題</span></li>
+    <li><span class="sch">西南学院高校１年生一貫</span><span>軌跡指定</span></li>
+    <li><span class="sch">筑紫女学園高校一貫１年生</span><span>式と証明</span></li>
+  </ul>
+  <p class="memo-links"><a href="https://t.co/lEpoU3wm45" target="_blank">確率の動画</a><a class="x" href="https://x.com/fcs9981/status/2082087442493129015" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★7/21授業メモ</h3><time datetime="2026-07-21">2026年7月21日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>平均値の定理</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>媒介変数</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>複素平面４限目</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>センター確率</span></li>
+    <li><span class="sch">筑紫高校２年生習塾理系</span><span>3倍角</span></li>
+    <li><span class="sch">武蔵台高校２年生</span><span>課題</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>課題</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2079568042464567356" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★7/14授業メモ</h3><time datetime="2026-07-14">2026年7月14日</time></div>
+  <p class="pre">期末結果 98/100 学年１位！</p>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>進研感想戦</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>次回センター確率</span></li>
+    <li><span class="sch">春日高校３年生理系</span><span>北予備</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>複素平面２限目</span></li>
+    <li><span class="sch">西南学院高校２年生一貫文系</span><span>整数、三角比</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>センター命題</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2077014460464787511" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★7/7授業メモ</h3><time datetime="2026-07-07">2026年7月7日</time></div>
+  <p class="pre">片方、学年１位</p>
+  <p class="memo-links"><a href="https://t.co/rDknVaALap" target="_blank">授業メモを読む</a><a class="x" href="https://x.com/fcs9981/status/2074499300512706677" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年6月<small>5件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★6/30授業メモ</h3><time datetime="2026-06-30">2026年6月30日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>合成</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>複素平面ドリル</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>二次曲線</span></li>
+    <li><span class="sch">春日高校３年生理系</span><span>新演習</span></li>
+    <li><span class="sch">春日高校卒</span><span>二次関数６限目おまけ</span></li>
+    <li><span class="sch">上智福岡高校２年生文系</span><span>エウレカ、、、</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2071950305064034777" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★6/23授業メモ</h3><time datetime="2026-06-23">2026年6月23日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>焦点、準線からの二次曲線</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>数Ⅱ微積名作選</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>数Ⅲ微分、不等式</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>試験あけ、センター赤本貸与、命題指定</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2069403392859087259" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★6/16授業メモ</h3><time datetime="2026-06-16">2026年6月16日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>複素平面と三次方程式</span></li>
+    <li><span class="sch">福岡工業高校３年生</span><span>ベクトル一次独立</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>数Ⅲ、必要十分条件教える</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>同習う、体験</span></li>
+    <li><span class="sch">西南学院高校２年生一貫文特</span><span>試験勉強</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2066929640086896844" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★6/9授業メモ</h3><time datetime="2026-06-09">2026年6月9日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>二次曲線、双曲線</span></li>
+    <li><span class="sch">春日高校３年生理系</span><span>複素平面、回転移動</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>1.96</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>平均値の定理</span></li>
+    <li><span class="sch">福岡工業高校３年生</span><span>メジアン</span></li>
+    <li><span class="sch">西南学院高校２年生一貫</span><span>積分方程式、４STEP</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>エウレカ質問解消</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2064324557083967651" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★6/2授業メモ</h3><time datetime="2026-06-02">2026年6月2日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>軌跡上級編</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>複素平面折り返し</span></li>
+    <li><span class="sch">福岡工業高校３年生</span><span>数Ⅲ微分</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>同</span></li>
+    <li><span class="sch">西南学院高校２年生文系</span><span>微積指定、ベクトル２限目</span></li>
+    <li><span class="sch">上智福岡高校２年生理系</span><span>エウレカ</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>方程式</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2061794558401560796" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年5月<small>4件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★5/26授業メモ</h3><time datetime="2026-05-26">2026年5月26日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>二次曲線指定、プリント欠品</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>微分</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>ベクトル２限目、一直線上</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>同</span></li>
+    <li><span class="sch">筑紫高校２年生習塾理系</span><span>方程式指定</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>同</span></li>
+    <li><span class="sch">武蔵台高校２年生</span><span>軌跡初級編</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2059274699423781332" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★5/19授業メモ</h3><time datetime="2026-05-19">2026年5月19日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年理系</span><span>積分全般</span></li>
+    <li><span class="sch">筑紫台高校３年理系</span><span>微分</span></li>
+    <li><span class="sch">福岡工業高校３年</span><span>5/25～</span></li>
+    <li><span class="sch">筑紫高校２年理系習塾</span><span>試験あけ指数指定</span></li>
+    <li><span class="sch">武蔵台高校２年理系</span><span>円指定</span></li>
+    <li><span class="sch">上智福岡高校２年</span><span>統計</span></li>
+    <li><span class="sch">筑陽学園高校２年</span><span>式と証明</span></li>
+    <li><span class="sch">筑紫女学園高校一貫１年</span><span>場合の数</span></li>
+    <li><span class="sch">九州産業高校１年</span><span>5/22</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/slabfukuoka/status/2056743918918938746" target="_blank">Xで見る（写真あり）</a></p>
+  <p class="small" style="margin:6px 0 0">投稿：サイエンスラボ福岡（@slabfukuoka）</p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★5/12授業メモ</h3><time datetime="2026-05-12">2026年5月12日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>複素平面</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>数Ⅲ微分</span></li>
+    <li><span class="sch">筑紫高校２年生習塾理系</span><span>次回、指数対数</span></li>
+    <li><span class="sch">上智福岡高校２年生文系</span><span>次回軌跡初級編</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>不等式の証明</span></li>
+    <li><span class="sch">筑陽学園高校２年生</span><span>二倍角</span></li>
+    <li><span class="sch">筑紫女学園高校一貫１年生</span><span>場合の数</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2054190888105156961" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★5/5授業メモ</h3><time datetime="2026-05-05">2026年5月5日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>部分積分、置換積分、対数教える</span></li>
+    <li><span class="sch">福岡工業高校３年生</span><span>ベクトル２限目、対数教える</span></li>
+    <li><span class="sch">筑紫台高校３年生</span><span>対数教える、微分方程式教える</span></li>
+    <li><span class="sch">西南学院高校一貫２年生</span><span>対数習う、微分方程式習う、指数教える</span></li>
+    <li><span class="sch">九州産業高校１年生</span><span>指数習う</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2051677337604026580" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年4月<small>3件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★4/28授業メモ</h3><time datetime="2026-04-28">2026年4月28日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>微分計算</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>関数の極限</span></li>
+    <li><span class="sch">西南学院高校一貫２年生文特</span><span>微積</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>数列指定</span></li>
+    <li><span class="sch">武蔵台高校２年生理系</span><span>図形と方程式指定</span></li>
+    <li><span class="sch">筑陽学園高校２年生文理</span><span>不等式の証明</span></li>
+    <li><span class="sch">筑陽学園高校２年生文理</span><span>加法定理</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2049118817708835185" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★4/21授業メモ</h3><time datetime="2026-04-21">2026年4月21日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>複素平面２限目</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>関数極限</span></li>
+    <li><span class="sch">西南学院高校２年生一貫</span><span>ベクトル１限目</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>同</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>統計</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>式と証明</span></li>
+    <li><span class="sch">武蔵台高校２年生理系</span><span>剰余の定理</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2046568230127554774" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★4/14授業メモ</h3><time datetime="2026-04-14">2026年4月14日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校３年生理系</span><span>マスト10</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>サポート反省</span></li>
+    <li><span class="sch">筑紫台高校３年生理系</span><span>極限</span></li>
+    <li><span class="sch">筑紫高校２年生理系習塾</span><span>二項定理</span></li>
+    <li><span class="sch">武蔵台高校２年生理系</span><span>剰余の定理</span></li>
+    <li><span class="sch">筑陽学園高校２年生文理</span><span>加法定理</span></li>
+    <li><span class="sch">上智福岡高校２年生</span><span>統計</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2044046667964657956" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年3月<small>5件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★3/31授業メモ</h3><time datetime="2026-03-31">2026年3月31日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>メジアン</span></li>
+    <li><span class="sch">筑陽学園高校２年生文理</span><span>黒本22</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>極限</span></li>
+    <li><span class="sch">福岡工業高校２年生</span><span>極限指定</span></li>
+    <li><span class="sch">筑紫丘高校理数科１年生</span><span>微分指定</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>指数指定</span></li>
+    <li><span class="sch">武蔵台高校１年生</span><span>不等式証明絶対値</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>三角関数</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2039017564744134894" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★3/24授業メモ</h3><time datetime="2026-03-24">2026年3月24日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>課題</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>極限</span></li>
+    <li><span class="sch">筑陽学園高校２年生文理</span><span>場合の数入試問題名作選</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>同</span></li>
+    <li><span class="sch">西南学院高校一貫１年生</span><span>微積、ベクトル</span></li>
+    <li><span class="sch">武蔵台高校１年生</span><span>次回、解と係数</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>三角関数</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2036443550817329640" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★3/17授業メモ</h3><time datetime="2026-03-17">2026年3月17日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校２年生文理</span><span>黒本22貸与</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>ラ・サール中２プリント教える、体験</span></li>
+    <li><span class="sch">筑紫丘高校理数科新１年生</span><span>同、二次関数１限目</span></li>
+    <li><span class="sch">ラ・サール中学校２年生</span><span>同習う、同</span></li>
+    <li><span class="sch">西南学院高校一貫１年生</span><span>微分指定</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>場合の数指定、次回日々演</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2033892412846907475" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★3/10授業メモ</h3><time datetime="2026-03-11">2026年3月11日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>積分計算</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>ベクトル</span></li>
+    <li><span class="sch">西南学院高校一貫１年生</span><span>指数対数</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>三角関数</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>図形と方程式</span></li>
+    <li><span class="sch">筑紫高校１年生</span><span>指定</span></li>
+    <li><span class="sch">筑陽学園高校１年生理数</span><span>チャート指定</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>式と証明</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2031712995106250815" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★3/3授業メモ</h3><time datetime="2026-03-03">2026年3月3日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">京都大学農学部新１年生</span><span>行列</span></li>
+    <li><span class="sch">久留米附設高校３年生</span><span>小論文</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>数Ⅲグラフ早業</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>空間ベクトル入試問題ドリル</span></li>
+    <li><span class="sch">西南学院高校一貫１年生</span><span>対数</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>数列入試問題ドリル</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2028829637942661156" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年2月<small>4件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★2/24授業メモ</h3><time datetime="2026-02-24">2026年2月24日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">京都大学農学部新１年生</span><span>行列（写真）</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>増減表</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>空間ベクトル入試問題ドリル</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>数学的帰納法</span></li>
+    <li><span class="sch">西南学院高校１年生一貫</span><span>次回、対数</span></li>
+    <li><span class="sch">筑紫高校１年生</span><span>データ</span></li>
+    <li><span class="sch">武蔵台高校１年生</span><span>二項定理</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2026274454087893290" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★2/17授業メモ</h3><time datetime="2026-02-17">2026年2月17日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">京都大学農学部新１年生</span><span>行列</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>積分</span></li>
+    <li><span class="sch">春日高校２年生理系</span><span>ベクトル２限目</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>同方程式</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>微分</span></li>
+    <li><span class="sch">筑紫高校１年生</span><span>データ</span></li>
+    <li><span class="sch">武蔵台高校１年生</span><span>二項定理指定</span></li>
+    <li><span class="sch">久留米附設中学校２年生</span><span>整数</span></li>
+    <li><span class="sch">オープン参加</span><span>筑女中２</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2023740848236904709" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★2/10授業メモ</h3><time datetime="2026-02-10">2026年2月10日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">京都大学農学部新１年生</span><span>行列指定</span></li>
+    <li><span class="sch">佐賀大学農学部新１年生</span><span>同</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>数Ⅲ積分</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>ベクトル３限目</span></li>
+    <li><span class="sch">西南学院高校一貫１年生</span><span>三角関数合成</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>漸化式</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>式と証明</span></li>
+    <li><span class="sch">春日高校１年生</span><span>二項定理</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2021203051902865701" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★2/3授業メモ</h3><time datetime="2026-02-03">2026年2月3日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校一貫３年生</span><span>空間ベクトル</span></li>
+    <li><span class="sch">筑陽学園高校３年生</span><span>佐賀大過去問</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>グラフ</span></li>
+    <li><span class="sch">福岡工業高校２年生</span><span>試験対策</span></li>
+    <li><span class="sch">西南学院高校１年生</span><span>同、合成</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>同、数列漸化式</span></li>
+    <li><span class="sch">筑紫高校１年生</span><span>同、幾何</span></li>
+    <li><span class="sch">武蔵台高校１年生</span><span>同、整数</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2018690145105355228" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2026年1月<small>4件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★1/27授業メモ</h3><time datetime="2026-01-27">2026年1月27日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校一貫３年生</span><span>山本矩ベクトル</span></li>
+    <li><span class="sch">筑陽学園高校３年生理系</span><span>佐賀大～20</span></li>
+    <li><span class="sch">筑紫台高校２年生</span><span>幾何聞く</span></li>
+    <li><span class="sch">西南高校一貫１年生</span><span>同教える</span></li>
+    <li><span class="sch">筑紫高校１年生</span><span>同習う</span></li>
+    <li><span class="sch">武蔵台高校１年生</span><span>整数</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>図形と方程式指定</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>微積指定</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2016131019058135164" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★1/20授業メモ</h3><time datetime="2026-01-20">2026年1月20日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校一貫３年生理系</span><span>京大プレミア</span></li>
+    <li><span class="sch">筑陽学園高校３年生理系</span><span>次回、佐賀</span></li>
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>剰余教える、データ教える</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>同習う、体験</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>同習う、体験</span></li>
+    <li><span class="sch">春日高校２年生理系</span><span>区分求</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2013594407874843133" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★1/13授業メモ</h3><time datetime="2026-01-13">2026年1月13日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>三角関数習う</span></li>
+    <li><span class="sch">筑陽学園高校一貫３年生理系</span><span>同教える、幾何習う</span></li>
+    <li><span class="sch">久留米附設中学校２年生</span><span>同教える</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>指数習う</span></li>
+    <li><span class="sch">西南学院高校１年生</span><span>同教える</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>微分</span></li>
+    <li><span class="sch">福岡工業高校２年生</span><span>接線</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2011055829374685288" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★1/6授業メモ</h3><time datetime="2026-01-06">2026年1月6日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校一貫３年生</span><span>数列、ベクトル日々演</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>福大入試11年</span></li>
+    <li><span class="sch">春日高校２年生特理</span><span>メジアン</span></li>
+    <li><span class="sch">福岡工業高校２年生</span><span>微分</span></li>
+    <li><span class="sch">筑紫台高校２年生</span><span>積分</span></li>
+    <li><span class="sch">筑紫丘高校１年生</span><span>課題</span></li>
+    <li><span class="sch">筑紫高校１年生</span><span>同</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>同</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2008513924128534710" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+<details class="month"><summary>2025年12月<small>2件</small></summary><div class="body">
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★12/23授業メモ</h3><time datetime="2025-12-23">2025年12月23日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑陽学園高校一貫３年生</span><span>共テ模試</span></li>
+    <li><span class="sch">筑陽学園高校３年生理系</span><span>平均変化率教える</span></li>
+    <li><span class="sch">上智福岡高校１年生</span><span>同習う</span></li>
+    <li><span class="sch">西南学院高校一貫１年生</span><span>合成</span></li>
+    <li><span class="sch">筑紫台高校２年生</span><span>数Ⅱ積分</span></li>
+    <li><span class="sch">武蔵台高校１年生</span><span>白チャート絞り</span></li>
+    <li><span class="sch">筑陽学園高校１年生</span><span>複素数</span></li>
+    <li><span class="sch">筑紫女学園中学校３年生</span><span>二次関数</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2003441368782504179" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+<article class="memo-card">
+  <div class="head"><h3>二日市数学教室★12/16授業メモ</h3><time datetime="2025-12-16">2025年12月16日</time></div>
+  <ul class="memo-rows">
+    <li><span class="sch">筑紫丘高校２年生理系</span><span>ベクトル習う</span></li>
+    <li><span class="sch">筑陽学園高校一貫３年生</span><span>同教える（写真）</span></li>
+    <li><span class="sch">久留米附設高校３年生</span><span>黒本</span></li>
+    <li><span class="sch">筑陽学園高校３年生理系</span><span>共通テスト類似</span></li>
+    <li><span class="sch">筑陽学園高校３年生文理</span><span>同</span></li>
+    <li><span class="sch">筑紫台高校２年生理系</span><span>積分</span></li>
+    <li><span class="sch">福岡工業高校２年生</span><span>微分</span></li>
+  </ul>
+  <p class="memo-links"><a class="x" href="https://x.com/fcs9981/status/2000908320937545799" target="_blank">Xで見る（写真あり）</a></p>
+</article>
+</div></details>
+</section>
+
+<section>
+  <h2>Instagram・Facebook の授業メモ</h2>
+  <p class="small">押すと Instagram・Facebook の投稿が開きます（新しい順）。</p>
+  <div class="ig-list">
+<a class="btn" href="https://www.instagram.com/p/DSUxPmiE7mp/" target="_blank"><span class="stack">投稿 1<small>Instagramで見る</small></span></a>
+<a class="btn" href="https://www.instagram.com/p/DSCxhE0k619/" target="_blank"><span class="stack">投稿 2<small>Instagramで見る</small></span></a>
+<a class="btn" href="https://www.instagram.com/p/DRwwTNME74-/" target="_blank"><span class="stack">投稿 3<small>Instagramで見る</small></span></a>
+<a class="btn" href="https://www.instagram.com/p/DReqnr9k3hU/" target="_blank"><span class="stack">投稿 4<small>Instagramで見る</small></span></a>
+<a class="btn" href="https://www.instagram.com/p/DRMqvPNk99I/" target="_blank"><span class="stack">投稿 5<small>Instagramで見る</small></span></a>
+<a class="btn" href="https://www.instagram.com/p/DQ6oBl_EtSt/" target="_blank"><span class="stack">投稿 6<small>Instagramで見る</small></span></a>
+<a class="btn" href="https://www.instagram.com/p/DQooMYnE_eN/" target="_blank"><span class="stack">投稿 7<small>Instagramで見る</small></span></a>
+  </div>
+  <div class="btns one" style="margin-top:10px">
+    <a class="btn" href="https://www.facebook.com/fcs9981/posts/pfbid0bj4YYD8uAjtsiN9qLijcVw2rEVSzaacuu6YC1BT4Dm8YsGNRoT9Aj39Yh3GGuBq5l" target="_blank">Facebook のお知らせを見る</a>
+  </div>
+</section>
+
+<section>
+  <h2>SNS</h2>
+  <div class="sns">
+    <a class="x" href="https://twitter.com/fcs9981?lang=ja" target="_blank">X</a>
+    <a class="th" href="https://www.threads.com/@mathlab29/" target="_blank">Threads</a>
+    <a class="ig" href="https://www.instagram.com/mathlab9981" target="_blank">Instagram</a>
+    <a class="fb" href="https://www.facebook.com/fcs9981" target="_blank">Facebook</a>
+    <a class="yt" href="https://www.youtube.com/user/FCS9981" target="_blank">YouTube</a>
+  </div>
+</section>
+
+<section>
+  <h2>お問い合わせ</h2>
+  <div class="btns two">
+    <a class="btn fill" href="tel:0929192200"><span class="stack">電話する<small>092-919-2200</small></span></a>
+    <a class="btn" href="mailto:mail@fcs9981.sakura.ne.jp"><span class="stack">メールする<small>mail@fcs9981.sakura.ne.jp</small></span></a>
+  </div>
+</section>
+
+</main>
+
+<footer>ＦＣＳ数学教室　二日市数学教室</footer>
+
+<nav class="fixed-cta" aria-label="お問い合わせ">
+  <a class="tel" href="tel:0929192200">電話する</a>
+  <a class="mail" href="mailto:mail@fcs9981.sakura.ne.jp">メールする</a>
+</nav>
+
+</body>
+</html>
