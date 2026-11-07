@@ -128,6 +128,7 @@ function GoogleMapView({
   selectedId,
   className = "h-[62vh]",
   legend = true,
+  layerToggle = true,
 }: MapViewProps) {
   const { ready, error } = useGoogleMaps();
   const divRef = useRef<HTMLDivElement>(null);
@@ -155,7 +156,13 @@ function GoogleMapView({
       // 地図 ID が無いときは、他社の店名を消して登録店のピンを目立たせる
       styles: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID ? undefined : GOOGLE_STYLES,
       gestureHandling: "greedy",
-      mapTypeControl: false,
+      // 地図／航空写真の切り替え（小さな地図では出さない）
+      mapTypeControl: layerToggle,
+      mapTypeControlOptions: {
+        mapTypeIds: ["roadmap", "hybrid"],
+        style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+        position: google.maps.ControlPosition.TOP_RIGHT,
+      },
       streetViewControl: false,
       fullscreenControl: false,
       clickableIcons: false,
