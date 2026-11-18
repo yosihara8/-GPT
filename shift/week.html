@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>週間シフト</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>週間シフト <span class="muted">（日付を押すとその日の階段状シフト表へ）</span></h1>
+  <div class="toolbar">
+    <button id="prev">◀ 前の週</button>
+    <div class="title" id="title"></div>
+    <button id="next">次の週 ▶</button>
+    <input type="date" id="date">
+    <button id="thisWeek">今週</button>
+    <label style="flex-direction:row;align-items:center;gap:6px">
+      <input type="checkbox" id="onlyWorking" style="padding:0"> 出勤者のみ表示
+    </label>
+    <button onclick="print()">印刷</button>
+  </div>
+  <div class="card">
+    <div class="scroll"><table class="week" id="w"></table></div>
+  </div>
+</main>
+<script src="common.js"></script>
+<script>
+renderNav('week.html');
+const $ = id => document.getElementById(id);
+let start = mondayOf(param('date') || today());
+$('onlyWorking').checked = localStorage.getItem('shiftApp.onlyWorking') === '1';
+
+function render() {
+  const data = loadData();
+  history.replaceState(null, '', `?date=${start}`);
+  $('date').value = start;
+  const days = [...Array(7)].map((_, i) => addDays(start, i));
+  $('title').textContent = `${labelDate(days[0])} 〜 ${labelDate(days[6])}`;
+  const t = today();
+  const inWeek = data.shifts.filter(s => s.date >= days[0] && s.date <= days[6]);
+
+  let staff = data.staff;
+  if ($('onlyWorking').checked) staff = staff.filter(st => inWeek.some(s => s.staffId === st.id));
+
+  let html = `<thead><tr><th>名前</th>`;
+  for (const d of days) html += `<th class="${d === t ? 'today' : ''}"><a class="${wdClass(d)}" href="day.html?date=${d}">${labelDate(d)}</a></th>`;
+  html += `<th>週合計</th></tr></thead><tbody>`;
+
+  for (const st of staff) {
+    let sum = 0;
+    html += `<tr><td class="name"><span class="dot" style="background:${st.color}"></span>${esc(st.name)}</td>`;
+    for (const d of days) {
+      const mine = inWeek.filter(s => s.staffId === st.id && s.date === d).sort((a, b) => toMin(a.start) - toMin(b.start));
+      sum += mine.reduce((a, s) => a + hoursOf(s), 0);
+      html += `<td class="${d === t ? 'today' : ''} ${mine.length ? '' : 'off'}">` +
+        (mine.length ? mine.map(s => `<span class="tag" style="background:${st.color}" title="${esc(s.note || '')}">${shortTime(s.start)}-${shortTime(s.end)}</span>`).join('<br>') : '−') + `</td>`;
+    }
+    html += `<td>${sum}h</td></tr>`;
+  }
+  if (!staff.length) html += `<tr><td colspan="9" class="muted" style="padding:16px">表示するアルバイトさんがいません（<a href="input.html">シフト入力</a>から登録）</td></tr>`;
+
+  html += `</tbody><tfoot><tr><td>出勤人数</td>`;
+  for (const d of days) html += `<td class="${d === t ? 'today' : ''}">${new Set(inWeek.filter(s => s.date === d).map(s => s.staffId)).size}人</td>`;
+  html += `<td>${inWeek.reduce((a, s) => a + hoursOf(s), 0)}h</td></tr></tfoot>`;
+  $('w').innerHTML = html;
+}
+
+$('prev').onclick = () => { start = addDays(start, -7); render(); };
+$('next').onclick = () => { start = addDays(start, 7); render(); };
+$('thisWeek').onclick = () => { start = mondayOf(today()); render(); };
+$('date').onchange = e => { if (e.target.value) { start = mondayOf(e.target.value); render(); } };
+$('onlyWorking').onchange = () => { localStorage.setItem('shiftApp.onlyWorking', $('onlyWorking').checked ? '1' : '0'); render(); };
+window.addEventListener('storage', render);
+render();
+</script>
+</body>
+</html>

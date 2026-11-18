@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>1日のシフト表</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>1日のシフト表 <span class="muted">（営業 <span id="hours"></span>）</span></h1>
+  <div class="toolbar">
+    <button id="prev">◀ 前日</button>
+    <div class="title" id="title"></div>
+    <button id="next">翌日 ▶</button>
+    <input type="date" id="date">
+    <button id="today">今日</button>
+    <label style="flex-direction:row;align-items:center;gap:6px">必要人数
+      <input type="number" id="need" min="0" max="20" style="width:64px">
+    </label>
+    <button onclick="print()">印刷</button>
+  </div>
+  <div class="card">
+    <div class="scroll"><table class="gantt" id="g"></table></div>
+    <p class="muted" id="sum"></p>
+  </div>
+</main>
+<script src="common.js"></script>
+<script>
+renderNav('day.html');
+const $ = id => document.getElementById(id);
+let date = param('date') || today();
+$('hours').textContent = `${OPEN_HOUR}:00〜${CLOSE_HOUR}:00`;
+$('need').value = localStorage.getItem('shiftApp.need') || 2;
+
+function render() {
+  const data = loadData();
+  history.replaceState(null, '', `?date=${date}`);
+  $('date').value = date;
+  $('title').innerHTML = `<span class="${wdClass(date)}">${labelDate(date)}</span>`;
+
+  const open = OPEN_HOUR * 60, slots = (CLOSE_HOUR - OPEN_HOUR) * 60 / STEP_MIN;
+  const perHour = 60 / STEP_MIN;
+  // 開始時刻 → 終了時刻 の順で並べて階段状にする
+  const list = data.shifts.filter(s => s.date === date)
+    .sort((a, b) => toMin(a.start) - toMin(b.start) || toMin(a.end) - toMin(b.end));
+
+  let html = `<colgroup><col class="name"><col class="time">${'<col>'.repeat(slots)}</colgroup>`;
+  html += `<thead><tr><th style="padding-left:8px">名前</th><th style="padding-left:8px">時間</th>`;
+  for (let h = OPEN_HOUR; h < CLOSE_HOUR; h++) html += `<th colspan="${perHour}">${h}</th>`;
+  html += `</tr></thead><tbody>`;
+
+  const count = new Array(slots).fill(0);
+  for (const s of list) {
+    const st = data.staff.find(x => x.id === s.staffId) || { name: '(削除済み)', color: '#999' };
+    const a = Math.max(0, (toMin(s.start) - open) / STEP_MIN);
+    const b = Math.min(slots, (toMin(s.end) - open) / STEP_MIN);
+    for (let i = a; i < b; i++) count[i]++;
+    html += `<tr><td class="name" title="${esc(s.note || '')}"><span class="dot" style="background:${st.color}"></span>${esc(st.name)}</td>
+      <td class="time">${shortTime(s.start)}-${shortTime(s.end)}</td>`;
+    for (let i = 0; i < a; i++) html += cell(i);
+    html += `<td class="bar" colspan="${b - a}" style="background:${st.color}">${shortTime(s.start)}-${shortTime(s.end)}${s.note ? ' ・' + esc(s.note) : ''}</td>`;
+    for (let i = b; i < slots; i++) html += cell(i);
+    html += `</tr>`;
+  }
+  if (!list.length) html += `<tr><td colspan="${slots + 2}" class="muted" style="padding:16px;text-align:center">この日のシフトはまだありません（<a href="input.html?date=${date}">入力する</a>）</td></tr>`;
+
+  const need = +$('need').value || 0;
+  html += `</tbody><tfoot><tr class="count"><td colspan="2">人数</td>`;
+  for (let i = 0; i < slots; i++) html += `<td class="${count[i] < need ? 'lack' : ''}">${count[i]}</td>`;
+  html += `</tr></tfoot>`;
+  $('g').innerHTML = html;
+
+  const total = list.reduce((a, s) => a + hoursOf(s), 0);
+  const lack = count.filter(c => c < need).length * STEP_MIN / 60;
+  $('sum').textContent = `出勤 ${new Set(list.map(s => s.staffId)).size} 人 / 合計 ${total} 時間` +
+    (need ? ` / 必要人数(${need}人)に足りない時間帯：${lack} 時間分（赤）` : '');
+}
+function cell(i) { return `<td class="slot ${i % (60 / STEP_MIN) === 0 ? 'hour' : 'half'}"></td>`; }
+
+$('prev').onclick = () => { date = addDays(date, -1); render(); };
+$('next').onclick = () => { date = addDays(date, 1); render(); };
+$('today').onclick = () => { date = today(); render(); };
+$('date').onchange = e => { if (e.target.value) { date = e.target.value; render(); } };
+$('need').oninput = () => { localStorage.setItem('shiftApp.need', $('need').value); render(); };
+window.addEventListener('storage', render);
+render();
+</script>
+</body>
+</html>

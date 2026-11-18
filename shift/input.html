@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>シフト入力</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>シフト入力</h1>
+
+  <div class="card">
+    <div class="row">
+      <label>名前
+        <select id="staff"></select>
+      </label>
+      <label>新しく名前を登録
+        <input id="newName" placeholder="例：山田">
+      </label>
+      <button id="addStaff">登録</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <label>日付 <input type="date" id="date"></label>
+      <label>開始 <select id="start"></select></label>
+      <label>終了 <select id="end"></select></label>
+      <label>メモ <input id="note" placeholder="任意"></label>
+      <button class="primary" id="add">シフトを追加</button>
+    </div>
+    <div style="margin-top:12px">
+      <div class="muted" style="margin-bottom:6px">よく使う時間（押すと開始・終了に入ります）</div>
+      <div class="chips" id="presets"></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="muted" style="margin-bottom:6px">同じ時間で週の複数日にまとめて入れる（日付の週が対象）</div>
+      <div class="chips" id="weekdays"></div>
+      <button id="addMulti" style="margin-top:8px">選んだ曜日にまとめて追加</button>
+    </div>
+    <p class="muted" id="msg"></p>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <button id="prevW">◀ 前の週</button>
+      <div class="title" id="weekTitle"></div>
+      <button id="nextW">次の週 ▶</button>
+      <span class="muted" id="total"></span>
+    </div>
+    <div class="scroll">
+      <table class="list">
+        <thead><tr><th>日付</th><th>時間</th><th>時間数</th><th>メモ</th><th></th></tr></thead>
+        <tbody id="mine"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card no-print">
+    <div class="muted" style="margin-bottom:8px">データの保存・移動（この端末のブラウザに保存されています）</div>
+    <div class="row">
+      <button id="export">JSONで書き出し</button>
+      <label style="flex-direction:row;align-items:center">読み込み <input type="file" id="import" accept="application/json"></label>
+      <button class="danger" id="delStaff">選択中の名前を削除</button>
+    </div>
+  </div>
+</main>
+
+<script src="common.js"></script>
+<script>
+renderNav('input.html');
+const PRESETS = [['09:00','14:00'],['10:00','15:00'],['12:00','17:00'],['14:00','19:00'],['17:00','22:00'],['09:00','17:00'],['13:00','22:00']];
+const $ = id => document.getElementById(id);
+let data = loadData();
+let weekStart = mondayOf(param('date') || today());
+$('date').value = param('date') || today();
+
+// 時刻プルダウン
+const opts = timeOptions();
+$('start').innerHTML = opts.slice(0, -1).map(t => `<option>${t}</option>`).join('');
+$('end').innerHTML = opts.slice(1).map(t => `<option>${t}</option>`).join('');
+$('start').value = '09:00'; $('end').value = '14:00';
+
+$('presets').innerHTML = PRESETS.map(([s, e]) =>
+  `<button class="chip" data-s="${s}" data-e="${e}">${shortTime(s)}-${shortTime(e)}</button>`).join('');
+$('presets').onclick = ev => {
+  const b = ev.target.closest('.chip'); if (!b) return;
+  $('start').value = b.dataset.s; $('end').value = b.dataset.e;
+};
+
+const WD_ORDER = [1,2,3,4,5,6,0];
+$('weekdays').innerHTML = WD_ORDER.map((w, i) =>
+  `<label style="flex-direction:row;align-items:center;gap:4px" class="chip ${w===0?'sun':w===6?'sat':''}"><input type="checkbox" value="${i}" style="padding:0">${WD[w]}</label>`).join('');
+
+function renderStaff(selId) {
+  const cur = selId || $('staff').value || localStorage.getItem('shiftApp.me');
+  $('staff').innerHTML = data.staff.length
+    ? data.staff.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')
+    : '<option value="">（先に名前を登録してください）</option>';
+  if (cur && staffById(data, cur)) $('staff').value = cur;
+}
+
+function msg(t) { $('msg').textContent = t; }
+
+$('addStaff').onclick = () => {
+  const name = $('newName').value.trim();
+  if (!name) return msg('名前を入力してください');
+  if (data.staff.some(s => s.name === name)) return msg('その名前はすでに登録されています');
+  const s = { id: uid(), name, color: COLORS[data.staff.length % COLORS.length] };
+  data.staff.push(s); saveData(data);
+  $('newName').value = '';
+  renderStaff(s.id); renderMine(); msg(`${name} さんを登録しました`);
+};
+$('staff').onchange = () => { localStorage.setItem('shiftApp.me', $('staff').value); renderMine(); };
+
+function addShift(date) {
+  const staffId = $('staff').value, start = $('start').value, end = $('end').value;
+  if (!staffId) { msg('名前を選んでください'); return false; }
+  if (!date) { msg('日付を選んでください'); return false; }
+  if (toMin(end) <= toMin(start)) { msg('終了は開始より後にしてください'); return false; }
+  const overlap = data.shifts.some(x => x.staffId === staffId && x.date === date &&
+    toMin(start) < toMin(x.end) && toMin(x.start) < toMin(end));
+  if (overlap) { msg(`${labelDate(date)} は時間が重なるシフトがあります`); return false; }
+  data.shifts.push({ id: uid(), staffId, date, start, end, note: $('note').value.trim() });
+  return true;
+}
+
+$('add').onclick = () => {
+  const date = $('date').value;
+  if (addShift(date)) {
+    saveData(data); weekStart = mondayOf(date); renderMine();
+    msg(`${labelDate(date)} ${shortTime($('start').value)}-${shortTime($('end').value)} を追加しました`);
+  }
+};
+$('addMulti').onclick = () => {
+  const base = mondayOf($('date').value || today());
+  const idx = [...document.querySelectorAll('#weekdays input:checked')].map(c => +c.value);
+  if (!idx.length) return msg('曜日を選んでください');
+  let n = 0;
+  for (const i of idx) if (addShift(addDays(base, i))) n++;
+  saveData(data); weekStart = base; renderMine();
+  if (n) msg(`${n}日分追加しました`);
+};
+
+function renderMine() {
+  const staffId = $('staff').value;
+  const end = addDays(weekStart, 6);
+  $('weekTitle').textContent = `${labelDate(weekStart)} 〜 ${labelDate(end)}`;
+  const list = data.shifts.filter(s => s.staffId === staffId && s.date >= weekStart && s.date <= end)
+    .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+  $('mine').innerHTML = list.length ? list.map(s => `<tr>
+      <td class="${wdClass(s.date)}">${labelDate(s.date)}</td>
+      <td>${shortTime(s.start)} - ${shortTime(s.end)}</td>
+      <td>${hoursOf(s)}h</td>
+      <td>${esc(s.note || '')}</td>
+      <td><button class="danger ghost" data-del="${s.id}">削除</button></td></tr>`).join('')
+    : `<tr><td colspan="5" class="muted">この週のシフトはまだありません</td></tr>`;
+  $('total').textContent = `合計 ${list.reduce((a, s) => a + hoursOf(s), 0)} 時間`;
+}
+$('mine').onclick = ev => {
+  const id = ev.target.dataset.del; if (!id) return;
+  data.shifts = data.shifts.filter(s => s.id !== id); saveData(data); renderMine();
+};
+$('prevW').onclick = () => { weekStart = addDays(weekStart, -7); renderMine(); };
+$('nextW').onclick = () => { weekStart = addDays(weekStart, 7); renderMine(); };
+
+$('export').onclick = exportJson;
+$('import').onchange = e => e.target.files[0] && importJson(e.target.files[0], () => { data = loadData(); renderStaff(); renderMine(); });
+$('delStaff').onclick = () => {
+  const s = staffById(data, $('staff').value); if (!s) return;
+  if (!confirm(`${s.name} さんと、そのシフトをすべて削除します。よろしいですか？`)) return;
+  data.staff = data.staff.filter(x => x.id !== s.id);
+  data.shifts = data.shifts.filter(x => x.staffId !== s.id);
+  saveData(data); renderStaff(); renderMine();
+};
+
+renderStaff(); renderMine();
+</script>
+</body>
+</html>

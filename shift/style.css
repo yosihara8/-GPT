@@ -1,0 +1,64 @@
+:root{
+  --bg:#f5f6f8; --card:#fff; --text:#1f2430; --sub:#6b7280; --line:#e3e6eb;
+  --accent:#4f8cff; --sat:#2f6fd6; --sun:#d93f3f; --stripe:#fafbfc;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;font-size:15px;line-height:1.5}
+.nav{display:flex;gap:4px;align-items:center;background:#1f2430;padding:8px 16px;position:sticky;top:0;z-index:20;overflow-x:auto}
+.nav .brand{color:#fff;font-weight:700;margin-right:12px;white-space:nowrap}
+.nav a{color:#c9cfdb;text-decoration:none;padding:6px 12px;border-radius:6px;white-space:nowrap}
+.nav a.on,.nav a:hover{background:#3a4152;color:#fff}
+main{max-width:1200px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:8px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+label{display:flex;flex-direction:column;font-size:13px;color:var(--sub);gap:4px}
+input,select,button{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--text)}
+button{cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button.ghost{background:transparent}
+button.danger{color:var(--sun)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.toolbar .title{font-size:18px;font-weight:700;min-width:140px;text-align:center}
+.muted{color:var(--sub);font-size:13px}
+.sat{color:var(--sat)} .sun{color:var(--sun)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+table.list{width:100%;border-collapse:collapse}
+table.list th,table.list td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+.scroll{overflow-x:auto}
+
+/* ===== 1日の階段状シフト表 ===== */
+.gantt{border-collapse:collapse;min-width:900px;width:100%;table-layout:fixed}
+.gantt th,.gantt td{border:1px solid var(--line);padding:0;height:34px;font-size:12px}
+.gantt col.name{width:110px} .gantt col.time{width:90px}
+.gantt thead th{background:#eef1f6;font-weight:600;text-align:left;padding-left:2px}
+.gantt td.name,.gantt td.time{padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fff}
+.gantt td.slot{background:#fff}
+.gantt td.slot.half{border-left:1px dashed #edf0f4}
+.gantt td.slot.hour{border-left:1px solid #d5d9e0}
+.gantt td.bar{color:#fff;font-weight:700;text-align:center;border-radius:0}
+.gantt tr.count td{background:#f3f5f9;font-weight:700;text-align:center}
+.gantt tr.count td.lack{background:#ffe3e3;color:var(--sun)}
+
+/* ===== 週間表 ===== */
+.week{border-collapse:collapse;width:100%;min-width:760px}
+.week th,.week td{border:1px solid var(--line);padding:6px;text-align:center;font-size:13px}
+.week thead th{background:#eef1f6}
+.week thead th a{color:inherit;text-decoration:none;display:block}
+.week thead th a:hover{text-decoration:underline}
+.week td.name{text-align:left;white-space:nowrap;font-weight:600}
+.week td .tag{display:inline-block;padding:3px 8px;border-radius:6px;color:#fff;font-weight:700;margin:1px 0}
+.week td.off{color:#c3c8d1}
+.week th.today,.week td.today{background:#fff8e1}
+.week tfoot td{background:#f3f5f9;font-weight:700}
+
+@media print{
+  .nav,.toolbar,.no-print{display:none!important}
+  body{background:#fff} main{max-width:none;padding:0}
+  .card{border:none;padding:0}
+  .gantt td.bar,.week td .tag{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
