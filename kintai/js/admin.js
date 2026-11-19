@@ -31,7 +31,13 @@
     },
     refresh() { Admin.renderNav(); Admin.renderMain(); },
   };
-  App.bus.on(() => { if (document.getElementById('adminView').hidden === false) Admin.renderNav(); });
+  App.bus.on(kind => {
+    if (!document.getElementById('adminMain')) return;
+    Admin.renderNav();
+    // 従業員ページでの打刻・希望などを反映。入力中・確認画面を開いているときは書き換えない
+    const busy = document.querySelector('.modal-back') || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName));
+    if (kind === 'external' && !busy) Admin.renderMain();
+  });
 
   /* 打刻の状態 */
   Admin.punchState = function (p, shift, date) {
@@ -68,6 +74,11 @@
         <div class="tile"><span class="tile-label">今日の出勤</span><b class="tile-num">${todayShifts.length}人<small> / 出勤中 ${working}人</small></b><span class="tile-sub">${pending ? `<a href="#shift" class="chip warn">シフト希望 ${pending}件が未承認</a>` : '未承認のシフト希望はありません'}</span></div>
       </section>`));
 
+      if (App.Legal) {
+        const iss = App.Legal.issues(d), bad = iss.filter(i => i.level === 'bad'), warn = iss.filter(i => i.level === 'warn');
+        main.append(UI.el(`<section class="card legal-sum ${bad.length ? 'has-bad' : ''}"><div class="card-head"><h2>法令チェック</h2><a class="btn sm" href="#legal">すべて見る</a></div>
+          ${bad.length + warn.length ? `<ul class="issues compact">${[...bad, ...warn].slice(0, 3).map(i => `<li class="issue ${i.level}"><span class="chip ${i.level}">${i.level === 'bad' ? 'すぐ対応' : '確認'}</span><div><b>${U.esc(i.title)}</b><small class="muted">${U.esc(i.law)}</small></div></li>`).join('')}</ul>${bad.length + warn.length > 3 ? `<p class="muted small">ほか ${bad.length + warn.length - 3} 件</p>` : ''}` : '<p class="muted">すぐ対応が必要なこと・確認が必要なことは見つかっていません（数値の確認のお知らせは「法令チェック」に出ています）。</p>'}</section>`));
+      }
       const grid = UI.el(`<div class="grid-2"></div>`);
       const now = UI.el(`<section class="card"><h2>今日の出勤状況 <small class="muted">${U.label(today)}</small></h2><div class="scroll"><table class="tbl"><thead><tr><th>名前</th><th>シフト</th><th>出勤</th><th>退勤</th><th>状態</th></tr></thead><tbody>${todayShifts.map(s => {
         const st = S.staff(s.staffId) || { name: '(削除済み)', color: '#888' };
@@ -94,7 +105,7 @@
 
   /* ================= 掲示板 ================= */
   Admin.register({
-    id: 'board', label: '掲示板', group: '現場', lead: 'お知らせを書くと、従業員アプリに届きます。誰が読んだか・リアクションも確認できます。',
+    id: 'board', label: '掲示板', group: '現場', lead: 'お知らせを書くと、従業員ページに届きます。誰が読んだか・リアクションも確認できます。',
     badge() { const d = S.get(); const n = d.staff.filter(s => s.active); return d.posts.filter(p => p.important && n.some(s => !d.reads.some(r => r.postId === p.id && r.staffId === s.id))).length; },
     render(main) {
       const d = S.get();
@@ -142,43 +153,86 @@
     },
   });
 
-  /* ================= 従業員名簿 ================= */
-  const FIELDS = [
-    ['code', '従業員番号', 'text'], ['name', '氏名', 'text'], ['kana', 'ふりがな', 'text'], ['role', '役割', 'text'],
-    ['wage', '時給（円）', 'number'], ['transport', '交通費（1日・円）', 'number'], ['phone', '電話番号', 'tel'],
-    ['birth', '生年月日', 'date'], ['hireDate', '入社日', 'date'], ['pin', 'アプリのPIN（4桁）', 'text'],
-    ['dependents', '扶養人数', 'number'], ['socialIns', '社会保険料（月額・手入力）', 'number'],
+  /* ================= 従業員名簿（労働者名簿） ================= */
+  // 労働基準法107条・施行規則53条で記入が決まっている項目には「法定」の印を付けます
+  const SECTIONS = [
+    ['基本', [
+      ['code', '従業員番号', 'text'], ['name', '氏名', 'text', 'law', true], ['kana', 'ふりがな', 'text'],
+      ['gender', '性別', 'select:女性,男性,その他', 'law', true], ['birth', '生年月日', 'date', 'law', true],
+      ['address', '住所', 'text', 'law', true], ['phone', '電話番号', 'tel'],
+    ]],
+    ['雇用', [
+      ['hireDate', '雇入れ年月日', 'date', 'law', true], ['job', '従事する業務の種類', 'text', 'law'],
+      ['role', '役割', 'text'], ['history', '履歴（前職・資格など）', 'text', 'law'],
+    ]],
+    ['給与・保険・税', [
+      ['wage', '時給（円）', 'number', '', true], ['transport', '交通費（1日・円）', 'number'],
+      ['dependents', '扶養人数', 'number'], ['socialIns', '社会保険料（月額・手入力）', 'number'],
+      ['taxCol', '税額表の区分', 'select:甲,乙'],
+    ]],
+    ['従業員ページ・メール', [
+      ['pin', '従業員ページのPIN（4桁）', 'text', '', true], ['email', 'メールアドレス', 'email'],
+      ['consentDate', '電子交付に同意した日', 'date'],
+    ]],
+    ['退職・死亡（該当するときだけ）', [
+      ['retireDate', '退職年月日', 'date', 'law'], ['retireReason', '退職の事由（解雇の場合はその理由）', 'text', 'law'],
+      ['deathDate', '死亡年月日', 'date', 'law'], ['deathCause', '死亡の原因', 'text', 'law'],
+    ]],
   ];
+  const ALL = SECTIONS.flatMap(s => s[1]);
+  function inputHtml([k, l, t, law, req], st) {
+    const lab = `${l}${law ? ' <span class="law-tag">法定</span>' : ''}${req ? ' <span class="req">必須</span>' : ''}`;
+    if (t.startsWith('select:')) return `<label class="field">${lab}<select id="f_${k}">${U.options(t.slice(7).split(','), st[k])}</select></label>`;
+    return `<label class="field">${lab}<input id="f_${k}" type="${t}" value="${U.esc(st[k] ?? '')}"${req ? ' required' : ''}${t === 'number' ? ' min="0" step="1"' : ''}${k === 'pin' ? ' pattern="[0-9]{4}" inputmode="numeric" title="数字4桁"' : ''}></label>`;
+  }
   function staffForm(st, isNew) {
-    const html = `<form class="form" id="stForm">${FIELDS.map(([k, l, t]) => `<label class="field">${l}<input id="f_${k}" type="${t}" value="${U.esc(st[k] ?? '')}" ${k === 'name' || k === 'wage' || k === 'pin' ? 'required' : ''}${t === 'number' ? ' min="0" step="1"' : ''}${k === 'pin' ? ' pattern="[0-9]{4}" inputmode="numeric"' : ''}></label>`).join('')}
-      <label class="field">税額表の区分<select id="f_taxCol">${U.options([['甲', '甲欄（扶養控除等申告書あり）'], ['乙', '乙欄（掛け持ちの2か所目など）']], st.taxCol)}</select></label>
-      <label class="field">色<input id="f_color" type="color" value="${st.color}"></label>
-      <label class="check"><input type="checkbox" id="f_empIns" ${st.empIns ? 'checked' : ''}> 雇用保険に加入（週20時間以上）</label>
+    const s = S.get().settings;
+    const html = `<form class="form">${SECTIONS.map(([title, fs]) => `<h4 class="wide form-sec">${title}</h4>${fs.map(f => inputHtml(f, st)).join('')}${title === '給与・保険・税' ? `
+      <label class="check wide"><input type="checkbox" id="f_empIns" ${st.empIns ? 'checked' : ''}> 雇用保険に加入（週20時間以上・31日以上の雇用見込み）</label>
+      <p class="wide small muted">最低賃金（${U.esc(s.minWagePref)}）：${U.yen(s.minWage)}。これより低い時給は保存できません（最低賃金法4条）。</p>` : ''}${title === '従業員ページ・メール' ? `
+      <label class="check wide"><input type="checkbox" id="f_consent" ${st.consent ? 'checked' : ''}> 給与明細をメール（電子）で受け取ることに本人が同意している</label>
+      <p class="wide small muted">給与明細を電子で渡すには、本人の承諾が必要です（所得税法231条2項・同施行令356条）。同意がない人には紙で渡してください。</p>` : ''}`).join('')}
+      <label class="field">表示の色<input id="f_color" type="color" value="${st.color}"></label>
       <label class="check"><input type="checkbox" id="f_active" ${st.active ? 'checked' : ''}> 在籍中</label>
-      <label class="field wide">メモ<textarea id="f_note" rows="2">${U.esc(st.note)}</textarea></label></form>`;
+      <label class="field wide">メモ（管理者だけが見られます）<textarea id="f_note" rows="2">${U.esc(st.note)}</textarea></label>
+      <p class="wide err" id="f_err" role="alert"></p></form>`;
     UI.modal(isNew ? '従業員を追加' : `${st.name} さんの情報`, html, [
       { label: 'やめる' },
       { label: '保存する', kind: 'primary', onClick: w => {
         const f = w.querySelector('form'); if (!f.reportValidity()) return false;
-        const v = id => w.querySelector('#f_' + id);
-        FIELDS.forEach(([k, , t]) => { st[k] = t === 'number' ? Number(v(k).value || 0) : v(k).value.trim(); });
-        st.taxCol = v('taxCol').value; st.color = v('color').value; st.empIns = v('empIns').checked; st.active = v('active').checked; st.note = v('note').value;
+        const v = id => w.querySelector('#f_' + id), err = w.querySelector('#f_err');
+        const wage = Number(v('wage').value || 0);
+        if (wage < s.minWage) { err.textContent = `時給が最低賃金（${s.minWagePref} ${U.yen(s.minWage)}）より低くなっています。`; return false; }
+        if (v('consent').checked && !v('email').value) { err.textContent = '電子交付に同意している場合は、メールアドレスを入れてください。'; return false; }
+        if (v('consent').checked && !v('consentDate').value) { err.textContent = '同意した日を入れてください（同意の記録として残します）。'; return false; }
+        if (!v('active').checked && !v('retireDate').value && !v('deathDate').value) { err.textContent = '在籍中を外すときは、退職年月日を入れてください（労働者名簿の記入事項）。'; return false; }
+        const before = JSON.stringify({ wage: st.wage, active: st.active });
+        ALL.forEach(([k, , t]) => { st[k] = t === 'number' ? Number(v(k).value || 0) : v(k).value.trim(); });
+        st.color = v('color').value; st.empIns = v('empIns').checked; st.active = v('active').checked; st.note = v('note').value; st.consent = v('consent').checked;
         const d = S.get(); if (isNew) d.staff.push(st);
+        S.log('管理者', isNew ? '従業員を追加' : '従業員情報を変更', st.name, isNew ? '' : `変更前 ${before}`);
         S.save(); UI.toast('保存しました'); Admin.refresh();
       } },
     ]);
   }
   Admin.register({
-    id: 'staff', label: '従業員名簿', group: '人事・給与', lead: '時給・交通費・保険・税の区分はここで設定します。行を押すと編集できます。',
+    id: 'staff', label: '従業員名簿', group: '人事・給与', lead: '労働者名簿（労働基準法107条）を兼ねています。行を押すと編集できます。退職した人も記録の保存期間中は削除せず「退職」として残します。',
     render(main) {
-      const d = S.get();
-      const bar = UI.el(`<div class="toolbar"><button class="btn primary">＋ 従業員を追加</button><span class="muted">在籍 ${d.staff.filter(s => s.active).length}人</span></div>`);
-      bar.querySelector('button').onclick = () => staffForm({ id: 'st' + U.uid(), code: 'S' + String(d.staff.length + 1).padStart(3, '0'), name: '', kana: '', role: 'アルバイト', wage: 1100, transport: 0, phone: '', birth: '', hireDate: U.today(), pin: String(1000 + Math.floor(Math.random() * 9000)), dependents: 0, socialIns: 0, taxCol: '甲', empIns: false, active: true, note: '', color: '#2f6fd6' }, true);
+      const d = S.get(), s = d.settings;
+      const bar = UI.el(`<div class="toolbar"><button class="btn primary">＋ 従業員を追加</button><span class="muted">在籍 ${d.staff.filter(x => x.active).length}人 ・ 退職 ${d.staff.filter(x => !x.active).length}人</span></div>`);
+      bar.querySelector('button').onclick = () => staffForm({ id: 'st' + U.uid(), code: 'S' + String(d.staff.length + 1).padStart(3, '0'), name: '', kana: '', gender: '女性', birth: '', address: '', phone: '', hireDate: U.today(), job: '接客・調理補助', role: 'アルバイト', history: '', wage: Math.max(s.minWage, 1230), transport: 0, dependents: 0, socialIns: 0, taxCol: '甲', empIns: false, pin: String(1000 + Math.floor(Math.random() * 9000)), email: '', consent: false, consentDate: '', retireDate: '', retireReason: '', deathDate: '', deathCause: '', active: true, note: '', color: '#c2185b' }, true);
       main.append(bar);
-      const card = UI.el(`<section class="card"><div class="scroll"><table class="tbl hover"><thead><tr><th>番号</th><th>氏名</th><th>役割</th><th class="r">時給</th><th class="r">交通費/日</th><th>雇用保険</th><th>税区分</th><th class="r">扶養</th><th>入社日</th><th>PIN</th><th>状態</th></tr></thead><tbody>${d.staff.map(s => `<tr data-id="${s.id}" tabindex="0">
-        <td class="mono">${U.esc(s.code)}</td><td><i class="dot" style="background:${s.color}"></i><b>${U.esc(s.name)}</b><br><small class="muted">${U.esc(s.kana)}</small></td><td>${U.esc(s.role)}</td>
-        <td class="r mono">${U.yen(s.wage)}</td><td class="r mono">${U.yen(s.transport)}</td><td>${s.empIns ? '<span class="chip good">加入</span>' : '<span class="chip">なし</span>'}</td><td>${s.taxCol}欄</td><td class="r">${s.dependents}人</td>
-        <td class="mono">${U.esc(s.hireDate)}</td><td class="mono">${U.esc(s.pin)}</td><td>${s.active ? '<span class="chip good">在籍</span>' : '<span class="chip">退職</span>'}</td></tr>`).join('')}</tbody></table></div></section>`);
+      const missing = st => ALL.filter(f => f[3] === 'law' && f[4] && !st[f[0]]).map(f => f[1]);
+      const card = UI.el(`<section class="card"><div class="scroll"><table class="tbl hover"><thead><tr><th>番号</th><th>氏名</th><th>性別</th><th>雇入れ日</th><th>業務</th><th class="r">時給</th><th>雇用保険</th><th>税区分</th><th>メール・電子交付</th><th>名簿の記入</th><th>状態</th></tr></thead><tbody>${d.staff.map(x => {
+        const miss = missing(x);
+        return `<tr data-id="${x.id}" tabindex="0">
+        <td class="num">${U.esc(x.code)}</td><td><i class="dot" style="background:${x.color}"></i><b>${U.esc(x.name)}</b><br><small class="muted">${U.esc(x.kana)}</small></td><td>${U.esc(x.gender)}</td><td class="num">${U.esc(x.hireDate)}</td><td>${U.esc(x.job)}</td>
+        <td class="r num">${U.yen(x.wage)}${x.wage < s.minWage ? '<br><span class="chip bad">最低賃金未満</span>' : ''}</td><td>${x.empIns ? '<span class="chip good">加入</span>' : '<span class="chip">なし</span>'}</td><td>${x.taxCol}欄</td>
+        <td>${x.email ? (x.consent ? '<span class="chip good">同意あり</span>' : '<span class="chip warn">同意なし（紙で交付）</span>') : '<span class="chip">未登録</span>'}</td>
+        <td>${miss.length ? `<span class="chip bad" title="${U.esc(miss.join('、'))}">未記入 ${miss.length}項目</span>` : '<span class="chip good">そろっています</span>'}</td>
+        <td>${x.active ? '<span class="chip good">在籍</span>' : `<span class="chip">退職 ${U.esc(x.retireDate)}</span>`}</td></tr>`;
+      }).join('')}</tbody></table></div>
+      <p class="muted small">労働者名簿は、退職・死亡の日から5年間（当分の間は3年間）保存する義務があります（労働基準法109条・143条）。生年月日・住所・メールアドレスなどの個人情報は管理者ページだけに表示し、従業員ページには氏名だけを出します。</p></section>`);
       card.querySelectorAll('tr[data-id]').forEach(tr => {
         const open = () => staffForm(S.staff(tr.dataset.id), false);
         tr.onclick = open; tr.onkeydown = e => { if (e.key === 'Enter') open(); };
@@ -189,55 +243,75 @@
 
   /* ================= 設定 ================= */
   Admin.register({
-    id: 'config', label: '設定・データ', group: 'その他', lead: '店舗の情報、割増率、保険料率、税額の計算に使う数値を変えられます。',
+    id: 'config', label: '設定・データ', group: 'その他', lead: '店舗の情報、法令に関わる数値（最低賃金・割増率・保険料率・税）、管理者のPIN、データのバックアップを扱います。',
     render(main) {
       const d = S.get(), s = d.settings, t = s.tax;
+      const tbl = a => a.map(r => [r[0] === Infinity ? null : r[0], r[1], r[2]]);
       const card = UI.el(`<section class="card"><h2>店舗と計算の設定</h2><form class="form" id="cfg">
-        <label class="field wide">店舗名<input id="c_storeName" value="${U.esc(s.storeName)}"></label>
+        <label class="field wide">店舗名<input id="c_storeName" value="${U.esc(s.storeName)}" required></label>
+        <label class="field wide">事業者名（給与明細・源泉徴収票に表示）<input id="c_employer" value="${U.esc(s.employer)}" required></label>
         <label class="field">営業開始（時）<input id="c_openHour" type="number" min="0" max="23" value="${s.openHour}"></label>
         <label class="field">営業終了（時）<input id="c_closeHour" type="number" min="1" max="29" value="${s.closeHour}"></label>
         <label class="field">シフトの刻み（分）<select id="c_step">${U.options([['15', '15分'], ['30', '30分'], ['60', '60分']], String(s.step))}</select></label>
         <label class="field">必要人数（初期値）<input id="c_need" type="number" min="0" value="${s.need}"></label>
-        <label class="field">残業の割増率<input id="c_otRate" type="number" step="0.01" min="1" value="${s.otRate}"></label>
-        <label class="field">深夜（22〜5時）の割増率<input id="c_nightRate" type="number" step="0.01" min="1" value="${s.nightRate}"></label>
-        <label class="field">雇用保険料率（本人負担）<input id="c_empInsRate" type="number" step="0.0001" min="0" value="${s.empInsRate}"></label>
-        <label class="field">給料日（毎月）<input id="c_payDay" type="number" min="1" max="31" value="${s.payDay}"></label>
+        <label class="field">給料日（毎月・月末締め）<input id="c_payDay" type="number" min="1" max="31" value="${s.payDay}"></label>
         <label class="field">人件費率の目標（%）<input id="c_laborTarget" type="number" min="0" max="100" value="${s.laborTarget}"></label>
-        <h3 class="wide">源泉所得税（月額表・電算機計算の特例）</h3>
-        <p class="wide notice">今の数値：${U.esc(t.version)}。税額表は改正されることがあります。本番で使う前に、国税庁の最新の「源泉徴収税額表」で必ず確認してください。</p>
+        <label class="field">管理者ページのPIN<input id="c_adminPin" value="${U.esc(s.adminPin)}" pattern="[0-9]{4,8}" inputmode="numeric" title="数字4〜8桁"></label>
+
+        <h3 class="wide form-sec">労働時間・割増賃金（労働基準法32条・37条）</h3>
+        <label class="field">週の始まり（週40時間の数え方）<select id="c_weekStart">${U.options([['0', '日曜日'], ['1', '月曜日'], ['6', '土曜日']], String(s.weekStart))}</select></label>
+        <label class="field">時間外の割増率（25%以上）<input id="c_otRate" type="number" step="0.01" min="1.25" value="${s.otRate}"></label>
+        <label class="field">月60時間超の割増率（50%以上）<input id="c_ot60Rate" type="number" step="0.01" min="1.5" value="${s.ot60Rate}"></label>
+        <label class="field">深夜（22〜5時）の割増率（25%以上）<input id="c_nightRate" type="number" step="0.01" min="1.25" value="${s.nightRate}"></label>
+        <label class="check wide"><input type="checkbox" id="c_agreement36" ${s.agreement36 ? 'checked' : ''}> 36協定（時間外・休日労働に関する協定）を労働基準監督署に届け出ている</label>
+        <label class="field">36協定：月の上限（時間）<input id="c_limitMonth" type="number" min="0" max="45" value="${s.limitMonth}"></label>
+        <label class="field">36協定：年の上限（時間）<input id="c_limitYear" type="number" min="0" max="360" value="${s.limitYear}"></label>
+
+        <h3 class="wide form-sec">最低賃金・雇用保険</h3>
+        <label class="field">最低賃金の都道府県<input id="c_minWagePref" value="${U.esc(s.minWagePref)}"></label>
+        <label class="field">地域別最低賃金（時間額・円）<input id="c_minWage" type="number" min="0" value="${s.minWage}"></label>
+        <label class="field wide">最低賃金のメモ<input id="c_minWageNote" value="${U.esc(s.minWageNote)}"></label>
+        <label class="field">雇用保険料率（労働者負担）<input id="c_empInsRate" type="number" step="0.0001" min="0" value="${s.empInsRate}"></label>
+        <label class="field wide">雇用保険料率のメモ<input id="c_empInsNote" value="${U.esc(s.empInsNote)}"></label>
+
+        <h3 class="wide form-sec">源泉所得税（月額表・電算機計算の特例）</h3>
+        <p class="wide notice">今の数値：${U.esc(t.version)}。令和8年分（2026年1月以降の支払い）から税額表が改正されています。本番で使う前に、国税庁の最新の「源泉徴収税額表」で必ず確認してください。</p>
         <label class="field">甲欄：この金額未満は0円<input id="t_zeroBelow" type="number" value="${t.zeroBelow}"></label>
         <label class="field">基礎控除（月額）<input id="t_kiso" type="number" value="${t.kiso}"></label>
         <label class="field">扶養1人あたりの控除（月額）<input id="t_fuyo" type="number" value="${t.fuyo}"></label>
         <label class="field">乙欄：一律の率<input id="t_otsuRate" type="number" step="0.00001" value="${t.otsuRate}"></label>
-        <label class="field wide">給与所得控除・税率の表（JSON）<textarea id="t_tables" rows="5" class="mono">${U.esc(JSON.stringify({ kyuyo: t.kyuyo.map(r => [r[0] === Infinity || r[0] === null ? null : r[0], r[1], r[2]]), brackets: t.brackets.map(r => [r[0] === Infinity || r[0] === null ? null : r[0], r[1], r[2]]) }))}</textarea></label>
+        <label class="field wide">給与所得控除・税率の表（JSON。上限なしは null）<textarea id="t_tables" rows="5" class="mono">${U.esc(JSON.stringify({ kyuyo: tbl(t.kyuyo), brackets: tbl(t.brackets) }))}</textarea></label>
+        <p class="wide err" id="c_err" role="alert"></p>
         <div class="wide row-end"><button type="button" class="btn" id="taxReset">税の数値を初期値に戻す</button><button class="btn primary">設定を保存</button></div>
       </form></section>`);
       card.querySelector('form').onsubmit = e => {
         e.preventDefault();
-        const v = id => card.querySelector('#' + id).value;
-        try {
-          const tb = JSON.parse(v('t_tables')); const fix = a => a.map(r => [r[0] === null ? Infinity : r[0], r[1], r[2]]);
-          t.kyuyo = fix(tb.kyuyo); t.brackets = fix(tb.brackets);
-        } catch (err) { UI.toast('表の書き方が正しくありません。JSONの形を確認してください'); return; }
-        s.storeName = v('c_storeName'); ['openHour', 'closeHour', 'step', 'need', 'otRate', 'nightRate', 'empInsRate', 'payDay', 'laborTarget'].forEach(k => { s[k] = Number(v('c_' + k)); });
+        const v = id => card.querySelector('#' + id).value, err = card.querySelector('#c_err');
+        let tb; try { tb = JSON.parse(v('t_tables')); if (!Array.isArray(tb.kyuyo) || !Array.isArray(tb.brackets)) throw 0; } catch (x) { err.textContent = '税の表の書き方が正しくありません。JSONの形を確認してください。'; return; }
+        if (Number(v('c_otRate')) < 1.25 || Number(v('c_nightRate')) < 1.25 || Number(v('c_ot60Rate')) < 1.5) { err.textContent = '割増率が法律の下限（時間外・深夜25%、月60時間超50%）より低くなっています。'; return; }
+        t.kyuyo = tb.kyuyo; t.brackets = tb.brackets;
+        ['storeName', 'employer', 'minWagePref', 'minWageNote', 'empInsNote', 'adminPin'].forEach(k => { s[k] = v('c_' + k).trim(); });
+        ['openHour', 'closeHour', 'step', 'need', 'otRate', 'ot60Rate', 'nightRate', 'weekStart', 'empInsRate', 'payDay', 'laborTarget', 'minWage', 'limitMonth', 'limitYear'].forEach(k => { s[k] = Number(v('c_' + k)); });
+        s.agreement36 = card.querySelector('#c_agreement36').checked;
         ['zeroBelow', 'kiso', 'fuyo', 'otsuRate'].forEach(k => { t[k] = Number(v('t_' + k)); });
         t.version = '手動で更新（' + U.today() + '）';
+        S.log('管理者', '設定を変更', '設定', '');
         S.save(); UI.toast('設定を保存しました'); Admin.refresh();
       };
       card.querySelector('#taxReset').onclick = () => { s.tax = App.defaultTax(); S.save(); UI.toast('税の数値を初期値に戻しました'); Admin.refresh(); };
       main.append(card);
 
       const data = UI.el(`<section class="card"><h2>データのバックアップ</h2>
-        <p class="muted">試作版では、データはこの端末のブラウザの中に保存されています。下の文字をコピーして保存しておくと、あとで貼り付けて元に戻せます。</p>
-        <textarea id="bk" rows="5" class="mono" readonly></textarea>
+        <p class="muted">試作版では、データはこの端末のブラウザの中に保存されています。下の文字をコピーして保存しておくと、あとで貼り付けて元に戻せます。中身には個人情報が含まれるので、保管場所に気をつけてください。</p>
+        <textarea id="bk" rows="4" class="mono" readonly></textarea>
         <div class="row-end"><button class="btn" id="bkMake">今のデータを表示</button><button class="btn" id="bkCopy">コピー</button></div>
-        <label class="field wide">復元するデータを貼り付け<textarea id="rs" rows="4" class="mono"></textarea></label>
+        <label class="field wide">復元するデータを貼り付け<textarea id="rs" rows="3" class="mono"></textarea></label>
         <div class="row-end"><button class="btn" id="rsDo">貼り付けたデータで置き換える</button><button class="btn danger" id="reset">見本データに作り直す</button></div></section>`);
       const bk = data.querySelector('#bk');
       data.querySelector('#bkMake').onclick = () => { bk.value = JSON.stringify(S.get()); };
       data.querySelector('#bkCopy').onclick = () => {
         if (!bk.value) bk.value = JSON.stringify(S.get());
-        navigator.clipboard.writeText(bk.value).then(() => UI.toast('コピーしました'), () => { bk.select(); UI.toast('選択しました。長押しまたは Ctrl+C でコピーしてください'); });
+        navigator.clipboard.writeText(bk.value).then(() => UI.toast('コピーしました'), () => { bk.select(); UI.toast('選択しました。Ctrl+C（スマホは長押し）でコピーしてください'); });
       };
       data.querySelector('#rsDo').onclick = async () => {
         let nd; try { nd = JSON.parse(data.querySelector('#rs').value); if (!nd.staff || !nd.settings) throw 0; } catch (e) { UI.toast('データの形が正しくありません'); return; }

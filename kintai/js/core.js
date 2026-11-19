@@ -17,6 +17,8 @@ const U = App.U = {
   wd: s => U.parse(s).getDay(),
   label: s => { const d = U.parse(s); return `${d.getMonth() + 1}/${d.getDate()}(${U.WD[d.getDay()]})`; },
   ymLabel: ym => `${ym.slice(0, 4)}年${+ym.slice(5, 7)}月`,
+  /* その日時点の満年齢 */
+  age: (birth, on) => { if (!birth) return null; const [y, m, d] = birth.split('-').map(Number); const [Y, M, D] = on.split('-').map(Number); return Y - y - ((M < m || (M === m && D < d)) ? 1 : 0); },
   wdClass: s => { const w = U.wd(s); return w === 0 ? 'sun' : w === 6 ? 'sat' : ''; },
   toMin: t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; },
   toHHMM: m => `${U.pad(Math.floor(m / 60))}:${U.pad(m % 60)}`,
@@ -40,17 +42,18 @@ const U = App.U = {
 App.bus = {
   fns: [],
   on(f) { this.fns.push(f); },
-  emit() { this.fns.forEach(f => { try { f(); } catch (e) { console.error(e); } }); },
+  emit(kind) { this.fns.forEach(f => { try { f(kind); } catch (e) { console.error(e); } }); },
 };
 
 /* ---------- 保存（試作版は端末のブラウザに保存） ---------- */
-const KEY = 'misekan.v1';
+const KEY = 'misekan.v2';   // データの形を変えたので v2（v1 の見本データは使いません）
 let mem = null;
 App.Store = {
   get() {
     if (mem) return mem;
     try { const raw = localStorage.getItem(KEY); if (raw) mem = JSON.parse(raw); } catch (e) { mem = null; }
     if (!mem || !mem.staff) { mem = App.Seed.create(); this.save(true); }
+    ['auditLog', 'mailLog', 'reads', 'reactions', 'requests', 'payrolls'].forEach(k => { if (!Array.isArray(mem[k])) mem[k] = []; });
     return mem;
   },
   save(silent) {
@@ -60,7 +63,18 @@ App.Store = {
   replace(d) { mem = d; this.save(); },
   reset() { mem = App.Seed.create(); this.save(); },
   staff(id) { return this.get().staff.find(s => s.id === id); },
+  /* 変更の記録（労働時間の記録を後から直したとき、誰が・いつ・なぜ直したかを残す） */
+  log(actor, action, target, detail, reason) {
+    const d = this.get();
+    d.auditLog.push({ at: new Date().toISOString().slice(0, 19), actor, action, target, detail: detail || '', reason: reason || '' });
+  },
 };
+/* 管理者ページと従業員ページを同じ端末で開いているとき、片方の変更をもう片方に反映する */
+addEventListener('storage', e => {
+  if (e.key !== KEY) return;
+  mem = null;
+  App.bus.emit('external');
+});
 App.pref = {
   get(k, d) { try { const v = localStorage.getItem('misekan.pref.' + k); return v === null ? d : v; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('misekan.pref.' + k, v); } catch (e) {} },

@@ -5,24 +5,9 @@
   const ps = { ym: U.ymAdd(U.ym(U.today()), -1), slipYm: U.ymAdd(U.ym(U.today()), -1), slipStaff: '', year: new Date().getFullYear() };
   const confirmed = (d, ym, sid) => d.payrolls.find(p => p.ym === ym && p.staffId === sid);
 
-  /* 給与明細の表示（管理画面・従業員アプリで共通） */
-  App.payslipHtml = function (p, storeName, payDay, draft) {
-    const row = (l, v, cls) => `<tr class="${cls || ''}"><th>${l}</th><td class="r mono">${v}</td></tr>`;
-    return `<div class="slip">
-      <div class="slip-head"><div><b class="slip-title">給与明細書</b><span>${U.ymLabel(p.ym)}分${draft ? '（見込み）' : ''}</span></div><div class="r"><b>${U.esc(p.name)}</b> 様<br><small class="muted">${U.esc(storeName)}${payDay ? ` ・ 支給日 毎月${payDay}日` : ''}</small></div></div>
-      <div class="slip-grid">
-        <table class="slip-t"><caption>勤怠</caption>${row('時給', U.yen(p.wage))}${row('出勤日数', p.days + '日')}${row('労働時間', U.hm(p.workMin))}${row('うち残業', U.hm(p.otMin))}${row('うち深夜', U.hm(p.nightMin))}</table>
-        <table class="slip-t"><caption>支給</caption>${row('基本給（時給×時間）', U.yen(p.base))}${row('残業手当', U.yen(p.otPay))}${row('深夜手当', U.yen(p.nightPay))}${row('通勤手当（非課税）', U.yen(p.transport))}${row('総支給額', U.yen(p.gross), 'total')}</table>
-        <table class="slip-t"><caption>控除</caption>${row('雇用保険料', U.yen(p.empIns))}${row('社会保険料', U.yen(p.social))}${row('所得税', U.yen(p.tax))}${row('控除合計', U.yen(p.deductions), 'total')}</table>
-      </div>
-      <div class="slip-net"><span>差引支給額</span><b class="mono">${U.yen(p.net)}</b></div>
-      ${p.taxNote ? `<p class="notice">${U.esc(p.taxNote)}</p>` : ''}
-    </div>`;
-  };
-
   /* ================= 給与計算 ================= */
   Admin.register({
-    id: 'payroll', label: '給与計算', group: '人事・給与', lead: '打刻をもとに月ごとの給与を計算します。内容を確認して「確定」すると、従業員アプリに給与明細が届きます。',
+    id: 'payroll', label: '給与計算', group: '人事・給与', lead: '打刻をもとに月ごとの給与を計算します。内容を確認して「確定」すると、従業員ページに給与明細が届きます。',
     render(main) {
       const d = S.get(), ym = ps.ym;
       const bar = UI.el(`<div class="toolbar"></div>`);
@@ -30,11 +15,13 @@
       const staff = d.staff.filter(s => s.active || d.punches.some(p => p.staffId === s.id && p.date.startsWith(ym)));
       const rows = staff.map(s => ({ s, live: App.Pay.month(s, ym, d), fixed: confirmed(d, ym, s.id) })).filter(r => r.live.days || r.fixed);
       const notYet = rows.filter(r => !r.fixed && r.live.days);
-      const btn = UI.el(`<div class="toolbar-r"><span class="muted small">締め：月末 ・ 計算期間 ${U.label(ym + '-01')}〜${U.label(U.monthDays(ym).pop())}</span><button class="btn primary sm" ${notYet.length ? '' : 'disabled'}>未確定の${notYet.length}人分を確定</button></div>`);
+      const closed = U.monthDays(ym).pop() < U.today();   // 締め日（月末）を過ぎた月だけ確定できる
+      const btn = UI.el(`<div class="toolbar-r"><span class="muted small">締め：月末 ・ 計算期間 ${U.label(ym + '-01')}〜${U.label(U.monthDays(ym).pop())}${closed ? '' : ' ・ <b>まだ締め日前のため確定できません</b>'}</span><button class="btn primary sm" ${notYet.length && closed ? '' : 'disabled'}>未確定の${notYet.length}人分を確定</button></div>`);
       btn.querySelector('button').onclick = async () => {
         const open = notYet.filter(r => r.live.openDays).length;
-        if (!await UI.confirm(`${U.ymLabel(ym)}分の給与を${notYet.length}人分確定し、従業員アプリに明細を届けます。${open ? `退勤の打刻もれがある人が${open}人います（その日は計算に入っていません）。` : ''}`, '確定する')) return;
+        if (!await UI.confirm(`${U.ymLabel(ym)}分の給与を${notYet.length}人分確定し、従業員ページに明細を届けます。${open ? `退勤の打刻もれがある人が${open}人います（その日は計算に入っていません）。` : ''}`, '確定する')) return;
         notYet.forEach(r => d.payrolls.push(Object.assign(r.live, { id: U.uid(), confirmedAt: new Date().toISOString() })));
+        S.log('管理者', '給与を確定', `${U.ymLabel(ym)}分`, notYet.map(r => r.s.name).join('、'));
         S.save(); UI.toast('確定しました'); Admin.refresh();
       };
       bar.append(btn); main.append(bar);
@@ -42,7 +29,7 @@
       const list = rows.map(r => r.fixed || r.live);
       main.append(UI.el(`<section class="tiles">
         <div class="tile"><span class="tile-label">総支給額の合計</span><b class="tile-num">${U.yen(U.sum(list, p => p.gross))}</b><span class="tile-sub">${list.length}人分</span></div>
-        <div class="tile"><span class="tile-label">差引支給額の合計（振込額）</span><b class="tile-num">${U.yen(U.sum(list, p => p.net))}</b><span class="tile-sub">支給日 ${U.label(U.ymAdd(ym, 1) + '-' + U.pad(Math.min(d.settings.payDay, 28)))}</span></div>
+        <div class="tile"><span class="tile-label">差引支給額の合計（振込額）</span><b class="tile-num">${U.yen(U.sum(list, p => p.net))}</b><span class="tile-sub">支給日 ${U.label(App.Pay.payDate(ym, d.settings.payDay))}</span></div>
         <div class="tile"><span class="tile-label">預かる所得税（支給月の翌月10日までに納付）</span><b class="tile-num">${U.yen(U.sum(list, p => p.tax))}</b><span class="tile-sub">雇用保険料 ${U.yen(U.sum(list, p => p.empIns))}</span></div>
       </section>`));
 
@@ -52,14 +39,16 @@
           <td class="nowrap">${r.fixed ? '<span class="chip good">確定済み</span>' : '<span class="chip warn">未確定</span>'}${changed ? ' <span class="chip bad" title="確定後に打刻が修正されました">打刻が変わっています</span>' : ''}${r.live.openDays ? ` <span class="chip bad">打刻もれ${r.live.openDays}</span>` : ''}</td>
           <td class="nowrap"><button class="btn sm" data-view="${i}">明細</button>${r.fixed ? ` <button class="btn sm" data-undo="${i}">確定を取り消す</button>` : ''}</td></tr>`;
       }).join('') || '<tr><td colspan="11" class="muted">この月の勤務はありません</td></tr>'}</tbody></table></div>
-      <p class="muted small">計算方法：基本給＝時給×実働時間、残業（1日8時間超）と深夜（22〜5時）はそれぞれ時給×${(d.settings.otRate - 1).toFixed(2)}・×${(d.settings.nightRate - 1).toFixed(2)}を加算。雇用保険料は総支給額×${d.settings.empInsRate}。所得税は社会保険料等を引いた課税額から計算。率や税の数値は「設定・データ」で変えられます。</p></section>`);
+      <p class="muted small">計算方法：基本給＝時給×労働時間。時間外（1日8時間・1週40時間を超えた分）は時給×${(d.settings.otRate - 1).toFixed(2)}、月60時間を超えた分は×${(d.settings.ot60Rate - 1).toFixed(2)}、深夜（22〜5時）は×${(d.settings.nightRate - 1).toFixed(2)}を加算（労働基準法37条）。雇用保険料は総支給額×${d.settings.empInsRate}。所得税は社会保険料等を引いた額から計算。給与から引けるのは法令で決まったものだけで、それ以外を引くには労使協定が必要です（労働基準法24条）。</p></section>`);
       card.onclick = async e => {
         const t = e.target;
-        if (t.dataset.view) { const r = rows[+t.dataset.view]; UI.modal('給与明細', App.payslipHtml(r.fixed || r.live, d.settings.storeName, d.settings.payDay, !r.fixed)); }
+        if (t.dataset.view) { const r = rows[+t.dataset.view]; UI.modal('給与明細', App.payslipHtml(r.fixed || r.live, { employer: d.settings.employer, draft: !r.fixed })); }
         if (t.dataset.undo) {
           const r = rows[+t.dataset.undo];
-          if (!await UI.confirm(`${r.s.name} さんの${U.ymLabel(ym)}分の確定を取り消します。従業員アプリからこの明細が見えなくなります。`, '取り消す', true)) return;
-          d.payrolls = d.payrolls.filter(x => x !== r.fixed); S.save(); Admin.refresh();
+          if (!await UI.confirm(`${r.s.name} さんの${U.ymLabel(ym)}分の確定を取り消します。従業員ページからこの明細が見えなくなります。`, '取り消す', true)) return;
+          d.payrolls = d.payrolls.filter(x => x !== r.fixed);
+          S.log('管理者', '給与の確定を取り消し', r.s.name, `${U.ymLabel(ym)}分`);
+          S.save(); Admin.refresh();
         }
       };
       main.append(card);
@@ -68,7 +57,7 @@
 
   /* ================= 給与明細 ================= */
   Admin.register({
-    id: 'payslip', label: '給与明細', group: '人事・給与', lead: '確定した給与明細を見られます。従業員アプリには本人の分だけが届きます。',
+    id: 'payslip', label: '給与明細', group: '人事・給与', lead: '確定した給与明細を見られます。従業員ページには本人の分だけが届きます。',
     render(main) {
       const d = S.get();
       const months = [...new Set(d.payrolls.map(p => p.ym))].sort().reverse();
@@ -81,7 +70,31 @@
       bar.querySelectorAll('[data-s]').forEach(b => { b.onclick = () => { ps.slipStaff = b.dataset.s; Admin.refresh(); }; });
       main.append(bar);
       const p = list.find(x => x.staffId === ps.slipStaff);
-      if (p) main.append(UI.el(`<section class="card">${App.payslipHtml(p, d.settings.storeName, d.settings.payDay)}<p class="muted small">確定日時 ${p.confirmedAt.slice(0, 16).replace('T', ' ')}</p></section>`));
+      if (p) main.append(UI.el(`<section class="card">${App.payslipHtml(p, { employer: d.settings.employer })}<p class="muted small">確定日時 ${p.confirmedAt.slice(0, 16).replace('T', ' ')}</p></section>`));
+    },
+  });
+
+  /* ================= 賃金台帳（労働基準法108条・施行規則54条） ================= */
+  Admin.register({
+    id: 'ledger', label: '賃金台帳', group: '人事・給与', lead: '労働基準法108条で作成が義務づけられている賃金台帳です。確定した給与から、1人ずつ1年分を作ります。',
+    render(main) {
+      const d = S.get(), y = ps.year;
+      const bar = UI.el(`<div class="toolbar"></div>`);
+      bar.append(UI.stepper(`${y}年（${U.wareki(y)}）`, () => { ps.year--; Admin.refresh(); }, () => { ps.year++; Admin.refresh(); }));
+      main.append(bar);
+      const list = d.payrolls.filter(p => p.ym.startsWith(String(y)));
+      const people = d.staff.filter(s => list.some(p => p.staffId === s.id));
+      if (!people.length) main.append(UI.el(`<section class="card"><p class="muted">この年の確定した給与はありません。</p></section>`));
+      const rows = [['賃金計算期間', p => `${+p.periodStart.slice(5, 7)}/${+p.periodStart.slice(8)}〜${+p.periodEnd.slice(5, 7)}/${+p.periodEnd.slice(8)}`], ['支給日', p => U.label(p.payDate)],
+        ['労働日数', p => p.days + '日'], ['労働時間数', p => U.hm(p.workMin)], ['時間外労働時間数', p => U.hm(p.otMin)], ['休日労働時間数', () => '0:00'], ['深夜労働時間数', p => U.hm(p.nightMin)],
+        ['基本給', p => U.yen(p.base)], ['時間外労働手当', p => U.yen(p.otPay)], ['深夜労働手当', p => U.yen(p.nightPay)], ['通勤手当', p => U.yen(p.transport)], ['総支給額', p => U.yen(p.gross), 'total'],
+        ['雇用保険料', p => U.yen(p.empIns)], ['社会保険料', p => U.yen(p.social)], ['所得税', p => U.yen(p.tax)], ['控除合計', p => U.yen(p.deductions)], ['差引支給額', p => U.yen(p.net), 'total']];
+      people.forEach(s => {
+        const ps2 = list.filter(p => p.staffId === s.id).sort((a, b) => a.ym.localeCompare(b.ym));
+        main.append(UI.el(`<section class="card"><h2><i class="dot" style="background:${s.color}"></i>${U.esc(s.name)} <small class="muted">性別：${U.esc(s.gender || '未記入')} ・ ${U.esc(s.job || '')}</small></h2>
+          <div class="scroll"><table class="tbl ledger"><thead><tr><th>項目</th>${ps2.map(p => `<th class="r">${+p.ym.slice(5)}月分</th>`).join('')}</tr></thead><tbody>${rows.map(([l, f, c]) => `<tr class="${c || ''}"><th>${l}</th>${ps2.map(p => `<td class="r num">${f(p)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>`));
+      });
+      main.append(UI.el(`<p class="muted small">記入する項目：氏名、性別、賃金計算期間、労働日数、労働時間数、時間外・休日・深夜の労働時間数、基本給・手当などの種類ごとの額、控除の項目と額（労働基準法施行規則54条）。最後の記入の日から5年間（当分の間は3年間）保存します（同法109条）。休日労働（法定休日の労働）は試作版では記録していないため0:00と表示しています。</p>`));
     },
   });
 

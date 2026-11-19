@@ -1,5 +1,5 @@
-/* ミセカン 従業員アプリ用の窓口（StaffAPI）
- * 従業員アプリ（staff.js）は App.Store を直接さわらず、必ずこの窓口だけを使います。
+/* ミセカン 従業員ページ用の窓口（StaffAPI）
+ * 従業員ページ（staff.js）は App.Store を直接さわらず、必ずこの窓口だけを使います。
  * 窓口はログインした本人のデータだけを複製して返すので、他の人の時給・シフト・給与は画面に届きません。
  * 本番では、この窓口と同じ形の API をサーバー側に作り、ログイン情報で本人確認してから本人分だけを返します。
  */
@@ -11,6 +11,7 @@
   App.StaffAPI = {
     /* 名前の一覧（ログイン画面用）：名前とIDだけを返す */
     loginList() { return App.Store.get().staff.filter(s => s.active).map(s => ({ id: s.id, name: s.name })); },
+    storeName() { return App.Store.get().settings.storeName; },
 
     login(staffId, pin) {
       const st = App.Store.staff(staffId);
@@ -21,10 +22,12 @@
 
   function session(id) {
     const db = () => App.Store.get();
-    const me = () => db().staff.find(s => s.id === id);
+    const me = () => { const s = db().staff.find(x => x.id === id); if (!s || !s.active) throw new Error('この従業員は利用できません'); return s; };
     return {
-      store() { const s = db().settings; return { name: s.storeName, open: s.openHour, close: s.closeHour, step: s.step }; },
+      store() { const s = db().settings; return { name: s.storeName, employer: s.employer, open: s.openHour, close: s.closeHour, step: s.step }; },
       profile() { const s = me(); return { id: s.id, name: s.name, wage: s.wage, transport: s.transport, color: s.color, code: s.code }; },
+      /* 従業員名簿：在籍している人の氏名だけ（時給・住所・生年月日・連絡先などは返さない） */
+      roster() { return db().staff.filter(s => s.active).map(s => ({ name: s.name, me: s.id === id })); },
 
       myShifts(from, to) { return copy(db().shifts.filter(x => x.staffId === id && x.date >= from && x.date <= to)); },
       myRequests() { return copy(db().requests.filter(x => x.staffId === id)).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start)); },
@@ -63,6 +66,7 @@
             p.out = now;
           }
         }
+        App.Store.log('本人（従業員ページ）', '打刻', me().name, `${today} ${({ in: '出勤', out: '退勤', breakStart: '休憩開始', breakEnd: '休憩終了' })[type]} ${now}`);
         App.Store.save(); return '';
       },
       myPunches(ym) { return copy(db().punches.filter(p => p.staffId === id && p.date.startsWith(ym))).sort((a, b) => a.date.localeCompare(b.date)); },

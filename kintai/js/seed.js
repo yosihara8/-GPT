@@ -7,21 +7,27 @@ App.Seed = {
     const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
     const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
     const today = U.today(), thisYm = U.ym(today);
-    const COLORS = ['#2f6fd6', '#d9622b', '#1f9d6b', '#8a55d6', '#c99400', '#d6457f'];
+    const COLORS = ['#c2185b', '#7b3f8c', '#2e8b7a', '#3f5ba9', '#b0803a', '#d0605e'];
 
     const staffDef = [
-      ['S001', '佐藤 美咲', 'さとう みさき', 1150, 300, true, 0, 0, '甲', '1111', { 1: '09:00-14:00', 3: '09:00-14:00', 5: '09:00-14:00', 6: '09:00-17:00' }],
-      ['S002', '鈴木 健太', 'すずき けんた', 1100, 400, true, 0, 0, '甲', '2222', { 1: '10:00-15:00', 2: '10:00-15:00', 4: '10:00-15:00', 5: '10:00-15:00', 0: '10:00-18:00' }],
-      ['S003', '高橋 さくら', 'たかはし さくら', 1100, 0, false, 0, 0, '甲', '3333', { 2: '12:00-17:00', 3: '12:00-17:00', 5: '12:00-17:00', 6: '12:00-17:00' }],
-      ['S004', '田中 翔', 'たなか しょう', 1250, 500, true, 0, 0, '甲', '4444', { 1: '14:00-22:00', 2: '14:00-22:00', 3: '14:00-22:00', 4: '14:00-22:00', 0: '13:00-22:00' }],
-      ['S005', '伊藤 葵', 'いとう あおい', 1080, 200, false, 0, 0, '乙', '5555', { 3: '17:00-22:00', 4: '17:00-22:00', 5: '17:00-22:00', 6: '17:00-22:00' }],
-      ['S006', '渡辺 大輔', 'わたなべ だいすけ', 1150, 300, true, 0, 1, '甲', '6666', { 1: '17:00-22:00', 2: '09:00-14:00', 4: '17:00-22:00', 6: '17:00-22:00', 0: '17:00-22:00' }],
+      ['S001', '佐藤 美咲', 'さとう みさき', 1250, 300, true, 0, 0, '甲', '1111', { 1: '09:00-14:00', 3: '09:00-14:00', 5: '09:00-14:00', 6: '09:00-17:00' }],
+      ['S002', '鈴木 健太', 'すずき けんた', 1230, 400, true, 0, 0, '甲', '2222', { 1: '10:00-15:00', 2: '10:00-15:00', 4: '10:00-15:00', 5: '10:00-15:00', 0: '10:00-18:00' }],
+      ['S003', '高橋 さくら', 'たかはし さくら', 1230, 0, false, 0, 0, '甲', '3333', { 2: '12:00-17:00', 3: '12:00-17:00', 5: '12:00-17:00', 6: '12:00-17:00' }],
+      ['S004', '田中 翔', 'たなか しょう', 1350, 500, true, 0, 0, '甲', '4444', { 1: '14:00-22:00', 2: '14:00-22:00', 3: '14:00-22:00', 4: '14:00-22:00', 0: '13:00-22:00' }],
+      ['S005', '伊藤 葵', 'いとう あおい', 1230, 200, false, 0, 0, '乙', '5555', { 3: '17:00-22:00', 4: '17:00-22:00', 5: '17:00-22:00', 6: '17:00-22:00' }],
+      ['S006', '渡辺 大輔', 'わたなべ だいすけ', 1280, 300, true, 0, 1, '甲', '6666', { 1: '17:00-22:00', 2: '09:00-14:00', 4: '17:00-22:00', 6: '17:00-22:00', 0: '17:00-22:00' }],
     ];
     const staff = staffDef.map((d, i) => ({
       id: 'st' + (i + 1), code: d[0], name: d[1], kana: d[2], role: i === 3 ? 'バイトリーダー' : 'アルバイト',
       wage: d[3], transport: d[4], empIns: d[5], socialIns: d[6], dependents: d[7], taxCol: d[8], pin: d[9],
       color: COLORS[i], phone: `090-0000-${String(1001 + i)}`, hireDate: U.addDays(today, -ri(120, 900)),
-      birth: `${ri(1985, 2006)}-${U.pad(ri(1, 12))}-${U.pad(ri(1, 28))}`, active: true, note: '', pattern: d[10],
+      birth: `${ri(1985, 2005)}-${U.pad(ri(1, 12))}-${U.pad(ri(1, 28))}`, active: true, note: '', pattern: d[10],
+      // 労働者名簿（労働基準法107条・施行規則53条）の項目
+      gender: ['女性', '男性', '女性', '男性', '女性', '男性'][i], address: `東京都〇〇区〇〇町${i + 1}-${i + 2}（見本）`,
+      history: '（見本）前職：飲食店ホール', job: i === 3 ? '接客・調理・締め作業' : '接客・調理補助',
+      retireDate: '', retireReason: '', deathDate: '', deathCause: '',
+      // メール配信（給与明細の電子交付には本人の承諾が必要：所得税法231条2項）
+      email: `staff${i + 1}@example.com`, consent: i !== 2, consentDate: i !== 2 ? U.addDays(today, -ri(30, 200)) : '',
     }));
 
     const shifts = [], punches = [], requests = [];
@@ -37,7 +43,8 @@ App.Seed = {
         const inM = U.toMin(s) - ri(0, 12) + (rnd() < 0.08 ? ri(5, 15) : 0);
         let outM = U.toMin(e) + ri(0, 15) + (e === '22:00' && rnd() < 0.3 ? ri(10, 40) : 0);
         const len = outM - inM;
-        const breakMin = len > 8 * 60 + 30 ? 60 : len > 6 * 60 ? 45 : 0;
+        // 34条：労働時間が6時間を超えたら45分、8時間を超えたら60分の休憩
+        const breakMin = len - 45 > 8 * 60 ? 60 : len > 6 * 60 ? 45 : 0;
         if (d === today) {
           if (nowMin < inM) continue;
           punches.push({ id: U.uid() + ri(0, 999), staffId: st.id, date: d, in: U.toHHMM(inM), out: nowMin >= outM ? U.toHHMM(outM) : '', breakMin: nowMin >= outM ? breakMin : 0, breakStart: '' });
@@ -90,7 +97,7 @@ App.Seed = {
     const posts = [
       { id: 'p1', title: '年末年始の営業時間について', body: '12/31は17時閉店、1/1〜1/3は休業です。\n12月後半のシフト希望は12/10までに提出してください。', important: true, pinned: true, createdAt: iso(U.addDays(today, -3), '10:00') },
       { id: 'p2', title: '新メニュー試食会', body: '来週の水曜15時から、冬の新メニューの試食会をします。参加できる人はリアクションで教えてください。', important: false, pinned: false, createdAt: iso(U.addDays(today, -1), '18:30') },
-      { id: 'p3', title: '打刻忘れに気をつけてください', body: '退勤の打刻忘れが続いています。帰る前にアプリの「退勤」を押したか確認をお願いします。', important: false, pinned: false, createdAt: iso(U.addDays(today, -8), '09:15') },
+      { id: 'p3', title: '打刻忘れに気をつけてください', body: '退勤の打刻忘れが続いています。帰る前に従業員ページの「退勤」を押したか確認をお願いします。', important: false, pinned: false, createdAt: iso(U.addDays(today, -8), '09:15') },
     ];
     const reads = [], reactions = [];
     const rr = (p, s, emoji) => { reads.push({ postId: p, staffId: s, at: iso(today, '08:00') }); if (emoji) reactions.push({ postId: p, staffId: s, emoji, at: iso(today, '08:00') }); };
@@ -100,8 +107,16 @@ App.Seed = {
 
     const data = {
       version: 1, demo: true,
-      settings: { storeName: 'カフェ駅前店（見本）', openHour: 9, closeHour: 22, step: 30, need: 2, otRate: 1.25, nightRate: 1.25, empInsRate: 0.0055, payDay: 25, laborTarget: 30, tax: App.defaultTax() },
-      staff, shifts, requests, punches, payrolls: [], sales, purchases, posts, reads, reactions,
+      settings: {
+        storeName: 'カフェ駅前店（見本）', employer: '株式会社〇〇（見本）', openHour: 9, closeHour: 22, step: 30, need: 2,
+        otRate: 1.25, ot60Rate: 1.5, nightRate: 1.25, weekStart: 0, payDay: 25, laborTarget: 30, adminPin: '0000',
+        empInsRate: 0.0055, empInsNote: '令和7年度 一般の事業・労働者負担（令和8年4月以降は要確認）',
+        minWage: 1226, minWagePref: '東京都', minWageNote: '令和7年10月改定の額（要確認：毎年10月ごろ改定）',
+        agreement36: true, limitMonth: 45, limitYear: 360,
+        tax: App.defaultTax(),
+        mail: { enabled: false, timing: 'unset', day: 1, fromName: 'カフェ駅前店（見本）', subject: '【{店舗名}】{年月}分 給与明細・勤怠・シフトのお知らせ', payslip: true, attendance: true, shift: true },
+      },
+      staff, shifts, requests, punches, payrolls: [], sales, purchases, posts, reads, reactions, auditLog: [], mailLog: [],
     };
     staff.forEach(s => delete s.pattern);
     // 先々月・先月の給与は確定済みにしておく

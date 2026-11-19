@@ -69,7 +69,7 @@
     });
     html += `</tbody><tfoot><tr><td>出勤人数</td>${days.map(x => `<td class="${x === today ? 'today' : ''}">${new Set(d.shifts.filter(s => s.date === x).map(s => s.staffId)).size}人</td>`).join('')}<td></td></tr>
       <tr><td>人件費（予定）</td>${days.map(x => `<td class="mono ${x === today ? 'today' : ''}">${U.yen(U.sum(d.shifts.filter(s => s.date === x), cost))}</td>`).join('')}<td class="r mono">${U.yen(U.sum(d.shifts.filter(s => s.date >= days[0] && s.date <= days[6]), cost))}</td></tr></tfoot></table>`;
-    const card = UI.el(`<section class="card"><p class="muted small">点線の「希望」は従業員アプリから出されたシフト希望です。✓で確定、✕で却下。空いているマスを押すとシフトを追加、色のついたシフトを押すと変更できます。日付を押すとその日の階段表を開きます。</p><div class="scroll">${html}</div></section>`);
+    const card = UI.el(`<section class="card"><p class="muted small">点線の「希望」は従業員ページから出されたシフト希望です。✓で確定、✕で却下。空いているマスを押すとシフトを追加、色のついたシフトを押すと変更できます。日付を押すとその日の階段表を開きます。</p><div class="scroll">${html}</div></section>`);
     card.onclick = e => {
       const t = e.target;
       if (t.dataset.day) { st.date = t.dataset.day; st.view = 'day'; Admin.refresh(); return; }
@@ -146,22 +146,40 @@
       <label class="field">出勤<input type="time" id="q_in" value="${p.in}" required></label>
       <label class="field">退勤<input type="time" id="q_out" value="${p.out}"></label>
       <label class="field">休憩（分）<input type="number" id="q_brk" min="0" step="5" value="${p.breakMin || 0}"></label>
-      <label class="field wide">修正の理由<input id="q_note" value="${U.esc(p.note || '')}" placeholder="例：退勤の打刻忘れ"></label></form>`,
-    [...(isNew ? [] : [{ label: '削除', kind: 'danger', onClick: () => { d.punches = d.punches.filter(x => x.id !== p.id); S.save(); Admin.refresh(); } }]),
+      <label class="field wide">修正・手入力の理由 <span class="req">必須</span><input id="q_note" required placeholder="例：退勤の打刻忘れ（本人に確認済み）"></label>
+      <p class="wide small muted">労働時間は客観的な記録で把握し、直すときは理由を残す必要があります（労働安全衛生法66条の8の3、厚生労働省「労働時間の適正な把握のためのガイドライン」）。直した内容・理由・日時は「修正の記録」に残ります。実際に働いた時間より短く記録することは法令違反になります。</p>
+      <p class="wide err" id="q_err" role="alert"></p></form>`,
+    [...(isNew ? [] : [{ label: '削除', kind: 'danger', onClick: w => {
+        const why = w.querySelector('#q_note').value.trim(), err = w.querySelector('#q_err');
+        if (!why) { err.textContent = '削除する理由を入れてください。'; return false; }
+        d.punches = d.punches.filter(x => x.id !== p.id);
+        S.log('管理者', '打刻を削除', S.staff(p.staffId)?.name, `${p.date} ${p.in}〜${p.out || ''} 休憩${p.breakMin}分`, why);
+        S.save(); Admin.refresh();
+      } }]),
       { label: 'やめる' },
       { label: '保存する', kind: 'primary', onClick: w => {
         const f = w.querySelector('form'); if (!f.reportValidity()) return false;
         const v = id => w.querySelector('#' + id).value;
-        const n = { in: v('q_in'), out: v('q_out'), breakMin: Number(v('q_brk')) || 0, note: v('q_note'), edited: true, breakStart: '' };
+        const n = { in: v('q_in'), out: v('q_out'), breakMin: Number(v('q_brk')) || 0, note: v('q_note').trim(), edited: true, breakStart: '' };
+        const err = w.querySelector('#q_err');
+        if (!n.note) { err.textContent = '理由を入れてください。'; return false; }
+        const short = App.Pay.breakShort(n);
+        if (short) { err.textContent = `休憩が${short}分足りません。労働時間が6時間を超えると45分、8時間を超えると60分の休憩が必要です（労働基準法34条）。実際に休憩が少なかった場合は、休憩分も労働時間として扱われます。休憩を正しく入れ直してください。`; return false; }
+        const who = S.staff(isNew ? v('q_staff') : p.staffId)?.name;
+        const after = `${n.in}〜${n.out || '（未退勤）'} 休憩${n.breakMin}分`;
         if (isNew) {
-          if (d.punches.some(x => x.staffId === v('q_staff') && x.date === v('q_date'))) { UI.toast('その日の打刻はすでにあります。一覧から修正してください'); return false; }
+          if (d.punches.some(x => x.staffId === v('q_staff') && x.date === v('q_date'))) { err.textContent = 'その日の打刻はすでにあります。一覧から修正してください。'; return false; }
           d.punches.push(Object.assign({ id: U.uid(), staffId: v('q_staff'), date: v('q_date') }, n));
-        } else Object.assign(d.punches.find(x => x.id === p.id), n);
+          S.log('管理者', '打刻を手入力', who, `${v('q_date')} ${after}`, n.note);
+        } else {
+          S.log('管理者', '打刻を修正', who, `${p.date} 変更前 ${p.in}〜${p.out || '（未退勤）'} 休憩${p.breakMin}分 → 変更後 ${after}`, n.note);
+          Object.assign(d.punches.find(x => x.id === p.id), n);
+        }
         S.save(); UI.toast('打刻を保存しました'); Admin.refresh();
       } }]);
   }
   Admin.register({
-    id: 'attendance', label: '勤怠・打刻', group: '現場', lead: '従業員アプリの打刻がここに集まります。打刻忘れや遅刻を確認して修正できます。',
+    id: 'attendance', label: '勤怠・打刻', group: '現場', lead: '従業員ページの打刻がここに集まります。打刻忘れや遅刻を確認して修正できます。',
     badge() { const d = S.get(), t = U.today(); return d.punches.filter(p => p.in && !p.out && p.date < t).length; },
     render(main) {
       const d = S.get(), today = U.today(), ym = at.ym;
@@ -174,14 +192,16 @@
 
       const people = d.staff.filter(s => !at.staff || s.id === at.staff);
       // 集計
-      const sum = UI.el(`<section class="card"><h2>${U.ymLabel(ym)}の集計</h2><div class="scroll"><table class="tbl"><thead><tr><th>名前</th><th class="r">出勤日数</th><th class="r">実働</th><th class="r">残業</th><th class="r">深夜</th><th class="r">遅刻</th><th class="r">打刻もれ</th></tr></thead><tbody>${people.map(p => {
+      const sum = UI.el(`<section class="card"><h2>${U.ymLabel(ym)}の集計</h2><div class="scroll"><table class="tbl"><thead><tr><th>名前</th><th class="r">出勤日数</th><th class="r">実働</th><th class="r">残業</th><th class="r">深夜</th><th class="r">遅刻</th><th class="r">休憩不足</th><th class="r">打刻もれ</th></tr></thead><tbody>${people.map(p => {
         const ps = d.punches.filter(x => x.staffId === p.id && x.date.startsWith(ym));
-        let w = 0, o = 0, n = 0; ps.forEach(x => { const c = App.Pay.day(x); if (c) { w += c.work; o += c.ot; n += c.night; } });
+        const md = U.monthDays(ym), dm = Object.values(App.Pay.days(p.id, d, md[0], md[md.length - 1]));   // 週40時間超も含めて数える
+        const w = U.sum(dm, x => x.work), o = U.sum(dm, x => x.ot), n = U.sum(dm, x => x.night);
+        const brkNg = ps.filter(x => App.Pay.breakShort(x)).length;
         const late = ps.filter(x => { const sh = d.shifts.find(s => s.staffId === p.id && s.date === x.date); return sh && x.in && U.toMin(x.in) > U.toMin(sh.start); }).length;
         const miss = ps.filter(x => x.in && !x.out && x.date < today).length + d.shifts.filter(s => s.staffId === p.id && s.date.startsWith(ym) && s.date < today && !ps.some(x => x.date === s.date)).length;
         if (!ps.length && !miss) return '';
-        return `<tr><td><i class="dot" style="background:${p.color}"></i>${U.esc(p.name)}</td><td class="r">${ps.filter(x => x.out).length}日</td><td class="r mono">${U.hm(w)}</td><td class="r mono">${U.hm(o)}</td><td class="r mono">${U.hm(n)}</td><td class="r">${late ? `<span class="chip warn">${late}回</span>` : '0回'}</td><td class="r">${miss ? `<span class="chip bad">${miss}件</span>` : '0件'}</td></tr>`;
-      }).join('') || '<tr><td colspan="7" class="muted">この月の打刻はありません</td></tr>'}</tbody></table></div></section>`);
+        return `<tr><td><i class="dot" style="background:${p.color}"></i>${U.esc(p.name)}</td><td class="r">${ps.filter(x => x.out).length}日</td><td class="r mono">${U.hm(w)}</td><td class="r mono">${U.hm(o)}</td><td class="r mono">${U.hm(n)}</td><td class="r">${late ? `<span class="chip warn">${late}回</span>` : '0回'}</td><td class="r">${brkNg ? `<span class="chip bad">${brkNg}日</span>` : '0日'}</td><td class="r">${miss ? `<span class="chip bad">${miss}件</span>` : '0件'}</td></tr>`;
+      }).join('') || '<tr><td colspan="8" class="muted">この月の打刻はありません</td></tr>'}</tbody></table></div><p class="muted small">残業＝1日8時間または1週40時間（${U.WD[d.settings.weekStart]}曜はじまり）を超えた時間。深夜＝22時〜翌5時。出勤簿にあたる記録は5年間（当分の間は3年間）保存します（労働基準法109条）。</p></section>`);
       main.append(sum);
 
       // 明細
@@ -198,6 +218,7 @@
         let state;
         if (!x.pu) state = x.date === today ? Admin.punchState(null, x.sh, x.date) : ['打刻なし', 'chip bad'];
         else if (!x.pu.out) state = x.date < today ? ['退勤の打刻もれ', 'chip bad'] : Admin.punchState(x.pu, x.sh, x.date);
+        else if (App.Pay.breakShort(x.pu)) state = [`休憩不足 ${App.Pay.breakShort(x.pu)}分`, 'chip bad'];
         else if (x.sh && U.toMin(x.pu.in) > U.toMin(x.sh.start)) state = ['遅刻', 'chip warn'];
         else if (x.sh && U.toMin(x.pu.out) < U.toMin(x.sh.end)) state = ['早退', 'chip warn'];
         else state = ['OK', 'chip good'];
@@ -208,6 +229,9 @@
         tr.onclick = open; tr.onkeydown = e => { if (e.key === 'Enter') open(); };
       });
       main.append(det);
+
+      const logs = d.auditLog.filter(l => /打刻/.test(l.action) && l.actor === '管理者').slice().reverse();
+      main.append(UI.el(`<section class="card"><h2>修正の記録 <small class="muted">管理者が直した・手入力した打刻（消すことはできません）</small></h2><div class="scroll"><table class="tbl"><thead><tr><th>日時</th><th>内容</th><th>対象</th><th>変更</th><th>理由</th></tr></thead><tbody>${logs.slice(0, 50).map(l => `<tr><td class="num nowrap">${l.at.replace('T', ' ').slice(0, 16)}</td><td class="nowrap">${U.esc(l.action)}</td><td class="nowrap">${U.esc(l.target)}</td><td>${U.esc(l.detail)}</td><td>${U.esc(l.reason)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">修正はまだありません</td></tr>'}</tbody></table></div></section>`));
     },
   });
 })();
