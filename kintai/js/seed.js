@@ -75,23 +75,37 @@ App.Seed = {
       sales.push({ date: d, amount, customers: Math.round(amount / ri(1350, 1650)), note: '' });
     }
 
-    // 購買履歴（直近45日）
+    // 商品マスタ
     const items = [
-      ['ブレンドコーヒー', 'ドリンク', 450], ['カフェラテ', 'ドリンク', 520], ['アイスティー', 'ドリンク', 480],
-      ['季節のフルーツティー', 'ドリンク', 650], ['クラブハウスサンド', 'フード', 980], ['ナポリタン', 'フード', 1050],
-      ['日替わりランチ', 'フード', 1100], ['キーマカレー', 'フード', 1000], ['ガトーショコラ', 'デザート', 520],
-      ['チーズケーキ', 'デザート', 500], ['プリン', 'デザート', 420], ['焼き菓子セット', 'テイクアウト', 1200], ['コーヒー豆 200g', 'テイクアウト', 1600]];
-    const wts = [10, 9, 5, 4, 6, 5, 9, 6, 5, 6, 4, 2, 1];
+      ['ブレンドコーヒー', 'ドリンク', 450, 10], ['カフェラテ', 'ドリンク', 520, 9], ['アイスティー', 'ドリンク', 480, 5],
+      ['季節のフルーツティー', 'ドリンク', 650, 4], ['クラブハウスサンド', 'フード', 980, 6], ['ナポリタン', 'フード', 1050, 5],
+      ['日替わりランチ', 'フード', 1100, 9], ['キーマカレー', 'フード', 1000, 6], ['ガトーショコラ', 'デザート', 520, 5],
+      ['チーズケーキ', 'デザート', 500, 6], ['プリン', 'デザート', 420, 4], ['焼き菓子セット', 'テイクアウト', 1200, 2], ['コーヒー豆 200g', 'テイクアウト', 1600, 1]]
+      .map(([name, category, price, w], i) => ({ id: 'it' + (i + 1), name, category, price, w }));
+    // 購買履歴（直近45日）：会員の購入（1件ずつ）＋ 商品ごとの1日分の集計。
+    // この45日は「売上の合計＝明細の合計」になるように、売上の金額を明細から決める（矛盾をなくす）
     const members = ['会員0012', '会員0035', '会員0047', '会員0101', '会員0128', '会員0150', '会員0203'];
-    const pick = () => { let r = rnd() * U.sum(wts); for (let i = 0; i < wts.length; i++) { r -= wts[i]; if (r < 0) return items[i]; } return items[0]; };
+    const sumW = U.sum(items, x => x.w);
     const purchases = [];
     for (let d = U.addDays(today, -45); d < today; d = U.addDays(d, 1)) {
-      const n = ri(16, 30);
-      for (let k = 0; k < n; k++) {
-        const it = pick();
-        purchases.push({ id: U.uid() + k, date: d, time: U.toHHMM(ri(9 * 60, 21 * 60 + 30)), item: it[0], category: it[1], price: it[2], qty: rnd() < 0.15 ? 2 : 1, customer: rnd() < 0.25 ? members[ri(0, members.length - 1)] : '' });
+      const sale = sales.find(x => x.date === d); if (!sale) continue;
+      let total = 0;
+      for (let k = 0, n = ri(3, 8); k < n; k++) {
+        const it = items[ri(0, items.length - 1)], qty = rnd() < 0.2 ? 2 : 1;
+        purchases.push({ id: U.uid() + 'm' + k, date: d, time: U.toHHMM(ri(9 * 60, 21 * 60 + 30)), itemId: it.id, item: it.name, category: it.category, price: it.price, qty, customer: members[ri(0, members.length - 1)] });
+        total += it.price * qty;
       }
+      const rest = Math.max(0, sale.amount - total);
+      items.forEach((it, k) => {
+        const qty = Math.max(0, Math.round(rest * it.w / sumW / it.price * (0.8 + rnd() * 0.4)));
+        if (!qty) return;
+        purchases.push({ id: U.uid() + 'a' + k, date: d, time: '', itemId: it.id, item: it.name, category: it.category, price: it.price, qty, customer: '' });
+        total += it.price * qty;
+      });
+      sale.amount = total;                                   // 明細の合計とそろえる
+      sale.customers = Math.max(1, Math.round(total / ri(1350, 1650)));
     }
+    items.forEach(x => delete x.w);
 
     const iso = (d, t) => `${d}T${t}:00`;
     const posts = [
@@ -116,7 +130,7 @@ App.Seed = {
         tax: App.defaultTax(),
         mail: { enabled: false, timing: 'unset', day: 1, fromName: 'カフェ駅前店（見本）', subject: '【{店舗名}】{年月}分 給与明細・勤怠・シフトのお知らせ', payslip: true, attendance: true, shift: true },
       },
-      staff, shifts, requests, punches, payrolls: [], sales, purchases, posts, reads, reactions, auditLog: [], mailLog: [],
+      staff, shifts, requests, punches, payrolls: [], sales, items, purchases, posts, reads, reactions, auditLog: [], mailLog: [],
     };
     staff.forEach(s => delete s.pattern);
     // 先々月・先月の給与は確定済みにしておく

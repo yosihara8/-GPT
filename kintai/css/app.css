@@ -49,10 +49,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   border-bottom:1px solid transparent;border-image:var(--gilt) 1}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand-text{display:flex;flex-direction:column;line-height:1.1}
-.brand-text b{font-family:var(--f-num);font-size:21px;letter-spacing:.32em;font-weight:600;background:var(--gilt);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-text b{font-family:var(--f-display);font-size:19px;letter-spacing:.3em;font-weight:700;background:var(--gilt);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand-text small{font-size:10.5px;letter-spacing:.3em;color:#f3d6e2}
-.logo{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--gilt);color:#3a1a28;font:600 18px var(--f-num);box-shadow:0 0 0 1px rgba(255,255,255,.4) inset,0 0 14px rgba(232,207,159,.45);flex:none}
-.logo.big{width:64px;height:64px;font-size:34px}
+.logo{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--gilt);color:#3a1a28;font:700 15px var(--f-display);box-shadow:0 0 0 1px rgba(255,255,255,.4) inset,0 0 14px rgba(232,207,159,.45);flex:none}
+.logo.big{width:64px;height:64px;font-size:28px}
 .store{font-size:12.5px;color:#f3d6e2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:1px solid rgba(232,207,159,.4);padding-left:10px}
 .top-r{display:flex;gap:6px;align-items:center}
 .top-link{font:inherit;font-size:13px;color:#fff;text-decoration:none;padding:6px 14px;border-radius:999px;border:1px solid rgba(232,207,159,.55);background:transparent;cursor:pointer}
@@ -349,3 +349,22 @@ summary{cursor:pointer;color:var(--rose)}
 /* 数字は高さのそろった字形（font の一括指定で打ち消されないよう最後に指定） */
 .punch-clock,.big-time,.tile-num,.slip-net b,.app-card.hero b,.rank-no,.gantt thead th{font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1}
 .chart .axis{font-feature-settings:"lnum" 1,"tnum" 1}
+.form-err:not(:empty){background:var(--bad-soft);border:1px solid #f2b9c6;border-radius:12px;padding:8px 12px;margin-bottom:10px;font-weight:700}
+.bad-input{border-color:var(--bad)!important;box-shadow:0 0 0 3px var(--bad-soft)!important}
+.sources{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-radius:14px;background:linear-gradient(90deg,#fff,var(--blush));border:1px solid var(--line)}
+.sources-title{font-size:11.5px;font-weight:700;letter-spacing:.12em;color:var(--gold-ink);margin-right:4px}
+.src-chip{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.src-chip small{color:var(--muted);font-size:11.5px}
+.src-chip span{color:var(--rose)}
+a.src-chip:hover,.src-chip.self:hover{border-color:var(--rose-hi);background:var(--blush)}
+.src-chip.self{border-color:var(--rose-hi);font-weight:700}
+.src-chip.staffp{background:var(--gold-soft);border-color:#ecd9b6;cursor:default}
+.input-card{border:1.5px solid var(--rose-hi);background:linear-gradient(180deg,#fff,#fff7fa)}
+.input-card h2::before{content:"入力";display:inline-block;font:700 10.5px var(--f-body);letter-spacing:.1em;color:#fff;background:var(--rose);border-radius:999px;padding:1px 8px;margin-right:8px;vertical-align:3px}
+.hint{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;font-size:13px}
+.tbl tr.missing td{background:#fffaf2}
+.flow{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px;max-width:85ch}
+.tbl.datamap td{vertical-align:top}
+.src-link{font-size:11.5px;color:var(--rose);text-decoration:none;margin-top:4px}
+.src-link:hover{text-decoration:underline}
+.sec-card .tbl th{font-weight:700;color:var(--ink);vertical-align:top} .sec-card .notice{margin-bottom:12px}

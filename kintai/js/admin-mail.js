@@ -73,7 +73,7 @@
         <div class="tile"><span class="tile-label">送信のタイミング</span><b class="tile-num small-num">${U.esc(Mail.timingLabel(s))}</b><span class="tile-sub">${next ? `次回 ${U.label(next)}` : m.timing === 'confirm' ? '給与計算タブで確定したとき' : '送信日はあとで指定してください'}</span></div>
         <div class="tile"><span class="tile-label">送る人</span><b class="tile-num">${d.staff.filter(x => x.active && x.email).length}<small> 人</small></b><span class="tile-sub">給与明細つき ${d.staff.filter(x => x.active && x.email && x.consent).length}人</span></div></section>`));
 
-      const cfg = UI.el(`<section class="card"><h2>送信の設定</h2><form class="form">
+      const cfg = UI.el(`<section class="card input-card" data-input><h2>送信の設定</h2><form class="form">
         <label class="check wide"><input type="checkbox" id="m_enabled" ${m.enabled ? 'checked' : ''}> 月1回の自動送信を使う</label>
         <label class="field">送信のタイミング<select id="m_timing">${U.options([['unset', '未設定（あとで指定）'], ['payday', '毎月の給料日'], ['day', '毎月決まった日'], ['confirm', '給与を確定したとき']], m.timing)}</select></label>
         <label class="field">決まった日（毎月）<input id="m_day" type="number" min="1" max="31" value="${m.day}"></label>

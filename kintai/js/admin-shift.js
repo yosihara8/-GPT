@@ -47,8 +47,9 @@
     const reqs = d.requests.filter(r => r.status === 'pending' && r.date >= days[0] && r.date <= days[6]);
     const bar = UI.el(`<div class="toolbar"></div>`);
     bar.append(UI.stepper(`${U.label(days[0])} 〜 ${U.label(days[6])}`, () => { st.week = U.addDays(st.week, -7); Admin.refresh(); }, () => { st.week = U.addDays(st.week, 7); Admin.refresh(); }));
-    const btns = UI.el(`<div class="toolbar-r"><button class="btn sm" id="thisW">今週</button><button class="btn sm primary" id="apAll" ${reqs.length ? '' : 'disabled'}>この週の希望をまとめて承認（${reqs.length}件）</button></div>`);
+    const btns = UI.el(`<div class="toolbar-r" data-input><button class="btn sm primary" id="wAdd">＋ シフトを追加</button><button class="btn sm" id="thisW">今週</button><button class="btn sm primary" id="apAll" ${reqs.length ? '' : 'disabled'}>この週の希望をまとめて承認（${reqs.length}件）</button></div>`);
     btns.querySelector('#thisW').onclick = () => { st.week = U.monday(U.today()); Admin.refresh(); };
+    btns.querySelector('#wAdd').onclick = () => shiftModal({ staffId: staff[0]?.id, date: days[0] < U.today() ? U.today() : days[0], start: '09:00', end: '14:00' });
     btns.querySelector('#apAll').onclick = async () => {
       if (!await UI.confirm(`${reqs.length}件の希望をシフトとして確定します。時間が重なるものは承認しません。`, '承認する')) return;
       let ok = 0; reqs.forEach(r => { if (approve(r)) ok++; }); S.save(); UI.toast(`${ok}件を承認しました${ok < reqs.length ? `（${reqs.length - ok}件は時間が重なるため保留）` : ''}`); Admin.refresh();
@@ -88,7 +89,7 @@
     const need = +App.pref.get('need', s.need);
     const bar = UI.el(`<div class="toolbar"></div>`);
     bar.append(UI.stepper(`<span class="${U.wdClass(date)}">${U.label(date)}</span>`, () => { st.date = U.addDays(date, -1); Admin.refresh(); }, () => { st.date = U.addDays(date, 1); Admin.refresh(); }));
-    const r = UI.el(`<div class="toolbar-r"><input type="date" id="dPick" value="${date}" aria-label="日付"><button class="btn sm" id="dToday">今日</button><label class="inline">必要人数 <input type="number" id="dNeed" min="0" max="20" value="${need}"></label><button class="btn sm primary" id="dAdd">＋ シフト追加</button></div>`);
+    const r = UI.el(`<div class="toolbar-r" data-input><input type="date" id="dPick" value="${date}" aria-label="日付"><button class="btn sm" id="dToday">今日</button><label class="inline">必要人数 <input type="number" id="dNeed" min="0" max="20" value="${need}"></label><button class="btn sm primary" id="dAdd">＋ シフト追加</button></div>`);
     r.querySelector('#dPick').onchange = e => { if (e.target.value) { st.date = e.target.value; Admin.refresh(); } };
     r.querySelector('#dToday').onclick = () => { st.date = U.today(); Admin.refresh(); };
     r.querySelector('#dNeed').onchange = e => { App.pref.set('need', e.target.value); Admin.refresh(); };
@@ -185,7 +186,7 @@
       const d = S.get(), today = U.today(), ym = at.ym;
       const bar = UI.el(`<div class="toolbar"></div>`);
       bar.append(UI.stepper(U.ymLabel(ym), () => { at.ym = U.ymAdd(ym, -1); Admin.refresh(); }, () => { at.ym = U.ymAdd(ym, 1); Admin.refresh(); }));
-      const r = UI.el(`<div class="toolbar-r"><select id="aStaff" aria-label="従業員">${U.options([['', '全員'], ...d.staff.map(s => [s.id, s.name])], at.staff)}</select><button class="btn sm primary" id="aAdd">＋ 打刻を手入力</button></div>`);
+      const r = UI.el(`<div class="toolbar-r" data-input><select id="aStaff" aria-label="従業員">${U.options([['', '全員'], ...d.staff.map(s => [s.id, s.name])], at.staff)}</select><button class="btn sm primary" id="aAdd">＋ 打刻を手入力</button></div>`);
       r.querySelector('#aStaff').onchange = e => { at.staff = e.target.value; Admin.refresh(); };
       r.querySelector('#aAdd').onclick = () => punchModal({ staffId: at.staff || d.staff[0].id, date: today, in: '09:00', out: '', breakMin: 0 }, true);
       bar.append(r); main.append(bar);
@@ -221,7 +222,7 @@
         else if (App.Pay.breakShort(x.pu)) state = [`休憩不足 ${App.Pay.breakShort(x.pu)}分`, 'chip bad'];
         else if (x.sh && U.toMin(x.pu.in) > U.toMin(x.sh.start)) state = ['遅刻', 'chip warn'];
         else if (x.sh && U.toMin(x.pu.out) < U.toMin(x.sh.end)) state = ['早退', 'chip warn'];
-        else state = ['OK', 'chip good'];
+        else state = ['問題なし', 'chip good'];
         return `<tr data-i="${i}" tabindex="0"><td class="${U.wdClass(x.date)} nowrap">${U.label(x.date)}</td><td class="nowrap"><i class="dot" style="background:${x.p.color}"></i>${U.esc(x.p.name)}</td><td class="mono">${x.sh ? U.short(x.sh.start) + '-' + U.short(x.sh.end) : '−'}</td><td class="mono">${x.pu?.in || '−'}</td><td class="mono">${x.pu?.out || '−'}</td><td class="r mono">${x.pu ? x.pu.breakMin + '分' : '−'}</td><td class="r mono">${c ? U.hm(c.work) : '−'}</td><td class="r mono">${c && c.night ? U.hm(c.night) : '−'}</td><td><span class="${state[1]}">${state[0]}</span>${x.pu?.edited ? ' <span class="chip">修正済み</span>' : ''}</td></tr>`;
       }).join('') || '<tr><td colspan="9" class="muted">この月の打刻はありません</td></tr>'}</tbody></table></div></section>`);
       det.querySelectorAll('tr[data-i]').forEach(tr => {

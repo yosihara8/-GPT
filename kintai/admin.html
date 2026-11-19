@@ -12,20 +12,20 @@
 </head>
 <body class="admin-page">
 <header class="topbar">
-  <div class="brand"><span class="logo" aria-hidden="true">M</span><span class="brand-text"><b>MISEKAN</b><small>管理者ページ</small></span><span class="store" id="storeName"></span></div>
-  <div class="top-r"><a class="top-link" href="staff.html" target="_blank" rel="noopener">従業員ページを開く</a><button class="top-link" id="lock" type="button">ロック</button></div>
+  <div class="brand"><span class="logo" aria-hidden="true">ミ</span><span class="brand-text"><b>ミセカン</b><small>管理者ページ</small></span><span class="store" id="storeName"></span></div>
+  <div class="top-r"><a class="top-link" href="staff.html">従業員ページを見る</a><button class="top-link" id="lock" type="button">ロック</button></div>
 </header>
 <div class="proto-note">試作版：データはこの端末のブラウザにだけ保存されます。表示している人・金額はすべて見本です。メールは送信されません。</div>
 
 <div id="gate" class="gate" hidden>
   <form id="gateForm" class="gate-card">
-    <span class="logo big" aria-hidden="true">M</span>
+    <span class="logo big" aria-hidden="true">ミ</span>
     <h1>管理者ページ</h1>
-    <p class="muted">店長専用です。管理者のPINを入力してください。</p>
-    <label class="field">管理者のPIN<input id="gatePin" type="password" inputmode="numeric" autocomplete="off" required></label>
+    <p class="muted">店長専用です。管理者の暗証番号を入力してください。</p>
+    <label class="field">管理者の暗証番号<input id="gatePin" type="password" inputmode="numeric" autocomplete="off" required></label>
     <p class="err" id="gateErr" role="alert"></p>
     <button class="btn primary block">ひらく</button>
-    <p class="muted small">見本のPIN：0000（「設定・データ」で変えられます）</p>
+    <p class="muted small">見本の暗証番号：0000（「設定・データ」で変えられます）</p>
   </form>
 </div>
 
@@ -42,6 +42,7 @@
 <script src="js/seed.js"></script>
 <script src="js/payslip.js"></script>
 <script src="js/admin.js"></script>
+<script src="js/admin-datamap.js"></script>
 <script src="js/admin-legal.js"></script>
 <script src="js/admin-shift.js"></script>
 <script src="js/admin-pay.js"></script>

@@ -53,7 +53,11 @@ App.Store = {
     if (mem) return mem;
     try { const raw = localStorage.getItem(KEY); if (raw) mem = JSON.parse(raw); } catch (e) { mem = null; }
     if (!mem || !mem.staff) { mem = App.Seed.create(); this.save(true); }
-    ['auditLog', 'mailLog', 'reads', 'reactions', 'requests', 'payrolls'].forEach(k => { if (!Array.isArray(mem[k])) mem[k] = []; });
+    ['auditLog', 'mailLog', 'reads', 'reactions', 'requests', 'payrolls', 'sales', 'purchases', 'posts'].forEach(k => { if (!Array.isArray(mem[k])) mem[k] = []; });
+    if (!Array.isArray(mem.items)) {   // 古いデータには商品マスタがないので、販売記録から作る
+      const m = new Map(); mem.purchases.forEach(p => { if (!m.has(p.item)) m.set(p.item, { id: 'it' + (m.size + 1), name: p.item, category: p.category, price: p.price }); });
+      mem.items = [...m.values()];
+    }
     return mem;
   },
   save(silent) {
@@ -109,7 +113,7 @@ App.UI = {
   confirm(msg, okLabel, danger) {
     return new Promise(res => App.UI.modal('確認', `<p>${U.esc(msg)}</p>`, [
       { label: 'やめる', onClick: () => res(false) },
-      { label: okLabel || 'OK', kind: danger ? 'danger' : 'primary', onClick: () => res(true) },
+      { label: okLabel || 'はい', kind: danger ? 'danger' : 'primary', onClick: () => res(true) },
     ]));
   },
   tip(e, html) {
@@ -173,3 +177,21 @@ App.Chart = {
   },
 };
 function niceStep(x) { const p = Math.pow(10, Math.floor(Math.log10(x || 1))); const n = x / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; }
+
+/* ---------- 暗証番号の打ち間違いが続いたときの一時ロック（総当たり対策・試作版） ---------- */
+App.Guard = {
+  MAX: 5, LOCK_MIN: 5,
+  read(k) { try { return JSON.parse(localStorage.getItem('misekan.guard.' + k)) || { n: 0, until: 0 }; } catch (e) { return { n: 0, until: 0 }; } },
+  write(k, v) { try { localStorage.setItem('misekan.guard.' + k, JSON.stringify(v)); } catch (e) {} },
+  /* ロック中なら残り分数、ロックされていなければ 0 */
+  locked(k) { const g = this.read(k); return g.until > Date.now() ? Math.ceil((g.until - Date.now()) / 60000) : 0; },
+  fail(k) { const g = this.read(k); g.n = (g.until && g.until < Date.now()) ? 1 : g.n + 1; g.until = g.n >= this.MAX ? Date.now() + this.LOCK_MIN * 60000 : 0; if (g.until) g.n = 0; this.write(k, g); return g.until ? this.LOCK_MIN : 0; },
+  ok(k) { this.write(k, { n: 0, until: 0 }); },
+};
+/* ---------- 操作がないまま一定時間たったら閉じる ---------- */
+App.idle = function (minutes, onIdle) {
+  let t;
+  const reset = () => { clearTimeout(t); t = setTimeout(onIdle, minutes * 60000); };
+  ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(ev => addEventListener(ev, reset, { passive: true }));
+  reset();
+};

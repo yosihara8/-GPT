@@ -26,7 +26,7 @@
       const prof = st.me.profile(), store = st.me.store();
       const unread = st.me.posts().filter(p => !p.read).length;
       r.innerHTML = '';
-      r.append(UI.el(`<header class="app-top"><div class="app-id"><span class="logo" aria-hidden="true">M</span><div><small>${U.esc(store.name)}</small><b>${U.esc(prof.name)} さん</b></div></div><button class="btn sm ghost" id="logout">ログアウト</button></header>`));
+      r.append(UI.el(`<header class="app-top"><div class="app-id"><span class="logo" aria-hidden="true">ミ</span><div><small>${U.esc(store.name)}</small><b>${U.esc(prof.name)} さん</b></div></div><button class="btn sm ghost" id="logout">ログアウト</button></header>`));
       r.querySelector('#logout').onclick = () => { st.me = null; Staff.render(); };
       const body = UI.el(`<main class="app-body"><h1 class="app-h1">${TABS.find(t => t[0] === st.tab)[1]}</h1></main>`);
       r.append(body);
@@ -41,15 +41,19 @@
   function login(r) {
     const list = API.loginList();
     const last = App.pref.get('appStaff', list[0]?.id);
-    r.innerHTML = `<div class="app-login"><span class="logo big" aria-hidden="true">M</span><h1>従業員ページ</h1><p class="muted">${U.esc(API.storeName())}</p>
+    r.innerHTML = `<div class="app-login"><span class="logo big" aria-hidden="true">ミ</span><h1>従業員ページ</h1><p class="muted">${U.esc(API.storeName())}</p>
       <form id="lg"><label class="field">名前<select id="lgName">${U.options(list.map(s => [s.id, s.name]), last)}</select></label>
-      <label class="field">PIN（4桁）<input id="lgPin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" required></label>
+      <label class="field">暗証番号（4桁）<input id="lgPin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" required></label>
       <p class="err" id="lgErr" role="alert"></p><button class="btn primary block">ログイン</button></form>
-      <p class="muted small">見本のPIN：佐藤 1111、鈴木 2222、高橋 3333、田中 4444、伊藤 5555、渡辺 6666</p></div>`;
+      <p class="muted small">見本の暗証番号：佐藤 1111、鈴木 2222、高橋 3333、田中 4444、伊藤 5555、渡辺 6666</p></div>`;
     r.querySelector('#lg').onsubmit = e => {
       e.preventDefault();
-      const id = r.querySelector('#lgName').value, s = API.login(id, r.querySelector('#lgPin').value);
-      if (!s) { r.querySelector('#lgErr').textContent = 'PINが違います。もう一度入力してください。'; return; }
+      const id = r.querySelector('#lgName').value, err = r.querySelector('#lgErr');
+      const lock = App.Guard.locked('staff.' + id);
+      if (lock) { err.textContent = `打ち間違いが続いたため、あと${lock}分ほどログインできません。`; return; }
+      const s = API.login(id, r.querySelector('#lgPin').value);
+      if (!s) { const l = App.Guard.fail('staff.' + id); err.textContent = l ? `打ち間違いが${App.Guard.MAX}回続いたため、${l}分間ログインできません。` : '暗証番号が違います。もう一度入力してください。'; r.querySelector('#lgPin').value = ''; return; }
+      App.Guard.ok('staff.' + id);
       App.pref.set('appStaff', id); st.me = s; st.tab = 'punch'; Staff.render();
     };
   }
@@ -162,6 +166,8 @@
 
   /* 管理者ページで変更があったら反映（入力中は書き換えない） */
   App.bus.on(kind => { if (kind === 'external' && st.me && !isBusy()) Staff.render(); });
+  // 10分なにも操作しなければ自動でログアウト（スマホの置き忘れ対策）
+  App.idle(10, () => { if (st.me) { st.me = null; Staff.render(); UI.toast('10分操作がなかったため、ログアウトしました'); } });
   setInterval(() => { const c = document.getElementById('clock'); if (c) c.textContent = U.nowHHMM(); }, 10000);
   Staff.render();
 })();
