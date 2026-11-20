@@ -1,0 +1,2208 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ミセカン 管理者ページ</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+/* ミセカン：デパ地下の高級化粧品カウンターのような、真珠色の地に光るローズピンクとシャンパンゴールド
+   レイアウト：管理者ページ＝左に縦メニュー＋右に作業面／従業員ページ＝スマホ1列＋下にタブ */
+:root{
+  color-scheme: light;
+  --pearl:#fffafc;      /* 地の色（真珠） */
+  --surface:#ffffff;
+  --blush:#fbeef3;      /* うすいピンクの面 */
+  --petal:#f6d8e3;
+  --rose:#c8336f;       /* ミセカン・ピンク（白文字が読める濃さ） */
+  --rose-hi:#ec6f9d;
+  --berry:#7e1846;
+  --ink:#2b1520;        /* 文字 */
+  --muted:#7a5867;
+  --line:#efd5df;
+  --gold:#b38a4f; --gold-ink:#8a6630; --gold-hi:#e8cf9f; --gold-soft:#f6ecdb;
+  --good:#2c7a57; --good-soft:#e2f2e9; --warn:#9c5c10; --warn-soft:#fbefda; --bad:#b0243d; --bad-soft:#fde4e9;
+  --sat:#3657a8; --sun:#c0263f; --today:#fff4e2; --series:#c8336f;
+  --shine:linear-gradient(120deg,#c8336f 0%,#cc3a76 30%,#a8245a 62%,#c8336f 100%);  /* 白い文字が読める濃さのピンクだけで作る */
+  --gilt:linear-gradient(120deg,#9c7440 0%,#e8cf9f 45%,#b38a4f 70%,#f3e2bf 100%);
+  --shadow:0 1px 2px rgba(126,24,70,.06),0 10px 30px -12px rgba(126,24,70,.22);
+  --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+  --f-num:"Cormorant Garamond","Shippori Mincho B1",serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--pearl);color:var(--ink);font:15px/1.7 var(--f-body);-webkit-text-size-adjust:100%;
+  background-image:radial-gradient(1200px 500px at 85% -10%,#fde3ee 0%,transparent 60%),radial-gradient(900px 500px at -10% 110%,#fbeadd 0%,transparent 60%);background-attachment:fixed}
+/* きらめき（光の粒）。動きを減らす設定の人には止める */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55;
+  background-image:radial-gradient(1.4px 1.4px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 78% 12%,#ffe6f0 50%,transparent 51%),radial-gradient(1.6px 1.6px at 64% 72%,#fff 50%,transparent 51%),radial-gradient(1.1px 1.1px at 28% 84%,#f7dcae 50%,transparent 51%),radial-gradient(1.3px 1.3px at 90% 58%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 42% 40%,#f7dcae 50%,transparent 51%);
+  animation:twinkle 6s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.25}to{opacity:.7}}
+@media (prefers-reduced-motion:reduce){body::after{animation:none}*{transition:none!important;animation:none!important}}
+body > *{position:relative;z-index:1}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:700;text-wrap:balance;margin:0;color:var(--ink)}
+h1{font-size:26px;letter-spacing:.06em} h2{font-size:17px;margin-bottom:12px;letter-spacing:.04em} h3{font-size:15px}
+a{color:var(--rose)}
+.num,.mono{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--muted)} .small{font-size:12.5px} .center{text-align:center} .r{text-align:right} .nowrap{white-space:nowrap}
+.sat{color:var(--sat)} .sun{color:var(--sun)}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px;border-radius:4px}
+[hidden]{display:none!important}
+
+/* ---------- 上部バー（夜のブティックのような濃い色に金のきらめき） ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--ink)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:linear-gradient(100deg,#2b1520 0%,#45192f 55%,#2b1520 100%);color:#fff;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid transparent;border-image:var(--gilt) 1}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-text{display:flex;flex-direction:column;line-height:1.1}
+.brand-text b{font-family:var(--f-display);font-size:19px;letter-spacing:.3em;font-weight:700;background:var(--gilt);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-text small{font-size:10.5px;letter-spacing:.3em;color:#f3d6e2}
+.logo{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--gilt);color:#3a1a28;font:700 15px var(--f-display);box-shadow:0 0 0 1px rgba(255,255,255,.4) inset,0 0 14px rgba(232,207,159,.45);flex:none}
+.logo.big{width:64px;height:64px;font-size:28px}
+.store{font-size:12.5px;color:#f3d6e2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:1px solid rgba(232,207,159,.4);padding-left:10px}
+.top-r{display:flex;gap:6px;align-items:center}
+.top-link{font:inherit;font-size:13px;color:#fff;text-decoration:none;padding:6px 14px;border-radius:999px;border:1px solid rgba(232,207,159,.55);background:transparent;cursor:pointer}
+.top-link:hover{background:rgba(232,207,159,.15)}
+.proto-note{font-size:12px;color:var(--berry);background:linear-gradient(90deg,var(--blush),var(--gold-soft));padding-block:5px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+
+/* ---------- 管理者ページ ---------- */
+.gate{min-height:70vh;display:grid;place-items:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.gate-card{width:min(380px,100%);display:flex;flex-direction:column;gap:12px;align-items:stretch;text-align:center;background:var(--surface);border-radius:20px;padding:32px 24px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.gate-card .logo{align-self:center}
+.gate-card .field{text-align:left}
+.admin{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;max-width:1400px;margin:0 auto;padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.side{position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:16px;background:rgba(255,255,255,.7);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:18px;padding:14px 10px}
+.nav-title{font-size:10.5px;letter-spacing:.28em;color:var(--gold-ink);margin:0 0 4px 12px;font-weight:700}
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;border-radius:999px;color:var(--ink);text-decoration:none;font-size:14.5px}
+.nav-item:hover{background:var(--blush)}
+.nav-item.on{background:var(--shine);background-size:160% 100%;color:#fff;font-weight:700;box-shadow:0 6px 16px -8px rgba(200,51,111,.7)}
+.badge{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--berry);color:#fff;font-size:11.5px;font-weight:700;display:inline-grid;place-items:center;box-shadow:0 0 0 2px #fff}
+.nav-item.on .badge{background:#fff;color:var(--rose);box-shadow:none}
+.admin-main{min-width:0;display:flex;flex-direction:column;gap:18px}
+.page-head{display:flex;flex-direction:column;gap:4px;padding-bottom:10px;border-bottom:1px solid transparent;border-image:linear-gradient(90deg,var(--gold-hi),transparent 70%) 1}
+.lead{margin:0;color:var(--muted);font-size:14px;max-width:75ch}
+@media (max-width:900px){
+  .admin{grid-template-columns:minmax(0,1fr);gap:14px;padding-top:14px}
+  .side{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding:6px;border-radius:999px;scrollbar-width:thin}
+  .nav-group{flex-direction:row;gap:2px}
+  .nav-title{display:none}
+  .nav-item{white-space:nowrap}
+  .store{display:none}
+}
+
+/* ---------- 部品 ---------- */
+.card,.tile{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0;box-shadow:var(--shadow)}
+.card > p:first-child{margin-top:0}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.card-head h2{margin:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;gap:2px;position:relative;overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--gilt)}
+.tile-label{font-size:12px;color:var(--muted);letter-spacing:.06em}
+.tile-num{font-family:var(--f-num);font-size:32px;font-weight:600;line-height:1.2;color:var(--berry);font-variant-numeric:lining-nums tabular-nums}
+.tile-num.small-num{font-family:var(--f-display);font-size:18px;padding:6px 0}
+.tile-num small{font-size:14px;color:var(--muted);font-family:var(--f-body);font-weight:400}
+.tile-sub{font-size:12.5px;color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:18px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:18px;min-width:0}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.toolbar-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row-end{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper-label{font-family:var(--f-display);font-size:17px;min-width:9em;text-align:center}
+.btn{font:inherit;font-size:14px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.btn:hover{border-color:var(--rose-hi);color:var(--rose)}
+.btn.sm{padding:5px 12px;font-size:13px}
+.btn.primary{background:var(--shine);background-size:180% 100%;background-position:30% 0;border-color:transparent;color:#fff;font-weight:700;box-shadow:0 8px 18px -10px rgba(200,51,111,.9);transition:background-position .5s}
+.btn.primary:hover{background-position:90% 0;color:#fff}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:700}
+.btn.danger{color:var(--bad);border-color:#f2c3cd}
+.btn.ghost{background:transparent;border-color:transparent;color:inherit}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn.block{width:100%}
+.btn.big{font-size:18px;padding:16px 0;flex:1;border-radius:18px}
+.link{background:none;border:0;font:inherit;font-weight:700;cursor:pointer;color:inherit;padding:0;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--gold-hi)}
+input,select,textarea{font:inherit;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);min-width:0;max-width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--rose-hi);outline:none;box-shadow:0 0 0 3px #fbd3e2}
+textarea{width:100%;resize:vertical}
+textarea.mono{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+input[type=number]{width:7em}
+input[type=color]{padding:2px;height:40px;width:64px}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:12px;align-items:end}
+.form.one{grid-template-columns:minmax(0,1fr)}
+.form .wide{grid-column:1/-1}
+.form-sec{font-size:14px;color:var(--berry);padding-top:8px;border-top:1px dashed var(--line);margin-top:4px;letter-spacing:.06em}
+.inline-form{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr))}
+.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.field input,.field select{width:100%}
+.law-tag{display:inline-block;font-size:10px;padding:0 6px;border-radius:999px;background:var(--gold-soft);color:var(--gold-ink);font-weight:700;letter-spacing:.05em}
+.req{font-size:10px;color:var(--bad);font-weight:700}
+.check{display:flex;align-items:center;gap:8px;font-size:14px}
+.check input{accent-color:var(--rose)}
+.inline{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.inline input[type=number]{width:4.5em}
+.err{color:var(--bad);font-size:13px;margin:0;min-height:1em}
+.notice{background:linear-gradient(90deg,var(--gold-soft),#fff8ee);color:var(--ink);border:1px solid #ecd9b6;border-left:4px solid var(--gold);padding:9px 14px;border-radius:12px;font-size:13px;margin:0}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:1px 9px;border-radius:999px;font-size:12px;background:var(--blush);color:var(--berry);white-space:nowrap;text-decoration:none}
+.chip.good{background:var(--good-soft);color:var(--good)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.info{background:var(--blush);color:var(--berry)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip-btn{font:inherit;font-size:13px;padding:4px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.chip-btn:hover{border-color:var(--rose-hi);color:var(--rose);background:var(--blush)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;box-shadow:0 0 0 2px #fff,0 0 0 3px var(--line)}
+.seg{display:inline-flex;background:var(--blush);border-radius:999px;padding:4px;gap:2px;flex-wrap:wrap;border:1px solid var(--line)}
+.admin-main > .seg{align-self:flex-start}
+.seg button{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--muted);padding:6px 16px;border-radius:999px;cursor:pointer}
+.seg button[aria-selected="true"]{background:#fff;color:var(--rose);font-weight:700;box-shadow:0 2px 8px -2px rgba(126,24,70,.25)}
+.seg.full{display:flex} .seg.full button{flex:1}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font:inherit;font-size:13px;padding:5px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.pill.on{background:var(--shine);border-color:transparent;color:#fff;font-weight:700}
+.meter{display:inline-block;width:90px;height:6px;border-radius:3px;background:var(--blush);overflow:hidden;vertical-align:middle;margin:0 8px}
+.meter i{display:block;height:100%;background:var(--shine);border-radius:3px}
+ul.plain{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+ul.plain li{display:flex;align-items:center;gap:4px;justify-content:space-between}
+ul.plain li a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- 法令チェック ---------- */
+.issues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.issue{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:10px 12px;border-radius:12px;background:var(--pearl);border:1px solid var(--line)}
+.issue.bad{border-left:4px solid var(--bad)} .issue.warn{border-left:4px solid var(--warn)} .issue.info{border-left:4px solid var(--gold)}
+.issue p{margin:2px 0;font-size:13px;color:var(--muted)}
+.issue small{display:block}
+.issues.compact .issue{grid-template-columns:auto minmax(0,1fr)}
+.legal-sum.has-bad{border-color:#f2b9c6}
+
+/* ---------- 表 ---------- */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.tbl th.r,.tbl td.r{text-align:right}
+.tbl thead th{font-size:11.5px;font-weight:700;color:var(--gold-ink);letter-spacing:.08em;white-space:nowrap;background:var(--surface);border-bottom:1px solid var(--gold-hi)}
+.tbl tfoot td{font-weight:700;background:var(--blush);border-bottom:0}
+.tbl.hover tbody tr{cursor:pointer}
+.tbl.hover tbody tr:hover{background:var(--blush)}
+.tbl .today{background:var(--today)}
+.tbl.ledger tbody th{font-weight:400;color:var(--muted);white-space:nowrap}
+.tbl.ledger tr.total th,.tbl.ledger tr.total td{font-weight:700;color:var(--ink);background:var(--blush)}
+.week{min-width:880px}
+.week th,.week td{text-align:center}
+.week td:first-child,.week th:first-child{text-align:left}
+.week .cell{cursor:pointer;min-width:100px}
+.week .cell:hover{background:var(--blush)}
+.week .add{color:var(--petal);font-size:18px}
+.week .cell:hover .add{color:var(--rose)}
+.tag{display:inline-flex;align-items:center;gap:3px;margin:2px;padding:3px 10px;border-radius:999px;font:700 12.5px var(--f-body);font-variant-numeric:tabular-nums;border:0;cursor:pointer;background:var(--c);color:#fff;box-shadow:0 3px 8px -4px var(--c)}
+.tag.req{background:#fff;color:var(--ink);border:1.5px dashed var(--rose-hi);font-weight:500;cursor:default;box-shadow:none}
+.mini{border:0;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1;padding:0}
+.mini.ok{background:var(--good-soft);color:var(--good)} .mini.ng{background:var(--bad-soft);color:var(--bad)}
+
+/* 1日の階段表 */
+.gantt{border-collapse:collapse;width:100%;min-width:960px;table-layout:fixed;font-size:12.5px;font-variant-numeric:tabular-nums}
+.gantt col.g-name{width:124px} .gantt col.g-time{width:76px}
+.gantt th,.gantt td{height:38px;padding:0 6px;border-bottom:1px solid var(--line)}
+.gantt thead th{text-align:left;font:600 13px var(--f-num);color:var(--gold-ink);border-left:1px solid var(--line);padding-left:3px}
+.gantt thead th:nth-child(-n+2){border-left:0;font:700 11.5px var(--f-body);letter-spacing:.08em}
+.gantt td.slot{padding:0;border-left:1px dashed #f5e3ea}
+.gantt td.slot.hour{border-left:1px solid var(--line)}
+.gantt td.bar{padding:4px 0}
+.gantt td.bar button{width:100%;height:28px;border:0;border-radius:999px;background:var(--c);color:#fff;font:700 12.5px var(--f-body);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 10px;box-shadow:0 4px 10px -6px var(--c)}
+.gantt td.bar small{font-weight:500;opacity:.9}
+.gantt tfoot td{text-align:center;font-weight:700;background:var(--blush);padding:0}
+.gantt tfoot td:first-child{text-align:left;padding-left:6px}
+.gantt tfoot td.lack{background:var(--bad-soft);color:var(--bad)}
+.sumline{margin:12px 0 0;font-size:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+
+/* ---------- グラフ ---------- */
+.chart-box{width:100%;overflow-x:auto}
+.chart{width:100%;min-width:520px;height:auto;display:block}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .grid.base{stroke:var(--gold-hi)}
+.chart .axis{fill:var(--muted);font:12px var(--f-num)}
+.chart .axis.sat{fill:var(--sat)} .chart .axis.sun{fill:var(--sun)}
+.chart .hit{fill:transparent;cursor:pointer}
+.chart .bar{fill:var(--series);opacity:.78}
+.chart .bar-g:hover .bar,.chart .bar-g.hl .bar{opacity:1}
+.chart .bar-g:hover .hit{fill:rgba(200,51,111,.06)}
+.tooltip{position:fixed;z-index:60;pointer-events:none;background:var(--ink);color:#fff;font-size:12.5px;padding:7px 12px;border-radius:12px;line-height:1.5;border:1px solid rgba(232,207,159,.5)}
+.tooltip .muted{color:#f3d6e2}
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.rank li{display:grid;grid-template-columns:24px minmax(0,1.3fr) minmax(40px,1fr) auto;gap:10px;align-items:center;font-size:14px}
+.rank-no{font:600 17px var(--f-num);color:var(--muted);text-align:right}
+.rank li:nth-child(-n+3) .rank-no{background:var(--gilt);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rank-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-name small{color:var(--muted);margin-left:6px}
+.rank-bar{height:8px;background:var(--blush);border-radius:4px;overflow:hidden}
+.rank-bar i{display:block;height:100%;background:var(--shine);border-radius:4px}
+.rank-val{font-size:13px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---------- 掲示板（管理者） ---------- */
+.post-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.post-body{white-space:pre-wrap;margin:8px 0 12px}
+.post-stats{display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:14px}
+.reacts{display:flex;flex-wrap:wrap;gap:6px}
+.react{display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border-radius:999px;background:var(--blush);font-size:13px}
+.react small{color:var(--muted)}
+details{margin-top:10px;font-size:14px}
+summary{cursor:pointer;color:var(--rose)}
+.who{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.who .chip{margin:0 2px}
+
+/* ---------- 給与明細・源泉徴収票 ---------- */
+.slip{border:1px solid var(--line);border-radius:16px;padding:18px;background:linear-gradient(180deg,#fff,#fffafc)}
+.slip-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid transparent;border-image:var(--gilt) 1}
+.slip-title{font-family:var(--f-display);font-size:20px;letter-spacing:.3em;margin-right:12px;color:var(--berry)}
+.slip-to{text-align:left}
+@media (min-width:600px){.slip-to{text-align:right}}
+.slip-meta{display:flex;flex-wrap:wrap;gap:4px 20px;margin:0 0 12px;font-size:13px}
+.slip-meta div{display:flex;gap:8px} .slip-meta dt{color:var(--muted)} .slip-meta dd{margin:0}
+.slip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
+.slip-t{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.slip-t caption{text-align:left;font-weight:700;font-size:11.5px;color:var(--gold-ink);letter-spacing:.2em;padding-bottom:4px}
+.slip-t th{text-align:left;font-weight:400;color:var(--muted);padding:4px 0;border-bottom:1px dotted var(--line)}
+.slip-t td{padding:4px 0;border-bottom:1px dotted var(--line)}
+.slip-t tr.total th,.slip-t tr.total td{color:var(--ink);font-weight:700;border-bottom:0;border-top:1px solid var(--ink)}
+.slip-net{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding:12px 16px;border-radius:14px;background:var(--shine);color:#fff}
+.slip-net b{font:600 30px var(--f-num)}
+.slip .notice{margin-top:10px}
+.slip-foot{margin:10px 0 0;font-size:11.5px;color:var(--muted)}
+.gensen{border:1.5px solid var(--ink);border-radius:6px;padding:12px;font-size:13.5px;background:#fff}
+.gensen-title{font-family:var(--f-display);font-weight:700;text-align:center;border-bottom:1px solid var(--ink);padding-bottom:6px;margin-bottom:8px}
+.gensen dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0}
+.gensen dt{color:var(--muted)} .gensen dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.mail-pv{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:12px}
+.mail-pv dl{margin:0;padding:10px 14px;background:var(--blush);display:flex;flex-direction:column;gap:2px;font-size:13px}
+.mail-pv dl div{display:flex;gap:10px} .mail-pv dt{color:var(--muted);min-width:4em} .mail-pv dd{margin:0;word-break:break-all}
+.mail-pv pre{margin:0;padding:14px;white-space:pre-wrap;font:13px/1.8 var(--f-body);background:#fff}
+
+/* ---------- モーダル・通知 ---------- */
+.modal-back{position:fixed;inset:0;z-index:50;background:rgba(43,21,32,.45);backdrop-filter:blur(2px);display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);color:var(--ink);border-radius:20px;width:min(760px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;box-shadow:0 30px 60px -20px rgba(43,21,32,.5);border:1px solid var(--line)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid transparent;border-image:var(--gilt) 1}
+.modal-body{padding:18px;overflow:auto}
+.modal-body p{margin:0}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
+.icon-btn{border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--ink);color:#fff;padding:10px 20px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px);border:1px solid rgba(232,207,159,.5);box-shadow:var(--shadow)}
+.admin-page .toast{bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+
+/* ---------- 従業員ページ ---------- */
+.app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.app-top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:linear-gradient(100deg,#2b1520,#45192f);color:#fff;border-bottom:1px solid transparent;border-image:var(--gilt) 1}
+.app-id{display:flex;gap:10px;align-items:center;min-width:0}
+.app-id small{display:block;font-size:11px;color:#f3d6e2}
+.app-id b{font-family:var(--f-display);font-size:16px;color:#fff}
+.app-top .btn.ghost{color:#f3d6e2}
+.app-body{flex:1;padding-block:16px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+.app-h1{font-size:22px;letter-spacing:.12em}
+.app-nav{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.app-nav button{position:relative;font:inherit;font-size:11px;border:0;background:none;color:var(--muted);padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.app-nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.app-nav button.on{color:var(--rose);font-weight:700}
+.app-nav button.on::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--shine)}
+.app-nav .badge{position:absolute;top:3px;left:calc(50% + 6px)}
+.app-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:8px;text-align:left;font:inherit;color:inherit;box-shadow:var(--shadow)}
+.app-card h2{margin-bottom:2px;font-size:16px}
+.app-card.alert{border-color:#f2b9c6;background:var(--bad-soft);cursor:pointer}
+.app-card.alert b{color:var(--bad)}
+.app-card.hero{background:var(--shine);color:#fff;border:0;position:relative;overflow:hidden}
+.app-card.hero::after{content:"";position:absolute;inset:-40% -20% auto auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.45),transparent 65%)}
+.app-card.hero b{font:600 38px/1.1 var(--f-num)}
+.mini-dl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 0}
+.mini-dl dt{font-size:11px;opacity:.9} .mini-dl dd{margin:0;font-weight:700}
+.app-login{padding:44px 24px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.app-login h1{font-size:22px;margin-top:8px}
+.app-login form{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:18px;text-align:left;background:var(--surface);padding:20px;border-radius:20px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.punch{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px;text-align:center;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.punch::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:var(--gilt)}
+.punch-date{color:var(--muted);font-size:14px;letter-spacing:.1em}
+.punch-clock{font:600 64px/1.05 var(--f-num);color:var(--berry);letter-spacing:.04em}
+.punch-state{align-self:center;padding:2px 16px;border-radius:999px;font-size:13px;font-weight:700;background:var(--blush);color:var(--berry)}
+.state-working{background:var(--good-soft);color:var(--good)} .state-break{background:var(--warn-soft);color:var(--warn)}
+.punch-btns{display:flex;gap:10px;margin-top:8px}
+.punch-log{display:grid;grid-template-columns:repeat(3,1fr);margin:10px 0 0;border-top:1px solid var(--line);padding-top:10px}
+.punch-log dt{font-size:11.5px;color:var(--muted)} .punch-log dd{margin:0;font-weight:700}
+.punch > .small{margin:8px 0 0}
+.big-time{font:600 32px var(--f-num);margin:0;color:var(--berry)}
+.day-list,.req-list,.roster{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.day-list{border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+.day-list li{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);gap:8px}
+.day-list li:last-child{border-bottom:0}
+.day-list li.today{background:var(--today)}
+.day-list b{font-size:16px}
+.req-list li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.req-list li:last-child{border-bottom:0}
+.req-list li > :first-child{min-width:5.5em}
+.roster li{padding:12px 4px;border-bottom:1px solid var(--line);font-size:15.5px;display:flex;gap:8px;align-items:center}
+.roster li:last-child{border-bottom:0}
+.roster li.me{font-weight:700;color:var(--berry)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.post-m{padding:0;overflow:hidden}
+.post-m.unread{border-color:var(--rose-hi)}
+.post-m-head{display:flex;align-items:center;gap:8px;width:100%;padding:15px 16px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.post-m-head b{flex:1;min-width:0}
+.post-m .post-body,.post-m .react-row{margin:0 16px 14px}
+.new-dot{width:8px;height:8px;border-radius:50%;background:var(--rose);flex:none;box-shadow:0 0 8px var(--rose-hi)}
+.react-row{display:flex;flex-wrap:wrap;gap:8px}
+.react-btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.react-btn span{color:var(--muted);margin-left:2px;font-variant-numeric:tabular-nums}
+.react-btn.on{background:var(--blush);border-color:var(--rose-hi);color:var(--rose);font-weight:700}
+.app-body .stepper{justify-content:space-between}
+.app-body .slip{padding:14px}
+.app-body .slip-title{font-size:16px}
+.privacy{color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin:8px 0 0}
+/* 数字は高さのそろった字形（font の一括指定で打ち消されないよう最後に指定） */
+.punch-clock,.big-time,.tile-num,.slip-net b,.app-card.hero b,.rank-no,.gantt thead th{font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1}
+.chart .axis{font-feature-settings:"lnum" 1,"tnum" 1}
+.form-err:not(:empty){background:var(--bad-soft);border:1px solid #f2b9c6;border-radius:12px;padding:8px 12px;margin-bottom:10px;font-weight:700}
+.bad-input{border-color:var(--bad)!important;box-shadow:0 0 0 3px var(--bad-soft)!important}
+.sources{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-radius:14px;background:linear-gradient(90deg,#fff,var(--blush));border:1px solid var(--line)}
+.sources-title{font-size:11.5px;font-weight:700;letter-spacing:.12em;color:var(--gold-ink);margin-right:4px}
+.src-chip{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.src-chip small{color:var(--muted);font-size:11.5px}
+.src-chip span{color:var(--rose)}
+a.src-chip:hover,.src-chip.self:hover{border-color:var(--rose-hi);background:var(--blush)}
+.src-chip.self{border-color:var(--rose-hi);font-weight:700}
+.src-chip.staffp{background:var(--gold-soft);border-color:#ecd9b6;cursor:default}
+.input-card{border:1.5px solid var(--rose-hi);background:linear-gradient(180deg,#fff,#fff7fa)}
+.input-card h2::before{content:"入力";display:inline-block;font:700 10.5px var(--f-body);letter-spacing:.1em;color:#fff;background:var(--rose);border-radius:999px;padding:1px 8px;margin-right:8px;vertical-align:3px}
+.hint{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;font-size:13px}
+.tbl tr.missing td{background:#fffaf2}
+.flow{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px;max-width:85ch}
+.tbl.datamap td{vertical-align:top}
+.src-link{font-size:11.5px;color:var(--rose);text-decoration:none;margin-top:4px}
+.src-link:hover{text-decoration:underline}
+.sec-card .tbl th{font-weight:700;color:var(--ink);vertical-align:top} .sec-card .notice{margin-bottom:12px}
+
+</style>
+</head>
+<body class="admin-page">
+<header class="topbar">
+  <div class="brand"><span class="logo" aria-hidden="true">ミ</span><span class="brand-text"><b>ミセカン</b><small>管理者ページ</small></span><span class="store" id="storeName"></span></div>
+  <div class="top-r"><a class="top-link" href="misekan-staff.html">従業員ページを見る</a><button class="top-link" id="lock" type="button">ロック</button></div>
+</header>
+<div class="proto-note">試作版：データはこの端末のブラウザにだけ保存されます。表示している人・金額はすべて見本です。メールは送信されません。</div>
+
+<div id="gate" class="gate" hidden>
+  <form id="gateForm" class="gate-card">
+    <span class="logo big" aria-hidden="true">ミ</span>
+    <h1>管理者ページ</h1>
+    <p class="muted">店長専用です。管理者の暗証番号を入力してください。</p>
+    <label class="field">管理者の暗証番号<input id="gatePin" type="password" inputmode="numeric" autocomplete="off" required></label>
+    <p class="err" id="gateErr" role="alert"></p>
+    <button class="btn primary block">ひらく</button>
+    <p class="muted small">見本の暗証番号：0000（「設定・データ」で変えられます）</p>
+  </form>
+</div>
+
+<div id="adminView" class="admin" hidden>
+  <nav id="sideNav" class="side" aria-label="管理メニュー"></nav>
+  <main id="adminMain" class="admin-main"></main>
+</div>
+
+<div id="tooltip" class="tooltip" hidden></div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+/* ---- js/core.js ---- */
+/* ミセカン 共通処理：日付・時刻・金額・保存・画面部品 */
+'use strict';
+const App = window.App = {};
+
+/* ---------- 小さな道具 ---------- */
+const U = App.U = {
+  pad: n => String(n).padStart(2, '0'),
+  ymd: d => `${d.getFullYear()}-${U.pad(d.getMonth() + 1)}-${U.pad(d.getDate())}`,
+  parse: s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d || 1); },
+  addDays: (s, n) => { const d = U.parse(s); d.setDate(d.getDate() + n); return U.ymd(d); },
+  monday: s => { const d = U.parse(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return U.ymd(d); },
+  today: () => U.ymd(new Date()),
+  ym: s => s.slice(0, 7),
+  ymAdd: (ym, n) => { const d = U.parse(ym + '-01'); d.setMonth(d.getMonth() + n); return U.ymd(d).slice(0, 7); },
+  monthDays: ym => { const out = []; let d = ym + '-01'; while (d.startsWith(ym)) { out.push(d); d = U.addDays(d, 1); } return out; },
+  WD: ['日', '月', '火', '水', '木', '金', '土'],
+  wd: s => U.parse(s).getDay(),
+  label: s => { const d = U.parse(s); return `${d.getMonth() + 1}/${d.getDate()}(${U.WD[d.getDay()]})`; },
+  ymLabel: ym => `${ym.slice(0, 4)}年${+ym.slice(5, 7)}月`,
+  /* その日時点の満年齢 */
+  age: (birth, on) => { if (!birth) return null; const [y, m, d] = birth.split('-').map(Number); const [Y, M, D] = on.split('-').map(Number); return Y - y - ((M < m || (M === m && D < d)) ? 1 : 0); },
+  wdClass: s => { const w = U.wd(s); return w === 0 ? 'sun' : w === 6 ? 'sat' : ''; },
+  toMin: t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; },
+  toHHMM: m => `${U.pad(Math.floor(m / 60))}:${U.pad(m % 60)}`,
+  short: t => { const [h, m] = t.split(':'); return m === '00' ? String(+h) : `${+h}:${m}`; },
+  nowHHMM: () => { const d = new Date(); return `${U.pad(d.getHours())}:${U.pad(d.getMinutes())}`; },
+  hm: min => `${Math.floor(min / 60)}:${U.pad(Math.round(min % 60))}`,
+  yen: n => '¥' + Math.round(n).toLocaleString('ja-JP'),
+  num: n => Math.round(n).toLocaleString('ja-JP'),
+  wareki: y => y >= 2019 ? `令和${y - 2018 === 1 ? '元' : y - 2018}年` : `${y}年`,
+  esc: s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
+  uid: () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+  sum: (arr, f) => arr.reduce((a, x) => a + (f ? f(x) : x), 0),
+  timeOptions(from, to, step) { const o = []; for (let t = from * 60; t <= to * 60; t += step) o.push(U.toHHMM(t)); return o; },
+  options: (list, sel) => list.map(v => Array.isArray(v)
+    ? `<option value="${U.esc(v[0])}"${v[0] === sel ? ' selected' : ''}>${U.esc(v[1])}</option>`
+    : `<option${v === sel ? ' selected' : ''}>${U.esc(v)}</option>`).join(''),
+  overlap: (a1, a2, b1, b2) => Math.max(0, Math.min(a2, b2) - Math.max(a1, b1)),
+};
+
+/* ---------- 変更通知 ---------- */
+App.bus = {
+  fns: [],
+  on(f) { this.fns.push(f); },
+  emit(kind) { this.fns.forEach(f => { try { f(kind); } catch (e) { console.error(e); } }); },
+};
+
+/* ---------- 保存（試作版は端末のブラウザに保存） ---------- */
+const KEY = 'misekan.v2';   // データの形を変えたので v2（v1 の見本データは使いません）
+let mem = null;
+App.Store = {
+  get() {
+    if (mem) return mem;
+    try { const raw = localStorage.getItem(KEY); if (raw) mem = JSON.parse(raw); } catch (e) { mem = null; }
+    if (!mem || !mem.staff) { mem = App.Seed.create(); this.save(true); }
+    ['auditLog', 'mailLog', 'reads', 'reactions', 'requests', 'payrolls', 'sales', 'purchases', 'posts'].forEach(k => { if (!Array.isArray(mem[k])) mem[k] = []; });
+    if (!Array.isArray(mem.items)) {   // 古いデータには商品マスタがないので、販売記録から作る
+      const m = new Map(); mem.purchases.forEach(p => { if (!m.has(p.item)) m.set(p.item, { id: 'it' + (m.size + 1), name: p.item, category: p.category, price: p.price }); });
+      mem.items = [...m.values()];
+    }
+    return mem;
+  },
+  save(silent) {
+    try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* 保存できない環境でも画面は動かす */ }
+    if (!silent) App.bus.emit();
+  },
+  replace(d) { mem = d; this.save(); },
+  reset() { mem = App.Seed.create(); this.save(); },
+  staff(id) { return this.get().staff.find(s => s.id === id); },
+  /* 変更の記録（労働時間の記録を後から直したとき、誰が・いつ・なぜ直したかを残す） */
+  log(actor, action, target, detail, reason) {
+    const d = this.get();
+    d.auditLog.push({ at: new Date().toISOString().slice(0, 19), actor, action, target, detail: detail || '', reason: reason || '' });
+  },
+};
+/* 管理者ページと従業員ページを同じ端末で開いているとき、片方の変更をもう片方に反映する */
+addEventListener('storage', e => {
+  if (e.key !== KEY) return;
+  mem = null;
+  App.bus.emit('external');
+});
+App.pref = {
+  get(k, d) { try { const v = localStorage.getItem('misekan.pref.' + k); return v === null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('misekan.pref.' + k, v); } catch (e) {} },
+};
+
+/* ---------- 画面部品 ---------- */
+App.UI = {
+  el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; },
+  toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(this._tt); this._tt = setTimeout(() => { t.hidden = true; }, 2600);
+  },
+  /* ブラウザの confirm は使えない環境があるため、画面内で確認する */
+  modal(title, bodyHtml, buttons) {
+    const wrap = App.UI.el(`<div class="modal-back"><div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><h3>${U.esc(title)}</h3><button class="icon-btn" data-x aria-label="閉じる">×</button></div>
+      <div class="modal-body">${bodyHtml}</div><div class="modal-foot"></div></div></div>`);
+    const close = () => wrap.remove();
+    const foot = wrap.querySelector('.modal-foot');
+    (buttons || [{ label: '閉じる' }]).forEach(b => {
+      const btn = App.UI.el(`<button class="btn ${b.kind || ''}">${U.esc(b.label)}</button>`);
+      btn.onclick = () => { if (b.onClick && b.onClick(wrap) === false) return; close(); };
+      foot.append(btn);
+    });
+    wrap.querySelector('[data-x]').onclick = close;
+    wrap.addEventListener('click', e => { if (e.target === wrap) close(); });
+    document.body.append(wrap);
+    const f = wrap.querySelector('input,select,textarea'); if (f) f.focus();
+    return { el: wrap, close };
+  },
+  confirm(msg, okLabel, danger) {
+    return new Promise(res => App.UI.modal('確認', `<p>${U.esc(msg)}</p>`, [
+      { label: 'やめる', onClick: () => res(false) },
+      { label: okLabel || 'はい', kind: danger ? 'danger' : 'primary', onClick: () => res(true) },
+    ]));
+  },
+  tip(e, html) {
+    const t = document.getElementById('tooltip');
+    if (!html) { t.hidden = true; return; }
+    t.innerHTML = html; t.hidden = false;
+    const r = t.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    t.style.left = x + 'px'; t.style.top = y + 'px';
+  },
+  /* 期間切り替えバー */
+  stepper(label, onPrev, onNext, extra) {
+    const el = App.UI.el(`<div class="stepper"><button class="btn sm" aria-label="前へ">◀</button><b class="stepper-label">${label}</b><button class="btn sm" aria-label="次へ">▶</button>${extra || ''}</div>`);
+    const [p, n] = el.querySelectorAll('button'); p.onclick = onPrev; n.onclick = onNext;
+    return el;
+  },
+};
+
+/* ---------- グラフ（縦棒・1系列） ---------- */
+App.Chart = {
+  bars(data, opt = {}) {
+    const W = opt.width || 720, H = opt.height || 220, L = 56, R = 8, T = 12, B = 28;
+    const max = Math.max(1, ...data.map(d => d.value));
+    const step = niceStep(max / 4), top = Math.ceil(max / step) * step;
+    const cw = (W - L - R) / data.length, bw = Math.max(2, Math.min(36, cw * 0.62));
+    const y = v => T + (H - T - B) * (1 - v / top);
+    let s = `<svg viewBox="0 0 ${W} ${H}" class="chart" role="img" aria-label="${U.esc(opt.label || '')}">`;
+    for (let v = 0; v <= top; v += step) {
+      s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="grid${v === 0 ? ' base' : ''}"/>`;
+      s += `<text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" class="axis">${opt.fmtAxis ? opt.fmtAxis(v) : U.num(v)}</text>`;
+    }
+    const every = Math.ceil(data.length / (opt.maxLabels || 16));
+    data.forEach((d, i) => {
+      const cx = L + cw * i + cw / 2, h = Math.max(0, y(0) - y(d.value));
+      const r = Math.min(4, bw / 2, h);
+      s += `<g class="bar-g${d.hl ? ' hl' : ''}" data-i="${i}"><rect x="${L + cw * i}" y="${T}" width="${cw}" height="${H - T - B}" class="hit"/>`;
+      if (h > 0) s += `<path class="bar" d="M${cx - bw / 2},${y(0)} V${y(0) - h + r} Q${cx - bw / 2},${y(0) - h} ${cx - bw / 2 + r},${y(0) - h} H${cx + bw / 2 - r} Q${cx + bw / 2},${y(0) - h} ${cx + bw / 2},${y(0) - h + r} V${y(0)} Z"/>`;
+      s += `</g>`;
+      if (i % every === 0) s += `<text x="${cx}" y="${H - 8}" text-anchor="middle" class="axis ${d.cls || ''}">${U.esc(d.label)}</text>`;
+    });
+    s += `</svg>`;
+    const box = App.UI.el(`<div class="chart-box">${s}</div>`);
+    box.querySelectorAll('.bar-g').forEach(g => {
+      const d = data[+g.dataset.i];
+      g.addEventListener('mousemove', e => App.UI.tip(e, `<b>${U.esc(d.tip || d.label)}</b><br>${opt.fmt ? opt.fmt(d.value) : U.num(d.value)}${d.sub ? '<br><span class="muted">' + U.esc(d.sub) + '</span>' : ''}`));
+      g.addEventListener('mouseleave', e => App.UI.tip(e));
+      if (opt.onClick) g.addEventListener('click', () => opt.onClick(d));
+    });
+    return box;
+  },
+  /* 横棒ランキング */
+  ranking(rows, fmt) {
+    const max = Math.max(1, ...rows.map(r => r.value));
+    return App.UI.el(`<ol class="rank">${rows.map((r, i) => `<li>
+      <span class="rank-no">${i + 1}</span>
+      <span class="rank-name">${U.esc(r.label)}${r.sub ? `<small>${U.esc(r.sub)}</small>` : ''}</span>
+      <span class="rank-bar"><i style="width:${(r.value / max * 100).toFixed(1)}%"></i></span>
+      <span class="rank-val">${fmt ? fmt(r.value) : U.num(r.value)}</span></li>`).join('') || '<li class="muted">データがありません</li>'}</ol>`);
+  },
+};
+function niceStep(x) { const p = Math.pow(10, Math.floor(Math.log10(x || 1))); const n = x / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; }
+
+/* ---------- 暗証番号の打ち間違いが続いたときの一時ロック（総当たり対策・試作版） ---------- */
+App.Guard = {
+  MAX: 5, LOCK_MIN: 5,
+  read(k) { try { return JSON.parse(localStorage.getItem('misekan.guard.' + k)) || { n: 0, until: 0 }; } catch (e) { return { n: 0, until: 0 }; } },
+  write(k, v) { try { localStorage.setItem('misekan.guard.' + k, JSON.stringify(v)); } catch (e) {} },
+  /* ロック中なら残り分数、ロックされていなければ 0 */
+  locked(k) { const g = this.read(k); return g.until > Date.now() ? Math.ceil((g.until - Date.now()) / 60000) : 0; },
+  fail(k) { const g = this.read(k); g.n = (g.until && g.until < Date.now()) ? 1 : g.n + 1; g.until = g.n >= this.MAX ? Date.now() + this.LOCK_MIN * 60000 : 0; if (g.until) g.n = 0; this.write(k, g); return g.until ? this.LOCK_MIN : 0; },
+  ok(k) { this.write(k, { n: 0, until: 0 }); },
+};
+/* ---------- 操作がないまま一定時間たったら閉じる ---------- */
+App.idle = function (minutes, onIdle) {
+  let t;
+  const reset = () => { clearTimeout(t); t = setTimeout(onIdle, minutes * 60000); };
+  ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(ev => addEventListener(ev, reset, { passive: true }));
+  reset();
+};
+
+</script>
+<script>
+/* ---- js/payroll.js ---- */
+/* ミセカン 給与計算・労働時間・源泉徴収の計算（画面を持たない部品）
+ *
+ * 労働基準法などの決まりのうち、ここで計算しているもの
+ *  - 32条  ：1日8時間・1週40時間を超えた分を時間外労働として数える（週は日曜はじまり。就業規則で決めた曜日に変えられる）
+ *  - 34条  ：休憩は 労働時間が6時間を超えると45分以上、8時間を超えると60分以上（足りない日を知らせる）
+ *  - 37条  ：時間外 25%以上、深夜（22時〜翌5時）25%以上、時間外が月60時間を超えた分は 50%以上
+ *  - 24条  ：賃金は全額払い。法令で決まった控除（所得税・社会保険料・雇用保険料）以外は労使協定がないと引けない
+ * 税・保険の数値は設定（settings）で変えられます。初期値は「要確認」の目印つきです。
+ */
+'use strict';
+(function () {
+  const U = App.U;
+
+  App.defaultTax = () => ({
+    version: '令和2〜7年分の電算機計算の特例（令和8年分は要確認）',
+    zeroBelow: 88000,
+    kyuyo: [[135416, null, 45834], [149999, 0.4, -8333], [299999, 0.3, 6667], [549999, 0.2, 36667], [708330, 0.1, 91667], [null, null, 162500]],
+    kiso: 40000,
+    fuyo: 31667,
+    brackets: [[162500, 0.05105, 0], [275000, 0.1021, 8296], [579166, 0.2042, 36374], [750000, 0.23483, 54113], [1500000, 0.33693, 130688], [3333333, 0.4084, 237893], [null, 0.45945, 408061]],
+    otsuBelow: 105000,
+    otsuRate: 0.03063,
+  });
+
+  const Pay = App.Pay = {};
+  const DAY_LIMIT = 8 * 60, WEEK_LIMIT = 40 * 60, M60 = 60 * 60;
+
+  /* 1日分：実働・深夜・1日8時間超（分） */
+  Pay.day = function (p) {
+    if (!p || !p.in || !p.out) return null;
+    const a = U.toMin(p.in); let b = U.toMin(p.out); if (b <= a) b += 1440;
+    const brk = p.breakMin || 0;
+    const work = Math.max(0, b - a - brk);
+    // 深夜（22:00〜翌5:00）。休憩は深夜帯に取らない前提の簡易計算
+    const night = Math.min(work, U.overlap(a, b, 22 * 60, 29 * 60) + U.overlap(a, b, 0, 5 * 60));
+    return { work, night, otDay: Math.max(0, work - DAY_LIMIT), brk };
+  };
+
+  /* 34条：必要な休憩（分） */
+  Pay.breakRequired = workPlusBreak => workPlusBreak > 8 * 60 ? 60 : workPlusBreak > 6 * 60 ? 45 : 0;
+  Pay.breakShort = function (p) {
+    const c = Pay.day(p); if (!c) return 0;
+    // 休憩前の拘束時間ではなく「労働時間」で判定。休憩が足りないと労働時間が長くなるので、実働で判断する
+    const need = c.work > 8 * 60 ? 60 : c.work > 6 * 60 ? 45 : 0;
+    return Math.max(0, need - c.brk);
+  };
+
+  /* 1人の、ある期間の日ごとの時間（週40時間超を含む） */
+  Pay.days = function (staffId, data, from, to) {
+    const weekStart = data.settings.weekStart ?? 0;
+    const back = (U.wd(from) - weekStart + 7) % 7;
+    const start = U.addDays(from, -back);  // その週の初日から数える
+    const byDate = {};
+    data.punches.filter(p => p.staffId === staffId && p.date >= start && p.date <= to).forEach(p => { byDate[p.date] = p; });
+    const out = {};
+    let cum = 0;
+    for (let d = start; d <= to; d = U.addDays(d, 1)) {
+      if (U.wd(d) === weekStart) cum = 0;
+      const c = Pay.day(byDate[d]);
+      if (!c) continue;
+      const regular = c.work - c.otDay;              // 1日8時間以内の部分
+      const before = Math.max(0, cum - WEEK_LIMIT);
+      cum += regular;
+      const otWeek = Math.max(0, cum - WEEK_LIMIT) - before;   // この日に週40時間を超えた分
+      if (d >= from) out[d] = { work: c.work, night: c.night, ot: c.otDay + otWeek, otWeek, brk: c.brk, punch: byDate[d] };
+    }
+    return out;
+  };
+
+  /* 源泉所得税（月額） */
+  Pay.incomeTax = function (A, dependents, col, tax) {
+    A = Math.max(0, Math.floor(A));
+    const lim = r => (r[0] === null || r[0] === undefined) ? Infinity : r[0];
+    if (col === '乙') {
+      return { tax: Math.floor(A * tax.otsuRate), note: A < tax.otsuBelow ? '' : '乙欄で10万5千円以上は税額表で確認が必要です（試作では一律の率で概算）' };
+    }
+    if (A < tax.zeroBelow) return { tax: 0, note: '' };
+    const k = tax.kyuyo.find(r => A <= lim(r));
+    const kyuyo = k[1] === null ? k[2] : Math.ceil(A * k[1] + k[2]);
+    const B = Math.max(0, A - kyuyo - tax.kiso - tax.fuyo * (dependents || 0));
+    const br = tax.brackets.find(r => B <= lim(r));
+    return { tax: Math.max(0, Math.round((B * br[1] - br[2]) / 10) * 10), note: '' };
+  };
+
+  /* 雇用保険料：50銭以下切り捨て、50銭超切り上げ（給与から引く場合の決まり） */
+  Pay.roundIns = x => { const f = Math.floor(x); return x - f > 0.5 ? f + 1 : f; };
+
+  /* 支給日（月末締め・翌月の給料日。31日などない日は月末） */
+  Pay.payDate = function (ym, payDay) {
+    const next = U.ymAdd(ym, 1), last = U.monthDays(next).length;
+    return `${next}-${U.pad(Math.min(payDay, last))}`;
+  };
+
+  /* 1か月分の給与 */
+  Pay.month = function (staff, ym, data) {
+    const s = data.settings, days = U.monthDays(ym);
+    const map = Pay.days(staff.id, data, days[0], days[days.length - 1]);
+    const list = Object.values(map);
+    const work = U.sum(list, x => x.work), night = U.sum(list, x => x.night), ot = U.sum(list, x => x.ot);
+    const ot60 = Math.max(0, ot - M60);
+    const wage = staff.wage;
+    const base = Math.round(wage * work / 60);
+    const otPay = Math.round(wage * (s.otRate - 1) * (ot - ot60) / 60 + wage * (s.ot60Rate - 1) * ot60 / 60);
+    const nightPay = Math.round(wage * (s.nightRate - 1) * night / 60);
+    const transport = (staff.transport || 0) * list.length;
+    const gross = base + otPay + nightPay + transport;
+    const taxable = gross - transport;                 // 通勤手当は非課税として扱う（上限内）
+    const empIns = staff.empIns ? Pay.roundIns(gross * s.empInsRate) : 0;
+    const social = staff.socialIns || 0;
+    const it = Pay.incomeTax(taxable - empIns - social, staff.dependents, staff.taxCol, s.tax);
+    const deductions = empIns + social + it.tax;
+    return {
+      ym, staffId: staff.id, name: staff.name, gender: staff.gender || '', wage, days: list.length,
+      periodStart: days[0], periodEnd: days[days.length - 1], payDate: Pay.payDate(ym, s.payDay),
+      workMin: work, otMin: ot, ot60Min: ot60, nightMin: night, base, otPay, nightPay, transport,
+      gross, taxable, empIns, social, tax: it.tax, taxNote: it.note, deductions, net: gross - deductions,
+      openDays: data.punches.filter(p => p.staffId === staff.id && p.date.startsWith(ym) && p.in && !p.out).length,
+      storeName: s.storeName,
+    };
+  };
+
+  /* 年間の給与所得控除（令和7年分以降の改正後の式。年末調整の表とは端数処理が異なる概算） */
+  Pay.annualKyuyo = function (pay) {
+    if (pay <= 1900000) return Math.min(pay, 650000);
+    if (pay <= 3600000) return Math.floor(pay * 0.3 + 80000);
+    if (pay <= 6600000) return Math.floor(pay * 0.2 + 440000);
+    if (pay <= 8500000) return Math.floor(pay * 0.1 + 1100000);
+    return 1950000;
+  };
+})();
+
+</script>
+<script>
+/* ---- js/seed.js ---- */
+/* ミセカン 見本データ（初回だけ作成。設定タブから作り直せます） */
+'use strict';
+App.Seed = {
+  create() {
+    const U = App.U;
+    let seed = 20261118;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+    const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+    const today = U.today(), thisYm = U.ym(today);
+    const COLORS = ['#c2185b', '#7b3f8c', '#2e8b7a', '#3f5ba9', '#b0803a', '#d0605e'];
+
+    const staffDef = [
+      ['S001', '佐藤 美咲', 'さとう みさき', 1250, 300, true, 0, 0, '甲', '1111', { 1: '09:00-14:00', 3: '09:00-14:00', 5: '09:00-14:00', 6: '09:00-17:00' }],
+      ['S002', '鈴木 健太', 'すずき けんた', 1230, 400, true, 0, 0, '甲', '2222', { 1: '10:00-15:00', 2: '10:00-15:00', 4: '10:00-15:00', 5: '10:00-15:00', 0: '10:00-18:00' }],
+      ['S003', '高橋 さくら', 'たかはし さくら', 1230, 0, false, 0, 0, '甲', '3333', { 2: '12:00-17:00', 3: '12:00-17:00', 5: '12:00-17:00', 6: '12:00-17:00' }],
+      ['S004', '田中 翔', 'たなか しょう', 1350, 500, true, 0, 0, '甲', '4444', { 1: '14:00-22:00', 2: '14:00-22:00', 3: '14:00-22:00', 4: '14:00-22:00', 0: '13:00-22:00' }],
+      ['S005', '伊藤 葵', 'いとう あおい', 1230, 200, false, 0, 0, '乙', '5555', { 3: '17:00-22:00', 4: '17:00-22:00', 5: '17:00-22:00', 6: '17:00-22:00' }],
+      ['S006', '渡辺 大輔', 'わたなべ だいすけ', 1280, 300, true, 0, 1, '甲', '6666', { 1: '17:00-22:00', 2: '09:00-14:00', 4: '17:00-22:00', 6: '17:00-22:00', 0: '17:00-22:00' }],
+    ];
+    const staff = staffDef.map((d, i) => ({
+      id: 'st' + (i + 1), code: d[0], name: d[1], kana: d[2], role: i === 3 ? 'バイトリーダー' : 'アルバイト',
+      wage: d[3], transport: d[4], empIns: d[5], socialIns: d[6], dependents: d[7], taxCol: d[8], pin: d[9],
+      color: COLORS[i], phone: `090-0000-${String(1001 + i)}`, hireDate: U.addDays(today, -ri(120, 900)),
+      birth: `${ri(1985, 2005)}-${U.pad(ri(1, 12))}-${U.pad(ri(1, 28))}`, active: true, note: '', pattern: d[10],
+      // 労働者名簿（労働基準法107条・施行規則53条）の項目
+      gender: ['女性', '男性', '女性', '男性', '女性', '男性'][i], address: `東京都〇〇区〇〇町${i + 1}-${i + 2}（見本）`,
+      history: '（見本）前職：飲食店ホール', job: i === 3 ? '接客・調理・締め作業' : '接客・調理補助',
+      retireDate: '', retireReason: '', deathDate: '', deathCause: '',
+      // メール配信（給与明細の電子交付には本人の承諾が必要：所得税法231条2項）
+      email: `staff${i + 1}@example.com`, consent: i !== 2, consentDate: i !== 2 ? U.addDays(today, -ri(30, 200)) : '',
+    }));
+
+    const shifts = [], punches = [], requests = [];
+    const start = U.ymAdd(thisYm, -2) + '-01';
+    const thisMon = U.monday(today), nextMon = U.addDays(thisMon, 7);
+    const nowMin = U.toMin(U.nowHHMM());
+    for (let d = start; d < nextMon; d = U.addDays(d, 1)) {
+      for (const st of staff) {
+        const pt = st.pattern[U.wd(d)]; if (!pt || rnd() < 0.06) continue;
+        const [s, e] = pt.split('-');
+        shifts.push({ id: U.uid() + ri(0, 999), staffId: st.id, date: d, start: s, end: e });
+        if (d > today) continue;
+        const inM = U.toMin(s) - ri(0, 12) + (rnd() < 0.08 ? ri(5, 15) : 0);
+        let outM = U.toMin(e) + ri(0, 15) + (e === '22:00' && rnd() < 0.3 ? ri(10, 40) : 0);
+        const len = outM - inM;
+        // 34条：労働時間が6時間を超えたら45分、8時間を超えたら60分の休憩
+        const breakMin = len - 45 > 8 * 60 ? 60 : len > 6 * 60 ? 45 : 0;
+        if (d === today) {
+          if (nowMin < inM) continue;
+          punches.push({ id: U.uid() + ri(0, 999), staffId: st.id, date: d, in: U.toHHMM(inM), out: nowMin >= outM ? U.toHHMM(outM) : '', breakMin: nowMin >= outM ? breakMin : 0, breakStart: '' });
+        } else {
+          punches.push({ id: U.uid() + ri(0, 999), staffId: st.id, date: d, in: U.toHHMM(inM), out: U.toHHMM(outM), breakMin, breakStart: '' });
+        }
+      }
+    }
+    // 来週分は「シフト希望（未承認）」として提出済みにしておく
+    for (let i = 0; i < 7; i++) {
+      const d = U.addDays(nextMon, i);
+      for (const st of staff) {
+        const pt = st.pattern[U.wd(d)]; if (!pt || rnd() < 0.15) continue;
+        const [s, e] = pt.split('-');
+        requests.push({ id: U.uid() + ri(0, 999), staffId: st.id, date: d, start: s, end: e, note: '', status: 'pending', createdAt: new Date().toISOString() });
+      }
+    }
+    requests.push({ id: U.uid() + 'x', staffId: 'st3', date: U.addDays(nextMon, 0), start: '12:00', end: '17:00', note: '月曜も入れます', status: 'pending', createdAt: new Date().toISOString() });
+
+    // 売上（13か月分）
+    const sales = [];
+    const sStart = U.ymAdd(thisYm, -12) + '-01';
+    for (let d = sStart; d < today; d = U.addDays(d, 1)) {
+      const w = U.wd(d), m = +d.slice(5, 7);
+      const wf = [1.25, 0.85, 0.85, 0.9, 0.95, 1.15, 1.35][w];
+      const mf = [0.9, 0.85, 1.0, 1.05, 1.1, 0.95, 1.1, 1.15, 1.0, 1.0, 1.0, 1.2][m - 1];
+      const amount = Math.round(215000 * wf * mf * (0.85 + rnd() * 0.3) / 10) * 10;
+      sales.push({ date: d, amount, customers: Math.round(amount / ri(1350, 1650)), note: '' });
+    }
+
+    // 商品マスタ
+    const items = [
+      ['ブレンドコーヒー', 'ドリンク', 450, 10], ['カフェラテ', 'ドリンク', 520, 9], ['アイスティー', 'ドリンク', 480, 5],
+      ['季節のフルーツティー', 'ドリンク', 650, 4], ['クラブハウスサンド', 'フード', 980, 6], ['ナポリタン', 'フード', 1050, 5],
+      ['日替わりランチ', 'フード', 1100, 9], ['キーマカレー', 'フード', 1000, 6], ['ガトーショコラ', 'デザート', 520, 5],
+      ['チーズケーキ', 'デザート', 500, 6], ['プリン', 'デザート', 420, 4], ['焼き菓子セット', 'テイクアウト', 1200, 2], ['コーヒー豆 200g', 'テイクアウト', 1600, 1]]
+      .map(([name, category, price, w], i) => ({ id: 'it' + (i + 1), name, category, price, w }));
+    // 購買履歴（直近45日）：会員の購入（1件ずつ）＋ 商品ごとの1日分の集計。
+    // この45日は「売上の合計＝明細の合計」になるように、売上の金額を明細から決める（矛盾をなくす）
+    const members = ['会員0012', '会員0035', '会員0047', '会員0101', '会員0128', '会員0150', '会員0203'];
+    const sumW = U.sum(items, x => x.w);
+    const purchases = [];
+    for (let d = U.addDays(today, -45); d < today; d = U.addDays(d, 1)) {
+      const sale = sales.find(x => x.date === d); if (!sale) continue;
+      let total = 0;
+      for (let k = 0, n = ri(3, 8); k < n; k++) {
+        const it = items[ri(0, items.length - 1)], qty = rnd() < 0.2 ? 2 : 1;
+        purchases.push({ id: U.uid() + 'm' + k, date: d, time: U.toHHMM(ri(9 * 60, 21 * 60 + 30)), itemId: it.id, item: it.name, category: it.category, price: it.price, qty, customer: members[ri(0, members.length - 1)] });
+        total += it.price * qty;
+      }
+      const rest = Math.max(0, sale.amount - total);
+      items.forEach((it, k) => {
+        const qty = Math.max(0, Math.round(rest * it.w / sumW / it.price * (0.8 + rnd() * 0.4)));
+        if (!qty) return;
+        purchases.push({ id: U.uid() + 'a' + k, date: d, time: '', itemId: it.id, item: it.name, category: it.category, price: it.price, qty, customer: '' });
+        total += it.price * qty;
+      });
+      sale.amount = total;                                   // 明細の合計とそろえる
+      sale.customers = Math.max(1, Math.round(total / ri(1350, 1650)));
+    }
+    items.forEach(x => delete x.w);
+
+    const iso = (d, t) => `${d}T${t}:00`;
+    const posts = [
+      { id: 'p1', title: '年末年始の営業時間について', body: '12/31は17時閉店、1/1〜1/3は休業です。\n12月後半のシフト希望は12/10までに提出してください。', important: true, pinned: true, createdAt: iso(U.addDays(today, -3), '10:00') },
+      { id: 'p2', title: '新メニュー試食会', body: '来週の水曜15時から、冬の新メニューの試食会をします。参加できる人はリアクションで教えてください。', important: false, pinned: false, createdAt: iso(U.addDays(today, -1), '18:30') },
+      { id: 'p3', title: '打刻忘れに気をつけてください', body: '退勤の打刻忘れが続いています。帰る前に従業員ページの「退勤」を押したか確認をお願いします。', important: false, pinned: false, createdAt: iso(U.addDays(today, -8), '09:15') },
+    ];
+    const reads = [], reactions = [];
+    const rr = (p, s, emoji) => { reads.push({ postId: p, staffId: s, at: iso(today, '08:00') }); if (emoji) reactions.push({ postId: p, staffId: s, emoji, at: iso(today, '08:00') }); };
+    rr('p1', 'st1', '了解'); rr('p1', 'st2', '了解'); rr('p1', 'st4', '👍'); rr('p1', 'st6');
+    rr('p2', 'st1', '🙋'); rr('p2', 'st3', '🙋'); rr('p2', 'st4', '👍');
+    ['st1', 'st2', 'st3', 'st4', 'st5', 'st6'].forEach(s => rr('p3', s, s === 'st5' ? '❤️' : '了解'));
+
+    const data = {
+      version: 1, demo: true,
+      settings: {
+        storeName: 'カフェ駅前店（見本）', employer: '株式会社〇〇（見本）', openHour: 9, closeHour: 22, step: 30, need: 2,
+        otRate: 1.25, ot60Rate: 1.5, nightRate: 1.25, weekStart: 0, payDay: 25, laborTarget: 30, adminPin: '0000',
+        empInsRate: 0.0055, empInsNote: '令和7年度 一般の事業・労働者負担（令和8年4月以降は要確認）',
+        minWage: 1226, minWagePref: '東京都', minWageNote: '令和7年10月改定の額（要確認：毎年10月ごろ改定）',
+        agreement36: true, limitMonth: 45, limitYear: 360,
+        tax: App.defaultTax(),
+        mail: { enabled: false, timing: 'unset', day: 1, fromName: 'カフェ駅前店（見本）', subject: '【{店舗名}】{年月}分 給与明細・勤怠・シフトのお知らせ', payslip: true, attendance: true, shift: true },
+      },
+      staff, shifts, requests, punches, payrolls: [], sales, items, purchases, posts, reads, reactions, auditLog: [], mailLog: [],
+    };
+    staff.forEach(s => delete s.pattern);
+    // 先々月・先月の給与は確定済みにしておく
+    [U.ymAdd(thisYm, -2), U.ymAdd(thisYm, -1)].forEach(ym => staff.forEach(st => {
+      const p = App.Pay.month(st, ym, data);
+      if (p.days) data.payrolls.push(Object.assign(p, { id: U.uid() + st.id, confirmedAt: new Date().toISOString() }));
+    }));
+    return data;
+  },
+};
+
+</script>
+<script>
+/* ---- js/payslip.js ---- */
+/* ミセカン 給与明細の表示（管理者ページ・従業員ページで共通） */
+'use strict';
+(function () {
+  const U = App.U;
+  /*
+   * 記載している主な項目：支給額と源泉徴収税額・社会保険料等の額（所得税法231条・同施行規則100条）、
+   * 計算期間・労働日数・労働時間数・時間外/深夜労働時間数・賃金と控除の内訳（賃金台帳と同じ項目：労働基準法施行規則54条）
+   */
+  App.payslipHtml = function (p, opt) {
+    opt = opt || {};
+    const row = (l, v, cls) => `<tr class="${cls || ''}"><th>${l}</th><td class="r num">${v}</td></tr>`;
+    return `<div class="slip">
+      <div class="slip-head"><div><b class="slip-title">給与明細書</b><span class="slip-ym">${U.ymLabel(p.ym)}分${opt.draft ? '（見込み・未確定）' : ''}</span></div>
+        <div class="slip-to"><b>${U.esc(p.name)}</b> 様<br><small class="muted">${U.esc(opt.employer || '')} ${U.esc(p.storeName || '')}</small></div></div>
+      <dl class="slip-meta"><div><dt>計算期間</dt><dd>${U.label(p.periodStart)}〜${U.label(p.periodEnd)}</dd></div><div><dt>支給日</dt><dd>${U.label(p.payDate)}</dd></div></dl>
+      <div class="slip-grid">
+        <table class="slip-t"><caption>勤怠</caption>${row('時給', U.yen(p.wage))}${row('労働日数', p.days + '日')}${row('労働時間数', U.hm(p.workMin))}${row('時間外労働時間数', U.hm(p.otMin))}${p.ot60Min ? row('うち月60時間超', U.hm(p.ot60Min)) : ''}${row('深夜労働時間数', U.hm(p.nightMin))}</table>
+        <table class="slip-t"><caption>支給</caption>${row('基本給（時給×労働時間）', U.yen(p.base))}${row('時間外労働手当', U.yen(p.otPay))}${row('深夜労働手当', U.yen(p.nightPay))}${row('通勤手当（非課税）', U.yen(p.transport))}${row('総支給額', U.yen(p.gross), 'total')}</table>
+        <table class="slip-t"><caption>控除</caption>${row('雇用保険料', U.yen(p.empIns))}${row('社会保険料', U.yen(p.social))}${row('所得税（源泉徴収税額）', U.yen(p.tax))}${row('控除合計', U.yen(p.deductions), 'total')}</table>
+      </div>
+      <div class="slip-net"><span>差引支給額</span><b class="num">${U.yen(p.net)}</b></div>
+      ${p.taxNote ? `<p class="notice">${U.esc(p.taxNote)}</p>` : ''}
+      <p class="slip-foot">課税支給額 ${U.yen(p.taxable)} ・ 割増：時間外25%（月60時間超は50%）・深夜25%</p>
+    </div>`;
+  };
+
+})();
+
+</script>
+<script>
+/* ---- js/admin.js ---- */
+/* ミセカン 管理画面：タブの仕組み・ホーム・掲示板・従業員名簿・設定 */
+'use strict';
+(function () {
+  const U = App.U, UI = App.UI, S = App.Store;
+  const tabs = [];
+  const Admin = App.Admin = {
+    groups: ['ホーム', '現場', '人事・給与', '売上', 'その他'],
+    register(t) { tabs.push(t); },
+    current: 'dashboard',
+    show(id) {
+      if (!tabs.some(t => t.id === id)) id = 'dashboard';
+      Admin.current = id; Admin.renderNav(); Admin.renderMain();
+    },
+    renderNav() {
+      const nav = document.getElementById('sideNav');
+      nav.innerHTML = Admin.groups.map(g => {
+        const ts = tabs.filter(t => t.group === g); if (!ts.length) return '';
+        return `<div class="nav-group"><div class="nav-title">${g}</div>${ts.map(t => {
+          const b = t.badge ? t.badge() : 0;
+          return `<a href="#${t.id}" class="nav-item${t.id === Admin.current ? ' on' : ''}" aria-current="${t.id === Admin.current ? 'page' : 'false'}">${t.label}${b ? `<span class="badge">${b}</span>` : ''}</a>`;
+        }).join('')}</div>`;
+      }).join('');
+      document.getElementById('storeName').textContent = S.get().settings.storeName;
+    },
+    renderMain() {
+      const t = tabs.find(x => x.id === Admin.current);
+      const main = document.getElementById('adminMain');
+      main.innerHTML = '';
+      main.append(UI.el(`<div class="page-head"><h1>${t.label}</h1>${t.lead ? `<p class="lead">${t.lead}</p>` : ''}</div>`));
+      const src = Admin.SOURCES[t.id];
+      if (src) {
+        const bar = UI.el(`<div class="sources" aria-label="このページのデータの出どころ"><span class="sources-title">データの出どころ</span>${src.map(([to, what, who]) =>
+          to === 'self' ? `<button type="button" class="src-chip self" data-jump>${what}<small>${who}</small><span aria-hidden="true">↓</span></button>`
+          : to === 'staffpage' ? `<span class="src-chip staffp">${what}<small>${who}</small></span>`
+          : `<a class="src-chip" href="#${to}">${what}<small>${who}</small><span aria-hidden="true">→</span></a>`).join('')}</div>`);
+        bar.querySelectorAll('[data-jump]').forEach(btn => { btn.onclick = () => { const f = main.querySelector('[data-input]'); if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); const i = f.querySelector('input:not([type=checkbox]),select,textarea,button'); if (i) setTimeout(() => i.focus({ preventScroll: true }), 300); } }; });
+        main.append(bar);
+      }
+      t.render(main);
+    },
+    refresh() { Admin.renderNav(); Admin.renderMain(); },
+  };
+  /* 各タブの数字が、どこで入力したデータから来ているか。
+   * [行き先のタブ, データの名前, 誰が入力するか]。行き先 'self' はこのページの入力欄、'staffpage' は従業員ページ */
+  Admin.SOURCES = {
+    dashboard: [['sales', '売上', '管理者が「毎日の売上」で入力'], ['attendance', '出勤・打刻', '従業員が打刻／管理者が修正'], ['shift', 'シフト', '管理者が「シフト」で作成'], ['staff', '時給', '管理者が「従業員名簿」で入力'], ['board', 'お知らせ', '管理者が「掲示板」で入力']],
+    legal: [['attendance', '打刻', '従業員が打刻／管理者が修正'], ['staff', '名簿・時給・生年月日', '管理者が入力'], ['config', '最低賃金・36協定・税', '管理者が「設定」で入力']],
+    board: [['self', 'お知らせ', 'このページで管理者が書く・直す'], ['staffpage', '既読・リアクション', '従業員ページで本人が押す']],
+    shift: [['self', 'シフト', 'このページで管理者が作成・変更'], ['staffpage', 'シフト希望', '従業員ページで本人が提出']],
+    attendance: [['staffpage', '打刻', '従業員ページで本人が押す'], ['self', '打刻の手入力・修正', 'このページで管理者が入力（理由が必須）']],
+    staff: [['self', '従業員の情報・時給・保険・税・連絡先', 'このページで管理者が入力']],
+    payroll: [['attendance', '労働時間', '打刻から計算'], ['staff', '時給・交通費・保険・扶養', '従業員名簿'], ['config', '割増率・保険料率・税', '設定']],
+    payslip: [['payroll', '確定した給与', '「給与計算」で確定したもの']],
+    ledger: [['payroll', '確定した給与', '「給与計算」で確定したもの'], ['staff', '性別・業務', '従業員名簿']],
+    tax: [['payroll', '確定した給与', '「給与計算」で確定したもの'], ['staff', '税区分・扶養', '従業員名簿']],
+    mail: [['self', '送信の設定', 'このページで管理者が入力'], ['staff', 'メールアドレス・同意', '従業員名簿'], ['payroll', '給与明細', '確定した給与'], ['attendance', '勤怠', '打刻'], ['shift', 'シフト', '確定したシフト']],
+    sales: [['self', '売上（レジ締めの合計・客数）', 'このページで管理者が入力'], ['purchases', '商品ごとの明細', '「購買履歴」で入力']],
+    purchases: [['self', '商品ごとの販売記録・商品マスタ', 'このページで管理者が入力'], ['sales', '売上の合計', '「毎日の売上」で入力']],
+    config: [['self', '店舗・計算・法令の数値', 'このページで管理者が入力']],
+  };
+
+  App.bus.on(kind => {
+    if (!document.getElementById('adminMain')) return;
+    Admin.renderNav();
+    // 従業員ページでの打刻・希望などを反映。入力中・確認画面を開いているときは書き換えない
+    const busy = document.querySelector('.modal-back') || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName));
+    if (kind === 'external' && !busy) Admin.renderMain();
+  });
+
+  /* 打刻の状態 */
+  Admin.punchState = function (p, shift, date) {
+    const now = U.toMin(U.nowHHMM());
+    if (p && p.out) return ['退勤済み', 'chip'];
+    if (p && p.breakStart) return ['休憩中', 'chip warn'];
+    if (p && p.in) return [shift && U.toMin(p.in) > U.toMin(shift.start) ? '出勤中（遅刻）' : '出勤中', shift && U.toMin(p.in) > U.toMin(shift.start) ? 'chip warn' : 'chip good'];
+    if (shift && date === U.today() && now > U.toMin(shift.start)) return ['未出勤', 'chip bad'];
+    if (shift && date < U.today()) return ['打刻なし', 'chip bad'];
+    return ['出勤前', 'chip'];
+  };
+
+  /* ================= ホーム ================= */
+  Admin.register({
+    id: 'dashboard', label: 'ホーム', group: 'ホーム', lead: '今日の店の状況をひと目で確認します。',
+    render(main) {
+      const d = S.get(), today = U.today(), ym = U.ym(today), yest = U.addDays(today, -1);
+      const salesM = U.sum(d.sales.filter(s => s.date.startsWith(ym)), s => s.amount);
+      const lastYm = U.ymAdd(ym, -12);
+      const dayN = +yest.slice(8, 10);
+      const salesLY = U.sum(d.sales.filter(s => s.date.startsWith(lastYm) && +s.date.slice(8, 10) <= dayN), s => s.amount);
+      const ySales = d.sales.find(s => s.date === yest);
+      const labor = U.sum(d.staff.filter(s => s.active), st => App.Pay.month(st, ym, d).gross);
+      const ratio = salesM ? labor / salesM * 100 : 0;
+      const todayShifts = d.shifts.filter(s => s.date === today).sort((a, b) => U.toMin(a.start) - U.toMin(b.start));
+      const working = d.punches.filter(p => p.date === today && p.in && !p.out).length;
+      const pending = d.requests.filter(r => r.status === 'pending').length;
+      const diff = salesLY ? (salesM / salesLY - 1) * 100 : 0;
+
+      main.append(UI.el(`<section class="tiles">
+        <div class="tile"><span class="tile-label">昨日の売上</span><b class="tile-num">${ySales ? U.yen(ySales.amount) : '未入力'}</b><span class="tile-sub">${ySales ? `客数 ${ySales.customers}人 ・ 客単価 ${U.yen(ySales.amount / Math.max(1, ySales.customers))}` : '<span class="chip warn">まだ入力されていません</span>'}</span><a class="src-link" href="#sales">入力：毎日の売上 →</a></div>
+        <div class="tile"><span class="tile-label">今月の売上（${+ym.slice(5)}/1〜昨日）</span><b class="tile-num">${U.yen(salesM)}</b><span class="tile-sub"><span class="chip ${diff >= 0 ? 'good' : 'bad'}">${diff >= 0 ? '▲' : '▼'} ${Math.abs(diff).toFixed(1)}%</span> 前年同期比</span><a class="src-link" href="#sales">入力：毎日の売上 →</a></div>
+        <div class="tile"><span class="tile-label">今月の人件費（見込み）</span><b class="tile-num">${U.yen(labor)}</b><span class="tile-sub"><span class="chip ${ratio <= d.settings.laborTarget ? 'good' : 'warn'}">人件費率 ${ratio.toFixed(1)}%</span> 目標 ${d.settings.laborTarget}%</span><a class="src-link" href="#attendance">打刻×時給（勤怠・従業員名簿）→</a></div>
+        <div class="tile"><span class="tile-label">今日の出勤</span><b class="tile-num">${todayShifts.length}人<small> / 出勤中 ${working}人</small></b><span class="tile-sub">${pending ? `<a href="#shift" class="chip warn">シフト希望 ${pending}件が未承認</a>` : '未承認のシフト希望はありません'}</span><a class="src-link" href="#shift">シフト・打刻 →</a></div>
+      </section>`));
+
+      if (App.Legal) {
+        const iss = App.Legal.issues(d), bad = iss.filter(i => i.level === 'bad'), warn = iss.filter(i => i.level === 'warn');
+        main.append(UI.el(`<section class="card legal-sum ${bad.length ? 'has-bad' : ''}"><div class="card-head"><h2>法令チェック</h2><a class="btn sm" href="#legal">すべて見る</a></div>
+          ${bad.length + warn.length ? `<ul class="issues compact">${[...bad, ...warn].slice(0, 3).map(i => `<li class="issue ${i.level}"><span class="chip ${i.level}">${i.level === 'bad' ? 'すぐ対応' : '確認'}</span><div><b>${U.esc(i.title)}</b><small class="muted">${U.esc(i.law)}</small></div></li>`).join('')}</ul>${bad.length + warn.length > 3 ? `<p class="muted small">ほか ${bad.length + warn.length - 3} 件</p>` : ''}` : '<p class="muted">すぐ対応が必要なこと・確認が必要なことは見つかっていません（数値の確認のお知らせは「法令チェック」に出ています）。</p>'}</section>`));
+      }
+      const grid = UI.el(`<div class="grid-2"></div>`);
+      const now = UI.el(`<section class="card"><h2>今日の出勤状況 <small class="muted">${U.label(today)}</small></h2><div class="scroll"><table class="tbl"><thead><tr><th>名前</th><th>シフト</th><th>出勤</th><th>退勤</th><th>状態</th></tr></thead><tbody>${todayShifts.map(s => {
+        const st = S.staff(s.staffId) || { name: '(削除済み)', color: '#888' };
+        const p = d.punches.find(x => x.staffId === s.staffId && x.date === today);
+        const [lab, cls] = Admin.punchState(p, s, today);
+        return `<tr><td><i class="dot" style="background:${st.color}"></i>${U.esc(st.name)}</td><td class="mono">${U.short(s.start)}-${U.short(s.end)}</td><td class="mono">${p && p.in ? p.in : '−'}</td><td class="mono">${p && p.out ? p.out : '−'}</td><td><span class="${cls}">${lab}</span></td></tr>`;
+      }).join('') || '<tr><td colspan="5" class="muted">今日のシフトはありません</td></tr>'}</tbody></table></div></section>`);
+      grid.append(now);
+
+      const board = UI.el(`<section class="card"><h2>掲示板の既読</h2><ul class="plain">${d.posts.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 4).map(p => {
+        const n = d.staff.filter(s => s.active).length, r = d.reads.filter(x => x.postId === p.id && S.staff(x.staffId)?.active).length;
+        return `<li><a href="#board">${U.esc(p.title)}</a><span class="meter"><i style="width:${n ? r / n * 100 : 0}%"></i></span><span class="mono">${r}/${n}</span></li>`;
+      }).join('')}</ul></section>`);
+      grid.append(board);
+      main.append(grid);
+
+      const months = []; for (let i = 11; i >= 0; i--) months.push(U.ymAdd(ym, -i));
+      const card = UI.el(`<section class="card"><h2>月別の売上 <small class="muted">直近12か月・今月は昨日まで</small></h2></section>`);
+      card.append(App.Chart.bars(months.map(m => ({ label: `${+m.slice(5)}月`, tip: U.ymLabel(m), value: U.sum(d.sales.filter(s => s.date.startsWith(m)), s => s.amount) })),
+        { fmt: U.yen, fmtAxis: v => (v / 10000).toLocaleString('ja-JP') + '万', label: '月別の売上' }));
+      main.append(card);
+    },
+  });
+
+  /* ================= 掲示板 ================= */
+  Admin.register({
+    id: 'board', label: '掲示板', group: '現場', lead: 'お知らせを書くと、従業員ページに届きます。誰が読んだか・リアクションも確認できます。',
+    badge() { const d = S.get(); const n = d.staff.filter(s => s.active); return d.posts.filter(p => p.important && n.some(s => !d.reads.some(r => r.postId === p.id && r.staffId === s.id))).length; },
+    render(main) {
+      const d = S.get();
+      const form = UI.el(`<section class="card input-card" data-input><h2>お知らせを書く</h2>
+        <form class="form" id="postForm">
+          <label class="field wide">タイトル<input id="pTitle" required maxlength="60" placeholder="例：12月のシフト提出のお願い"></label>
+          <label class="field wide">本文<textarea id="pBody" rows="4" required placeholder="従業員に伝えたいことを書きます"></textarea></label>
+          <label class="check"><input type="checkbox" id="pImp"> 重要（未読の人をホームで知らせる）</label>
+          <label class="check"><input type="checkbox" id="pPin"> 一番上に固定</label>
+          <button class="btn primary">投稿する</button>
+        </form></section>`);
+      form.querySelector('form').onsubmit = e => {
+        e.preventDefault();
+        d.posts.push({ id: U.uid(), title: form.querySelector('#pTitle').value.trim(), body: form.querySelector('#pBody').value.trim(), important: form.querySelector('#pImp').checked, pinned: form.querySelector('#pPin').checked, createdAt: new Date().toISOString().slice(0, 19) });
+        S.save(); UI.toast('投稿しました'); Admin.refresh();
+      };
+      main.append(form);
+
+      const active = d.staff.filter(s => s.active);
+      d.posts.slice().sort((a, b) => (b.pinned - a.pinned) || b.createdAt.localeCompare(a.createdAt)).forEach(p => {
+        const readers = active.filter(s => d.reads.some(r => r.postId === p.id && r.staffId === s.id));
+        const unread = active.filter(s => !readers.includes(s));
+        const rs = d.reactions.filter(r => r.postId === p.id);
+        const byEmoji = {}; rs.forEach(r => { (byEmoji[r.emoji] = byEmoji[r.emoji] || []).push(S.staff(r.staffId)?.name || '?'); });
+        const card = UI.el(`<article class="card post">
+          <div class="post-head"><h3>${p.pinned ? '<span class="chip">固定</span> ' : ''}${p.important ? '<span class="chip bad">重要</span> ' : ''}${U.esc(p.title)}</h3><span class="muted num">${p.createdAt.slice(0, 16).replace('T', ' ')}${p.editedAt ? '（編集済み）' : ''}</span></div>
+          <p class="post-body">${U.esc(p.body)}</p>
+          <div class="post-stats">
+            <div><b>既読 ${readers.length}/${active.length}</b><span class="meter"><i style="width:${active.length ? readers.length / active.length * 100 : 0}%"></i></span></div>
+            <div class="reacts">${Object.entries(byEmoji).map(([e, names]) => `<span class="react" title="${U.esc(names.join('、'))}">${U.esc(e)} ${names.length}<small>${U.esc(names.map(n => n.split(' ')[0]).join('・'))}</small></span>`).join('') || '<span class="muted">リアクションはまだありません</span>'}</div>
+          </div>
+          <details><summary>読んだ人・まだの人</summary><div class="who">
+            <div><b>読んだ人</b> ${readers.map(s => `<span class="chip good">${U.esc(s.name)}</span>`).join('') || '<span class="muted">なし</span>'}</div>
+            <div><b>まだの人</b> ${unread.map(s => `<span class="chip bad">${U.esc(s.name)}</span>`).join('') || '<span class="muted">全員読みました</span>'}</div></div></details>
+          <div class="row-end"><button class="btn sm" data-edit>編集</button><button class="btn sm" data-pin>${p.pinned ? '固定をはずす' : '一番上に固定'}</button><button class="btn sm danger" data-del>削除</button></div>
+        </article>`);
+        card.querySelector('[data-pin]').onclick = () => { p.pinned = !p.pinned; S.save(); Admin.refresh(); };
+        card.querySelector('[data-edit]').onclick = () => UI.modal('お知らせを編集', `<form class="form one">
+            <label class="field">タイトル<input id="e_t" value="${U.esc(p.title)}" maxlength="60"></label>
+            <label class="field">本文<textarea id="e_b" rows="5">${U.esc(p.body)}</textarea></label>
+            <label class="check"><input type="checkbox" id="e_i" ${p.important ? 'checked' : ''}> 重要</label>
+            <p class="muted small">すでに読んだ人の既読はそのまま残ります。大事な変更のときは、新しいお知らせとして出し直すと全員にもう一度読んでもらえます。</p><p class="err" id="e_err"></p></form>`,
+          [{ label: 'やめる' }, { label: '保存する', kind: 'primary', onClick: w => {
+            const t = w.querySelector('#e_t').value.trim(), bd = w.querySelector('#e_b').value.trim();
+            if (!t || !bd) { w.querySelector('#e_err').textContent = 'タイトルと本文を入れてください。'; return false; }
+            p.title = t; p.body = bd; p.important = w.querySelector('#e_i').checked; p.editedAt = new Date().toISOString().slice(0, 16);
+            S.save(); UI.toast('お知らせを直しました'); Admin.refresh();
+          } }]);
+        card.querySelector('[data-del]').onclick = async () => {
+          if (!await UI.confirm(`「${p.title}」を削除します。既読とリアクションも消えます。`, '削除する', true)) return;
+          d.posts = d.posts.filter(x => x !== p); d.reads = d.reads.filter(x => x.postId !== p.id); d.reactions = d.reactions.filter(x => x.postId !== p.id);
+          S.save(); Admin.refresh();
+        };
+        main.append(card);
+      });
+    },
+  });
+
+  /* ================= 従業員名簿（労働者名簿） ================= */
+  // 労働基準法107条・施行規則53条で記入が決まっている項目には「法定」の印を付けます
+  const SECTIONS = [
+    ['基本', [
+      ['code', '従業員番号', 'text'], ['name', '氏名', 'text', 'law', true], ['kana', 'ふりがな', 'text'],
+      ['gender', '性別', 'select:女性,男性,その他', 'law'], ['birth', '生年月日', 'date', 'law'],
+      ['address', '住所', 'text', 'law'], ['phone', '電話番号', 'tel'],
+    ]],
+    ['雇用', [
+      ['hireDate', '雇入れ年月日', 'date', 'law'], ['job', '従事する業務の種類', 'text', 'law'],
+      ['role', '役割', 'text'], ['history', '履歴（前職・資格など）', 'text', 'law'],
+    ]],
+    ['給与・保険・税', [
+      ['wage', '時給（円）', 'number', '', true], ['transport', '交通費（1日・円）', 'number'],
+      ['dependents', '扶養人数', 'number'], ['socialIns', '社会保険料（月額・手入力）', 'number'],
+      ['taxCol', '税額表の区分', 'select:甲,乙'],
+    ]],
+    ['従業員ページ・メール', [
+      ['pin', '従業員ページの暗証番号（4桁）', 'text', '', true], ['email', 'メールアドレス', 'email'],
+      ['consentDate', '電子交付に同意した日', 'date'],
+    ]],
+    ['退職・死亡（該当するときだけ）', [
+      ['retireDate', '退職年月日', 'date', 'law'], ['retireReason', '退職の事由（解雇の場合はその理由）', 'text', 'law'],
+      ['deathDate', '死亡年月日', 'date', 'law'], ['deathCause', '死亡の原因', 'text', 'law'],
+    ]],
+  ];
+  const ALL = SECTIONS.flatMap(s => s[1]);
+  function inputHtml([k, l, t, law, req], st) {
+    const lab = `${l}${law ? ' <span class="law-tag">法定</span>' : ''}${req ? ' <span class="req">必須</span>' : ''}`;
+    if (t.startsWith('select:')) return `<label class="field">${lab}<select id="f_${k}">${U.options([...(k === 'gender' ? [['', '（未記入）']] : []), ...t.slice(7).split(',').map(x => [x, x])], st[k] || '')}</select></label>`;
+    return `<label class="field">${lab}<input id="f_${k}" type="${t}" value="${U.esc(st[k] ?? '')}"${t === 'number' ? ' min="0" step="1"' : ''}${k === 'pin' ? ' inputmode="numeric" maxlength="4"' : ''}></label>`;
+  }
+  function staffForm(st, isNew) {
+    const s = S.get().settings;
+    const html = `<p class="err form-err" id="f_err" role="alert"></p><p class="muted small"><span class="req">必須</span> の3つ（氏名・時給・暗証番号）を入れれば登録できます。<span class="law-tag">法定</span> の項目は労働者名簿に必要なので、わかりしだい入れてください（未記入は「法令チェック」に出ます）。</p><form class="form" novalidate>${SECTIONS.map(([title, fs]) => `<h4 class="wide form-sec">${title}</h4>${fs.map(f => inputHtml(f, st)).join('')}${title === '給与・保険・税' ? `
+      <label class="check wide"><input type="checkbox" id="f_empIns" ${st.empIns ? 'checked' : ''}> 雇用保険に加入（週20時間以上・31日以上の雇用見込み）</label>
+      <p class="wide small muted">最低賃金（${U.esc(s.minWagePref)}）：${U.yen(s.minWage)}。これより低い時給は保存できません（最低賃金法4条）。</p>` : ''}${title === '従業員ページ・メール' ? `
+      <label class="check wide"><input type="checkbox" id="f_consent" ${st.consent ? 'checked' : ''}> 給与明細をメール（電子）で受け取ることに本人が同意している</label>
+      <p class="wide small muted">給与明細を電子で渡すには、本人の承諾が必要です（所得税法231条2項・同施行令356条）。同意がない人には紙で渡してください。</p>` : ''}`).join('')}
+      <label class="field">表示の色<input id="f_color" type="color" value="${st.color}"></label>
+      <label class="check"><input type="checkbox" id="f_active" ${st.active ? 'checked' : ''}> 在籍中</label>
+      <label class="field wide">メモ（管理者だけが見られます）<textarea id="f_note" rows="2">${U.esc(st.note)}</textarea></label></form>`;
+    UI.modal(isNew ? '従業員を追加' : `${st.name} さんの情報`, html, [
+      { label: 'やめる' },
+      { label: '保存する', kind: 'primary', onClick: w => {
+        const v = id => w.querySelector('#f_' + id), err = w.querySelector('#f_err');
+        w.querySelectorAll('.bad-input').forEach(x => x.classList.remove('bad-input'));
+        const fail = (msg, id) => { err.textContent = msg; if (id) { v(id).classList.add('bad-input'); v(id).focus({ preventScroll: true }); } w.querySelector('.modal-body').scrollTop = 0; return false; };
+        const name = v('name').value.trim(), wage = Number(v('wage').value || 0), pin = v('pin').value.trim(), email = v('email').value.trim();
+        if (!name) return fail('氏名を入れてください。', 'name');
+        if (S.get().staff.some(x => x.name === name && x.id !== st.id)) return fail('同じ氏名の人がいます。従業員ページのログインで区別できるよう、名前の書き方を変えてください（例：山田 花子（夜））。', 'name');
+        if (!wage) return fail('時給を入れてください。', 'wage');
+        if (wage < s.minWage) return fail(`時給が最低賃金（${s.minWagePref} ${U.yen(s.minWage)}）より低くなっています（最低賃金法4条）。`, 'wage');
+        if (!/^[0-9]{4}$/.test(pin)) return fail('暗証番号は数字4桁で入れてください。', 'pin');
+        if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail('メールアドレスの形が正しくありません。', 'email');
+        if (v('consent').checked && !email) return fail('電子交付に同意している場合は、メールアドレスを入れてください。', 'email');
+        if (v('consent').checked && !v('consentDate').value) return fail('同意した日を入れてください（同意の記録として残します）。', 'consentDate');
+        if (!v('active').checked && !v('retireDate').value && !v('deathDate').value) return fail('在籍中を外すときは、退職年月日を入れてください（労働者名簿の記入事項）。', 'retireDate');
+        const before = JSON.stringify({ wage: st.wage, active: st.active });
+        ALL.forEach(([k, , t]) => { st[k] = t === 'number' ? Number(v(k).value || 0) : v(k).value.trim(); });
+        st.color = v('color').value; st.empIns = v('empIns').checked; st.active = v('active').checked; st.note = v('note').value; st.consent = v('consent').checked;
+        const d = S.get(); if (isNew) d.staff.push(st);
+        S.log('管理者', isNew ? '従業員を追加' : '従業員情報を変更', st.name, isNew ? '' : `変更前 ${before}`);
+        S.save();
+        const miss = ALL.filter(f => f[3] === 'law' && ['gender', 'birth', 'address', 'hireDate'].includes(f[0]) && !st[f[0]]).map(f => f[1]);
+        UI.toast(`${isNew ? '登録' : '保存'}しました${miss.length ? `（労働者名簿の未記入：${miss.join('・')}）` : ''}`); Admin.refresh();
+      } },
+    ]);
+  }
+  Admin.register({
+    id: 'staff', label: '従業員名簿', group: '人事・給与', lead: '労働者名簿（労働基準法107条）を兼ねています。行を押すと編集できます。退職した人も記録の保存期間中は削除せず「退職」として残します。',
+    render(main) {
+      const d = S.get(), s = d.settings;
+      const bar = UI.el(`<div class="toolbar input-bar" data-input><button class="btn primary">＋ 従業員を追加</button><span class="muted">在籍 ${d.staff.filter(x => x.active).length}人 ・ 退職 ${d.staff.filter(x => !x.active).length}人</span></div>`);
+      bar.querySelector('button').onclick = () => staffForm({ id: 'st' + U.uid(), code: 'S' + String(d.staff.length + 1).padStart(3, '0'), name: '', kana: '', gender: '', birth: '', address: '', phone: '', hireDate: U.today(), job: '接客・調理補助', role: 'アルバイト', history: '', wage: Math.max(s.minWage, 1230), transport: 0, dependents: 0, socialIns: 0, taxCol: '甲', empIns: false, pin: String(1000 + Math.floor(Math.random() * 9000)), email: '', consent: false, consentDate: '', retireDate: '', retireReason: '', deathDate: '', deathCause: '', active: true, note: '', color: '#c2185b' }, true);
+      main.append(bar);
+      const missing = st => ALL.filter(f => ['name', 'gender', 'birth', 'address', 'hireDate'].includes(f[0]) && !st[f[0]]).map(f => f[1]);
+      const card = UI.el(`<section class="card"><div class="scroll"><table class="tbl hover"><thead><tr><th>番号</th><th>氏名</th><th>性別</th><th>雇入れ日</th><th>業務</th><th class="r">時給</th><th>雇用保険</th><th>税区分</th><th>メール・電子交付</th><th>名簿の記入</th><th>状態</th></tr></thead><tbody>${d.staff.map(x => {
+        const miss = missing(x);
+        return `<tr data-id="${x.id}" tabindex="0">
+        <td class="num">${U.esc(x.code)}</td><td><i class="dot" style="background:${x.color}"></i><b>${U.esc(x.name)}</b><br><small class="muted">${U.esc(x.kana)}</small></td><td>${U.esc(x.gender)}</td><td class="num">${U.esc(x.hireDate)}</td><td>${U.esc(x.job)}</td>
+        <td class="r num">${U.yen(x.wage)}${x.wage < s.minWage ? '<br><span class="chip bad">最低賃金未満</span>' : ''}</td><td>${x.empIns ? '<span class="chip good">加入</span>' : '<span class="chip">なし</span>'}</td><td>${x.taxCol}欄</td>
+        <td>${x.email ? (x.consent ? '<span class="chip good">同意あり</span>' : '<span class="chip warn">同意なし（紙で交付）</span>') : '<span class="chip">未登録</span>'}</td>
+        <td>${miss.length ? `<span class="chip bad" title="${U.esc(miss.join('、'))}">未記入 ${miss.length}項目</span>` : '<span class="chip good">そろっています</span>'}</td>
+        <td>${x.active ? '<span class="chip good">在籍</span>' : `<span class="chip">退職 ${U.esc(x.retireDate)}</span>`}</td></tr>`;
+      }).join('')}</tbody></table></div>
+      <p class="muted small">労働者名簿は、退職・死亡の日から5年間（当分の間は3年間）保存する義務があります（労働基準法109条・143条）。生年月日・住所・メールアドレスなどの個人情報は管理者ページだけに表示し、従業員ページには氏名だけを出します。</p></section>`);
+      card.querySelectorAll('tr[data-id]').forEach(tr => {
+        const open = () => staffForm(S.staff(tr.dataset.id), false);
+        tr.onclick = open; tr.onkeydown = e => { if (e.key === 'Enter') open(); };
+      });
+      main.append(card);
+    },
+  });
+
+  /* ================= 設定 ================= */
+  Admin.register({
+    id: 'config', label: '設定・データ', group: 'その他', lead: '店舗の情報、法令に関わる数値（最低賃金・割増率・保険料率・税）、管理者の暗証番号、データのバックアップを扱います。',
+    render(main) {
+      const d = S.get(), s = d.settings, t = s.tax;
+      const tbl = a => a.map(r => [r[0] === Infinity ? null : r[0], r[1], r[2]]);
+      const SEC = [
+        ['データの保存場所', 'この端末のブラウザの中だけ。入力したデータはインターネットには送っていません（文字の形＝フォントだけGoogleから読み込みます）。', 'クラウドのサーバーに保存し、通信はすべて暗号化（HTTPS）'],
+        ['管理者ページの鍵', '暗証番号。5回続けて間違えると5分ロック。15分操作がないと自動でロック。', 'メールアドレス＋パスワード＋2段階認証'],
+        ['従業員のログイン', '名前＋4桁の暗証番号。5回続けて間違えると5分ロック。10分操作がないと自動でログアウト。', '1人ずつのアカウント（メールやLINEでのログイン）'],
+        ['本人以外のデータ', '従業員ページの画面には出しません。ただし同じブラウザの中に全員分のデータがあり、パソコンに詳しい人なら開発者ツールで見られます。', 'サーバーが本人の分だけを送る（データベースの権限設定）'],
+        ['暗証番号の保存', '暗号化せずに保存しています。', '元に戻せない形（ハッシュ）にして保存'],
+        ['バックアップ', '下の「バックアップ」の文字には個人情報がすべて入っています。メールやLINEで送らないでください。', '暗号化した自動バックアップ'],
+        ['操作の記録', '打刻の修正・給与の確定・設定の変更などを記録しています。', 'すべての閲覧と変更を記録'],
+        ['確認用のリンク', '誰が開けるかは、ページの「共有」メニューの設定で決まります（非公開にすると、あなただけが開けます）。開いた人ごとにデータは別々で、ほかの人が入力した内容は見えません。', '本番用の専用アドレスと利用者の管理'],
+      ];
+      main.append(UI.el(`<section class="card sec-card"><h2>セキュリティ（試作版の今の状態）</h2>
+        <p class="notice">結論：データはどこにも送っていないので、インターネットに漏れる作りではありません。ただし、本物の個人情報を入れて使えるほどの守りはまだありません。<b>試作版には本物の従業員の住所・生年月日・メールアドレスなどを入れないでください。</b></p>
+        <div class="scroll"><table class="tbl"><thead><tr><th>項目</th><th>試作版（今）</th><th>本番で必要な対策</th></tr></thead><tbody>${SEC.map(([k, now, prod]) => `<tr><th class="nowrap">${k}</th><td>${now}</td><td>${prod}</td></tr>`).join('')}</tbody></table></div></section>`));
+      const card = UI.el(`<section class="card input-card" data-input><h2>店舗と計算の設定</h2><form class="form" id="cfg">
+        <label class="field wide">店舗名<input id="c_storeName" value="${U.esc(s.storeName)}" required></label>
+        <label class="field wide">事業者名（給与明細・源泉徴収票に表示）<input id="c_employer" value="${U.esc(s.employer)}" required></label>
+        <label class="field">営業開始（時）<input id="c_openHour" type="number" min="0" max="23" value="${s.openHour}"></label>
+        <label class="field">営業終了（時）<input id="c_closeHour" type="number" min="1" max="29" value="${s.closeHour}"></label>
+        <label class="field">シフトの刻み（分）<select id="c_step">${U.options([['15', '15分'], ['30', '30分'], ['60', '60分']], String(s.step))}</select></label>
+        <label class="field">必要人数（初期値）<input id="c_need" type="number" min="0" value="${s.need}"></label>
+        <label class="field">給料日（毎月・月末締め）<input id="c_payDay" type="number" min="1" max="31" value="${s.payDay}"></label>
+        <label class="field">人件費率の目標（%）<input id="c_laborTarget" type="number" min="0" max="100" value="${s.laborTarget}"></label>
+        <label class="field">管理者ページの暗証番号<input id="c_adminPin" value="${U.esc(s.adminPin)}" pattern="[0-9]{4,8}" inputmode="numeric" title="数字4〜8桁"></label>
+
+        <h3 class="wide form-sec">労働時間・割増賃金（労働基準法32条・37条）</h3>
+        <label class="field">週の始まり（週40時間の数え方）<select id="c_weekStart">${U.options([['0', '日曜日'], ['1', '月曜日'], ['6', '土曜日']], String(s.weekStart))}</select></label>
+        <label class="field">時間外の割増率（25%以上）<input id="c_otRate" type="number" step="0.01" min="1.25" value="${s.otRate}"></label>
+        <label class="field">月60時間超の割増率（50%以上）<input id="c_ot60Rate" type="number" step="0.01" min="1.5" value="${s.ot60Rate}"></label>
+        <label class="field">深夜（22〜5時）の割増率（25%以上）<input id="c_nightRate" type="number" step="0.01" min="1.25" value="${s.nightRate}"></label>
+        <label class="check wide"><input type="checkbox" id="c_agreement36" ${s.agreement36 ? 'checked' : ''}> 36協定（時間外・休日労働に関する協定）を労働基準監督署に届け出ている</label>
+        <label class="field">36協定：月の上限（時間）<input id="c_limitMonth" type="number" min="0" max="45" value="${s.limitMonth}"></label>
+        <label class="field">36協定：年の上限（時間）<input id="c_limitYear" type="number" min="0" max="360" value="${s.limitYear}"></label>
+
+        <h3 class="wide form-sec">最低賃金・雇用保険</h3>
+        <label class="field">最低賃金の都道府県<input id="c_minWagePref" value="${U.esc(s.minWagePref)}"></label>
+        <label class="field">地域別最低賃金（時間額・円）<input id="c_minWage" type="number" min="0" value="${s.minWage}"></label>
+        <label class="field wide">最低賃金のメモ<input id="c_minWageNote" value="${U.esc(s.minWageNote)}"></label>
+        <label class="field">雇用保険料率（労働者負担）<input id="c_empInsRate" type="number" step="0.0001" min="0" value="${s.empInsRate}"></label>
+        <label class="field wide">雇用保険料率のメモ<input id="c_empInsNote" value="${U.esc(s.empInsNote)}"></label>
+
+        <h3 class="wide form-sec">源泉所得税（月額表・電算機計算の特例）</h3>
+        <p class="wide notice">今の数値：${U.esc(t.version)}。令和8年分（2026年1月以降の支払い）から税額表が改正されています。本番で使う前に、国税庁の最新の「源泉徴収税額表」で必ず確認してください。</p>
+        <label class="field">甲欄：この金額未満は0円<input id="t_zeroBelow" type="number" value="${t.zeroBelow}"></label>
+        <label class="field">基礎控除（月額）<input id="t_kiso" type="number" value="${t.kiso}"></label>
+        <label class="field">扶養1人あたりの控除（月額）<input id="t_fuyo" type="number" value="${t.fuyo}"></label>
+        <label class="field">乙欄：一律の率<input id="t_otsuRate" type="number" step="0.00001" value="${t.otsuRate}"></label>
+        <details class="wide"><summary>詳しい人向け：給与所得控除・税率の表を直接直す</summary><label class="field">表のデータ（上限がない行は null と書きます）<textarea id="t_tables" rows="5" class="mono">${U.esc(JSON.stringify({ kyuyo: tbl(t.kyuyo), brackets: tbl(t.brackets) }))}</textarea></label></details>
+        <p class="wide err" id="c_err" role="alert"></p>
+        <div class="wide row-end"><button type="button" class="btn" id="taxReset">税の数値を初期値に戻す</button><button class="btn primary">設定を保存</button></div>
+      </form></section>`);
+      card.querySelector('form').onsubmit = e => {
+        e.preventDefault();
+        const v = id => card.querySelector('#' + id).value, err = card.querySelector('#c_err');
+        let tb; try { tb = JSON.parse(v('t_tables')); if (!Array.isArray(tb.kyuyo) || !Array.isArray(tb.brackets)) throw 0; } catch (x) { err.textContent = '税の表の書き方が正しくありません。JSONの形を確認してください。'; return; }
+        if (Number(v('c_otRate')) < 1.25 || Number(v('c_nightRate')) < 1.25 || Number(v('c_ot60Rate')) < 1.5) { err.textContent = '割増率が法律の下限（時間外・深夜25%、月60時間超50%）より低くなっています。'; return; }
+        t.kyuyo = tb.kyuyo; t.brackets = tb.brackets;
+        ['storeName', 'employer', 'minWagePref', 'minWageNote', 'empInsNote', 'adminPin'].forEach(k => { s[k] = v('c_' + k).trim(); });
+        ['openHour', 'closeHour', 'step', 'need', 'otRate', 'ot60Rate', 'nightRate', 'weekStart', 'empInsRate', 'payDay', 'laborTarget', 'minWage', 'limitMonth', 'limitYear'].forEach(k => { s[k] = Number(v('c_' + k)); });
+        s.agreement36 = card.querySelector('#c_agreement36').checked;
+        ['zeroBelow', 'kiso', 'fuyo', 'otsuRate'].forEach(k => { t[k] = Number(v('t_' + k)); });
+        t.version = '手動で更新（' + U.today() + '）';
+        S.log('管理者', '設定を変更', '設定', '');
+        S.save(); UI.toast('設定を保存しました'); Admin.refresh();
+      };
+      card.querySelector('#taxReset').onclick = () => { s.tax = App.defaultTax(); S.save(); UI.toast('税の数値を初期値に戻しました'); Admin.refresh(); };
+      main.append(card);
+
+      const data = UI.el(`<section class="card"><h2>データのバックアップ</h2>
+        <p class="muted">試作版では、データはこの端末のブラウザの中に保存されています。下の文字をコピーして保存しておくと、あとで貼り付けて元に戻せます。中身には個人情報が含まれるので、保管場所に気をつけてください。</p>
+        <textarea id="bk" rows="4" class="mono" readonly></textarea>
+        <div class="row-end"><button class="btn" id="bkMake">今のデータを表示</button><button class="btn" id="bkCopy">コピー</button></div>
+        <label class="field wide">復元するデータを貼り付け<textarea id="rs" rows="3" class="mono"></textarea></label>
+        <div class="row-end"><button class="btn" id="rsDo">貼り付けたデータで置き換える</button><button class="btn danger" id="reset">見本データに作り直す</button></div></section>`);
+      const bk = data.querySelector('#bk');
+      data.querySelector('#bkMake').onclick = () => { bk.value = JSON.stringify(S.get()); };
+      data.querySelector('#bkCopy').onclick = () => {
+        if (!bk.value) bk.value = JSON.stringify(S.get());
+        navigator.clipboard.writeText(bk.value).then(() => UI.toast('コピーしました'), () => { bk.select(); UI.toast('選択しました。Ctrl+C（スマホは長押し）でコピーしてください'); });
+      };
+      data.querySelector('#rsDo').onclick = async () => {
+        let nd; try { nd = JSON.parse(data.querySelector('#rs').value); if (!nd.staff || !nd.settings) throw 0; } catch (e) { UI.toast('データの形が正しくありません'); return; }
+        if (await UI.confirm('今のデータを、貼り付けたデータで置き換えます。', '置き換える', true)) { S.replace(nd); UI.toast('置き換えました'); Admin.refresh(); }
+      };
+      data.querySelector('#reset').onclick = async () => {
+        if (await UI.confirm('今のデータをすべて消して、見本データを作り直します。', '作り直す', true)) { S.reset(); UI.toast('見本データを作り直しました'); Admin.refresh(); }
+      };
+      main.append(data);
+    },
+  });
+})();
+
+</script>
+<script>
+/* ---- js/admin-datamap.js ---- */
+/* ミセカン 管理者ページ：データの入力と流れ
+ * すべてのデータについて「誰が・どこで入力し・どの画面で使われるか」を1枚にまとめます。
+ */
+'use strict';
+(function () {
+  const U = App.U, UI = App.UI, S = App.Store, Admin = App.Admin;
+  Admin.register({
+    id: 'datamap', label: 'データの入力と流れ', group: 'ホーム',
+    lead: '画面に出ている数字は、すべてこの表のどこかで入力したデータから計算しています。入力する場所がわからないときは、ここから開いてください。',
+    render(main) {
+      const d = S.get(), today = U.today();
+      const last = (arr, f) => arr.length ? arr.map(f).sort().pop() : '';
+      const days = d.sales.length, pDays = new Set(d.purchases.map(p => p.date)).size;
+      const rows = [
+        ['売上（1日のレジ締めの合計・客数）', '管理者', 'sales', '毎日の売上', 'ホーム、毎日の売上のグラフ、人件費率', `${days}日分`, last(d.sales, x => x.date)],
+        ['商品ごとの販売記録（購買履歴）', '管理者', 'purchases', '購買履歴・ランキング', '商品・カテゴリ・会員ランキング、売上との差の確認', `${d.purchases.length}件（${pDays}日分）`, last(d.purchases, x => x.date)],
+        ['商品マスタ（商品名・カテゴリ・単価）', '管理者', 'purchases', '購買履歴・ランキング（商品マスタ）', '販売記録の入力欄', `${d.items.length}品`, ''],
+        ['従業員（労働者名簿・時給・保険・税・連絡先・暗証番号）', '管理者', 'staff', '従業員名簿', '給与計算、シフト、法令チェック、メール、従業員ページのログイン', `${d.staff.length}人`, ''],
+        ['シフト希望', '従業員', 'staffpage', '従業員ページ「シフト」→「希望を出す」', 'シフト（✓で承認・✕で却下）', `未承認 ${d.requests.filter(r => r.status === 'pending').length}件`, last(d.requests, x => x.createdAt.slice(0, 10))],
+        ['シフト（確定）', '管理者', 'shift', 'シフト', '1日の階段表、従業員ページ「シフト」、人件費（予定）、メール', `${d.shifts.filter(x => x.date >= today).length}件（今日以降）`, ''],
+        ['打刻（出勤・休憩・退勤）', '従業員（直すのは管理者）', 'attendance', '従業員ページ「打刻」／勤怠・打刻（手入力・修正）', '勤怠の集計、給与計算、法令チェック、ホームの出勤状況', `${d.punches.length}件`, last(d.punches, x => x.date)],
+        ['給与（確定）', '管理者', 'payroll', '給与計算で「確定」', '給与明細、賃金台帳、源泉徴収、従業員ページ「給与明細」、メール', `${d.payrolls.length}件`, last(d.payrolls, x => x.ym)],
+        ['お知らせ', '管理者', 'board', '掲示板', '従業員ページ「掲示板」', `${d.posts.length}件`, last(d.posts, x => x.createdAt.slice(0, 10))],
+        ['既読・リアクション', '従業員', 'staffpage', '従業員ページ「掲示板」', '掲示板（読んだ人・まだの人・押した人）', `既読 ${d.reads.length}件・リアクション ${d.reactions.length}件`, ''],
+        ['設定（最低賃金・割増率・36協定・保険料率・税・暗証番号）', '管理者', 'config', '設定・データ', '給与計算、法令チェック、ログイン', '−', ''],
+        ['メール配信の設定', '管理者', 'mail', 'メール配信', '月1回のメール（試作では送信しない）', `記録 ${d.mailLog.length}件`, ''],
+        ['修正の記録', '自動で残る', 'attendance', '勤怠・打刻（下の「修正の記録」）', '労働時間の記録の確認', `${d.auditLog.length}件`, last(d.auditLog, x => x.at.slice(0, 10))],
+      ];
+      main.append(UI.el(`<section class="card"><div class="scroll"><table class="tbl datamap"><thead><tr><th>データ</th><th>入力する人</th><th>入力する場所</th><th>使われる画面</th><th class="r">件数</th><th>最新</th><th></th></tr></thead><tbody>${rows.map(([what, who, tab, where, used, n, lastDate]) => `<tr>
+        <td><b>${what}</b></td><td class="nowrap"><span class="chip ${who.startsWith('従業員') ? 'info' : who === '管理者' ? 'good' : ''}">${who}</span></td><td>${where}</td><td class="small">${used}</td><td class="r nowrap">${n}</td><td class="nowrap small">${lastDate ? U.esc(lastDate) : '−'}</td>
+        <td>${tab === 'staffpage' ? '<a class="btn sm" href="misekan-staff.html">従業員ページ</a>' : `<a class="btn sm primary" href="#${tab}">${who === '管理者' ? '入力する' : '開く'}</a>`}</td></tr>`).join('')}</tbody></table></div></section>`));
+      main.append(UI.el(`<section class="card"><h2>データの流れ</h2><ol class="flow">
+        <li><b>毎日</b>：従業員が従業員ページで<b>打刻</b>する → 管理者は「勤怠・打刻」で確認し、打刻もれを理由つきで直す。閉店後に管理者が「毎日の売上」に<b>レジ締めの合計</b>を入力し、「購買履歴」に<b>商品ごとの販売数</b>を入力する。</li>
+        <li><b>週ごと</b>：従業員が従業員ページで<b>シフト希望</b>を出す → 管理者が「シフト」で承認・調整して<b>シフトを確定</b> → 従業員ページに表示される。</li>
+        <li><b>月末</b>：締め日を過ぎたら、管理者が「給与計算」で内容を確かめて<b>確定</b> → 給与明細・賃金台帳・源泉徴収に反映 → 従業員ページの「給与明細」に表示される（メールは送信日を決めたあとに対応）。</li>
+        <li><b>いつでも</b>：管理者が「掲示板」でお知らせを書く → 従業員が読む・リアクションする → 管理者は誰が読んだかを確認できる。</li>
+      </ol></section>`));
+    },
+  });
+})();
+
+</script>
+<script>
+/* ---- js/admin-legal.js ---- */
+/* ミセカン 管理者ページ：法令チェック
+ * データを見て、法律上の対応が必要なところを自動で見つけます。
+ * ここに出ないから問題がない、とは限りません。最終的な判断は社会保険労務士・税理士に確認してください。
+ */
+'use strict';
+(function () {
+  const U = App.U, UI = App.UI, S = App.Store, Admin = App.Admin;
+
+  const Legal = App.Legal = {};
+  Legal.issues = function (d) {
+    const s = d.settings, today = U.today(), ym = U.ym(today), out = [];
+    const add = (level, title, detail, law, tab) => out.push({ level, title, detail, law, tab });
+    const active = d.staff.filter(x => x.active);
+    const months = [U.ymAdd(ym, -1), ym];
+
+    // 最低賃金
+    active.filter(x => x.wage < s.minWage).forEach(x => add('bad', `${x.name} さんの時給が最低賃金より低い`, `時給 ${U.yen(x.wage)} ／ ${s.minWagePref}の最低賃金 ${U.yen(s.minWage)}`, '最低賃金法4条', 'staff'));
+
+    // 休憩
+    d.punches.filter(p => months.includes(U.ym(p.date)) && App.Pay.breakShort(p)).forEach(p => {
+      add('bad', `${S.staff(p.staffId)?.name} さん ${U.label(p.date)} の休憩が${App.Pay.breakShort(p)}分足りない`, `${p.in}〜${p.out} 休憩${p.breakMin}分`, '労働基準法34条', 'attendance');
+    });
+
+    // 時間外・36協定・年少者
+    active.forEach(x => {
+      months.forEach(m => {
+        const md = U.monthDays(m);
+        const dm = Object.entries(App.Pay.days(x.id, d, md[0], md[md.length - 1]));
+        const ot = U.sum(dm, ([, v]) => v.ot);
+        if (ot > 0 && !s.agreement36) add('bad', `${x.name} さん ${U.ymLabel(m)}に時間外労働 ${U.hm(ot)}（36協定なし）`, '36協定を届け出ていないと、1日8時間・週40時間を超えて働かせることはできません。', '労働基準法32条・36条', 'attendance');
+        else if (ot > s.limitMonth * 60) add('bad', `${x.name} さん ${U.ymLabel(m)}の時間外労働 ${U.hm(ot)} が36協定の上限（月${s.limitMonth}時間）を超えている`, '', '労働基準法36条', 'attendance');
+        else if (ot > s.limitMonth * 60 * 0.8) add('warn', `${x.name} さん ${U.ymLabel(m)}の時間外労働 ${U.hm(ot)}（上限の8割を超えた）`, '', '労働基準法36条', 'attendance');
+        dm.forEach(([date, v]) => {
+          const age = U.age(x.birth, date);
+          if (age !== null && age < 18 && (v.night > 0 || v.ot > 0)) add('bad', `${x.name} さん（${age}歳）${U.label(date)} に${v.night ? '深夜（22時以降）' : ''}${v.night && v.ot ? 'と' : ''}${v.ot ? '時間外' : ''}の労働`, '18歳未満は、原則として深夜（22時〜翌5時）と時間外の労働ができません。', '労働基準法60条・61条', 'attendance');
+        });
+      });
+      const y = today.slice(0, 4);
+      const yOt = U.sum(Object.values(App.Pay.days(x.id, d, `${y}-01-01`, today)), v => v.ot);
+      if (s.agreement36 && yOt > s.limitYear * 60) add('bad', `${x.name} さん ${y}年の時間外労働 ${U.hm(yOt)} が年の上限（${s.limitYear}時間）を超えている`, '1月1日から数えた概算です。36協定の起算日で確認してください。', '労働基準法36条', 'attendance');
+      // 18歳未満の深夜シフト（予定）
+      d.shifts.filter(sh => sh.staffId === x.id && sh.date >= today && U.toMin(sh.end) > 22 * 60).forEach(sh => {
+        const age = U.age(x.birth, sh.date);
+        if (age !== null && age < 18) add('bad', `${x.name} さん（${age}歳）${U.label(sh.date)} のシフトが22時を超えている`, `${sh.start}〜${sh.end}`, '労働基準法61条', 'shift');
+      });
+      // 労働者名簿の記入
+      const need = [['name', '氏名'], ['gender', '性別'], ['birth', '生年月日'], ['address', '住所'], ['hireDate', '雇入れ年月日']].filter(([k]) => !x[k]).map(([, l]) => l);
+      if (need.length) add('warn', `${x.name || '(名前なし)'} さんの労働者名簿に未記入の項目`, need.join('、'), '労働基準法107条', 'staff');
+      if (x.email && !x.consent) add('info', `${x.name} さんは給与明細の電子交付に同意していない`, 'メールでは給与明細を送らず、紙で渡してください。', '所得税法231条2項', 'mail');
+    });
+
+    // 打刻もれ
+    d.punches.filter(p => p.in && !p.out && p.date < today).forEach(p => add('warn', `${S.staff(p.staffId)?.name} さん ${U.label(p.date)} の退勤の打刻がない`, '本人に確認して、理由を書いて修正してください。', '労働安全衛生法66条の8の3', 'attendance'));
+
+    // 確定後の打刻修正
+    d.payrolls.forEach(p => {
+      const st = S.staff(p.staffId); if (!st) return;
+      const live = App.Pay.month(st, p.ym, d);
+      if (live.gross !== p.gross) add('warn', `${p.name} さん ${U.ymLabel(p.ym)}分：確定後に打刻が変わり、給与額が${U.yen(live.gross - p.gross)}ずれている`, '差額の精算が必要か確認してください。', '労働基準法24条（全額払い）', 'payroll');
+    });
+
+    // 数値の確認
+    if (/要確認/.test(s.tax.version)) add('info', '源泉所得税の数値が令和8年分の税額表に合っているか確認が必要', s.tax.version, '所得税法185条', 'config');
+    if (/要確認/.test(s.empInsNote)) add('info', '雇用保険料率が今年度の率か確認が必要', `${s.empInsRate}（${s.empInsNote}）`, '労働保険徴収法', 'config');
+    if (/要確認/.test(s.minWageNote)) add('info', '最低賃金の額が今の額か確認が必要', `${s.minWagePref} ${U.yen(s.minWage)}（${s.minWageNote}）`, '最低賃金法', 'config');
+    return out;
+  };
+
+  const COVER = [
+    ['労働基準法15条', '労働条件の明示（労働条件通知書）', 'none', '試作版にはありません。雇い入れ時に書面などで渡してください。'],
+    ['労働基準法24条', '賃金の支払い（全額・毎月1回以上・一定期日）', 'ok', '月末締め・毎月決まった給料日。控除は法令で決まったものだけ。'],
+    ['労働基準法32条', '労働時間（1日8時間・1週40時間）', 'ok', '超えた分を時間外として計算。'],
+    ['労働基準法34条', '休憩（6時間超45分・8時間超60分）', 'ok', '足りない日を表示。打刻の修正時も確認。'],
+    ['労働基準法36条', '36協定と時間外労働の上限', 'ok', '協定の有無と月・年の上限を確認。'],
+    ['労働基準法37条', '割増賃金（時間外25%・月60時間超50%・深夜25%）', 'part', '休日労働（35%）は試作版では未対応。'],
+    ['労働基準法39条', '年次有給休暇・年次有給休暇管理簿', 'none', '試作版にはありません。次の段階で追加が必要です。'],
+    ['労働基準法60・61条', '年少者（18歳未満）の時間外・深夜労働の禁止', 'ok', '生年月日から判定して表示。'],
+    ['労働基準法107条', '労働者名簿', 'ok', '「従業員名簿」タブ。法定の項目に印。'],
+    ['労働基準法108条', '賃金台帳', 'ok', '「賃金台帳」タブ。'],
+    ['労働基準法109条', '記録の保存（5年・当分の間3年）', 'part', '退職者・打刻・確定給与は削除しない作り。試作版はこの端末にだけ保存されるため、バックアップが必要。'],
+    ['労働安全衛生法66条の8の3', '労働時間の状況の把握（客観的な記録）', 'ok', '従業員ページの打刻。管理者の修正は理由つきで記録。'],
+    ['最低賃金法4条', '最低賃金', 'ok', '最低賃金より低い時給は保存できません。'],
+    ['所得税法183・185条', '源泉徴収（月額表）', 'part', '税額の数値は要確認。乙欄の10万5千円以上と年末調整は未対応。'],
+    ['所得税法226条', '源泉徴収票', 'part', '下書きのみ。年末調整後の金額ではありません。'],
+    ['所得税法231条', '給与支払明細書の交付（電子交付は本人の承諾が必要）', 'ok', '従業員ページとメールで交付。メールは同意した人だけ。'],
+    ['雇用保険法・労働保険徴収法', '雇用保険料の控除', 'ok', '料率は年度ごとに確認が必要。'],
+    ['健康保険法・厚生年金保険法', '社会保険料の控除（標準報酬月額）', 'part', '月額を手入力。等級の自動計算は未対応。'],
+    ['地方税法', '住民税の特別徴収', 'none', '試作版にはありません。'],
+    ['個人情報保護法', '従業員の個人情報の取り扱い', 'part', '従業員ページには本人のデータと同僚の氏名だけを表示。試作版は暗号化・ログイン管理が簡易なため、本番ではサーバー側で対策が必要。'],
+  ];
+
+  Admin.register({
+    id: 'legal', label: '法令チェック', group: 'ホーム', lead: '労働時間・賃金・税・個人情報について、対応が必要なところを自動で探します。ここに出ないから問題がない、とは限りません。最終的な判断は社会保険労務士・税理士に確認してください。',
+    badge() { return Legal.issues(S.get()).filter(i => i.level === 'bad').length; },
+    render(main) {
+      const list = Legal.issues(S.get());
+      const n = l => list.filter(i => i.level === l).length;
+      main.append(UI.el(`<section class="tiles">
+        <div class="tile"><span class="tile-label">すぐ対応が必要</span><b class="tile-num">${n('bad')}<small> 件</small></b><span class="tile-sub">法令に反するおそれ</span></div>
+        <div class="tile"><span class="tile-label">確認が必要</span><b class="tile-num">${n('warn')}<small> 件</small></b><span class="tile-sub">記録の不足・上限が近い</span></div>
+        <div class="tile"><span class="tile-label">お知らせ</span><b class="tile-num">${n('info')}<small> 件</small></b><span class="tile-sub">数値の確認など</span></div></section>`));
+      const lab = { bad: ['すぐ対応', 'chip bad'], warn: ['確認', 'chip warn'], info: ['お知らせ', 'chip'] };
+      const order = { bad: 0, warn: 1, info: 2 };
+      main.append(UI.el(`<section class="card"><h2>見つかったこと</h2><ul class="issues">${list.sort((a, b) => order[a.level] - order[b.level]).map(i => `<li class="issue ${i.level}"><span class="${lab[i.level][1]}">${lab[i.level][0]}</span><div><b>${U.esc(i.title)}</b>${i.detail ? `<p>${U.esc(i.detail)}</p>` : ''}<small class="muted">${U.esc(i.law)}</small></div><a class="btn sm" href="#${i.tab}">開く</a></li>`).join('') || '<li class="muted">今のデータでは、見つかったことはありません。</li>'}</ul></section>`));
+      const st = { ok: ['対応', 'chip good'], part: ['一部対応', 'chip warn'], none: ['未対応', 'chip bad'] };
+      main.append(UI.el(`<section class="card"><h2>法令ごとの対応状況（試作版）</h2><div class="scroll"><table class="tbl"><thead><tr><th>法令</th><th>内容</th><th>状況</th><th>この画面での扱い</th></tr></thead><tbody>${COVER.map(([law, what, s2, note]) => `<tr><td class="nowrap">${law}</td><td>${what}</td><td><span class="${st[s2][1]}">${st[s2][0]}</span></td><td class="small">${note}</td></tr>`).join('')}</tbody></table></div></section>`));
+    },
+  });
+})();
+
+</script>
+<script>
+/* ---- js/admin-shift.js ---- */
+/* ミセカン 管理画面：シフト（週間で作成・1日の階段表）と勤怠 */
+'use strict';
+(function () {
+  const U = App.U, UI = App.UI, S = App.Store, Admin = App.Admin;
+  const st = { view: App.pref.get('shiftView', 'week'), week: U.monday(U.today()), date: U.today() };
+
+  const times = () => { const s = S.get().settings; return U.timeOptions(s.openHour, s.closeHour, s.step); };
+  const cost = sh => { const p = S.staff(sh.staffId); return p ? p.wage * (U.toMin(sh.end) - U.toMin(sh.start)) / 60 : 0; };
+  const clash = (d, sid, date, start, end, skipId) => d.shifts.some(x => x.id !== skipId && x.staffId === sid && x.date === date && U.toMin(start) < U.toMin(x.end) && U.toMin(x.start) < U.toMin(end));
+
+  function shiftModal(sh) {
+    const d = S.get(), isNew = !sh.id, tl = times();
+    const presets = [['09:00', '14:00'], ['10:00', '15:00'], ['12:00', '17:00'], ['14:00', '19:00'], ['17:00', '22:00'], ['09:00', '17:00'], ['13:00', '22:00']];
+    const m = UI.modal(isNew ? 'シフトを追加' : 'シフトを変更', `<form class="form">
+      <label class="field">名前<select id="m_staff">${U.options(d.staff.filter(s => s.active).map(s => [s.id, s.name]), sh.staffId)}</select></label>
+      <label class="field">日付<input type="date" id="m_date" value="${sh.date}"></label>
+      <label class="field">開始<select id="m_start">${U.options(tl.slice(0, -1), sh.start)}</select></label>
+      <label class="field">終了<select id="m_end">${U.options(tl.slice(1), sh.end)}</select></label>
+      <div class="wide chips">${presets.map(([a, b]) => `<button type="button" class="chip-btn" data-a="${a}" data-b="${b}">${U.short(a)}-${U.short(b)}</button>`).join('')}</div>
+      <p class="wide err" id="m_err" role="alert"></p></form>`,
+    [...(isNew ? [] : [{ label: '削除', kind: 'danger', onClick: () => { d.shifts = d.shifts.filter(x => x.id !== sh.id); S.save(); UI.toast('シフトを削除しました'); Admin.refresh(); } }]),
+      { label: 'やめる' },
+      { label: '保存する', kind: 'primary', onClick: w => {
+        const v = id => w.querySelector('#' + id).value;
+        const n = { staffId: v('m_staff'), date: v('m_date'), start: v('m_start'), end: v('m_end') };
+        const err = w.querySelector('#m_err');
+        if (U.toMin(n.end) <= U.toMin(n.start)) { err.textContent = '終了は開始より後にしてください'; return false; }
+        if (clash(d, n.staffId, n.date, n.start, n.end, sh.id)) { err.textContent = 'この人は同じ日に時間が重なるシフトがあります'; return false; }
+        if (isNew) d.shifts.push(Object.assign({ id: U.uid() }, n)); else Object.assign(d.shifts.find(x => x.id === sh.id), n);
+        S.save(); UI.toast('シフトを保存しました'); Admin.refresh();
+      } }]);
+    m.el.querySelectorAll('[data-a]').forEach(b => { b.onclick = () => { m.el.querySelector('#m_start').value = b.dataset.a; m.el.querySelector('#m_end').value = b.dataset.b; }; });
+  }
+
+  function approve(r) {
+    const d = S.get();
+    if (clash(d, r.staffId, r.date, r.start, r.end)) return false;
+    r.status = 'approved';
+    d.shifts.push({ id: U.uid(), staffId: r.staffId, date: r.date, start: r.start, end: r.end, fromRequest: r.id });
+    return true;
+  }
+
+  /* ---------- 週間（作成） ---------- */
+  function weekView(main) {
+    const d = S.get(), days = [...Array(7)].map((_, i) => U.addDays(st.week, i)), today = U.today();
+    const staff = d.staff.filter(s => s.active);
+    const reqs = d.requests.filter(r => r.status === 'pending' && r.date >= days[0] && r.date <= days[6]);
+    const bar = UI.el(`<div class="toolbar"></div>`);
+    bar.append(UI.stepper(`${U.label(days[0])} 〜 ${U.label(days[6])}`, () => { st.week = U.addDays(st.week, -7); Admin.refresh(); }, () => { st.week = U.addDays(st.week, 7); Admin.refresh(); }));
+    const btns = UI.el(`<div class="toolbar-r" data-input><button class="btn sm primary" id="wAdd">＋ シフトを追加</button><button class="btn sm" id="thisW">今週</button><button class="btn sm primary" id="apAll" ${reqs.length ? '' : 'disabled'}>この週の希望をまとめて承認（${reqs.length}件）</button></div>`);
+    btns.querySelector('#thisW').onclick = () => { st.week = U.monday(U.today()); Admin.refresh(); };
+    btns.querySelector('#wAdd').onclick = () => shiftModal({ staffId: staff[0]?.id, date: days[0] < U.today() ? U.today() : days[0], start: '09:00', end: '14:00' });
+    btns.querySelector('#apAll').onclick = async () => {
+      if (!await UI.confirm(`${reqs.length}件の希望をシフトとして確定します。時間が重なるものは承認しません。`, '承認する')) return;
+      let ok = 0; reqs.forEach(r => { if (approve(r)) ok++; }); S.save(); UI.toast(`${ok}件を承認しました${ok < reqs.length ? `（${reqs.length - ok}件は時間が重なるため保留）` : ''}`); Admin.refresh();
+    };
+    bar.append(btns); main.append(bar);
+
+    let html = `<table class="tbl week"><thead><tr><th>名前</th>${days.map(x => `<th class="${x === today ? 'today' : ''}"><button class="link ${U.wdClass(x)}" data-day="${x}">${U.label(x)}</button></th>`).join('')}<th class="r">週の時間</th></tr></thead><tbody>`;
+    staff.forEach(p => {
+      let min = 0;
+      html += `<tr><td class="nowrap"><i class="dot" style="background:${p.color}"></i>${U.esc(p.name)}</td>`;
+      days.forEach(x => {
+        const ss = d.shifts.filter(s => s.staffId === p.id && s.date === x).sort((a, b) => U.toMin(a.start) - U.toMin(b.start));
+        const rr = reqs.filter(r => r.staffId === p.id && r.date === x);
+        ss.forEach(s => { min += U.toMin(s.end) - U.toMin(s.start); });
+        html += `<td class="cell ${x === today ? 'today' : ''}" data-add="${p.id}|${x}">${ss.map(s => `<button class="tag" style="--c:${p.color}" data-shift="${s.id}">${U.short(s.start)}-${U.short(s.end)}</button>`).join('')}${rr.map(r => `<span class="tag req" title="${U.esc(r.note || 'シフト希望')}">希望 ${U.short(r.start)}-${U.short(r.end)}<button class="mini ok" data-ok="${r.id}" aria-label="承認">✓</button><button class="mini ng" data-ng="${r.id}" aria-label="却下">✕</button></span>`).join('')}${!ss.length && !rr.length ? '<span class="add">＋</span>' : ''}</td>`;
+      });
+      html += `<td class="r mono">${U.hm(min)}</td></tr>`;
+    });
+    html += `</tbody><tfoot><tr><td>出勤人数</td>${days.map(x => `<td class="${x === today ? 'today' : ''}">${new Set(d.shifts.filter(s => s.date === x).map(s => s.staffId)).size}人</td>`).join('')}<td></td></tr>
+      <tr><td>人件費（予定）</td>${days.map(x => `<td class="mono ${x === today ? 'today' : ''}">${U.yen(U.sum(d.shifts.filter(s => s.date === x), cost))}</td>`).join('')}<td class="r mono">${U.yen(U.sum(d.shifts.filter(s => s.date >= days[0] && s.date <= days[6]), cost))}</td></tr></tfoot></table>`;
+    const card = UI.el(`<section class="card"><p class="muted small">点線の「希望」は従業員ページから出されたシフト希望です。✓で確定、✕で却下。空いているマスを押すとシフトを追加、色のついたシフトを押すと変更できます。日付を押すとその日の階段表を開きます。</p><div class="scroll">${html}</div></section>`);
+    card.onclick = e => {
+      const t = e.target;
+      if (t.dataset.day) { st.date = t.dataset.day; st.view = 'day'; Admin.refresh(); return; }
+      if (t.dataset.ok) { const r = d.requests.find(x => x.id === t.dataset.ok); if (approve(r)) { S.save(); UI.toast('承認しました'); } else UI.toast('同じ日に時間が重なるシフトがあるため承認できません'); Admin.refresh(); return; }
+      if (t.dataset.ng) { d.requests.find(x => x.id === t.dataset.ng).status = 'rejected'; S.save(); UI.toast('却下しました'); Admin.refresh(); return; }
+      if (t.dataset.shift) { shiftModal(d.shifts.find(x => x.id === t.dataset.shift)); return; }
+      const cell = t.closest('[data-add]');
+      if (cell && (t === cell || t.classList.contains('add'))) { const [sid, date] = cell.dataset.add.split('|'); shiftModal({ staffId: sid, date, start: '09:00', end: '14:00' }); }
+    };
+    main.append(card);
+  }
+
+  /* ---------- 1日（階段表） ---------- */
+  function dayView(main) {
+    const d = S.get(), s = d.settings, date = st.date;
+    const need = +App.pref.get('need', s.need);
+    const bar = UI.el(`<div class="toolbar"></div>`);
+    bar.append(UI.stepper(`<span class="${U.wdClass(date)}">${U.label(date)}</span>`, () => { st.date = U.addDays(date, -1); Admin.refresh(); }, () => { st.date = U.addDays(date, 1); Admin.refresh(); }));
+    const r = UI.el(`<div class="toolbar-r" data-input><input type="date" id="dPick" value="${date}" aria-label="日付"><button class="btn sm" id="dToday">今日</button><label class="inline">必要人数 <input type="number" id="dNeed" min="0" max="20" value="${need}"></label><button class="btn sm primary" id="dAdd">＋ シフト追加</button></div>`);
+    r.querySelector('#dPick').onchange = e => { if (e.target.value) { st.date = e.target.value; Admin.refresh(); } };
+    r.querySelector('#dToday').onclick = () => { st.date = U.today(); Admin.refresh(); };
+    r.querySelector('#dNeed').onchange = e => { App.pref.set('need', e.target.value); Admin.refresh(); };
+    r.querySelector('#dAdd').onclick = () => shiftModal({ staffId: d.staff[0]?.id, date, start: '09:00', end: '14:00' });
+    bar.append(r); main.append(bar);
+
+    const open = s.openHour * 60, slots = (s.closeHour - s.openHour) * 60 / s.step, per = 60 / s.step;
+    const list = d.shifts.filter(x => x.date === date).sort((a, b) => U.toMin(a.start) - U.toMin(b.start) || U.toMin(a.end) - U.toMin(b.end));
+    const count = new Array(slots).fill(0);
+    let h = `<table class="gantt"><colgroup><col class="g-name"><col class="g-time">${'<col>'.repeat(slots)}</colgroup><thead><tr><th>名前</th><th>時間</th>`;
+    for (let x = s.openHour; x < s.closeHour; x++) h += `<th colspan="${per}">${x}</th>`;
+    h += `</tr></thead><tbody>`;
+    const cell = i => `<td class="slot ${i % per === 0 ? 'hour' : ''}"></td>`;
+    list.forEach(x => {
+      const p = S.staff(x.staffId) || { name: '(削除済み)', color: '#888' };
+      const a = Math.max(0, (U.toMin(x.start) - open) / s.step), b = Math.min(slots, (U.toMin(x.end) - open) / s.step);
+      for (let i = a; i < b; i++) count[i]++;
+      const pu = d.punches.find(q => q.staffId === x.staffId && q.date === date);
+      h += `<tr><td class="nowrap"><i class="dot" style="background:${p.color}"></i>${U.esc(p.name)}</td><td class="mono">${U.short(x.start)}-${U.short(x.end)}</td>`;
+      for (let i = 0; i < a; i++) h += cell(i);
+      h += `<td class="bar" colspan="${b - a}"><button style="--c:${p.color}" data-shift="${x.id}">${U.short(x.start)}-${U.short(x.end)}${pu && pu.in ? ` <small>打刻 ${pu.in}${pu.out ? '〜' + pu.out : '〜'}</small>` : ''}</button></td>`;
+      for (let i = b; i < slots; i++) h += cell(i);
+      h += `</tr>`;
+    });
+    if (!list.length) h += `<tr><td colspan="${slots + 2}" class="muted center">この日のシフトはまだありません</td></tr>`;
+    h += `</tbody><tfoot><tr><td colspan="2">人数</td>${count.map(c => `<td class="${c < need ? 'lack' : ''}">${c}</td>`).join('')}</tr></tfoot></table>`;
+    const lack = count.filter(c => c < need).length * s.step / 60;
+    const card = UI.el(`<section class="card"><div class="scroll">${h}</div>
+      <p class="sumline">出勤 <b>${new Set(list.map(x => x.staffId)).size}人</b> ・ 合計 <b>${U.hm(U.sum(list, x => U.toMin(x.end) - U.toMin(x.start)))}</b> ・ 人件費（予定） <b>${U.yen(U.sum(list, cost))}</b>${need ? ` ・ ${lack ? `<span class="chip bad">人が足りない時間 ${lack}時間分</span>` : '<span class="chip good">必要人数を満たしています</span>'}` : ''}</p></section>`);
+    card.onclick = e => { const b = e.target.closest('[data-shift]'); if (b) shiftModal(d.shifts.find(x => x.id === b.dataset.shift)); };
+    main.append(card);
+  }
+
+  Admin.register({
+    id: 'shift', label: 'シフト', group: '現場', lead: '従業員の希望を承認してシフトを作ります。1日の表は営業時間に沿った階段状で表示します。',
+    badge() { return S.get().requests.filter(r => r.status === 'pending').length; },
+    render(main) {
+      const seg = UI.el(`<div class="seg" role="tablist"><button data-v="week" role="tab">週間・作成</button><button data-v="day" role="tab">1日の階段表</button></div>`);
+      seg.querySelectorAll('button').forEach(b => {
+        b.setAttribute('aria-selected', b.dataset.v === st.view);
+        b.onclick = () => { st.view = b.dataset.v; App.pref.set('shiftView', st.view); Admin.refresh(); };
+      });
+      main.append(seg);
+      (st.view === 'day' ? dayView : weekView)(main);
+    },
+  });
+
+  /* ================= 勤怠・打刻 ================= */
+  const at = { ym: U.ym(U.today()), staff: '' };
+  function punchModal(p, isNew) {
+    const d = S.get();
+    UI.modal(isNew ? '打刻を手入力' : '打刻を修正', `<form class="form">
+      <label class="field">名前<select id="q_staff" ${isNew ? '' : 'disabled'}>${U.options(d.staff.map(s => [s.id, s.name]), p.staffId)}</select></label>
+      <label class="field">日付<input type="date" id="q_date" value="${p.date}" ${isNew ? '' : 'disabled'}></label>
+      <label class="field">出勤<input type="time" id="q_in" value="${p.in}" required></label>
+      <label class="field">退勤<input type="time" id="q_out" value="${p.out}"></label>
+      <label class="field">休憩（分）<input type="number" id="q_brk" min="0" step="5" value="${p.breakMin || 0}"></label>
+      <label class="field wide">修正・手入力の理由 <span class="req">必須</span><input id="q_note" required placeholder="例：退勤の打刻忘れ（本人に確認済み）"></label>
+      <p class="wide small muted">労働時間は客観的な記録で把握し、直すときは理由を残す必要があります（労働安全衛生法66条の8の3、厚生労働省「労働時間の適正な把握のためのガイドライン」）。直した内容・理由・日時は「修正の記録」に残ります。実際に働いた時間より短く記録することは法令違反になります。</p>
+      <p class="wide err" id="q_err" role="alert"></p></form>`,
+    [...(isNew ? [] : [{ label: '削除', kind: 'danger', onClick: w => {
+        const why = w.querySelector('#q_note').value.trim(), err = w.querySelector('#q_err');
+        if (!why) { err.textContent = '削除する理由を入れてください。'; return false; }
+        d.punches = d.punches.filter(x => x.id !== p.id);
+        S.log('管理者', '打刻を削除', S.staff(p.staffId)?.name, `${p.date} ${p.in}〜${p.out || ''} 休憩${p.breakMin}分`, why);
+        S.save(); Admin.refresh();
+      } }]),
+      { label: 'やめる' },
+      { label: '保存する', kind: 'primary', onClick: w => {
+        const f = w.querySelector('form'); if (!f.reportValidity()) return false;
+        const v = id => w.querySelector('#' + id).value;
+        const n = { in: v('q_in'), out: v('q_out'), breakMin: Number(v('q_brk')) || 0, note: v('q_note').trim(), edited: true, breakStart: '' };
+        const err = w.querySelector('#q_err');
+        if (!n.note) { err.textContent = '理由を入れてください。'; return false; }
+        const short = App.Pay.breakShort(n);
+        if (short) { err.textContent = `休憩が${short}分足りません。労働時間が6時間を超えると45分、8時間を超えると60分の休憩が必要です（労働基準法34条）。実際に休憩が少なかった場合は、休憩分も労働時間として扱われます。休憩を正しく入れ直してください。`; return false; }
+        const who = S.staff(isNew ? v('q_staff') : p.staffId)?.name;
+        const after = `${n.in}〜${n.out || '（未退勤）'} 休憩${n.breakMin}分`;
+        if (isNew) {
+          if (d.punches.some(x => x.staffId === v('q_staff') && x.date === v('q_date'))) { err.textContent = 'その日の打刻はすでにあります。一覧から修正してください。'; return false; }
+          d.punches.push(Object.assign({ id: U.uid(), staffId: v('q_staff'), date: v('q_date') }, n));
+          S.log('管理者', '打刻を手入力', who, `${v('q_date')} ${after}`, n.note);
+        } else {
+          S.log('管理者', '打刻を修正', who, `${p.date} 変更前 ${p.in}〜${p.out || '（未退勤）'} 休憩${p.breakMin}分 → 変更後 ${after}`, n.note);
+          Object.assign(d.punches.find(x => x.id === p.id), n);
+        }
+        S.save(); UI.toast('打刻を保存しました'); Admin.refresh();
+      } }]);
+  }
+  Admin.register({
+    id: 'attendance', label: '勤怠・打刻', group: '現場', lead: '従業員ページの打刻がここに集まります。打刻忘れや遅刻を確認して修正できます。',
+    badge() { const d = S.get(), t = U.today(); return d.punches.filter(p => p.in && !p.out && p.date < t).length; },
+    render(main) {
+      const d = S.get(), today = U.today(), ym = at.ym;
+      const bar = UI.el(`<div class="toolbar"></div>`);
+      bar.append(UI.stepper(U.ymLabel(ym), () => { at.ym = U.ymAdd(ym, -1); Admin.refresh(); }, () => { at.ym = U.ymAdd(ym, 1); Admin.refresh(); }));
+      const r = UI.el(`<div class="toolbar-r" data-input><select id="aStaff" aria-label="従業員">${U.options([['', '全員'], ...d.staff.map(s => [s.id, s.name])], at.staff)}</select><button class="btn sm primary" id="aAdd">＋ 打刻を手入力</button></div>`);
+      r.querySelector('#aStaff').onchange = e => { at.staff = e.target.value; Admin.refresh(); };
+      r.querySelector('#aAdd').onclick = () => punchModal({ staffId: at.staff || d.staff[0].id, date: today, in: '09:00', out: '', breakMin: 0 }, true);
+      bar.append(r); main.append(bar);
+
+      const people = d.staff.filter(s => !at.staff || s.id === at.staff);
+      // 集計
+      const sum = UI.el(`<section class="card"><h2>${U.ymLabel(ym)}の集計</h2><div class="scroll"><table class="tbl"><thead><tr><th>名前</th><th class="r">出勤日数</th><th class="r">実働</th><th class="r">残業</th><th class="r">深夜</th><th class="r">遅刻</th><th class="r">休憩不足</th><th class="r">打刻もれ</th></tr></thead><tbody>${people.map(p => {
+        const ps = d.punches.filter(x => x.staffId === p.id && x.date.startsWith(ym));
+        const md = U.monthDays(ym), dm = Object.values(App.Pay.days(p.id, d, md[0], md[md.length - 1]));   // 週40時間超も含めて数える
+        const w = U.sum(dm, x => x.work), o = U.sum(dm, x => x.ot), n = U.sum(dm, x => x.night);
+        const brkNg = ps.filter(x => App.Pay.breakShort(x)).length;
+        const late = ps.filter(x => { const sh = d.shifts.find(s => s.staffId === p.id && s.date === x.date); return sh && x.in && U.toMin(x.in) > U.toMin(sh.start); }).length;
+        const miss = ps.filter(x => x.in && !x.out && x.date < today).length + d.shifts.filter(s => s.staffId === p.id && s.date.startsWith(ym) && s.date < today && !ps.some(x => x.date === s.date)).length;
+        if (!ps.length && !miss) return '';
+        return `<tr><td><i class="dot" style="background:${p.color}"></i>${U.esc(p.name)}</td><td class="r">${ps.filter(x => x.out).length}日</td><td class="r mono">${U.hm(w)}</td><td class="r mono">${U.hm(o)}</td><td class="r mono">${U.hm(n)}</td><td class="r">${late ? `<span class="chip warn">${late}回</span>` : '0回'}</td><td class="r">${brkNg ? `<span class="chip bad">${brkNg}日</span>` : '0日'}</td><td class="r">${miss ? `<span class="chip bad">${miss}件</span>` : '0件'}</td></tr>`;
+      }).join('') || '<tr><td colspan="8" class="muted">この月の打刻はありません</td></tr>'}</tbody></table></div><p class="muted small">残業＝1日8時間または1週40時間（${U.WD[d.settings.weekStart]}曜はじまり）を超えた時間。深夜＝22時〜翌5時。出勤簿にあたる記録は5年間（当分の間は3年間）保存します（労働基準法109条）。</p></section>`);
+      main.append(sum);
+
+      // 明細
+      const rows = [];
+      U.monthDays(ym).forEach(date => people.forEach(p => {
+        const pu = d.punches.find(x => x.staffId === p.id && x.date === date);
+        const sh = d.shifts.find(x => x.staffId === p.id && x.date === date);
+        if (!pu && !(sh && date <= today)) return;
+        rows.push({ date, p, pu, sh });
+      }));
+      rows.reverse();
+      const det = UI.el(`<section class="card"><h2>打刻の明細 <small class="muted">新しい順・行を押すと修正</small></h2><div class="scroll"><table class="tbl hover"><thead><tr><th>日付</th><th>名前</th><th>シフト</th><th>出勤</th><th>退勤</th><th class="r">休憩</th><th class="r">実働</th><th class="r">深夜</th><th>状態</th></tr></thead><tbody>${rows.map((x, i) => {
+        const c = App.Pay.day(x.pu);
+        let state;
+        if (!x.pu) state = x.date === today ? Admin.punchState(null, x.sh, x.date) : ['打刻なし', 'chip bad'];
+        else if (!x.pu.out) state = x.date < today ? ['退勤の打刻もれ', 'chip bad'] : Admin.punchState(x.pu, x.sh, x.date);
+        else if (App.Pay.breakShort(x.pu)) state = [`休憩不足 ${App.Pay.breakShort(x.pu)}分`, 'chip bad'];
+        else if (x.sh && U.toMin(x.pu.in) > U.toMin(x.sh.start)) state = ['遅刻', 'chip warn'];
+        else if (x.sh && U.toMin(x.pu.out) < U.toMin(x.sh.end)) state = ['早退', 'chip warn'];
+        else state = ['問題なし', 'chip good'];
+        return `<tr data-i="${i}" tabindex="0"><td class="${U.wdClass(x.date)} nowrap">${U.label(x.date)}</td><td class="nowrap"><i class="dot" style="background:${x.p.color}"></i>${U.esc(x.p.name)}</td><td class="mono">${x.sh ? U.short(x.sh.start) + '-' + U.short(x.sh.end) : '−'}</td><td class="mono">${x.pu?.in || '−'}</td><td class="mono">${x.pu?.out || '−'}</td><td class="r mono">${x.pu ? x.pu.breakMin + '分' : '−'}</td><td class="r mono">${c ? U.hm(c.work) : '−'}</td><td class="r mono">${c && c.night ? U.hm(c.night) : '−'}</td><td><span class="${state[1]}">${state[0]}</span>${x.pu?.edited ? ' <span class="chip">修正済み</span>' : ''}</td></tr>`;
+      }).join('') || '<tr><td colspan="9" class="muted">この月の打刻はありません</td></tr>'}</tbody></table></div></section>`);
+      det.querySelectorAll('tr[data-i]').forEach(tr => {
+        const open = () => { const x = rows[+tr.dataset.i]; x.pu ? punchModal(x.pu, false) : punchModal({ staffId: x.p.id, date: x.date, in: x.sh ? x.sh.start : '09:00', out: x.sh ? x.sh.end : '', breakMin: 0 }, true); };
+        tr.onclick = open; tr.onkeydown = e => { if (e.key === 'Enter') open(); };
+      });
+      main.append(det);
+
+      const logs = d.auditLog.filter(l => /打刻/.test(l.action) && l.actor === '管理者').slice().reverse();
+      main.append(UI.el(`<section class="card"><h2>修正の記録 <small class="muted">管理者が直した・手入力した打刻（消すことはできません）</small></h2><div class="scroll"><table class="tbl"><thead><tr><th>日時</th><th>内容</th><th>対象</th><th>変更</th><th>理由</th></tr></thead><tbody>${logs.slice(0, 50).map(l => `<tr><td class="num nowrap">${l.at.replace('T', ' ').slice(0, 16)}</td><td class="nowrap">${U.esc(l.action)}</td><td class="nowrap">${U.esc(l.target)}</td><td>${U.esc(l.detail)}</td><td>${U.esc(l.reason)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">修正はまだありません</td></tr>'}</tbody></table></div></section>`));
+    },
+  });
+})();
+
+</script>
+<script>
+/* ---- js/admin-pay.js ---- */
+/* ミセカン 管理画面：給与計算・給与明細・源泉徴収 */
+'use strict';
+(function () {
+  const U = App.U, UI = App.UI, S = App.Store, Admin = App.Admin;
+  const ps = { ym: U.ymAdd(U.ym(U.today()), -1), slipYm: U.ymAdd(U.ym(U.today()), -1), slipStaff: '', year: new Date().getFullYear() };
+  const confirmed = (d, ym, sid) => d.payrolls.find(p => p.ym === ym && p.staffId === sid);
+
+  /* ================= 給与計算 ================= */
+  Admin.register({
+    id: 'payroll', label: '給与計算', group: '人事・給与', lead: '打刻をもとに月ごとの給与を計算します。内容を確認して「確定」すると、従業員ページに給与明細が届きます。',
+    render(main) {
+      const d = S.get(), ym = ps.ym;
+      const bar = UI.el(`<div class="toolbar"></div>`);
+      bar.append(UI.stepper(U.ymLabel(ym) + '分', () => { ps.ym = U.ymAdd(ym, -1); Admin.refresh(); }, () => { ps.ym = U.ymAdd(ym, 1); Admin.refresh(); }));
+      const staff = d.staff.filter(s => s.active || d.punches.some(p => p.staffId === s.id && p.date.startsWith(ym)));
+      const rows = staff.map(s => ({ s, live: App.Pay.month(s, ym, d), fixed: confirmed(d, ym, s.id) })).filter(r => r.live.days || r.fixed);
+      const notYet = rows.filter(r => !r.fixed && r.live.days);
+      const closed = U.monthDays(ym).pop() < U.today();   // 締め日（月末）を過ぎた月だけ確定できる
+      const btn = UI.el(`<div class="toolbar-r"><span class="muted small">締め：月末 ・ 計算期間 ${U.label(ym + '-01')}〜${U.label(U.monthDays(ym).pop())}${closed ? '' : ' ・ <b>まだ締め日前のため確定できません</b>'}</span><button class="btn primary sm" ${notYet.length && closed ? '' : 'disabled'}>未確定の${notYet.length}人分を確定</button></div>`);
+      btn.querySelector('button').onclick = async () => {
+        const open = notYet.filter(r => r.live.openDays).length;
+        if (!await UI.confirm(`${U.ymLabel(ym)}分の給与を${notYet.length}人分確定し、従業員ページに明細を届けます。${open ? `退勤の打刻もれがある人が${open}人います（その日は計算に入っていません）。` : ''}`, '確定する')) return;
+        notYet.forEach(r => d.payrolls.push(Object.assign(r.live, { id: U.uid(), confirmedAt: new Date().toISOString() })));
+        S.log('管理者', '給与を確定', `${U.ymLabel(ym)}分`, notYet.map(r => r.s.name).join('、'));
+        S.save(); UI.toast('確定しました'); Admin.refresh();
+      };
+      bar.append(btn); main.append(bar);
+
+      const list = rows.map(r => r.fixed || r.live);
+      main.append(UI.el(`<section class="tiles">
+        <div class="tile"><span class="tile-label">総支給額の合計</span><b class="tile-num">${U.yen(U.sum(list, p => p.gross))}</b><span class="tile-sub">${list.length}人分</span></div>
+        <div class="tile"><span class="tile-label">差引支給額の合計（振込額）</span><b class="tile-num">${U.yen(U.sum(list, p => p.net))}</b><span class="tile-sub">支給日 ${U.label(App.Pay.payDate(ym, d.settings.payDay))}</span></div>
+        <div class="tile"><span class="tile-label">預かる所得税（支給月の翌月10日までに納付）</span><b class="tile-num">${U.yen(U.sum(list, p => p.tax))}</b><span class="tile-sub">雇用保険料 ${U.yen(U.sum(list, p => p.empIns))}</span></div>
+      </section>`));
+
+      const card = UI.el(`<section class="card"><div class="scroll"><table class="tbl hover"><thead><tr><th>名前</th><th class="r">時給</th><th class="r">日数</th><th class="r">労働時間</th><th class="r">総支給</th><th class="r">雇用保険</th><th class="r">社会保険</th><th class="r">所得税</th><th class="r">差引支給</th><th>状態</th><th></th></tr></thead><tbody>${rows.map((r, i) => {
+        const p = r.fixed || r.live, changed = r.fixed && r.fixed.gross !== r.live.gross;
+        return `<tr><td class="nowrap"><i class="dot" style="background:${r.s.color}"></i>${U.esc(r.s.name)} <small class="muted">${r.s.taxCol}欄</small></td><td class="r mono">${U.yen(p.wage)}</td><td class="r">${p.days}</td><td class="r mono">${U.hm(p.workMin)}</td><td class="r mono">${U.yen(p.gross)}</td><td class="r mono">${U.yen(p.empIns)}</td><td class="r mono">${U.yen(p.social)}</td><td class="r mono">${U.yen(p.tax)}</td><td class="r mono"><b>${U.yen(p.net)}</b></td>
+          <td class="nowrap">${r.fixed ? '<span class="chip good">確定済み</span>' : '<span class="chip warn">未確定</span>'}${changed ? ' <span class="chip bad" title="確定後に打刻が修正されました">打刻が変わっています</span>' : ''}${r.live.openDays ? ` <span class="chip bad">打刻もれ${r.live.openDays}</span>` : ''}</td>
+          <td class="nowrap"><button class="btn sm" data-view="${i}">明細</button>${r.fixed ? ` <button class="btn sm" data-undo="${i}">確定を取り消す</button>` : ''}</td></tr>`;
+      }).join('') || '<tr><td colspan="11" class="muted">この月の勤務はありません</td></tr>'}</tbody></table></div>
+      <p class="muted small">計算方法：基本給＝時給×労働時間。時間外（1日8時間・1週40時間を超えた分）は時給×${(d.settings.otRate - 1).toFixed(2)}、月60時間を超えた分は×${(d.settings.ot60Rate - 1).toFixed(2)}、深夜（22〜5時）は×${(d.settings.nightRate - 1).toFixed(2)}を加算（労働基準法37条）。雇用保険料は総支給額×${d.settings.empInsRate}。所得税は社会保険料等を引いた額から計算。給与から引けるのは法令で決まったものだけで、それ以外を引くには労使協定が必要です（労働基準法24条）。</p></section>`);
+      card.onclick = async e => {
+        const t = e.target;
+        if (t.dataset.view) { const r = rows[+t.dataset.view]; UI.modal('給与明細', App.payslipHtml(r.fixed || r.live, { employer: d.settings.employer, draft: !r.fixed })); }
+        if (t.dataset.undo) {
+          const r = rows[+t.dataset.undo];
+          if (!await UI.confirm(`${r.s.name} さんの${U.ymLabel(ym)}分の確定を取り消します。従業員ページからこの明細が見えなくなります。`, '取り消す', true)) return;
+          d.payrolls = d.payrolls.filter(x => x !== r.fixed);
+          S.log('管理者', '給与の確定を取り消し', r.s.name, `${U.ymLabel(ym)}分`);
+          S.save(); Admin.refresh();
+        }
+      };
+      main.append(card);
+    },
+  });
+
+  /* ================= 給与明細 ================= */
+  Admin.register({
+    id: 'payslip', label: '給与明細', group: '人事・給与', lead: '確定した給与明細を見られます。従業員ページには本人の分だけが届きます。',
+    render(main) {
+      const d = S.get();
+      const months = [...new Set(d.payrolls.map(p => p.ym))].sort().reverse();
+      if (!months.length) { main.append(UI.el(`<section class="card"><p class="muted">確定した給与はまだありません。「給与計算」タブで確定してください。</p></section>`)); return; }
+      if (!months.includes(ps.slipYm)) ps.slipYm = months[0];
+      const list = d.payrolls.filter(p => p.ym === ps.slipYm);
+      if (!list.some(p => p.staffId === ps.slipStaff)) ps.slipStaff = list[0]?.staffId || '';
+      const bar = UI.el(`<div class="toolbar"><select id="sYm" aria-label="月">${U.options(months.map(m => [m, U.ymLabel(m) + '分']), ps.slipYm)}</select><div class="pills">${list.map(p => `<button class="pill${p.staffId === ps.slipStaff ? ' on' : ''}" data-s="${p.staffId}">${U.esc(p.name)}</button>`).join('')}</div></div>`);
+      bar.querySelector('#sYm').onchange = e => { ps.slipYm = e.target.value; Admin.refresh(); };
+      bar.querySelectorAll('[data-s]').forEach(b => { b.onclick = () => { ps.slipStaff = b.dataset.s; Admin.refresh(); }; });
+      main.append(bar);
+      const p = list.find(x => x.staffId === ps.slipStaff);
+      if (p) main.append(UI.el(`<section class="card">${App.payslipHtml(p, { employer: d.settings.employer })}<p class="muted small">確定日時 ${p.confirmedAt.slice(0, 16).replace('T', ' ')}</p></section>`));
+    },
+  });
+
+  /* ================= 賃金台帳（労働基準法108条・施行規則54条） ================= */
+  Admin.register({
+    id: 'ledger', label: '賃金台帳', group: '人事・給与', lead: '労働基準法108条で作成が義務づけられている賃金台帳です。確定した給与から、1人ずつ1年分を作ります。',
+    render(main) {
+      const d = S.get(), y = ps.year;
+      const bar = UI.el(`<div class="toolbar"></div>`);
+      bar.append(UI.stepper(`${y}年（${U.wareki(y)}）`, () => { ps.year--; Admin.refresh(); }, () => { ps.year++; Admin.refresh(); }));
+      main.append(bar);
+      const list = d.payrolls.filter(p => p.ym.startsWith(String(y)));
+      const people = d.staff.filter(s => list.some(p => p.staffId === s.id));
+      if (!people.length) main.append(UI.el(`<section class="card"><p class="muted">この年の確定した給与はありません。</p></section>`));
+      const rows = [['賃金計算期間', p => `${+p.periodStart.slice(5, 7)}/${+p.periodStart.slice(8)}〜${+p.periodEnd.slice(5, 7)}/${+p.periodEnd.slice(8)}`], ['支給日', p => U.label(p.payDate)],
+        ['労働日数', p => p.days + '日'], ['労働時間数', p => U.hm(p.workMin)], ['時間外労働時間数', p => U.hm(p.otMin)], ['休日労働時間数', () => '0:00'], ['深夜労働時間数', p => U.hm(p.nightMin)],
+        ['基本給', p => U.yen(p.base)], ['時間外労働手当', p => U.yen(p.otPay)], ['深夜労働手当', p => U.yen(p.nightPay)], ['通勤手当', p => U.yen(p.transport)], ['総支給額', p => U.yen(p.gross), 'total'],
+        ['雇用保険料', p => U.yen(p.empIns)], ['社会保険料', p => U.yen(p.social)], ['所得税', p => U.yen(p.tax)], ['控除合計', p => U.yen(p.deductions)], ['差引支給額', p => U.yen(p.net), 'total']];
+      people.forEach(s => {
+        const ps2 = list.filter(p => p.staffId === s.id).sort((a, b) => a.ym.localeCompare(b.ym));
+        main.append(UI.el(`<section class="card"><h2><i class="dot" style="background:${s.color}"></i>${U.esc(s.name)} <small class="muted">性別：${U.esc(s.gender || '未記入')} ・ ${U.esc(s.job || '')}</small></h2>
+          <div class="scroll"><table class="tbl ledger"><thead><tr><th>項目</th>${ps2.map(p => `<th class="r">${+p.ym.slice(5)}月分</th>`).join('')}</tr></thead><tbody>${rows.map(([l, f, c]) => `<tr class="${c || ''}"><th>${l}</th>${ps2.map(p => `<td class="r num">${f(p)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>`));
+      });
+      main.append(UI.el(`<p class="muted small">記入する項目：氏名、性別、賃金計算期間、労働日数、労働時間数、時間外・休日・深夜の労働時間数、基本給・手当などの種類ごとの額、控除の項目と額（労働基準法施行規則54条）。最後の記入の日から5年間（当分の間は3年間）保存します（同法109条）。休日労働（法定休日の労働）は試作版では記録していないため0:00と表示しています。</p>`));
+    },
+  });
+
+  /* ================= 源泉徴収 ================= */
+  Admin.register({
+    id: 'tax', label: '源泉徴収', group: '人事・給与', lead: '確定した給与から、源泉徴収簿（月ごとの記録）と源泉徴収票の下書きを作ります。給与を支払った年（1〜12月支給分）で集計します。',
+    render(main) {
+      const d = S.get(), y = ps.year;
+      const bar = UI.el(`<div class="toolbar"></div>`);
+      bar.append(UI.stepper(`${y}年（${U.wareki(y)}）`, () => { ps.year--; Admin.refresh(); }, () => { ps.year++; Admin.refresh(); }));
+      main.append(bar);
+      const payYm = p => U.ymAdd(p.ym, 1);   // 月末締め・翌月払い：支払った年で集計する
+      const yrs = d.payrolls.filter(p => payYm(p).startsWith(String(y)));
+      main.append(UI.el(`<p class="notice">年末調整はまだ反映していません（試作）。源泉徴収票の「源泉徴収税額」は、毎月預かった所得税の合計です。提出前に税理士または国税庁の資料で確認してください。</p>`));
+
+      const months = [...Array(12)].map((_, i) => `${y}-${U.pad(i + 1)}`);
+      const people = d.staff.filter(s => yrs.some(p => p.staffId === s.id));
+      main.append(UI.el(`<section class="card"><h2>月別の納付額（全員分）</h2><div class="scroll"><table class="tbl"><thead><tr><th>支給月</th><th class="r">支給人数</th><th class="r">課税支給額</th><th class="r">所得税</th><th>納付期限</th></tr></thead><tbody>${months.map(m => {
+        const l = yrs.filter(p => payYm(p) === m); if (!l.length) return '';
+        return `<tr><td>${+m.slice(5)}月支給<small class="muted">（${U.ymLabel(U.ymAdd(m, -1))}分）</small></td><td class="r">${l.length}人</td><td class="r mono">${U.yen(U.sum(l, p => p.taxable))}</td><td class="r mono"><b>${U.yen(U.sum(l, p => p.tax))}</b></td><td>${U.label(U.ymAdd(m, 1) + '-10')}</td></tr>`;
+      }).join('') || '<tr><td colspan="5" class="muted">この年の確定した給与はありません</td></tr>'}</tbody></table></div><p class="muted small">所得税は「給与を支払った月の翌月10日」までに納めます。月末締め・翌月${d.settings.payDay}日払いなので、たとえば10月分（11月${d.settings.payDay}日支給）は12月10日が期限です。納期の特例を受けている場合は年2回（7/10・1/20）にまとめて納めます。</p></section>`));
+
+      people.forEach(s => {
+        const l = yrs.filter(p => p.staffId === s.id).sort((a, b) => a.ym.localeCompare(b.ym));
+        const pay = U.sum(l, p => p.taxable), tax = U.sum(l, p => p.tax), soc = U.sum(l, p => p.empIns + p.social);
+        const after = Math.max(0, pay - App.Pay.annualKyuyo(pay));
+        main.append(UI.el(`<section class="card"><h2><i class="dot" style="background:${s.color}"></i>${U.esc(s.name)} <small class="muted">${s.taxCol}欄 ・ 扶養${s.dependents}人</small></h2>
+          <div class="grid-2"><div class="scroll"><table class="tbl"><thead><tr><th>支給月</th><th class="r">課税支給額</th><th class="r">社会保険料等</th><th class="r">所得税</th></tr></thead><tbody>${l.map(p => `<tr><td>${+payYm(p).slice(5)}月支給</td><td class="r mono">${U.yen(p.taxable)}</td><td class="r mono">${U.yen(p.empIns + p.social)}</td><td class="r mono">${U.yen(p.tax)}</td></tr>`).join('')}</tbody>
+            <tfoot><tr><td>合計</td><td class="r mono">${U.yen(pay)}</td><td class="r mono">${U.yen(soc)}</td><td class="r mono">${U.yen(tax)}</td></tr></tfoot></table></div>
+          <div class="gensen"><div class="gensen-title">${U.wareki(y)}分 給与所得の源泉徴収票（下書き）</div>
+            <dl><dt>支払を受ける者</dt><dd>${U.esc(s.name)}</dd><dt>種別</dt><dd>給料・賃金</dd>
+            <dt>支払金額</dt><dd class="mono">${U.yen(pay)}</dd><dt>給与所得控除後の金額（概算）</dt><dd class="mono">${U.yen(after)}</dd>
+            <dt>社会保険料等の金額</dt><dd class="mono">${U.yen(soc)}</dd><dt>源泉徴収税額</dt><dd class="mono"><b>${U.yen(tax)}</b></dd>
+            <dt>支払者</dt><dd>${U.esc(d.settings.storeName)}</dd></dl></div></div></section>`));
+      });
+    },
+  });
+})();
+
+</script>
+<script>
+/* ---- js/admin-mail.js ---- */
+/* ミセカン 管理者ページ：メール配信（月1回・本人分だけ）
+ * 試作版では実際には送信しません。送信日・宛先・本文の確認と、送信予定の記録までです。
+ * 本番では、サーバー（例：Google Apps Script）が決まった日に1人ずつ別々のメールで送ります。
+ */
+'use strict';
+(function () {
+  const U = App.U, UI = App.UI, S = App.Store, Admin = App.Admin;
+  const Mail = App.Mail = {};
+  const ms = { staff: '', date: '' };
+
+  /* 次に送る日（未設定なら null） */
+  Mail.nextDate = function (s) {
+    const m = s.mail, today = U.today();
+    if (m.timing === 'unset' || m.timing === 'confirm') return null;
+    const day = m.timing === 'payday' ? s.payDay : m.day;
+    const at = ym => `${ym}-${U.pad(Math.min(day, U.monthDays(ym).length))}`;
+    const ym = U.ym(today);
+    return at(ym) >= today ? at(ym) : at(U.ymAdd(ym, 1));
+  };
+  Mail.timingLabel = function (s) {
+    const m = s.mail;
+    return { unset: '未設定（あとで指定）', payday: `毎月の給料日（${s.payDay}日）`, day: `毎月${m.day}日`, confirm: '給与を確定したとき' }[m.timing];
+  };
+
+  /* 1人分のメールを作る。送る日を基準に「直近で確定した給与の月」と「翌月のシフト」を入れる */
+  Mail.build = function (d, st, sendDate) {
+    const s = d.settings, m = s.mail;
+    const slip = d.payrolls.filter(p => p.staffId === st.id && p.ym < U.ym(sendDate)).sort((a, b) => b.ym.localeCompare(a.ym))[0];
+    const ym = slip ? slip.ym : U.ymAdd(U.ym(sendDate), -1);
+    const shiftYm = U.ymAdd(U.ym(sendDate), 1);
+    const subject = m.subject.replace(/\{店舗名\}/g, s.storeName).replace(/\{年月\}/g, U.ymLabel(ym));
+    const L = [];
+    L.push(`${st.name} 様`, '', `いつもありがとうございます。${s.storeName}です。`, `${U.ymLabel(ym)}分の給与明細・勤怠と、${U.ymLabel(shiftYm)}のシフトをお知らせします。`, '');
+    if (m.payslip) {
+      L.push(`■ 給与明細（${U.ymLabel(ym)}分）`);
+      if (!st.consent) L.push('　給与明細は紙でお渡しします（メールでの受け取りに同意をいただいていないため）。');
+      else if (!slip) L.push('　まだ確定していません。確定したら従業員ページでご確認いただけます。');
+      else {
+        L.push(`　計算期間　${U.label(slip.periodStart)}〜${U.label(slip.periodEnd)}　支給日　${U.label(slip.payDate)}`,
+          `　時給　${U.yen(slip.wage)}　労働日数　${slip.days}日　労働時間　${U.hm(slip.workMin)}（時間外 ${U.hm(slip.otMin)}・深夜 ${U.hm(slip.nightMin)}）`,
+          `　基本給　${U.yen(slip.base)}　時間外手当　${U.yen(slip.otPay)}　深夜手当　${U.yen(slip.nightPay)}　通勤手当　${U.yen(slip.transport)}`,
+          `　総支給額　${U.yen(slip.gross)}`,
+          `　雇用保険料　${U.yen(slip.empIns)}　社会保険料　${U.yen(slip.social)}　所得税　${U.yen(slip.tax)}　控除合計　${U.yen(slip.deductions)}`,
+          `　差引支給額　${U.yen(slip.net)}`);
+      }
+      L.push('');
+    }
+    if (m.attendance) {
+      L.push(`■ 勤怠（${U.ymLabel(ym)}の打刻）`);
+      const ps = d.punches.filter(p => p.staffId === st.id && p.date.startsWith(ym)).sort((a, b) => a.date.localeCompare(b.date));
+      ps.forEach(p => { const c = App.Pay.day(p); L.push(`　${U.label(p.date)}　${p.in}〜${p.out || '（退勤の打刻なし）'}　休憩${p.breakMin}分　実働 ${c ? U.hm(c.work) : '−'}`); });
+      if (!ps.length) L.push('　この月の打刻はありません。');
+      L.push('');
+    }
+    if (m.shift) {
+      L.push(`■ ${U.ymLabel(shiftYm)}のシフト（${U.label(sendDate)}時点で確定している分）`);
+      const sh = d.shifts.filter(x => x.staffId === st.id && x.date.startsWith(shiftYm)).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+      sh.forEach(x => L.push(`　${U.label(x.date)}　${U.short(x.start)}〜${U.short(x.end)}`));
+      if (!sh.length) L.push('　まだ確定しているシフトはありません。');
+      L.push('');
+    }
+    L.push('――――――――――', `このメールは ${s.storeName} から、ご本人だけにお送りしています。`, '内容に誤りがある場合や、メールでの受け取りをやめたい場合は店長にお知らせください。', '心当たりのない方は、お手数ですが破棄してください。');
+    return { to: st.email, subject, body: L.join('\n'), ym, shiftYm };
+  };
+
+  Admin.register({
+    id: 'mail', label: 'メール配信', group: '人事・給与', lead: '従業員1人ずつに、本人の給与明細・勤怠・翌月のシフトを月1回メールで送る設定です。試作版では実際には送信せず、送信予定の記録までを行います。',
+    render(main) {
+      const d = S.get(), s = d.settings, m = s.mail, next = Mail.nextDate(s);
+      main.append(UI.el(`<p class="notice">試作版：メールは送信されません。「送信予定に記録」を押しても、記録が残るだけです。本番で送るには、サーバー側の仕組み（例：Googleスプレッドシート＋Apps Script）が必要です。</p>`));
+      main.append(UI.el(`<section class="tiles">
+        <div class="tile"><span class="tile-label">自動送信</span><b class="tile-num">${m.enabled && m.timing !== 'unset' ? 'オン' : 'オフ'}</b><span class="tile-sub">${m.enabled && m.timing === 'unset' ? '送信日が未設定のため止まっています' : '設定で切り替えます'}</span></div>
+        <div class="tile"><span class="tile-label">送信のタイミング</span><b class="tile-num small-num">${U.esc(Mail.timingLabel(s))}</b><span class="tile-sub">${next ? `次回 ${U.label(next)}` : m.timing === 'confirm' ? '給与計算タブで確定したとき' : '送信日はあとで指定してください'}</span></div>
+        <div class="tile"><span class="tile-label">送る人</span><b class="tile-num">${d.staff.filter(x => x.active && x.email).length}<small> 人</small></b><span class="tile-sub">給与明細つき ${d.staff.filter(x => x.active && x.email && x.consent).length}人</span></div></section>`));
+
+      const cfg = UI.el(`<section class="card input-card" data-input><h2>送信の設定</h2><form class="form">
+        <label class="check wide"><input type="checkbox" id="m_enabled" ${m.enabled ? 'checked' : ''}> 月1回の自動送信を使う</label>
+        <label class="field">送信のタイミング<select id="m_timing">${U.options([['unset', '未設定（あとで指定）'], ['payday', '毎月の給料日'], ['day', '毎月決まった日'], ['confirm', '給与を確定したとき']], m.timing)}</select></label>
+        <label class="field">決まった日（毎月）<input id="m_day" type="number" min="1" max="31" value="${m.day}"></label>
+        <label class="field">差出人の名前<input id="m_fromName" value="${U.esc(m.fromName)}"></label>
+        <label class="field wide">件名（{店舗名}・{年月} が入れ替わります）<input id="m_subject" value="${U.esc(m.subject)}"></label>
+        <label class="check"><input type="checkbox" id="m_payslip" ${m.payslip ? 'checked' : ''}> 給与明細（同意した人だけ）</label>
+        <label class="check"><input type="checkbox" id="m_attendance" ${m.attendance ? 'checked' : ''}> その月の勤怠（打刻）</label>
+        <label class="check"><input type="checkbox" id="m_shift" ${m.shift ? 'checked' : ''}> 翌月のシフト</label>
+        <div class="wide row-end"><button class="btn primary">設定を保存</button></div></form>
+        <p class="muted small">メールは1人ずつ別々に送り、ほかの人のアドレスや内容は入りません。給与明細をメールで送れるのは、電子交付に同意した人だけです（所得税法231条2項・同施行令356条）。同意のない人には、給与明細を除いた内容を送り、明細は紙で渡します。</p></section>`);
+      cfg.querySelector('form').onsubmit = e => {
+        e.preventDefault(); const v = id => cfg.querySelector('#m_' + id);
+        m.enabled = v('enabled').checked; m.timing = v('timing').value; m.day = Math.min(31, Math.max(1, Number(v('day').value) || 1));
+        m.fromName = v('fromName').value.trim(); m.subject = v('subject').value.trim() || '【{店舗名}】{年月}分 給与明細・勤怠・シフトのお知らせ';
+        m.payslip = v('payslip').checked; m.attendance = v('attendance').checked; m.shift = v('shift').checked;
+        S.log('管理者', 'メール配信の設定を変更', 'メール配信', `${Mail.timingLabel(s)} / ${m.enabled ? 'オン' : 'オフ'}`);
+        S.save(); UI.toast('保存しました'); Admin.refresh();
+      };
+      main.append(cfg);
+
+      const rec = UI.el(`<section class="card"><h2>送り先</h2><div class="scroll"><table class="tbl"><thead><tr><th>氏名</th><th>メールアドレス</th><th>電子交付の同意</th><th>送る内容</th></tr></thead><tbody>${d.staff.filter(x => x.active).map(x => `<tr><td class="nowrap"><i class="dot" style="background:${x.color}"></i>${U.esc(x.name)}</td><td>${x.email ? U.esc(x.email) : '<span class="chip">未登録</span>'}</td><td>${x.consent ? `<span class="chip good">同意 ${U.esc(x.consentDate)}</span>` : '<span class="chip warn">同意なし</span>'}</td><td>${!x.email ? '<span class="muted">送りません</span>' : [m.payslip ? (x.consent ? '給与明細' : '<s>給与明細</s>（紙）') : '', m.attendance ? '勤怠' : '', m.shift ? 'シフト' : ''].filter(Boolean).join('・')}</td></tr>`).join('')}</tbody></table></div><p class="muted small">アドレスと同意は「従業員名簿」で変えられます。</p></section>`);
+      main.append(rec);
+
+      const people = d.staff.filter(x => x.active && x.email);
+      if (!people.some(x => x.id === ms.staff)) ms.staff = people[0]?.id || '';
+      if (!ms.date) ms.date = next || U.today();
+      const st = S.staff(ms.staff);
+      const pv = UI.el(`<section class="card"><h2>本文の確認</h2><div class="toolbar"><div class="pills">${people.map(x => `<button class="pill${x.id === ms.staff ? ' on' : ''}" data-s="${x.id}">${U.esc(x.name)}</button>`).join('')}</div><label class="inline">送る日 <input type="date" id="pvDate" value="${ms.date}"></label></div></section>`);
+      if (st) {
+        const mail = Mail.build(d, st, ms.date);
+        pv.append(UI.el(`<div class="mail-pv"><dl><div><dt>差出人</dt><dd>${U.esc(m.fromName)}</dd></div><div><dt>宛先</dt><dd>${U.esc(mail.to)}</dd></div><div><dt>件名</dt><dd>${U.esc(mail.subject)}</dd></div></dl><pre>${U.esc(mail.body)}</pre></div>`));
+        const b = UI.el(`<div class="row-end"><button class="btn primary">送信予定に記録（試作：送信しません）</button></div>`);
+        b.querySelector('button').onclick = async () => {
+          if (!await UI.confirm(`${st.name} さん（${st.email}）あてのメールを、送信予定として記録します。実際には送信されません。`, '記録する')) return;
+          d.mailLog.push({ at: new Date().toISOString().slice(0, 19), staffId: st.id, name: st.name, to: st.email, subject: mail.subject, sendDate: ms.date, payslip: m.payslip && st.consent, status: '記録のみ（試作）' });
+          S.log('管理者', 'メールを送信予定に記録', st.name, mail.subject);
+          S.save(); UI.toast('記録しました'); Admin.refresh();
+        };
+        pv.append(b);
+      } else pv.append(UI.el(`<p class="muted">メールアドレスが登録された従業員がいません。</p>`));
+      pv.querySelectorAll('[data-s]').forEach(b => { b.onclick = () => { ms.staff = b.dataset.s; Admin.refresh(); }; });
+      pv.querySelector('#pvDate').onchange = e => { if (e.target.value) { ms.date = e.target.value; Admin.refresh(); } };
+      main.append(pv);
+
+      main.append(UI.el(`<section class="card"><h2>送信の記録</h2><div class="scroll"><table class="tbl"><thead><tr><th>記録した日時</th><th>送る日</th><th>宛先</th><th>件名</th><th>給与明細</th><th>状態</th></tr></thead><tbody>${d.mailLog.slice().reverse().slice(0, 50).map(l => `<tr><td class="num nowrap">${l.at.replace('T', ' ').slice(0, 16)}</td><td class="nowrap">${U.label(l.sendDate)}</td><td>${U.esc(l.name)}<br><small class="muted">${U.esc(l.to)}</small></td><td>${U.esc(l.subject)}</td><td>${l.payslip ? 'あり' : 'なし'}</td><td><span class="chip">${U.esc(l.status)}</span></td></tr>`).join('') || '<tr><td colspan="6" class="muted">まだ記録はありません</td></tr>'}</tbody></table></div></section>`));
+    },
+  });
+})();
+
+</script>
+<script>
+/* ---- js/admin-sales.js ---- */
+/* ミセカン 管理者ページ：毎日の売上・購買履歴とランキング
+ * データの決まり：
+ *  - 「売上」＝1日のレジ締めの合計と客数。管理者が「毎日の売上」で入力する（ホームやグラフはここから計算）
+ *  - 「購買履歴」＝商品ごとの販売記録。管理者が「購買履歴・ランキング」で入力する（ランキングはここから計算）
+ *  - 2つの合計が合わない日は「差」を表示し、明細の合計を売上に入れるボタンを出す
+ */
+'use strict';
+(function () {
+  const U = App.U, UI = App.UI, S = App.Store, Admin = App.Admin;
+  const ss = { ym: U.ym(U.today()), days: '30', metric: 'amount', q: '', date: '' };
+  const man = v => (v / 10000).toLocaleString('ja-JP', { maximumFractionDigits: 1 }) + '万';
+  const detailSum = (d, date) => U.sum(d.purchases.filter(p => p.date === date), p => p.price * p.qty);
+  const hasDetail = (d, date) => d.purchases.some(p => p.date === date);
+
+  /* ================= 毎日の売上 ================= */
+  Admin.register({
+    id: 'sales', label: '毎日の売上', group: '売上', lead: '閉店後に、レジ締めの合計金額と客数をここに入力します。ホームの売上・グラフ・人件費率はこの数字から計算します。',
+    render(main) {
+      const d = S.get(), ym = ss.ym;
+      if (!ss.date) ss.date = U.addDays(U.today(), -1);
+      const form = UI.el(`<section class="card input-card" data-input><h2>売上を入力・修正</h2><form class="form inline-form">
+        <label class="field">日付<input type="date" id="sDate" value="${ss.date}" max="${U.today()}" required></label>
+        <label class="field">売上（円・税込み）<input type="number" id="sAmt" min="0" step="1" required inputmode="numeric"></label>
+        <label class="field">客数（人）<input type="number" id="sCus" min="0" step="1" inputmode="numeric"></label>
+        <label class="field">メモ<input id="sNote" placeholder="例：雨・イベントあり"></label>
+        <button class="btn primary">保存</button></form>
+        <div class="hint" id="sHint"></div></section>`);
+      const fill = () => {
+        const date = form.querySelector('#sDate').value; ss.date = date;
+        const r = d.sales.find(x => x.date === date), ds = detailSum(d, date);
+        form.querySelector('#sAmt').value = r ? r.amount : ''; form.querySelector('#sCus').value = r ? r.customers : ''; form.querySelector('#sNote').value = r ? r.note : '';
+        const h = form.querySelector('#sHint');
+        h.innerHTML = `${r ? '<span class="chip">入力済み：保存すると上書きします</span>' : '<span class="chip warn">まだ入力していない日です</span>'}
+          ${hasDetail(d, date) ? ` <span>この日の購買履歴（商品明細）の合計：<b>${U.yen(ds)}</b></span> <button type="button" class="btn sm" id="useDetail">この金額を売上に入れる</button>` : ' <span class="muted">この日の商品明細はまだありません（「購買履歴・ランキング」で入力）</span>'}`;
+        const u = h.querySelector('#useDetail'); if (u) u.onclick = () => { form.querySelector('#sAmt').value = ds; form.querySelector('#sAmt').focus(); };
+      };
+      form.querySelector('#sDate').onchange = fill; fill();
+      form.querySelector('form').onsubmit = e => {
+        e.preventDefault();
+        const v = id => form.querySelector('#' + id).value, date = v('sDate');
+        const rec = { date, amount: Number(v('sAmt')), customers: Number(v('sCus') || 0), note: v('sNote').trim() };
+        const i = d.sales.findIndex(x => x.date === date); if (i >= 0) d.sales[i] = rec; else d.sales.push(rec);
+        d.sales.sort((a, b) => a.date.localeCompare(b.date)); ss.ym = U.ym(date);
+        S.save(); UI.toast(`${U.label(date)}の売上を保存しました`); Admin.refresh();
+      };
+      main.append(form);
+
+      const bar = UI.el(`<div class="toolbar"></div>`);
+      bar.append(UI.stepper(U.ymLabel(ym), () => { ss.ym = U.ymAdd(ym, -1); Admin.refresh(); }, () => { ss.ym = U.ymAdd(ym, 1); Admin.refresh(); }));
+      main.append(bar);
+
+      const days = U.monthDays(ym), rec = d.sales.filter(x => x.date.startsWith(ym));
+      const total = U.sum(rec, x => x.amount), cus = U.sum(rec, x => x.customers);
+      // 前年同月は「同じ日まで」で比べる（今月の途中なのに前年の1か月分と比べると、減ったように見えてしまうため）
+      const lastDay = ym === U.ym(U.today()) ? +U.addDays(U.today(), -1).slice(8) : 31;
+      const ly = U.sum(d.sales.filter(x => x.date.startsWith(U.ymAdd(ym, -12)) && +x.date.slice(8) <= lastDay), x => x.amount);
+      const diff = ly ? (total / ly - 1) * 100 : null;
+      const missing = days.filter(x => x < U.today() && !rec.some(r => r.date === x));
+      main.append(UI.el(`<section class="tiles">
+        <div class="tile"><span class="tile-label">月の売上</span><b class="tile-num">${U.yen(total)}</b><span class="tile-sub">${rec.length}日分入力 ${missing.length ? `<span class="chip warn">未入力 ${missing.length}日</span>` : ''}</span></div>
+        <div class="tile"><span class="tile-label">1日平均</span><b class="tile-num">${U.yen(rec.length ? total / rec.length : 0)}</b><span class="tile-sub">客数 ${U.num(cus)}人</span></div>
+        <div class="tile"><span class="tile-label">客単価</span><b class="tile-num">${U.yen(cus ? total / cus : 0)}</b><span class="tile-sub">売上÷客数</span></div>
+        <div class="tile"><span class="tile-label">前年同月${lastDay < 31 ? `（1〜${lastDay}日）` : ''}</span><b class="tile-num">${ly ? U.yen(ly) : '−'}</b><span class="tile-sub">${diff === null ? 'データなし' : `<span class="chip ${diff >= 0 ? 'good' : 'bad'}">${diff >= 0 ? '▲' : '▼'} ${Math.abs(diff).toFixed(1)}%</span>`}</span></div></section>`));
+
+      const c1 = UI.el(`<section class="card"><h2>日別の売上 <small class="muted">${U.ymLabel(ym)}・棒を押すとその日を入力欄に読み込みます</small></h2></section>`);
+      c1.append(App.Chart.bars(days.map(x => { const r = rec.find(y => y.date === x); return { date: x, label: String(+x.slice(8)), cls: U.wdClass(x), tip: U.label(x), value: r ? r.amount : 0, sub: r ? `客数 ${r.customers}人${r.note ? ' ・ ' + r.note : ''}` : '未入力' }; }),
+        { fmt: U.yen, fmtAxis: man, maxLabels: 31, label: '日別の売上', onClick: x => { ss.date = x.date; Admin.refresh(); } }));
+      main.append(c1);
+
+      const months = []; for (let i = 11; i >= 0; i--) months.push(U.ymAdd(ym, -i));
+      const c2 = UI.el(`<section class="card"><h2>月別の売上 <small class="muted">棒を押すとその月を表示</small></h2></section>`);
+      c2.append(App.Chart.bars(months.map(m => ({ m, label: `${+m.slice(5)}月`, tip: U.ymLabel(m), hl: m === ym, value: U.sum(d.sales.filter(x => x.date.startsWith(m)), x => x.amount) })), { fmt: U.yen, fmtAxis: man, label: '月別の売上', onClick: x => { ss.ym = x.m; Admin.refresh(); } }));
+      main.append(c2);
+
+      const tbl = UI.el(`<section class="card"><h2>入力の一覧 <small class="muted">${U.ymLabel(ym)}</small></h2><div class="scroll"><table class="tbl"><thead><tr><th>日付</th><th class="r">売上</th><th class="r">客数</th><th class="r">客単価</th><th class="r">商品明細の合計</th><th class="r">差</th><th>メモ</th><th></th></tr></thead><tbody>${days.filter(x => x <= U.today()).reverse().map(x => {
+        const r = rec.find(y => y.date === x), ds = hasDetail(d, x) ? detailSum(d, x) : null;
+        if (!r) return `<tr class="missing"><td class="${U.wdClass(x)}">${U.label(x)}</td><td colspan="6"><span class="chip warn">未入力</span></td><td><button class="btn sm primary" data-edit="${x}">入力</button></td></tr>`;
+        const gap = ds === null ? null : r.amount - ds;
+        return `<tr><td class="${U.wdClass(x)}">${U.label(x)}</td><td class="r num">${U.yen(r.amount)}</td><td class="r">${r.customers}</td><td class="r num">${U.yen(r.customers ? r.amount / r.customers : 0)}</td>
+          <td class="r num">${ds === null ? '<span class="muted">明細なし</span>' : U.yen(ds)}</td><td class="r num">${gap === null ? '−' : gap === 0 ? '<span class="chip good">一致</span>' : `<span class="chip warn">${gap > 0 ? '+' : ''}${U.num(gap)}</span>`}</td>
+          <td>${U.esc(r.note)}</td><td class="nowrap"><button class="btn sm" data-edit="${x}">修正</button> <button class="btn sm danger" data-del="${x}">削除</button></td></tr>`;
+      }).join('')}</tbody></table></div><p class="muted small">「差」は売上（レジ締め）と商品明細の合計の差です。明細を入力していない商品があると差が出ます。</p></section>`);
+      tbl.onclick = async e => {
+        const t = e.target;
+        if (t.dataset.edit) { ss.date = t.dataset.edit; Admin.refresh(); setTimeout(() => { const f = document.querySelector('[data-input]'); f && f.scrollIntoView({ behavior: 'smooth' }); document.getElementById('sAmt')?.focus({ preventScroll: true }); }, 50); }
+        if (t.dataset.del) {
+          if (!await UI.confirm(`${U.label(t.dataset.del)}の売上を削除します。`, '削除する', true)) return;
+          d.sales = d.sales.filter(x => x.date !== t.dataset.del); S.log('管理者', '売上を削除', U.label(t.dataset.del), ''); S.save(); UI.toast('削除しました'); Admin.refresh();
+        }
+      };
+      main.append(tbl);
+    },
+  });
+
+  /* ================= 購買履歴・ランキング ================= */
+  function itemModal(it) {
+    const d = S.get(), isNew = !it.id;
+    UI.modal(isNew ? '商品を追加' : '商品を変更', `<form class="form">
+      <label class="field wide">商品名<input id="i_name" value="${U.esc(it.name || '')}" required></label>
+      <label class="field">カテゴリ<input id="i_cat" value="${U.esc(it.category || '')}" list="catList2" required><datalist id="catList2">${[...new Set(d.items.map(x => x.category))].map(c => `<option value="${U.esc(c)}">`).join('')}</datalist></label>
+      <label class="field">単価（円・税込み）<input id="i_price" type="number" min="0" value="${it.price ?? ''}" required></label>
+      <p class="wide muted small">単価を変えても、すでに記録した販売の金額は変わりません（記録したときの単価のまま残ります）。</p><p class="wide err" id="i_err"></p></form>`,
+    [...(isNew ? [] : [{ label: '削除', kind: 'danger', onClick: () => { d.items = d.items.filter(x => x.id !== it.id); S.save(); UI.toast('商品マスタから削除しました（過去の記録は残ります）'); Admin.refresh(); } }]),
+      { label: 'やめる' },
+      { label: '保存する', kind: 'primary', onClick: w => {
+        const f = w.querySelector('form'); if (!f.reportValidity()) return false;
+        const name = w.querySelector('#i_name').value.trim();
+        if (d.items.some(x => x.name === name && x.id !== it.id)) { w.querySelector('#i_err').textContent = '同じ名前の商品があります。'; return false; }
+        const n = { name, category: w.querySelector('#i_cat').value.trim(), price: Number(w.querySelector('#i_price').value) };
+        if (isNew) d.items.push(Object.assign({ id: 'it' + U.uid() }, n)); else Object.assign(it, n);
+        S.save(); UI.toast('商品マスタを保存しました'); Admin.refresh();
+      } }]);
+  }
+
+  Admin.register({
+    id: 'purchases', label: '購買履歴・ランキング', group: '売上', lead: '商品ごとに「何がいくつ売れたか」を記録し、ランキングを出します。1日の売上の合計は「毎日の売上」で入力します。',
+    render(main) {
+      const d = S.get(), today = U.today();
+      const from = ss.days === 'all' ? '0000' : U.addDays(today, -Number(ss.days));
+      const list = d.purchases.filter(p => p.date >= from);
+
+      // 入力欄（いちばん上）
+      const add = UI.el(`<section class="card input-card" data-input><h2>販売を記録する</h2><form class="form inline-form">
+        <label class="field">日付<input type="date" id="bDate" value="${today}" max="${today}" required></label>
+        <label class="field">時刻（1日分の集計なら空欄）<input type="time" id="bTime"></label>
+        <label class="field">商品（商品マスタから選ぶ）<select id="bItem" required><option value="">選んでください</option>${d.items.map(x => `<option value="${x.id}">${U.esc(x.name)}（${U.yen(x.price)}）</option>`).join('')}</select></label>
+        <label class="field">数量<input type="number" id="bQty" min="1" value="1" required></label>
+        <label class="field">会員番号（任意）<input id="bCus" placeholder="例：会員0012"></label>
+        <button class="btn primary">記録</button></form>
+        <p class="muted small">商品マスタにない商品は、下の「商品マスタ」で先に追加してください。記録した金額は「毎日の売上」の「商品明細の合計」に反映されます。</p></section>`);
+      add.querySelector('form').onsubmit = e => {
+        e.preventDefault(); const v = id => add.querySelector('#' + id).value;
+        const it = d.items.find(x => x.id === v('bItem')); if (!it) return;
+        d.purchases.push({ id: U.uid(), date: v('bDate'), time: v('bTime'), itemId: it.id, item: it.name, category: it.category, price: it.price, qty: Number(v('bQty')), customer: v('bCus').trim() });
+        S.save(); UI.toast(`${it.name}×${v('bQty')} を記録しました`); Admin.refresh();
+      };
+      main.append(add);
+
+      const bar = UI.el(`<div class="toolbar"><div class="seg">${[['7', '7日'], ['30', '30日'], ['90', '90日'], ['all', 'すべて']].map(([v, l]) => `<button data-days="${v}" aria-selected="${ss.days === v}">${l}</button>`).join('')}</div>
+        <div class="seg">${[['amount', '金額'], ['qty', '数量']].map(([v, l]) => `<button data-m="${v}" aria-selected="${ss.metric === v}">${l}で並べる</button>`).join('')}</div></div>`);
+      bar.querySelectorAll('[data-days]').forEach(b => { b.onclick = () => { ss.days = b.dataset.days; Admin.refresh(); }; });
+      bar.querySelectorAll('[data-m]').forEach(b => { b.onclick = () => { ss.metric = b.dataset.m; Admin.refresh(); }; });
+      main.append(bar);
+
+      const val = p => ss.metric === 'qty' ? p.qty : p.qty * p.price;
+      const fmt = ss.metric === 'qty' ? (v => U.num(v) + '個') : U.yen;
+      const group = (key, n) => {
+        const m = {}; list.forEach(p => { const k = key(p); if (!k) return; m[k] = m[k] || { label: k, value: 0, qty: 0, amt: 0 }; m[k].value += val(p); m[k].qty += p.qty; m[k].amt += p.qty * p.price; });
+        return Object.values(m).sort((a, b) => b.value - a.value).slice(0, n).map(r => Object.assign(r, { sub: ss.metric === 'qty' ? U.yen(r.amt) : r.qty + '個' }));
+      };
+      const salesSum = U.sum(d.sales.filter(x => x.date >= from), x => x.amount);
+      main.append(UI.el(`<section class="tiles">
+        <div class="tile"><span class="tile-label">売れた数</span><b class="tile-num">${U.num(U.sum(list, p => p.qty))}個</b><span class="tile-sub">${list.length}件の記録</span></div>
+        <div class="tile"><span class="tile-label">明細の金額の合計</span><b class="tile-num">${U.yen(U.sum(list, p => p.qty * p.price))}</b><span class="tile-sub">同じ期間の売上（レジ締め）${U.yen(salesSum)}</span></div>
+        <div class="tile"><span class="tile-label">会員の購入</span><b class="tile-num">${list.filter(p => p.customer).length}件</b><span class="tile-sub">${ss.days === 'all' ? 'すべての期間' : `直近${ss.days}日`}</span></div></section>`));
+      const grid = UI.el(`<div class="grid-2"></div>`);
+      const c1 = UI.el(`<section class="card"><h2>商品ランキング</h2></section>`); c1.append(App.Chart.ranking(group(p => p.item, 10), fmt));
+      const right = UI.el(`<div class="stack"></div>`);
+      const c2 = UI.el(`<section class="card"><h2>カテゴリ別</h2></section>`); c2.append(App.Chart.ranking(group(p => p.category, 6), fmt));
+      const c3 = UI.el(`<section class="card"><h2>会員ランキング</h2></section>`); c3.append(App.Chart.ranking(group(p => p.customer, 5), fmt));
+      right.append(c2, c3); grid.append(c1, right); main.append(grid);
+
+      // 商品マスタ
+      const master = UI.el(`<section class="card"><div class="card-head"><h2>商品マスタ</h2><button class="btn sm primary" id="itAdd">＋ 商品を追加</button></div><div class="scroll"><table class="tbl hover"><thead><tr><th>商品名</th><th>カテゴリ</th><th class="r">単価</th><th class="r">記録の件数</th></tr></thead><tbody>${d.items.map(x => `<tr data-it="${x.id}" tabindex="0"><td>${U.esc(x.name)}</td><td><span class="chip">${U.esc(x.category)}</span></td><td class="r num">${U.yen(x.price)}</td><td class="r">${d.purchases.filter(p => p.itemId === x.id).length}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">商品がありません</td></tr>'}</tbody></table></div><p class="muted small">行を押すと変更・削除できます。</p></section>`);
+      master.querySelector('#itAdd').onclick = () => itemModal({});
+      master.querySelectorAll('tr[data-it]').forEach(tr => { const o = () => itemModal(d.items.find(x => x.id === tr.dataset.it)); tr.onclick = o; tr.onkeydown = e => { if (e.key === 'Enter') o(); }; });
+      main.append(master);
+
+      const q = ss.q.trim();
+      const hist = list.filter(p => !q || (p.item + p.category + p.customer).includes(q)).sort((a, b) => (b.date + (b.time || '99')).localeCompare(a.date + (a.time || '99')));
+      const h = UI.el(`<section class="card"><div class="card-head"><h2>購買履歴</h2><input type="search" id="bQ" placeholder="商品・カテゴリ・会員で絞り込み" value="${U.esc(ss.q)}" aria-label="絞り込み"></div><div class="scroll"><table class="tbl"><thead><tr><th>日付</th><th>時刻</th><th>商品</th><th>カテゴリ</th><th class="r">単価</th><th class="r">数量</th><th class="r">金額</th><th>会員</th><th></th></tr></thead><tbody>${hist.slice(0, 80).map(p => `<tr><td class="nowrap ${U.wdClass(p.date)}">${U.label(p.date)}</td><td class="num">${p.time || '<span class="muted small">1日分の集計</span>'}</td><td>${U.esc(p.item)}</td><td><span class="chip">${U.esc(p.category)}</span></td><td class="r num">${U.yen(p.price)}</td><td class="r">${p.qty}</td><td class="r num">${U.yen(p.price * p.qty)}</td><td>${U.esc(p.customer) || '<span class="muted">−</span>'}</td><td><button class="btn sm danger" data-del="${p.id}">削除</button></td></tr>`).join('') || '<tr><td colspan="9" class="muted">該当する記録はありません</td></tr>'}</tbody></table></div><p class="muted small">${hist.length}件中、新しい順に${Math.min(80, hist.length)}件を表示</p></section>`);
+      h.querySelector('#bQ').onchange = e => { ss.q = e.target.value; Admin.refresh(); };
+      h.onclick = async e => {
+        const id = e.target.dataset.del; if (!id) return;
+        const p = d.purchases.find(x => x.id === id);
+        if (!await UI.confirm(`${U.label(p.date)} ${p.item}×${p.qty} の記録を削除します。`, '削除する', true)) return;
+        d.purchases = d.purchases.filter(x => x.id !== id); S.save(); UI.toast('削除しました'); Admin.refresh();
+      };
+      main.append(h);
+    },
+  });
+})();
+
+</script>
+<script>
+/* ---- js/admin-main.js ---- */
+/* ミセカン 管理者ページの起動（暗証番号の確認とタブの切り替え） */
+'use strict';
+(function () {
+  const S = App.Store;
+  const KEY = 'misekan.adminOpen';
+  const isOpen = () => { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } };
+  const setOpen = v => { try { v ? sessionStorage.setItem(KEY, '1') : sessionStorage.removeItem(KEY); } catch (e) {} };
+  let open = isOpen();
+
+  function route() {
+    document.getElementById('storeName').textContent = S.get().settings.storeName;
+    document.getElementById('gate').hidden = open;
+    document.getElementById('adminView').hidden = !open;
+    document.getElementById('lock').hidden = !open;
+    if (!open) { setTimeout(() => document.getElementById('gatePin').focus(), 0); return; }
+    App.Admin.show(location.hash.slice(1) || 'dashboard');
+    window.scrollTo(0, 0);
+  }
+  document.getElementById('gateForm').onsubmit = e => {
+    e.preventDefault();
+    const pin = document.getElementById('gatePin').value, err = document.getElementById('gateErr');
+    const lock = App.Guard.locked('admin');
+    if (lock) { err.textContent = `打ち間違いが続いたため、あと${lock}分ほど入れません。`; return; }
+    if (String(pin) !== String(S.get().settings.adminPin)) {
+      const l = App.Guard.fail('admin');
+      err.textContent = l ? `打ち間違いが${App.Guard.MAX}回続いたため、${l}分間ロックしました。` : '暗証番号が違います。';
+      document.getElementById('gatePin').value = ''; return;
+    }
+    App.Guard.ok('admin');
+    open = true; setOpen(true); document.getElementById('gatePin').value = ''; document.getElementById('gateErr').textContent = ''; route();
+  };
+  document.getElementById('lock').onclick = () => { open = false; setOpen(false); route(); };
+  addEventListener('hashchange', route);
+  // 15分なにも操作しなければ自動でロック（席を離れたときの のぞき見対策）
+  App.idle(15, () => { if (open) { open = false; setOpen(false); route(); document.getElementById('gateErr').textContent = '15分操作がなかったため、ロックしました。'; } });
+  route();
+})();
+
+</script>
+</body>
+</html>
